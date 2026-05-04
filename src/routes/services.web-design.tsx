@@ -95,25 +95,8 @@ function ServiceDetailPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/60 to-primary-dark/95" />
           <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
-            {/* Feature card (left in LTR / right of layout in RTL flow second) */}
-            <div className="order-2 lg:order-1">
-              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
-                <div className="text-center text-sm font-bold text-white/90">
-                  واجهة أوضح + ثقة أعلى + تحويل أفضل
-                </div>
-                <div className="mt-4 space-y-2">
-                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
-                    <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
-                      <Check className="h-4 w-4 text-white/80" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Headline */}
-            <div className="order-1 text-right lg:order-2">
+            {/* Headline first (right side in RTL) */}
+            <div className="order-1 text-right">
               <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
                 <Link to="/" className="hover:underline">الرئيسية</Link>
                 <ChevronLeft className="h-3 w-3" />
@@ -132,6 +115,23 @@ function ServiceDetailPage() {
                 <button className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">
                   نموذج لأعمالنا
                 </button>
+              </div>
+            </div>
+
+            {/* Feature card */}
+            <div className="order-2">
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
+                <div className="text-center text-sm font-bold text-white/90">
+                  واجهة أوضح + ثقة أعلى + تحويل أفضل
+                </div>
+                <div className="mt-4 space-y-2">
+                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
+                    <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
+                      <Check className="h-4 w-4 text-white/80" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
