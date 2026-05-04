@@ -31,16 +31,16 @@ export const salesByCategory = [
 ];
 
 export type AdminService = {
-  id: string; sku: string; titleAr: string; titleEn: string; category: string;
+  id: string; sku: string; slug: string; titleAr: string; titleEn: string; category: string;
   price: number; bookings: number; status: "active" | "draft" | "archived";
 };
 
 export const adminServices: AdminService[] = [
-  { id: "s1", sku: "WEB-001", titleAr: "تصميم مواقع الكترونية", titleEn: "Web Design", category: "ويب", price: 7900, bookings: 64, status: "active" },
-  { id: "s2", sku: "SEO-002", titleAr: "تحسين محركات البحث", titleEn: "SEO", category: "تسويق", price: 1500, bookings: 42, status: "active" },
-  { id: "s3", sku: "BRD-003", titleAr: "تصميم هوية بصرية", titleEn: "Branding", category: "هوية", price: 3500, bookings: 38, status: "active" },
-  { id: "s4", sku: "APP-004", titleAr: "تطوير تطبيقات الموبايل", titleEn: "Mobile Apps", category: "تطبيقات", price: 18900, bookings: 21, status: "active" },
-  { id: "s5", sku: "SMM-005", titleAr: "إدارة سوشيال ميديا", titleEn: "Social Media", category: "تسويق", price: 2500, bookings: 19, status: "draft" },
+  { id: "s1", sku: "WEB-001", slug: "web-design", titleAr: "تصميم مواقع الكترونية", titleEn: "Web Design", category: "ويب", price: 7900, bookings: 64, status: "active" },
+  { id: "s2", sku: "SEO-002", slug: "seo", titleAr: "تحسين محركات البحث (SEO)", titleEn: "SEO", category: "تسويق", price: 1500, bookings: 42, status: "active" },
+  { id: "s3", sku: "UID-003", slug: "ui-design", titleAr: "تصميم واجهات مستخدم", titleEn: "UI Design", category: "تصميم", price: 3500, bookings: 38, status: "active" },
+  { id: "s4", sku: "ADV-004", slug: "ad-videos", titleAr: "تصميم فيديوهات إعلانية", titleEn: "Ad Videos", category: "فيديو", price: 4900, bookings: 21, status: "active" },
+  { id: "s5", sku: "SMM-005", slug: "social-media-design", titleAr: "تصميم سوشيال ميديا", titleEn: "Social Media", category: "تسويق", price: 2500, bookings: 19, status: "draft" },
 ];
 
 export type AdminBooking = {
