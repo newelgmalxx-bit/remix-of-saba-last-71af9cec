@@ -80,6 +80,12 @@ export function HeroSection() {
       {/* Stats strip */}
       <div className="relative mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-6 rounded-2xl border border-border bg-white px-8 py-8 shadow-sm lg:flex-row lg:justify-between">
+          <div className="text-center lg:max-w-xs lg:text-right">
+            <h3 className="text-lg font-extrabold text-foreground">شريكك في التحول الرقمي</h3>
+            <p className="mt-1 text-xs leading-6 text-muted-foreground">
+              نساعدك على بناء مستقبل رقمي أفضل بتجربة واضحة ونتيجة فائقة الجودة تليق بالنمو.
+            </p>
+          </div>
           <div className="flex flex-1 items-center justify-around gap-6">
             {[
               { v: "+50", l: "خبير ومختص" },
@@ -92,12 +98,6 @@ export function HeroSection() {
                 <div className="mt-1 text-xs text-muted-foreground">{s.l}</div>
               </div>
             ))}
-          </div>
-          <div className="text-center lg:max-w-xs lg:text-right">
-            <h3 className="text-lg font-extrabold text-foreground">شريكك في التحول الرقمي</h3>
-            <p className="mt-1 text-xs leading-6 text-muted-foreground">
-              نساعدك على بناء مستقبل رقمي أفضل بتجربة واضحة ونتيجة فائقة الجودة تليق بالنمو.
-            </p>
           </div>
         </div>
       </div>
