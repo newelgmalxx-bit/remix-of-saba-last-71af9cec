@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowLeft, ChevronLeft, ChevronDown, Check, Star, Sparkles, Target, Gem,
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, Sparkles, Target, Gem,
   Layout, Users2, FileCode2, LifeBuoy, Smartphone, MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -132,14 +132,6 @@ function ServiceDetailPage() {
             </div>
           </div>
         </section>
-
-        {/* Sticky CTA chip */}
-        <Link
-          to={"/contact" as any}
-          className="fixed left-4 top-1/2 z-40 hidden -translate-y-1/2 rounded-full bg-primary px-5 py-3 text-xs font-bold text-white shadow-lg transition hover:-translate-y-[55%] lg:inline-flex"
-        >
-          اطلب الآن
-        </Link>
 
         {/* Overview */}
         <section className="py-12">
@@ -334,22 +326,7 @@ function ServiceDetailPage() {
                 <h2 className="text-2xl font-extrabold text-foreground">آراء العملاء</h2>
                 <p className="mt-1 text-xs text-muted-foreground">تجارب حقيقية من فرق اعتمدت علينا.</p>
               </div>
-              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                {testimonials.map((t) => (
-                  <div key={t.name} className="rounded-2xl border border-border bg-secondary/30 p-6 text-right">
-                    <div className="flex justify-end gap-0.5 text-amber-400">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                    <p className="mt-3 text-sm leading-7 text-foreground/80">"{t.text}"</p>
-                    <div className="mt-4 text-xs">
-                      <div className="font-bold text-foreground">{t.name}</div>
-                      <div className="text-muted-foreground">{t.role}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <TestimonialsSlider />
             </div>
           </div>
         </section>
