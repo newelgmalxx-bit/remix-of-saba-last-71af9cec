@@ -253,7 +253,7 @@ export function GhostButton({ children, onClick }: { children: React.ReactNode; 
 
 function LangToggle() {
   const [lang, setLang] = useState<"ar" | "en">("ar");
-  React.useEffect(() => {
+  useEffect(() => {
     try { const v = localStorage.getItem("saba_admin_lang") as "ar" | "en" | null; if (v) setLang(v); } catch {}
   }, []);
   const toggle = () => {
