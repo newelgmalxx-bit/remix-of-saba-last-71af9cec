@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import aboutHero from "@/assets/about-hero.jpg";
+import aboutBg from "@/assets/about-bg.jpg";
 import {
   Sparkles, Target, Eye, Heart, Award, Users, Rocket, Globe2,
   Lightbulb, ShieldCheck, Handshake, TrendingUp, ArrowLeft, Quote,
   Briefcase, Code2, Palette, Megaphone, CheckCircle2, Star, Zap, Layers,
+  ChevronRight, ChevronLeft,
 } from "lucide-react";
 
 const stats = [
@@ -61,40 +64,41 @@ function AboutPage() {
       <main className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-40" />
+          <img src={aboutBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
           <div
-            className="absolute inset-0 -z-0"
-            style={{ background: "linear-gradient(135deg, rgba(84,130,174,0.10) 0%, rgba(30,91,148,0.04) 60%, transparent 100%)" }}
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.85) 0%, rgba(30,91,148,0.78) 50%, rgba(15,40,75,0.92) 100%)" }}
           />
-          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl animate-pulse-glow" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse-glow" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl animate-pulse-glow" />
 
           <div className="relative mx-auto max-w-7xl px-4 py-24 lg:py-32">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary">
+            <div className="mx-auto max-w-3xl text-center text-white">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold text-white backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
                 من نحن
               </span>
-              <h1 className="mt-6 text-4xl font-extrabold leading-tight text-foreground md:text-6xl">
-                نصنع <span className="text-gradient-primary">تجارب رقمية</span>
+              <h1 className="mt-6 text-4xl font-extrabold leading-tight md:text-6xl">
+                نصنع <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">تجارب رقمية</span>
                 <br />
                 تترك أثراً يدوم
               </h1>
-              <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              <p className="mt-6 text-lg leading-8 text-white/85">
                 سابا ديزاين وكالة رقمية متخصصة في تحويل أفكارك إلى منتجات عصرية تجمع بين
                 الجمال والوظيفة. نؤمن بأن التصميم العظيم يبدأ من فهم عميق للإنسان قبل التقنية.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   to="/contact"
-                  className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-primary-dark"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-xl transition hover:bg-white/90"
                 >
                   ابدأ مشروعك معنا
                   <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
                 </Link>
                 <Link
                   to="/portfolio"
-                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
                 >
                   استعرض أعمالنا
                 </Link>
