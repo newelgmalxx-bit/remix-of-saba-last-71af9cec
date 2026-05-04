@@ -6,7 +6,7 @@ import { adminServices as initialServices, fmtSAR, type AdminService } from "@/d
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/admin/services")({
+export const Route = createFileRoute("/admin/services/")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
   component: ServicesPage,
 });
