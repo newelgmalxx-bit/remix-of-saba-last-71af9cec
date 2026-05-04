@@ -23,6 +23,8 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
+import { Route as AccountTicketsNewRouteImport } from './routes/account.tickets.new'
+import { Route as AccountTicketsTicketIdRouteImport } from './routes/account.tickets.$ticketId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -95,6 +97,16 @@ const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
   path: '/account/orders/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountTicketsNewRoute = AccountTicketsNewRouteImport.update({
+  id: '/account/tickets/new',
+  path: '/account/tickets/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountTicketsTicketIdRoute = AccountTicketsTicketIdRouteImport.update({
+  id: '/account/tickets/$ticketId',
+  path: '/account/tickets/$ticketId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
   id: '/account/orders/$orderId',
   path: '/account/orders/$orderId',
@@ -115,6 +127,8 @@ export interface FileRoutesByFullPath {
   '/account/': typeof AccountIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -132,6 +146,8 @@ export interface FileRoutesByTo {
   '/account': typeof AccountIndexRoute
   '/services': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
   '/account/orders': typeof AccountOrdersIndexRoute
   '/account/tickets': typeof AccountTicketsIndexRoute
 }
@@ -150,6 +166,8 @@ export interface FileRoutesById {
   '/account/': typeof AccountIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -169,6 +187,8 @@ export interface FileRouteTypes {
     | '/account/'
     | '/services/'
     | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +206,8 @@ export interface FileRouteTypes {
     | '/account'
     | '/services'
     | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
     | '/account/orders'
     | '/account/tickets'
   id:
@@ -203,6 +225,8 @@ export interface FileRouteTypes {
     | '/account/'
     | '/services/'
     | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesById: FileRoutesById
@@ -220,6 +244,8 @@ export interface RootRouteChildren {
   AccountIndexRoute: typeof AccountIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
+  AccountTicketsTicketIdRoute: typeof AccountTicketsTicketIdRoute
+  AccountTicketsNewRoute: typeof AccountTicketsNewRoute
   AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
   AccountTicketsIndexRoute: typeof AccountTicketsIndexRoute
 }
@@ -324,6 +350,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountOrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/tickets/new': {
+      id: '/account/tickets/new'
+      path: '/account/tickets/new'
+      fullPath: '/account/tickets/new'
+      preLoaderRoute: typeof AccountTicketsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/tickets/$ticketId': {
+      id: '/account/tickets/$ticketId'
+      path: '/account/tickets/$ticketId'
+      fullPath: '/account/tickets/$ticketId'
+      preLoaderRoute: typeof AccountTicketsTicketIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/orders/$orderId': {
       id: '/account/orders/$orderId'
       path: '/account/orders/$orderId'
@@ -359,9 +399,20 @@ const rootRouteChildren: RootRouteChildren = {
   AccountIndexRoute: AccountIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
+  AccountTicketsTicketIdRoute: AccountTicketsTicketIdRoute,
+  AccountTicketsNewRoute: AccountTicketsNewRoute,
   AccountOrdersIndexRoute: AccountOrdersIndexRoute,
   AccountTicketsIndexRoute: AccountTicketsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
