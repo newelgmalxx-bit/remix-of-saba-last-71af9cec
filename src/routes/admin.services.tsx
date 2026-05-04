@@ -2,12 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download } from "lucide-react";
 import { useState } from "react";
-import { adminServices, fmtSAR } from "@/data/admin";
-import { services as siteServices } from "@/data/services";
-
-const slugFor = (titleAr: string): string => {
-  return siteServices.find((s) => s.title === titleAr || s.breadcrumb === titleAr)?.slug ?? siteServices[0].slug;
-};
+import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/services")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
@@ -19,16 +16,45 @@ const statusMap = { active: { l: "نشطة", t: "emerald" as const }, draft: { l
 function ServicesPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
-  const filtered = adminServices.filter(s =>
+  const [items, setItems] = useState<AdminService[]>(initialServices);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "web-design" });
+
+  const filtered = items.filter(s =>
     (tab === "all" || s.status === tab) &&
     (s.titleAr.includes(q) || s.titleEn.toLowerCase().includes(q.toLowerCase()) || s.sku.toLowerCase().includes(q.toLowerCase()))
   );
 
+  const handleAdd = () => {
+    if (!form.titleAr || !form.sku) { toast.error("الاسم والـ SKU مطلوبان"); return; }
+    const newSvc: AdminService = {
+      id: "s" + (items.length + 1),
+      sku: form.sku, slug: form.slug,
+      titleAr: form.titleAr, titleEn: form.titleEn || form.titleAr,
+      category: form.category || "عام",
+      price: Number(form.price) || 0, bookings: 0, status: "draft",
+    };
+    setItems([newSvc, ...items]);
+    setOpen(false);
+    setForm({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "web-design" });
+    toast.success("تم إضافة الخدمة");
+  };
+
+  const handleExport = () => {
+    const csv = ["SKU,Title,Category,Price,Bookings,Status", ...items.map(s => `${s.sku},${s.titleAr},${s.category},${s.price},${s.bookings},${s.status}`)].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "services.csv"; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("تم تصدير الخدمات");
+  };
+
   return (
     <AdminLayout title="الخدمات" subtitle="إدارة كتالوج الخدمات والباقات" action={
       <div className="hidden sm:flex gap-2">
-        <GhostButton><Download className="h-4 w-4" /> تصدير</GhostButton>
-        <PrimaryButton><Plus className="h-4 w-4" /> إضافة خدمة</PrimaryButton>
+        <GhostButton onClick={handleExport}><Download className="h-4 w-4" /> تصدير</GhostButton>
+        <PrimaryButton onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> إضافة خدمة</PrimaryButton>
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
@@ -84,7 +110,7 @@ function ServicesPage() {
                     <td className="px-3 py-3">{s.bookings}</td>
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
                     <td className="px-3 py-3">
-                      <Link to="/admin/services/$slug" params={{ slug: slugFor(s.titleAr) }} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:bg-muted">
+                      <Link to="/admin/services/$slug" params={{ slug: s.slug }} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:bg-muted">
                         <Pencil className="h-3 w-3" /> التفاصيل
                       </Link>
                     </td>
@@ -95,6 +121,38 @@ function ServicesPage() {
           </table>
         </div>
       </PanelCard>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader><DialogTitle>إضافة خدمة جديدة</DialogTitle></DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs font-bold space-y-1.5">الاسم (عربي)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">الاسم (English)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">SKU
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">التصنيف
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">السعر (ر.س)
+                <input type="number" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">المعرّف (slug)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+              </label>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setOpen(false)}>إلغاء</GhostButton>
+            <PrimaryButton onClick={handleAdd}>إضافة</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
