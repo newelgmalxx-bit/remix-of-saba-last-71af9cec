@@ -190,7 +190,7 @@ function ServicesPage() {
   );
 }
 
-export const Route = createFileRoute("/services")({
+export const Route = createFileRoute("/services/")({
   head: () => ({
     meta: [
       { title: "خدماتنا | سابا ديزاين" },
