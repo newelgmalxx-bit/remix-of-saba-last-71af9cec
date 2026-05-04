@@ -1,8 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, MoreHorizontal, Download } from "lucide-react";
+import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download } from "lucide-react";
 import { useState } from "react";
 import { adminServices, fmtSAR } from "@/data/admin";
+import { services as siteServices } from "@/data/services";
+
+const slugFor = (titleAr: string): string => {
+  return siteServices.find((s) => s.title === titleAr || s.breadcrumb === titleAr)?.slug ?? siteServices[0].slug;
+};
 
 export const Route = createFileRoute("/admin/services")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
@@ -78,7 +83,11 @@ function ServicesPage() {
                     <td className="px-3 py-3 font-bold">{fmtSAR(s.price)}</td>
                     <td className="px-3 py-3">{s.bookings}</td>
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
-                    <td className="px-3 py-3"><button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted"><MoreHorizontal className="h-4 w-4" /></button></td>
+                    <td className="px-3 py-3">
+                      <Link to="/admin/services/$slug" params={{ slug: slugFor(s.titleAr) }} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:bg-muted">
+                        <Pencil className="h-3 w-3" /> التفاصيل
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}
