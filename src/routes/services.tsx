@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import servicesHero from "@/assets/services-hero.png";
 
 const tabs = ["الكل", "تصميم", "برمجة", "تسويق", "سوشيال ميديا"];
 
@@ -47,17 +48,20 @@ function ServicesPage() {
       <SiteHeader />
       <main className="flex-1">
         {/* Hero banner */}
-        <section className="relative overflow-hidden bg-gradient-to-l from-primary to-primary-dark text-white">
-          <div className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white_1px,transparent_1px)] [background-size:24px_24px]" />
-          <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-8 px-4 py-16 sm:px-6 lg:px-8">
-            <div className="hidden h-40 w-40 shrink-0 rounded-full bg-white/10 ring-1 ring-white/20 md:block" />
-            <div className="flex-1 text-right">
-              <div className="mb-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold">
+        <section className="relative overflow-hidden text-white">
+          <div
+            className="absolute inset-0 bg-cover bg-no-repeat"
+            style={{ backgroundImage: `url(${servicesHero})`, backgroundPosition: "right center" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/70 to-primary-dark/95" />
+          <div className="relative mx-auto flex max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8">
+            <div className="ml-auto max-w-md text-right">
+              <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
                 <Link to="/" className="hover:underline">الرئيسية</Link>
                 <ChevronLeft className="h-3 w-3" />
                 <span>خدماتنا</span>
               </div>
-              <h1 className="text-4xl font-extrabold sm:text-5xl">خدماتنا</h1>
+              <h1 className="text-5xl font-extrabold sm:text-6xl">خدماتنا</h1>
               <p className="mt-3 text-sm text-white/80 sm:text-base">حلول متكاملة لنمو أعمالك الرقمية</p>
             </div>
           </div>
@@ -67,7 +71,7 @@ function ServicesPage() {
         <section className="bg-background py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-start gap-2">
                 {tabs.map((t) => (
                   <button
                     key={t}
