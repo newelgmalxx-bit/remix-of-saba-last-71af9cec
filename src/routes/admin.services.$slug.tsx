@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star } from "lucide-react";
+import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star, CheckCircle2 } from "lucide-react";
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/services/$slug")({
   head: () => ({ meta: [{ title: "تعديل الخدمة | لوحة التحكم" }] }),
@@ -38,6 +37,7 @@ function ServiceEditorPage() {
   const [overview, setOverview] = useState(initial?.overview.map(o => ({ title: o.title, desc: o.desc })) ?? []);
   const [benefits, setBenefits] = useState(initial?.benefits.map(b => ({ title: b.title, desc: b.desc })) ?? []);
   const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
   if (!base) {
     return (
@@ -53,7 +53,7 @@ function ServiceEditorPage() {
   const handleSave = () => {
     const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans };
     save(next);
-    toast.success("تم حفظ تعديلات الخدمة");
+    setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
 
   const handleReset = () => {
@@ -66,7 +66,7 @@ function ServiceEditorPage() {
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
     setPlans(base.plans.map(p => ({ ...p, feats: [...p.feats] })));
-    toast.success("تمت استعادة الإعدادات الأصلية");
+    setSavedAt(null);
   };
 
   return (
@@ -86,6 +86,12 @@ function ServiceEditorPage() {
       <button onClick={() => navigate({ to: "/admin/services" })} className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowRight className="h-4 w-4" /> رجوع لقائمة الخدمات
       </button>
+
+      {savedAt && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+          <CheckCircle2 className="h-4 w-4" /> تم حفظ التعديلات في {savedAt}
+        </div>
+      )}
 
       <div className="grid gap-6">
         {/* Basic */}
