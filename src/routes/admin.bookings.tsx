@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Plus, Download, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, type AdminBooking } from "@/data/admin";
+import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ function BookingsPage() {
   const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<"7" | "30" | "90" | "all">("all");
+  const [source, setSource] = useState<"all" | "direct" | "partner">("all");
   const [viewing, setViewing] = useState<AdminBooking | null>(null);
   const [editing, setEditing] = useState<AdminBooking | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
@@ -27,6 +28,7 @@ function BookingsPage() {
 
   const filtered = bookings.slice(0, limit).filter(b =>
     (tab === "all" || b.status === tab) &&
+    (source === "all" || b.source === source) &&
     (b.client.includes(q) || b.number.toLowerCase().includes(q.toLowerCase()))
   );
 
@@ -53,6 +55,11 @@ function BookingsPage() {
   return (
     <AdminLayout title="الحجوزات" subtitle="تتبع وإدارة دورة حياة الطلبات" action={
       <div className="hidden sm:flex gap-2">
+        <select value={source} onChange={(e) => setSource(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+          <option value="all">كل المصادر</option>
+          <option value="direct">مباشر</option>
+          <option value="partner">من الشريك</option>
+        </select>
         <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
           <option value="7">آخر 7 أيام</option>
           <option value="30">آخر 30 يوم</option>
@@ -105,7 +112,11 @@ function BookingsPage() {
                     <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.email}</div></td>
                     <td className="px-3 py-3">{b.service}</td>
                     <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
-                    <td className="px-3 py-3 text-muted-foreground">{b.payment}</td>
+                    <td className="px-3 py-3">
+                      <select value={b.payment} onChange={(e) => setBookings(bookings.map(x => x.id === b.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
+                        {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </td>
                     <td className="px-3 py-3">
                       <select value={b.status} onChange={(e) => { setBookings(bookings.map(x => x.id === b.id ? { ...x, status: e.target.value as any } : x)); toast.success("تم تحديث الحالة"); }} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
                         {statusKeys.map(k => <option key={k} value={k}>{bookingStatusMap[k].label}</option>)}
@@ -184,7 +195,16 @@ function BookingsPage() {
               <Lbl label="البريد"><input className={ic} value={editForm.email ?? ""} onChange={e => setEditForm({ ...editForm, email: e.target.value })} /></Lbl>
               <Lbl label="الخدمة" full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
               <Lbl label="الإجمالي (ر.س)"><input type="number" className={ic} value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
-              <Lbl label="طريقة الدفع"><input className={ic} value={editForm.payment ?? ""} onChange={e => setEditForm({ ...editForm, payment: e.target.value })} /></Lbl>
+              <Lbl label="طريقة الدفع">
+                <select className={ic} value={editForm.payment ?? paymentMethods[0]} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
+                  {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </Lbl>
+              <Lbl label="المصدر">
+                <select className={ic} value={editForm.source ?? "direct"} onChange={e => setEditForm({ ...editForm, source: e.target.value as any })}>
+                  <option value="direct">مباشر</option><option value="partner">من الشريك</option>
+                </select>
+              </Lbl>
               <Lbl label="الحالة" full>
                 <select className={ic} value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value as any })}>
                   {statusKeys.map(k => <option key={k} value={k}>{bookingStatusMap[k].label}</option>)}
