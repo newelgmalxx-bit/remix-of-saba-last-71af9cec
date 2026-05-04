@@ -379,6 +379,65 @@ function ServiceDetailPage() {
   );
 }
 
+function TestimonialsSlider() {
+  const [i, setI] = useState(0);
+  const total = testimonials.length;
+  const prev = () => setI((v) => (v - 1 + total) % total);
+  const next = () => setI((v) => (v + 1) % total);
+
+  return (
+    <div className="mt-6">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-secondary/30">
+        <div
+          className="flex transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(${i * 100}%)` }}
+        >
+          {testimonials.map((t) => (
+            <div key={t.name} className="w-full shrink-0 p-8 text-right">
+              <div className="flex justify-end gap-0.5 text-amber-400">
+                {Array.from({ length: 5 }).map((_, k) => (
+                  <Star key={k} className="h-4 w-4 fill-current" />
+                ))}
+              </div>
+              <p className="mt-4 text-base leading-8 text-foreground/80">"{t.text}"</p>
+              <div className="mt-5 text-xs">
+                <div className="font-bold text-foreground">{t.name}</div>
+                <div className="text-muted-foreground">{t.role}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-between">
+        <button
+          onClick={prev}
+          aria-label="السابق"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <div className="flex items-center gap-1.5">
+          {testimonials.map((_, k) => (
+            <button
+              key={k}
+              onClick={() => setI(k)}
+              aria-label={`الشريحة ${k + 1}`}
+              className={`h-1.5 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-1.5 bg-border"}`}
+            />
+          ))}
+        </div>
+        <button
+          onClick={next}
+          aria-label="التالي"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/services/web-design")({
   head: () => ({
     meta: [
