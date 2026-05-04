@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
 import { serviceMap } from "@/data/services";
+import { useServiceContent } from "@/hooks/useServiceContent";
 
 const steps = [
   { n: 1, icon: MessageSquare, title: "فهم المتطلبات" },
@@ -53,7 +54,8 @@ const faqs = [
 
 function ServiceDetailPage() {
   const { slug } = Route.useParams();
-  const service = serviceMap[slug];
+  const live = useServiceContent(slug);
+  const service = live ?? serviceMap[slug];
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
