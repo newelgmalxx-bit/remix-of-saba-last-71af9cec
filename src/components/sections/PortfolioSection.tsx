@@ -134,10 +134,11 @@ export function PortfolioSection() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-white px-6 py-5 text-center md:flex-row md:text-right">
           <div className="flex flex-wrap items-center gap-3">
-            <button className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary-dark">
-              ابدأ مشروعك <ArrowLeft className="h-4 w-4" />
+            <button className="group inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_-10px_rgba(30,91,148,0.6)] transition-all hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_14px_28px_-10px_rgba(30,91,148,0.7)]">
+              ابدأ مشروعك
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             </button>
-            <button className="inline-flex h-11 items-center rounded-full border border-border bg-white px-6 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary">
+            <button className="inline-flex h-11 items-center rounded-full border border-border bg-white px-6 text-sm font-bold text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md">
               عرض المزيد
             </button>
           </div>
