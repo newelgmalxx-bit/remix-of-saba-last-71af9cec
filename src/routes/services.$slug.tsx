@@ -1,9 +1,10 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, ShoppingCart, Zap,
 } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
