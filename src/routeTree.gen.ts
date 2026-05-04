@@ -36,6 +36,7 @@ import { Route as AccountTicketsIndexRouteImport } from './routes/account.ticket
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin.settings.appearance'
+import { Route as AdminServicesSlugRouteImport } from './routes/admin.services.$slug'
 import { Route as AccountTicketsNewRouteImport } from './routes/account.tickets.new'
 import { Route as AccountTicketsTicketIdRouteImport } from './routes/account.tickets.$ticketId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
@@ -176,6 +177,11 @@ const AdminSettingsAppearanceRoute = AdminSettingsAppearanceRouteImport.update({
   path: '/appearance',
   getParentRoute: () => AdminSettingsRoute,
 } as any)
+const AdminServicesSlugRoute = AdminServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AdminServicesRoute,
+} as any)
 const AccountTicketsNewRoute = AccountTicketsNewRouteImport.update({
   id: '/account/tickets/new',
   path: '/account/tickets/new',
@@ -209,7 +215,7 @@ export interface FileRoutesByFullPath {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
-  '/admin/services': typeof AdminServicesRoute
+  '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
@@ -240,7 +247,7 @@ export interface FileRoutesByTo {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
-  '/admin/services': typeof AdminServicesRoute
+  '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders': typeof AccountOrdersIndexRoute
@@ -273,7 +281,7 @@ export interface FileRoutesById {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
-  '/admin/services': typeof AdminServicesRoute
+  '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
     | '/account/orders/'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
     | '/account/orders'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
     | '/account/orders/'
@@ -598,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsAppearanceRouteImport
       parentRoute: typeof AdminSettingsRoute
     }
+    '/admin/services/$slug': {
+      id: '/admin/services/$slug'
+      path: '/$slug'
+      fullPath: '/admin/services/$slug'
+      preLoaderRoute: typeof AdminServicesSlugRouteImport
+      parentRoute: typeof AdminServicesRoute
+    }
     '/account/tickets/new': {
       id: '/account/tickets/new'
       path: '/account/tickets/new'
@@ -622,6 +641,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminServicesRouteChildren {
+  AdminServicesSlugRoute: typeof AdminServicesSlugRoute
+}
+
+const AdminServicesRouteChildren: AdminServicesRouteChildren = {
+  AdminServicesSlugRoute: AdminServicesSlugRoute,
+}
+
+const AdminServicesRouteWithChildren = AdminServicesRoute._addFileChildren(
+  AdminServicesRouteChildren,
+)
+
 interface AdminSettingsRouteChildren {
   AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
   AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
@@ -643,7 +674,7 @@ interface AdminRouteChildren {
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
-  AdminServicesRoute: typeof AdminServicesRoute
+  AdminServicesRoute: typeof AdminServicesRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -655,7 +686,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
-  AdminServicesRoute: AdminServicesRoute,
+  AdminServicesRoute: AdminServicesRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
