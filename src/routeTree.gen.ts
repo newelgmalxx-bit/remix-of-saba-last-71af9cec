@@ -23,10 +23,16 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTrackingRouteImport } from './routes/admin.tracking'
+import { Route as AdminSiteRouteImport } from './routes/admin.site'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
+import { Route as AdminPaymentRouteImport } from './routes/admin.payment'
+import { Route as AdminPartnerRouteImport } from './routes/admin.partner'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
@@ -111,6 +117,21 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTrackingRoute = AdminTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSiteRoute = AdminSiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -121,6 +142,11 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSeoRoute = AdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -129,6 +155,16 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
 const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPaymentRoute = AdminPaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPartnerRoute = AdminPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
@@ -213,10 +249,16 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
+  '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
+  '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -245,10 +287,16 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
+  '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
+  '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
@@ -279,10 +327,16 @@ export interface FileRoutesById {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
+  '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
+  '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -314,10 +368,16 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
+    | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
+    | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -346,10 +406,16 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
+    | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
+    | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account'
@@ -379,10 +445,16 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
+    | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
+    | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -519,6 +591,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tracking': {
+      id: '/admin/tracking'
+      path: '/tracking'
+      fullPath: '/admin/tracking'
+      preLoaderRoute: typeof AdminTrackingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/site': {
+      id: '/admin/site'
+      path: '/site'
+      fullPath: '/admin/site'
+      preLoaderRoute: typeof AdminSiteRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -533,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/seo': {
+      id: '/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AdminSeoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reports': {
       id: '/admin/reports'
       path: '/reports'
@@ -545,6 +645,20 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/admin/portfolio'
       preLoaderRoute: typeof AdminPortfolioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/payment': {
+      id: '/admin/payment'
+      path: '/payment'
+      fullPath: '/admin/payment'
+      preLoaderRoute: typeof AdminPaymentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/partner': {
+      id: '/admin/partner'
+      path: '/partner'
+      fullPath: '/admin/partner'
+      preLoaderRoute: typeof AdminPartnerRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/invoices': {
@@ -672,10 +786,16 @@ interface AdminRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminClientsRoute: typeof AdminClientsRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminPartnerRoute: typeof AdminPartnerRoute
+  AdminPaymentRoute: typeof AdminPaymentRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminSeoRoute: typeof AdminSeoRoute
   AdminServicesRoute: typeof AdminServicesRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
+  AdminSiteRoute: typeof AdminSiteRoute
+  AdminTrackingRoute: typeof AdminTrackingRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -684,10 +804,16 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminClientsRoute: AdminClientsRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminPartnerRoute: AdminPartnerRoute,
+  AdminPaymentRoute: AdminPaymentRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminSeoRoute: AdminSeoRoute,
   AdminServicesRoute: AdminServicesRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRouteWithChildren,
+  AdminSiteRoute: AdminSiteRoute,
+  AdminTrackingRoute: AdminTrackingRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

@@ -151,9 +151,7 @@ function ClientsPage() {
             <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
             <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
             <Lbl label="اللغة المفضلة">
-              <select className={ic} value={add.language} onChange={e => setAdd({ ...add, language: e.target.value })}>
-                <option>العربية</option><option>English</option>
-              </select>
+              <input className={ic} value={add.language} onChange={e => setAdd({ ...add, language: e.target.value })} />
             </Lbl>
             <Lbl label="الشريحة">
               <select className={ic} value={add.segment} onChange={e => setAdd({ ...add, segment: e.target.value as any })}>

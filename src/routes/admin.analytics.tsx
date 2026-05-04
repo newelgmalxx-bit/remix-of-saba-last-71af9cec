@@ -3,6 +3,7 @@ import { AdminLayout, StatCard, PanelCard } from "@/components/admin/AdminLayout
 import { Eye, MousePointerClick, TrendingUp, Clock } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
 import { monthlyRevenue } from "@/data/admin";
+import { useState } from "react";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "التحليلات | لوحة التحكم" }] }),
@@ -19,15 +20,24 @@ const sources = [
 ];
 
 function AnalyticsPage() {
+  const [tab, setTab] = useState<"visits" | "engagement" | "conversions" | "revenue">("visits");
+  const tabs: [typeof tab, string][] = [["visits", "الزيارات"], ["engagement", "التفاعل"], ["conversions", "التحويلات"], ["revenue", "الإيرادات"]];
   return (
     <AdminLayout title="التحليلات" subtitle="رؤى متقدمة لأداء الموقع والتفاعل">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="مشاهدات الصفحة" value="48,210" hint="↑ +18.2%" icon={Eye} accent="primary" />
-        <StatCard label="معدل النقر" value="6.4%" hint="↑ +1.1%" icon={MousePointerClick} accent="violet" />
-        <StatCard label="معدل التحويل" value="3.8%" hint="↑ +0.4%" icon={TrendingUp} accent="emerald" />
-        <StatCard label="متوسط مدة الزيارة" value="4م 12ث" hint="↑ +12ث" icon={Clock} accent="amber" />
+      <div className="mb-6 inline-flex flex-wrap rounded-xl border border-border bg-card p-1">
+        {tabs.map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
+        ))}
       </div>
 
+      {tab === "visits" && (
+      <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard label="مشاهدات الصفحة" value="48,210" hint="↑ +18.2%" icon={Eye} accent="primary" />
+        <StatCard label="زوار فريدون" value="12,840" hint="↑ +9.3%" icon={Eye} accent="violet" />
+        <StatCard label="جلسات" value="18,520" hint="↑ +6.1%" icon={MousePointerClick} accent="emerald" />
+        <StatCard label="متوسط مدة الزيارة" value="4م 12ث" hint="↑ +12ث" icon={Clock} accent="amber" />
+      </div>
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
         <PanelCard title="حركة المرور الأسبوعية" subtitle="الزيارات حسب اليوم" className="lg:col-span-2">
           <div className="h-72">
@@ -55,7 +65,28 @@ function AnalyticsPage() {
           </ul>
         </PanelCard>
       </div>
+      </>
+      )}
 
+      {tab === "engagement" && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <StatCard label="معدل الارتداد" value="32.4%" hint="↓ -2.1%" icon={MousePointerClick} accent="amber" />
+          <StatCard label="صفحات/جلسة" value="3.8" hint="↑ +0.5" icon={Eye} accent="primary" />
+          <StatCard label="متوسط مدة الجلسة" value="4م 12ث" icon={Clock} accent="violet" />
+          <StatCard label="جلسات متفاعلة" value="68%" hint="↑ +4%" icon={TrendingUp} accent="emerald" />
+        </div>
+      )}
+
+      {tab === "conversions" && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <StatCard label="معدل التحويل" value="3.8%" hint="↑ +0.4%" icon={TrendingUp} accent="emerald" />
+          <StatCard label="إضافات للسلة" value="1,240" icon={MousePointerClick} accent="primary" />
+          <StatCard label="بدء دفع" value="420" icon={Clock} accent="amber" />
+          <StatCard label="طلبات مكتملة" value="184" hint="↑ +12.5%" icon={Eye} accent="violet" />
+        </div>
+      )}
+
+      {tab === "revenue" && (
       <PanelCard title="الإيرادات الشهرية" subtitle="آخر 12 شهر">
         <div className="h-72">
           <ResponsiveContainer>
@@ -69,6 +100,7 @@ function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
       </PanelCard>
+      )}
     </AdminLayout>
   );
 }

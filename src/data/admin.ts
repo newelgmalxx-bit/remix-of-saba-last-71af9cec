@@ -46,15 +46,16 @@ export const adminServices: AdminService[] = [
 export type AdminBooking = {
   id: string; number: string; client: string; email: string; service: string;
   total: number; payment: string; status: "pending" | "in_progress" | "review" | "completed" | "cancelled"; date: string;
+  source?: "direct" | "partner";
 };
 
 export const adminBookings: AdminBooking[] = [
-  { id: "b1", number: "SD-1024", client: "أحمد العبدالله", email: "ahmed@example.com", service: "تصميم مواقع", total: 10810, payment: "تابي", status: "in_progress", date: "10 فبراير 2026" },
-  { id: "b2", number: "SD-1023", client: "نورة السالم", email: "noura@example.com", service: "هوية بصرية", total: 4025, payment: "مدى", status: "completed", date: "9 فبراير 2026" },
-  { id: "b3", number: "SD-1022", client: "محمد الزهراني", email: "m.z@example.com", service: "SEO", total: 1725, payment: "تمارا", status: "pending", date: "9 فبراير 2026" },
-  { id: "b4", number: "SD-1021", client: "ريم الشهري", email: "reem@example.com", service: "سوشيال ميديا", total: 2875, payment: "Apple Pay", status: "review", date: "8 فبراير 2026" },
-  { id: "b5", number: "SD-1020", client: "خالد القحطاني", email: "k@example.com", service: "تطبيق موبايل", total: 21735, payment: "ماي فاتورة", status: "in_progress", date: "8 فبراير 2026" },
-  { id: "b6", number: "SD-1019", client: "سارة المطيري", email: "s.m@example.com", service: "بنرات إعلانية", total: 3450, payment: "كاش", status: "cancelled", date: "7 فبراير 2026" },
+  { id: "b1", number: "SD-1024", client: "أحمد العبدالله", email: "ahmed@example.com", service: "تصميم مواقع", total: 10810, payment: "تابي", status: "in_progress", date: "10 فبراير 2026", source: "direct" },
+  { id: "b2", number: "SD-1023", client: "نورة السالم", email: "noura@example.com", service: "هوية بصرية", total: 4025, payment: "مدى", status: "completed", date: "9 فبراير 2026", source: "partner" },
+  { id: "b3", number: "SD-1022", client: "محمد الزهراني", email: "m.z@example.com", service: "SEO", total: 1725, payment: "تمارا", status: "pending", date: "9 فبراير 2026", source: "direct" },
+  { id: "b4", number: "SD-1021", client: "ريم الشهري", email: "reem@example.com", service: "سوشيال ميديا", total: 2875, payment: "Apple Pay", status: "review", date: "8 فبراير 2026", source: "partner" },
+  { id: "b5", number: "SD-1020", client: "خالد القحطاني", email: "k@example.com", service: "تطبيق موبايل", total: 21735, payment: "ماي فاتورة", status: "in_progress", date: "8 فبراير 2026", source: "direct" },
+  { id: "b6", number: "SD-1019", client: "سارة المطيري", email: "s.m@example.com", service: "بنرات إعلانية", total: 3450, payment: "كاش", status: "cancelled", date: "7 فبراير 2026", source: "partner" },
 ];
 
 export const bookingStatusMap: Record<AdminBooking["status"], { label: string; tone: "amber" | "primary" | "violet" | "emerald" | "rose" }> = {
@@ -65,18 +66,21 @@ export const bookingStatusMap: Record<AdminBooking["status"], { label: string; t
   cancelled: { label: "ملغي", tone: "rose" },
 };
 
+export const paymentMethods = ["مدى", "فيزا", "ماستركارد", "Apple Pay", "تابي", "تمارا", "ماي فاتورة", "تحويل بنكي", "كاش"];
+
 export type AdminInvoice = {
   id: string; number: string; orderNumber: string; client: string; email: string;
+  phone?: string; payment?: string;
   amount: number; status: "paid" | "pending" | "void"; issued: string;
 };
 
 export const adminInvoices: AdminInvoice[] = [
-  { id: "i1", number: "INV-7821", orderNumber: "SD-1024", client: "أحمد العبدالله", email: "ahmed@example.com", amount: 10810, status: "paid", issued: "10 فبراير 2026" },
-  { id: "i2", number: "INV-7820", orderNumber: "SD-1023", client: "نورة السالم", email: "noura@example.com", amount: 4025, status: "paid", issued: "9 فبراير 2026" },
-  { id: "i3", number: "INV-7819", orderNumber: "SD-1022", client: "محمد الزهراني", email: "m.z@example.com", amount: 1725, status: "pending", issued: "9 فبراير 2026" },
-  { id: "i4", number: "INV-7818", orderNumber: "SD-1021", client: "ريم الشهري", email: "reem@example.com", amount: 2875, status: "paid", issued: "8 فبراير 2026" },
-  { id: "i5", number: "INV-7817", orderNumber: "SD-1020", client: "خالد القحطاني", email: "k@example.com", amount: 21735, status: "pending", issued: "8 فبراير 2026" },
-  { id: "i6", number: "INV-7816", orderNumber: "SD-1019", client: "سارة المطيري", email: "s.m@example.com", amount: 3450, status: "void", issued: "7 فبراير 2026" },
+  { id: "i1", number: "INV-7821", orderNumber: "SD-1024", client: "أحمد العبدالله", email: "ahmed@example.com", phone: "+966 55 111 2222", payment: "تابي", amount: 10810, status: "paid", issued: "10 فبراير 2026" },
+  { id: "i2", number: "INV-7820", orderNumber: "SD-1023", client: "نورة السالم", email: "noura@example.com", phone: "+966 50 333 4444", payment: "مدى", amount: 4025, status: "paid", issued: "9 فبراير 2026" },
+  { id: "i3", number: "INV-7819", orderNumber: "SD-1022", client: "محمد الزهراني", email: "m.z@example.com", phone: "+966 56 555 6666", payment: "تمارا", amount: 1725, status: "pending", issued: "9 فبراير 2026" },
+  { id: "i4", number: "INV-7818", orderNumber: "SD-1021", client: "ريم الشهري", email: "reem@example.com", phone: "+966 53 777 8888", payment: "Apple Pay", amount: 2875, status: "paid", issued: "8 فبراير 2026" },
+  { id: "i5", number: "INV-7817", orderNumber: "SD-1020", client: "خالد القحطاني", email: "k@example.com", phone: "+966 55 999 0000", payment: "ماي فاتورة", amount: 21735, status: "pending", issued: "8 فبراير 2026" },
+  { id: "i6", number: "INV-7816", orderNumber: "SD-1019", client: "سارة المطيري", email: "s.m@example.com", phone: "+966 50 222 3333", payment: "كاش", amount: 3450, status: "void", issued: "7 فبراير 2026" },
 ];
 
 export type AdminClient = {
