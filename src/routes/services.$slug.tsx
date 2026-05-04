@@ -1,26 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, Sparkles, Target, Gem,
-  Layout, Users2, FileCode2, LifeBuoy, Smartphone, MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
-
-const overview = [
-  { icon: Users2, title: "لمن هذه الخدمة", desc: "للشركات الناشئة والعلامات التي تريد حضورًا رقميًا قويًا وموقعًا احترافيًا." },
-  { icon: Sparkles, title: "لماذا تهم؟", desc: "لأن الواجهة الواضحة ترفع الثقة، تقلّل التشتيت، وتزيد التحويل." },
-  { icon: Gem, title: "القيمة الأساسية", desc: "موقع سريع ومتجاوب وآمن يعكس هويتك ويحقق نتائج تجارية حقيقية." },
-];
-
-const benefits = [
-  { icon: Layout, title: "تصميم كامل للمشروع", desc: "واجهات متناسقة لجميع الصفحات الرئيسية." },
-  { icon: Target, title: "تجربة مستخدم احترافية", desc: "تدفقات واضحة وسهلة الإستخدام لكل العملاء." },
-  { icon: FileCode2, title: "ملفات قابلة للتطوير", desc: "كود نظيف وسهل التعديل والتوسعة لاحقًا." },
-  { icon: Smartphone, title: "نسخة للموبايل والويب", desc: "تجربة مثالية على كل الأجهزة." },
-  { icon: LifeBuoy, title: "دعم بعد التسليم", desc: "متابعة فنية لأكثر من شهر بعد الإطلاق." },
-];
+import { serviceMap } from "@/data/services";
 
 const steps = [
   { n: 1, icon: MessageSquare, title: "فهم المتطلبات" },
@@ -45,21 +32,6 @@ const stats = [
   { v: "98%", l: "نسبة رضا العملاء" },
   { v: "14 يوم", l: "متوسط مدة التسليم" },
   { v: "+180", l: "عدد العملاء" },
-];
-
-const plans = [
-  {
-    name: "Basic", price: "3,500", featured: false,
-    feats: ["تصميم 5 صفحات", "متجاوب", "هوية بسيطة", "صياغة محتوى مبدئي"],
-  },
-  {
-    name: "Pro", price: "7,900", featured: true,
-    feats: ["تصميم 10 صفحات", "هوية متكاملة", "ربط نماذج تواصل", "تحسين سرعة", "SEO أساسي"],
-  },
-  {
-    name: "Premium", price: "12,500", featured: false,
-    feats: ["كل ما في باقة Pro", "متجر إلكتروني", "لوحة تحكم", "دعم أولوية"],
-  },
 ];
 
 const testimonials = [
@@ -452,7 +424,7 @@ function TestimonialsSlider() {
   );
 }
 
-export const Route = createFileRoute("/services/")({
+export const Route = createFileRoute("/services/$slug")({
   head: () => ({
     meta: [
       { title: "تصميم مواقع الكترونية | سابا ديزاين" },
