@@ -1,12 +1,12 @@
-import { Percent, Tag, Users, Lightbulb, Clock, Shield } from "lucide-react";
+import { Wand2, Tag, Headphones, Clock, Lightbulb, Award } from "lucide-react";
 
 const items = [
-  { icon: Percent, title: "أسعار تنافسية", desc: "أفضل قيمة مقابل السعر" },
-  { icon: Tag, title: "أسعار الجملة", desc: "خصومات مميزة للكميات" },
-  { icon: Users, title: "فريق محترف", desc: "خبراء متخصصون" },
-  { icon: Lightbulb, title: "حلول مبتكرة", desc: "أفكار إبداعية" },
-  { icon: Clock, title: "تسليم في الوقت", desc: "التزام بالمواعيد" },
-  { icon: Shield, title: "جودة عالية", desc: "معايير احترافية" },
+  { icon: Wand2, title: "خبرة واحترافية", desc: "فريق محترف بخبرة طويلة في المجال" },
+  { icon: Tag, title: "أسعار تنافسية", desc: "أفضل قيمة مقابل السعر تناسب جميع الميزانيات" },
+  { icon: Headphones, title: "دعم مستمر", desc: "دعم فني متواصل قبل وبعد تسليم المشروع" },
+  { icon: Clock, title: "الالتزام بالمواعيد", desc: "نلتزم بتسليم المشاريع في الوقت المحدد" },
+  { icon: Lightbulb, title: "تصاميم إبداعية", desc: "أفكار مبتكرة وتصاميم تجذب الانتباه" },
+  { icon: Award, title: "جودة عالية", desc: "نحرص على تقديم أعلى جودة في كل ما نقدمه" },
 ];
 
 export function WhyUsSection() {
@@ -14,21 +14,17 @@ export function WhyUsSection() {
     <section className="bg-background py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            مميزاتنا
-          </span>
-          <h2 className="mt-3 text-3xl font-extrabold text-foreground sm:text-4xl">
-            لماذا تختار ديزاين؟
-          </h2>
+          <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">لماذا تختار ديزاين؟</h2>
+          <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-primary/70" />
         </div>
-        <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-14 grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
           {items.map((i) => (
             <div key={i.title} className="flex flex-col items-center text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-primary">
-                <i.icon className="h-6 w-6" />
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
+                <i.icon className="h-5 w-5" />
               </span>
-              <h3 className="mt-3 text-sm font-bold text-foreground">{i.title}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">{i.desc}</p>
+              <h3 className="mt-4 text-sm font-bold text-foreground">{i.title}</h3>
+              <p className="mt-2 text-[11px] leading-5 text-muted-foreground">{i.desc}</p>
             </div>
           ))}
         </div>
