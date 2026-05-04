@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { LogosMarquee } from "@/components/sections/LogosMarquee";
 import { ServicesGrid } from "@/components/sections/ServicesGrid";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import { StatsBanner } from "@/components/sections/StatsBanner";
@@ -30,7 +29,6 @@ function Index() {
       <SiteHeader />
       <main className="flex-1">
         <HeroSection />
-        <LogosMarquee />
         <ServicesGrid />
         <PortfolioSection />
         <StatsBanner />
