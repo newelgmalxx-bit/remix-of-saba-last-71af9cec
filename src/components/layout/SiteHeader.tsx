@@ -22,13 +22,10 @@ export function SiteHeader() {
           <img
             src={logo}
             alt="سابا ديزاين"
-            width={40}
-            height={40}
-            className="h-10 w-10 object-contain transition-transform duration-500 group-hover:rotate-[8deg]"
+            width={120}
+            height={48}
+            className="h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
           />
-          <span className="text-lg font-extrabold tracking-tight text-foreground">
-            سابا <span className="text-primary">ديزاين</span>
-          </span>
         </Link>
 
         {/* Desktop nav */}
