@@ -73,7 +73,8 @@
   --popover-foreground: oklch(0.18 0.04 250);
   --primary: oklch(0.45 0.11 250);            /* #1E5B94 */
   --primary-foreground: oklch(0.99 0.005 250);
-  --primary-light: oklch(0.93 0.04 250);      /* light blue surface */
+  --primary-light: oklch(0.92 0.035 250);     /* #1E5B94 @ 16% over white ≈ #D2DDE9 */
+  --primary-soft: color-mix(in oklab, var(--primary) 16%, white); /* exact #1E5B9429 surface */
   --primary-dark: oklch(0.28 0.07 250);       /* deep navy */
   --secondary: oklch(0.96 0.012 250);
   --secondary-foreground: oklch(0.28 0.07 250);
