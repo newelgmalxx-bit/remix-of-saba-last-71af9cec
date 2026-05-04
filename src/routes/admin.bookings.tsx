@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Plus, Download, Pencil, Trash2 } from "lucide-react";
+import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
