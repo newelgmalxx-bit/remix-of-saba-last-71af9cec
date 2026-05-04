@@ -24,6 +24,7 @@ import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
@@ -106,6 +107,11 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountProfileRoute = AccountProfileRouteImport.update({
   id: '/account/profile',
   path: '/account/profile',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/bookings'
     | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/bookings'
     | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/bookings'
     | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
@@ -405,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/profile': {
       id: '/account/profile'
       path: '/account/profile'
@@ -451,11 +470,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminBookingsRoute: typeof AdminBookingsRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBookingsRoute: AdminBookingsRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -497,3 +518,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
