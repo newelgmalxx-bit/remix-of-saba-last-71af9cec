@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export function SiteFooter() {
   return (
@@ -7,9 +8,9 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 font-extrabold">
-              S
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1.5">
+              <img src={logo} alt="سابا ديزاين" width={40} height={40} className="h-full w-full object-contain" />
             </div>
             <span className="text-lg font-extrabold">سابا ديزاين</span>
           </div>
