@@ -146,7 +146,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value
     <li className="flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div className="text-[11px] text-white/65">{label}</div>
-        <div className="truncate text-sm font-semibold">{value}</div>
+        <div className="truncate text-sm font-semibold" dir="ltr">{value}</div>
       </div>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15">
         <Icon className="h-4 w-4" />
