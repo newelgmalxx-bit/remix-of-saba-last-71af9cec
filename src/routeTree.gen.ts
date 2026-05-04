@@ -42,6 +42,7 @@ import { Route as AccountTicketsIndexRouteImport } from './routes/account.ticket
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
 import { Route as AdminSettingsTeamRouteImport } from './routes/admin.settings.team'
 import { Route as AdminSettingsProfileRouteImport } from './routes/admin.settings.profile'
+import { Route as AdminSettingsNotificationsRouteImport } from './routes/admin.settings.notifications'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin.settings.appearance'
 import { Route as AdminServicesSlugRouteImport } from './routes/admin.services.$slug'
@@ -214,6 +215,12 @@ const AdminSettingsProfileRoute = AdminSettingsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AdminSettingsRoute,
 } as any)
+const AdminSettingsNotificationsRoute =
+  AdminSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AdminSettingsRoute,
+  } as any)
 const AdminSettingsIntegrationsRoute =
   AdminSettingsIntegrationsRouteImport.update({
     id: '/integrations',
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/notifications': typeof AdminSettingsNotificationsRoute
   '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/notifications': typeof AdminSettingsNotificationsRoute
   '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders': typeof AccountOrdersIndexRoute
@@ -364,6 +373,7 @@ export interface FileRoutesById {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/notifications': typeof AdminSettingsNotificationsRoute
   '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/notifications'
     | '/admin/settings/profile'
     | '/admin/settings/team'
     | '/account/orders/'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/notifications'
     | '/admin/settings/profile'
     | '/admin/settings/team'
     | '/account/orders'
@@ -488,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/notifications'
     | '/admin/settings/profile'
     | '/admin/settings/team'
     | '/account/orders/'
@@ -748,6 +761,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsProfileRouteImport
       parentRoute: typeof AdminSettingsRoute
     }
+    '/admin/settings/notifications': {
+      id: '/admin/settings/notifications'
+      path: '/notifications'
+      fullPath: '/admin/settings/notifications'
+      preLoaderRoute: typeof AdminSettingsNotificationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
     '/admin/settings/integrations': {
       id: '/admin/settings/integrations'
       path: '/integrations'
@@ -808,6 +828,7 @@ const AdminServicesRouteWithChildren = AdminServicesRoute._addFileChildren(
 interface AdminSettingsRouteChildren {
   AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
   AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+  AdminSettingsNotificationsRoute: typeof AdminSettingsNotificationsRoute
   AdminSettingsProfileRoute: typeof AdminSettingsProfileRoute
   AdminSettingsTeamRoute: typeof AdminSettingsTeamRoute
 }
@@ -815,6 +836,7 @@ interface AdminSettingsRouteChildren {
 const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
   AdminSettingsAppearanceRoute: AdminSettingsAppearanceRoute,
   AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+  AdminSettingsNotificationsRoute: AdminSettingsNotificationsRoute,
   AdminSettingsProfileRoute: AdminSettingsProfileRoute,
   AdminSettingsTeamRoute: AdminSettingsTeamRoute,
 }
