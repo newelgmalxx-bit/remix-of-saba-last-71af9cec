@@ -445,13 +445,18 @@ function TestimonialsSlider() {
 }
 
 export const Route = createFileRoute("/services/$slug")({
-  head: () => ({
-    meta: [
-      { title: "تصميم مواقع الكترونية | سابا ديزاين" },
-      { name: "description", content: "خدمة تصميم مواقع احترافية متجاوبة سريعة تعكس هويتك وتحقق التحويل." },
-      { property: "og:title", content: "تصميم مواقع الكترونية | سابا ديزاين" },
-      { property: "og:description", content: "مواقع سريعة ومتجاوبة تعكس هويتك التجارية وتحقق التحويل." },
-    ],
-  }),
+  head: ({ params }) => {
+    const s = serviceMap[params.slug];
+    const t = s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين";
+    const d = s?.subtitle ?? "حلول رقمية متكاملة لنمو أعمالك.";
+    return {
+      meta: [
+        { title: t },
+        { name: "description", content: d },
+        { property: "og:title", content: t },
+        { property: "og:description", content: d },
+      ],
+    };
+  },
   component: ServiceDetailPage,
 });
