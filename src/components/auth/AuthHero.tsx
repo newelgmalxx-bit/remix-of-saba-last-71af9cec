@@ -11,7 +11,7 @@ const features = [
 
 export function AuthHero() {
   return (
-    <div dir="rtl" className="relative hidden flex-col justify-between overflow-hidden p-10 text-white lg:flex" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
+    <div dir="rtl" className="relative flex flex-col justify-between overflow-hidden p-6 text-white sm:p-10" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
       <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
