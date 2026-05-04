@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-white.png";
 
 export function SiteFooter() {
   return (
@@ -8,9 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl bg-white/95 p-3 inline-block">
-            <img src={logo} alt="سابا ديزاين" width={140} height={56} className="h-12 w-auto object-contain" />
-          </div>
+          <img src={logo} alt="سابا ديزاين" width={160} height={64} className="h-14 w-auto object-contain" />
           <p className="mt-4 text-sm leading-7 text-white/70">
             وكالة رقمية متخصصة في تصميم وتطوير الحلول الرقمية المبتكرة لتحويل أفكارك إلى واقع.
           </p>
