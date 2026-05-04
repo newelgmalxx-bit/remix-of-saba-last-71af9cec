@@ -1,4 +1,4 @@
-import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Clock3, Sparkles } from "lucide-react";
+import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Clock3, Sparkles, Send } from "lucide-react";
 
 export function ContactSection() {
   return (
@@ -17,7 +17,49 @@ export function ContactSection() {
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-5">
-          {/* Form */}
+          {/* Info card — right in RTL (first in DOM) */}
+          <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-primary to-primary-dark p-7 text-white shadow-md lg:col-span-2">
+            <h3 className="text-xl font-bold">معلومات التواصل</h3>
+            <p className="mt-2 text-xs leading-relaxed text-white/75">
+              نحن هنا للإجابة على جميع استفساراتك. تواصل معنا عبر أي من القنوات التالية.
+            </p>
+
+            <ul className="mt-6 space-y-4">
+              <InfoRow icon={Phone} label="اتصل بنا" value="+966 50 123 4567" />
+              <InfoRow icon={Mail} label="راسلنا" value="info@sabadesign.com" />
+              <InfoRow icon={MessageCircle} label="واتساب" value="+966 50 123 4567" />
+              <InfoRow icon={MapPin} label="موقعنا" value="الرياض، المملكة العربية السعودية" />
+            </ul>
+
+            <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[11px] text-white/70">ساعات العمل</div>
+                  <div className="mt-1 text-sm font-semibold">السبت - الخميس: 9:00 ص - 6:00 م</div>
+                </div>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
+                  <Clock className="h-4 w-4" />
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-[11px] text-white/70">تابعنا على</p>
+              <div className="mt-3 flex items-center gap-2">
+                {[Instagram, Twitter, Linkedin, Facebook].map((Icon, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 hover:scale-110"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Form — left in RTL */}
           <form className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8 lg:col-span-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground">أرسل لنا رسالة</h3>
@@ -52,8 +94,9 @@ export function ContactSection() {
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_-10px_rgba(30,91,148,0.6)] transition hover:bg-primary-dark"
+                className="group inline-flex h-11 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_-10px_rgba(30,91,148,0.6)] transition-all hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-10px_rgba(30,91,148,0.7)]"
               >
+                <Send className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 إرسال الطلب
               </button>
               <span className="text-xs text-muted-foreground">
@@ -62,48 +105,6 @@ export function ContactSection() {
               </span>
             </div>
           </form>
-
-          {/* Info card */}
-          <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-primary to-primary-dark p-7 text-white shadow-md lg:col-span-2">
-            <h3 className="text-xl font-bold">معلومات التواصل</h3>
-            <p className="mt-2 text-xs leading-relaxed text-white/75">
-              نحن هنا للإجابة على جميع استفساراتك. تواصل معنا عبر أي من القنوات التالية.
-            </p>
-
-            <ul className="mt-6 space-y-4">
-              <InfoRow icon={Phone} label="اتصل بنا" value="+966 50 123 4567" />
-              <InfoRow icon={Mail} label="راسلنا" value="info@sabadesign.com" />
-              <InfoRow icon={MessageCircle} label="واتساب" value="+966 50 123 4567" />
-              <InfoRow icon={MapPin} label="موقعنا" value="الرياض، المملكة العربية السعودية" />
-            </ul>
-
-            <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-[11px] text-white/70">ساعات العمل</div>
-                  <div className="mt-1 text-sm font-semibold">السبت - الخميس: 9:00 ص - 6:00 م</div>
-                </div>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
-                  <Clock className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <p className="text-[11px] text-white/70">تابعنا على</p>
-              <div className="mt-3 flex items-center gap-2">
-                {[Instagram, Twitter, Linkedin, Facebook].map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
