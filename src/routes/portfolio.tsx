@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import portfolioBg from "@/assets/portfolio-bg.jpg";
 import {
   ArrowLeft, ChevronLeft, ExternalLink, Sparkles, Layout, Smartphone,
-  Megaphone, Palette, Code2, Search, TrendingUp, Star, Award, Briefcase,
+  Megaphone, Palette, Search, Star, Award, Briefcase,
   Users, Globe2, Eye,
 } from "lucide-react";
 
