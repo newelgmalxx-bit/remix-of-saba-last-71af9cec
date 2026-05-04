@@ -132,8 +132,8 @@ export function PortfolioSection() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-white px-6 py-5 text-center md:flex-row md:text-right">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-white px-8 py-6 text-center md:flex-row md:text-right">
+          <div className="order-2 flex flex-wrap items-center gap-3 md:order-1">
             <button className="group inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_-10px_rgba(30,91,148,0.6)] transition-all hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_14px_28px_-10px_rgba(30,91,148,0.7)]">
               ابدأ مشروعك
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -142,12 +142,14 @@ export function PortfolioSection() {
               عرض المزيد
             </button>
           </div>
-          <p className="text-base font-semibold text-foreground">
-            لديك فكرة مشروع؟ <span className="text-primary">نحوّلها لواقع.</span>
-            <span className="block text-sm font-normal text-muted-foreground">
+          <div className="order-1 md:order-2">
+            <p className="text-xl font-extrabold text-foreground sm:text-2xl">
+              لديك فكرة مشروع؟ <span className="text-primary">نحوّلها لواقع.</span>
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
               تواصل معنا اليوم واحصل على استشارة مجانية لمشروعك القادم.
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
       </div>
     </section>
