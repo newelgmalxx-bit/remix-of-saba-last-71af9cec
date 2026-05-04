@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { serviceMap, type ServiceContent } from "@/data/services";
+import { Sparkles } from "lucide-react";
 
 const KEY = "saba_service_overrides_v1";
 
@@ -46,8 +47,8 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
       title: o.title ?? slug,
       subtitle: o.subtitle ?? "",
       heroHighlights: o.heroHighlights ?? [],
-      overview: (o.overview ?? []).map((x) => ({ icon: undefined as any, title: x.title, desc: x.desc })),
-      benefits: (o.benefits ?? []).map((x) => ({ icon: undefined as any, title: x.title, desc: x.desc })),
+      overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
+      benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       plans: o.plans ?? [],
     } as ServiceContent;
   }
