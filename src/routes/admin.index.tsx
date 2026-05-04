@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
-import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Calendar, Bell } from "lucide-react";
+import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
 import { adminStats, monthlyRevenue, salesByCategory, adminBookings, bookingStatusMap, fmtSAR } from "@/data/admin";
+import { useState } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
   PieChart, Pie, Cell,
@@ -13,11 +14,16 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminDashboard() {
+  const [period, setPeriod] = useState("آخر 30 يوم");
+  const filteredRevenue = period === "آخر 7 أيام" ? monthlyRevenue.slice(-2)
+    : period === "آخر 30 يوم" ? monthlyRevenue.slice(-3)
+    : period === "آخر 90 يوم" ? monthlyRevenue.slice(-6)
+    : monthlyRevenue;
   return (
     <AdminLayout title="لوحة التحكم" subtitle="مرحباً بعودتك! إليك نظرة عامة على نشاط الأعمال" action={
-      <button className="hidden sm:inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-xs font-bold">
-        <Calendar className="h-4 w-4" /> آخر 30 يوم
-      </button>
+      <select value={period} onChange={(e) => setPeriod(e.target.value)} className="hidden sm:inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+        <option>آخر 7 أيام</option><option>آخر 30 يوم</option><option>آخر 90 يوم</option><option>كل الفترة</option>
+      </select>
     }>
       {/* Hero card */}
       <div className="rounded-2xl bg-gradient-to-l from-primary to-primary-dark p-6 text-white shadow-md mb-6 relative overflow-hidden">
@@ -71,7 +77,7 @@ function AdminDashboard() {
         <PanelCard title="نظرة عامة على الإيرادات" subtitle="الأداء الشهري" className="lg:col-span-2">
           <div className="h-72">
             <ResponsiveContainer>
-              <AreaChart data={monthlyRevenue}>
+              <AreaChart data={filteredRevenue}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#1E5B94" stopOpacity={0.4} />
