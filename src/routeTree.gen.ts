@@ -23,6 +23,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrackingRouteImport } from './routes/admin.tracking'
 import { Route as AdminSiteRouteImport } from './routes/admin.site'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -31,6 +32,7 @@ import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
 import { Route as AdminPaymentRouteImport } from './routes/admin.payment'
+import { Route as AdminPartnerRouteImport } from './routes/admin.partner'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
@@ -115,6 +117,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTrackingRoute = AdminTrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -153,6 +160,11 @@ const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
 const AdminPaymentRoute = AdminPaymentRouteImport.update({
   id: '/payment',
   path: '/payment',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPartnerRoute = AdminPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
@@ -237,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -245,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -273,6 +287,7 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -281,6 +296,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
@@ -311,6 +327,7 @@ export interface FileRoutesById {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -319,6 +336,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -350,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
     | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
@@ -358,6 +377,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/site'
     | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -386,6 +406,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
     | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
@@ -394,6 +415,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/site'
     | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account'
@@ -423,6 +445,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/invoices'
+    | '/admin/partner'
     | '/admin/payment'
     | '/admin/portfolio'
     | '/admin/reports'
@@ -431,6 +454,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/site'
     | '/admin/tracking'
+    | '/admin/users'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -567,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/tracking': {
       id: '/admin/tracking'
       path: '/tracking'
@@ -621,6 +652,13 @@ declare module '@tanstack/react-router' {
       path: '/payment'
       fullPath: '/admin/payment'
       preLoaderRoute: typeof AdminPaymentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/partner': {
+      id: '/admin/partner'
+      path: '/partner'
+      fullPath: '/admin/partner'
+      preLoaderRoute: typeof AdminPartnerRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/invoices': {
@@ -748,6 +786,7 @@ interface AdminRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminClientsRoute: typeof AdminClientsRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminPartnerRoute: typeof AdminPartnerRoute
   AdminPaymentRoute: typeof AdminPaymentRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
@@ -756,6 +795,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminSiteRoute: typeof AdminSiteRoute
   AdminTrackingRoute: typeof AdminTrackingRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -764,6 +804,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminClientsRoute: AdminClientsRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminPartnerRoute: AdminPartnerRoute,
   AdminPaymentRoute: AdminPaymentRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
@@ -772,6 +813,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminSiteRoute: AdminSiteRoute,
   AdminTrackingRoute: AdminTrackingRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -812,3 +854,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
