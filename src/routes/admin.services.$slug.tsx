@@ -4,6 +4,7 @@ import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components
 import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star, CheckCircle2 } from "lucide-react";
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/services/$slug")({
   head: () => ({ meta: [{ title: "تعديل الخدمة | لوحة التحكم" }] }),
