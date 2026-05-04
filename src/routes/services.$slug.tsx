@@ -375,7 +375,7 @@ function ServiceDetailPage() {
   );
 }
 
-function TestimonialsSlider() {
+function TestimonialsSlider({ testimonials }: { testimonials: { name: string; role: string; text: string }[] }) {
   const [i, setI] = useState(0);
   // group into pairs (2 per slide on md+)
   const pages = Math.ceil(testimonials.length / 2);
