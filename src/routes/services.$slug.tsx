@@ -57,6 +57,9 @@ function ServiceDetailPage() {
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
+  const { add } = useCart();
+  const navigate = useNavigate();
+  const [heroAdded, setHeroAdded] = useState(false);
 
   if (!service) {
     return (
@@ -104,12 +107,26 @@ function ServiceDetailPage() {
                 {subtitle}
               </p>
               <div className="mt-6 flex flex-wrap justify-end gap-3">
-                <button className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5">
-                  اطلب الخدمة الآن
+                <button
+                  onClick={() => {
+                    const featured = plans.find((p) => p.featured) ?? plans[0];
+                    if (!featured) return;
+                    const priceNum = Number(String(featured.price).replace(/[^\d]/g, "")) || 0;
+                    add({ serviceSlug: service.slug, serviceTitle: title, planName: featured.name, price: priceNum });
+                    setHeroAdded(true);
+                    setTimeout(() => navigate({ to: "/cart" as any }), 600);
+                  }}
+                  className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  {heroAdded ? "✓ تمت الإضافة..." : "اطلب الخدمة الآن"}
                 </button>
-                <button className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">
-                  نموذج لأعمالنا
-                </button>
+                <a
+                  href="#plans"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
+                >
+                  استعراض الباقات
+                </a>
               </div>
             </div>
 
@@ -272,7 +289,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* Plans */}
-        <section className="pb-12">
+        <section id="plans" className="scroll-mt-24 pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
                 <div className="text-right">
