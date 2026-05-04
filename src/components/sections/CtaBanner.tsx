@@ -10,8 +10,8 @@ export function CtaBanner() {
           <div className="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
           <div className="relative flex flex-col items-center justify-between gap-8 md:flex-row">
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
-              <Rocket className="h-12 w-12 text-white" />
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center text-white/90">
+              <Rocket className="h-16 w-16" strokeWidth={1.5} />
             </div>
             <div className="flex-1 text-center">
               <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
@@ -22,12 +22,13 @@ export function CtaBanner() {
               </p>
               <Link
                 to={"/contact" as any}
-                className="mt-6 inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-transparent px-7 text-sm font-bold text-white transition hover:bg-white hover:text-primary"
+                className="group mt-6 inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-transparent px-7 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-white hover:text-primary hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)]"
               >
-                اطلب عرض سعر <ArrowLeft className="h-4 w-4" />
+                اطلب عرض سعر
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
               </Link>
             </div>
-            <div className="hidden h-28 w-28 shrink-0 md:block" />
+            <div className="hidden h-24 w-24 shrink-0 md:block" />
           </div>
         </div>
       </div>
