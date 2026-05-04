@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X, Globe } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const navLinks: { to: any; label: string }[] = [
   { to: "/", label: "الرئيسية" },
@@ -17,12 +18,16 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-extrabold">
-            S
-          </div>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src={logo}
+            alt="سابا ديزاين"
+            width={40}
+            height={40}
+            className="h-10 w-10 object-contain transition-transform duration-500 group-hover:rotate-[8deg]"
+          />
           <span className="text-lg font-extrabold tracking-tight text-foreground">
-            سابا ديزاين
+            سابا <span className="text-primary">ديزاين</span>
           </span>
         </Link>
 
