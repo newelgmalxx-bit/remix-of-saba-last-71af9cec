@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import aboutHero from "@/assets/about-hero.jpg";
 import {
   Sparkles, Target, Eye, Heart, Award, Users, Rocket, Globe2,
   Lightbulb, ShieldCheck, Handshake, TrendingUp, ArrowLeft, Quote,
-  Briefcase, Code2, Palette, Megaphone, CheckCircle2,
+  Briefcase, Code2, Palette, Megaphone, CheckCircle2, Star, Zap, Layers,
 } from "lucide-react";
 
 const stats = [
@@ -28,11 +29,22 @@ const services = [
   { icon: Rocket, title: "إطلاق المنتجات الرقمية" },
 ];
 
-const team = [
-  { name: "أحمد الراشد", role: "المؤسس والمدير التنفيذي", initial: "أ" },
-  { name: "سارة المنصوري", role: "مديرة الإبداع", initial: "س" },
-  { name: "محمد الزهراني", role: "رئيس قسم التطوير", initial: "م" },
-  { name: "ليلى العتيبي", role: "مديرة استراتيجية التسويق", initial: "ل" },
+const process = [
+  { icon: Lightbulb, title: "الاكتشاف", desc: "نفهم عملك، عملاءك، وأهدافك بعمق قبل أي خط أو كود." },
+  { icon: Layers, title: "التصميم", desc: "نحوّل الرؤية إلى واجهات بصرية أنيقة ومدروسة بدقة." },
+  { icon: Code2, title: "التطوير", desc: "نبني المنتج بأحدث التقنيات مع التركيز على الأداء والأمان." },
+  { icon: Rocket, title: "الإطلاق والنمو", desc: "نطلق مشروعك ونواكبه بالتحسينات والدعم المستمر." },
+];
+
+const testimonials = [
+  { name: "خالد العبدالله", role: "مدير عام، شركة تك ستارت", quote: "تجربة استثنائية. الفريق فهم رؤيتنا من أول اجتماع وقدّم نتيجة فاقت توقعاتنا بمراحل." },
+  { name: "نورة السالم", role: "مؤسسة، علامة نمط", quote: "احترافية في كل تفصيلة، التزام بالمواعيد، وذوق راقي. سابا ديزاين شريك حقيقي وليس مجرد مزود خدمة." },
+  { name: "عبدالرحمن المالكي", role: "مدير تسويق، مجموعة الأفق", quote: "حصلنا على هوية رقمية رفعت من قيمة علامتنا التجارية وضاعفت معدل التحويل بشكل ملموس." },
+];
+
+const tools = [
+  "Figma", "React", "Next.js", "Webflow", "Shopify",
+  "TypeScript", "Node.js", "Tailwind", "Framer", "Adobe",
 ];
 
 const journey = [
@@ -142,20 +154,20 @@ function AboutPage() {
 
             <div className="relative order-1 lg:order-2">
               <div className="relative aspect-square overflow-hidden rounded-3xl shadow-lg">
+                <img src={aboutHero} alt="منصة سابا ديزاين الرقمية" className="absolute inset-0 h-full w-full object-cover" />
                 <div
                   className="absolute inset-0"
-                  style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}
+                  style={{ background: "linear-gradient(180deg, rgba(30,91,148,0) 30%, rgba(15,40,75,0.85) 100%)" }}
                 />
-                <div className="absolute inset-0 bg-grid opacity-30" />
-                <div className="relative flex h-full flex-col items-center justify-center p-10 text-white">
-                  <Quote className="mb-6 h-12 w-12 opacity-40" />
-                  <p className="text-center text-2xl font-bold leading-relaxed">
+                <div className="relative flex h-full flex-col justify-end p-8 text-white md:p-10">
+                  <Quote className="mb-4 h-10 w-10 opacity-70" />
+                  <p className="text-xl font-bold leading-relaxed md:text-2xl">
                     "نحن لا نصمم مواقع.
                     <br />
                     نصنع تجارب رقمية يتذكرها الناس."
                   </p>
-                  <div className="mt-8 h-0.5 w-16 bg-white/60" />
-                  <span className="mt-3 text-sm text-white/80">— فلسفة سابا ديزاين</span>
+                  <div className="mt-5 h-0.5 w-16 bg-white/70" />
+                  <span className="mt-2 text-sm text-white/85">— فلسفة سابا ديزاين</span>
                 </div>
               </div>
               <div className="absolute -bottom-6 -left-6 hidden h-32 w-32 rounded-2xl border-4 border-background bg-white p-4 shadow-lg lg:block">
@@ -253,29 +265,84 @@ function AboutPage() {
           </div>
         </section>
 
-        {/* TEAM */}
+        {/* PROCESS */}
         <section className="mx-auto max-w-7xl px-4 py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">الفريق</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">منهجيتنا</span>
             <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-              العقول التي تصنع الفرق
+              كيف نعمل من الفكرة إلى الإطلاق
             </h2>
-            <p className="mt-4 text-muted-foreground">فريق متعدد التخصصات يجمع بين الإبداع، التقنية، والاستراتيجية.</p>
+            <p className="mt-4 text-muted-foreground">منهجية واضحة بأربع مراحل تضمن تسليماً ناجحاً ونتائج تستمر.</p>
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((m) => (
-              <div key={m.name} className="group overflow-hidden rounded-3xl border border-border bg-white text-center transition hover:-translate-y-1 hover:shadow-lg">
-                <div className="relative h-44 overflow-hidden" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
-                  <div className="absolute inset-0 bg-grid opacity-30" />
-                  <div className="relative flex h-full items-center justify-center text-6xl font-extrabold text-white/95">
-                    {m.initial}
+          <div className="relative mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {process.map((p, i) => (
+              <div key={p.title} className="group relative rounded-3xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
+                    <p.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-4xl font-extrabold text-primary/10 transition group-hover:text-primary/20">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="mt-5 text-lg font-extrabold text-foreground">{p.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* TESTIMONIALS */}
+        <section className="bg-secondary/30 py-24">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
+              <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
+                ما يقوله من عملوا معنا
+              </h2>
+            </div>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {testimonials.map((t) => (
+                <div key={t.name} className="relative rounded-3xl border border-border bg-background p-7 shadow-sm transition hover:shadow-md">
+                  <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/15" />
+                  <div className="flex gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
+                  <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-extrabold text-foreground">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.role}</div>
+                    </div>
                   </div>
                 </div>
-                <div className="p-5">
-                  <h3 className="text-base font-extrabold text-foreground">{m.name}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{m.role}</p>
-                </div>
-              </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TOOLS / TECH */}
+        <section className="mx-auto max-w-7xl px-4 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">أدواتنا</span>
+            <h2 className="mt-3 text-2xl font-extrabold text-foreground md:text-3xl">
+              تقنيات عالمية في يد فريق محترف
+            </h2>
+          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {tools.map((t) => (
+              <span
+                key={t}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:border-primary hover:text-primary"
+              >
+                <Zap className="h-3.5 w-3.5 text-primary" />
+                {t}
+              </span>
             ))}
           </div>
         </section>
