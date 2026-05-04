@@ -170,12 +170,32 @@ function CheckoutPage() {
                             </span>
                           )}
                           <div className="flex items-center gap-3">
-                            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${active ? "bg-primary text-white" : "bg-primary-light text-primary"}`}>
-                              <Icon className="h-5 w-5" />
+                            <div className={`flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl ${m.logo ? "bg-white border border-border p-1" : active ? "bg-primary text-white" : "bg-primary-light text-primary"}`}>
+                              {m.logo ? (
+                                <img src={m.logo} alt={m.name} className="max-h-8 w-auto object-contain" />
+                              ) : (
+                                <Icon className="h-5 w-5" />
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-bold">{m.name}</div>
                               <div className="text-xs text-muted-foreground">{m.desc}</div>
+                              {m.brands && (
+                                <div className="mt-2 flex items-center gap-1.5">
+                                  {m.brands.map((b) =>
+                                    b.logo ? (
+                                      <span key={b.name} className="inline-flex h-6 items-center rounded-md border border-border bg-white px-1.5">
+                                        <img src={b.logo} alt={b.name} className="h-4 w-auto object-contain" />
+                                      </span>
+                                    ) : (
+                                      <span key={b.name} className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-white px-2 text-[10px] font-bold text-foreground/70">
+                                        {b.icon && <b.icon className="h-3 w-3" />}
+                                        {b.name}
+                                      </span>
+                                    ),
+                                  )}
+                                </div>
+                              )}
                             </div>
                             <div
                               className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
