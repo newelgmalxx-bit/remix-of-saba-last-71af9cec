@@ -206,6 +206,69 @@ function ServiceEditorPage() {
         </PanelCard>
 
         {/* Mobile actions */}
+        {/* Steps */}
+        <PanelCard title="خطوات العمل" action={
+          <button onClick={() => setSteps([...steps, { title: "" }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة خطوة</button>
+        }>
+          <div className="grid gap-3 md:grid-cols-2">
+            {steps.map((s, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary text-xs font-bold">{i + 1}</span>
+                <input className={inputCls} value={s.title} onChange={(e) => { const n = [...steps]; n[i] = { title: e.target.value }; setSteps(n); }} />
+                <button onClick={() => setSteps(steps.filter((_, x) => x !== i))} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-rose-500 hover:bg-rose-50"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
+
+        {/* Stats */}
+        <PanelCard title="أرقام تعكس الثقة" action={
+          <button onClick={() => setStats([...stats, { v: "", l: "" }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة رقم</button>
+        }>
+          <div className="grid gap-3 md:grid-cols-2">
+            {stats.map((s, i) => (
+              <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-end">
+                <Field label="القيمة"><input className={inputCls} value={s.v} onChange={(e) => { const n = [...stats]; n[i] = { ...n[i], v: e.target.value }; setStats(n); }} /></Field>
+                <Field label="الوصف"><input className={inputCls} value={s.l} onChange={(e) => { const n = [...stats]; n[i] = { ...n[i], l: e.target.value }; setStats(n); }} /></Field>
+                <button onClick={() => setStats(stats.filter((_, x) => x !== i))} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-rose-500 hover:bg-rose-50"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
+
+        {/* Testimonials */}
+        <PanelCard title="آراء العملاء" action={
+          <button onClick={() => setTestimonials([...testimonials, { name: "", role: "", text: "" }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة رأي</button>
+        }>
+          <div className="grid gap-4 md:grid-cols-2">
+            {testimonials.map((t, i) => (
+              <div key={i} className="rounded-xl border border-border p-4 space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="الاسم"><input className={inputCls} value={t.name} onChange={(e) => { const n = [...testimonials]; n[i] = { ...n[i], name: e.target.value }; setTestimonials(n); }} /></Field>
+                  <Field label="المسمى"><input className={inputCls} value={t.role} onChange={(e) => { const n = [...testimonials]; n[i] = { ...n[i], role: e.target.value }; setTestimonials(n); }} /></Field>
+                </div>
+                <Field label="النص"><textarea rows={2} className={inputCls} value={t.text} onChange={(e) => { const n = [...testimonials]; n[i] = { ...n[i], text: e.target.value }; setTestimonials(n); }} /></Field>
+                <button onClick={() => setTestimonials(testimonials.filter((_, x) => x !== i))} className="text-xs text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
+
+        {/* FAQs */}
+        <PanelCard title="الأسئلة الشائعة" action={
+          <button onClick={() => setFaqs([...faqs, { q: "", a: "" }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة سؤال</button>
+        }>
+          <div className="space-y-3">
+            {faqs.map((f, i) => (
+              <div key={i} className="rounded-xl border border-border p-4 space-y-3">
+                <Field label="السؤال"><input className={inputCls} value={f.q} onChange={(e) => { const n = [...faqs]; n[i] = { ...n[i], q: e.target.value }; setFaqs(n); }} /></Field>
+                <Field label="الإجابة"><textarea rows={2} className={inputCls} value={f.a} onChange={(e) => { const n = [...faqs]; n[i] = { ...n[i], a: e.target.value }; setFaqs(n); }} /></Field>
+                <button onClick={() => setFaqs(faqs.filter((_, x) => x !== i))} className="text-xs text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
+
         <div className="flex sm:hidden gap-2 sticky bottom-4">
           <GhostButton onClick={handleReset}><RotateCcw className="h-4 w-4" /> استعادة</GhostButton>
           <PrimaryButton onClick={handleSave}><Save className="h-4 w-4" /> حفظ</PrimaryButton>
