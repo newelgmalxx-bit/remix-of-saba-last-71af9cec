@@ -114,12 +114,15 @@ function ServicesPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
               <h2 className="text-center text-2xl font-extrabold text-foreground">كيف نعمل</h2>
-              <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-5">
+              <div className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-5">
                 {steps.map((s) => (
-                  <div key={s.n} className="relative flex flex-col items-center text-center">
+                  <div
+                    key={s.n}
+                    className="group relative flex flex-col items-center rounded-2xl border border-border bg-secondary/30 p-6 text-center transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-white hover:shadow-md"
+                  >
                     <div className="relative">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
-                        <s.icon className="h-5 w-5" />
+                      <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-light text-primary transition group-hover:bg-primary group-hover:text-white">
+                        <s.icon className="h-6 w-6" />
                       </span>
                       <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white shadow">
                         {s.n}
