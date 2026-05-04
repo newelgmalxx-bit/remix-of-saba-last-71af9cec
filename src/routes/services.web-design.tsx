@@ -385,43 +385,53 @@ function ServiceDetailPage() {
 
 function TestimonialsSlider() {
   const [i, setI] = useState(0);
-  const total = testimonials.length;
-  const prev = () => setI((v) => (v - 1 + total) % total);
-  const next = () => setI((v) => (v + 1) % total);
+  // group into pairs (2 per slide on md+)
+  const pages = Math.ceil(testimonials.length / 2);
+  const prev = () => setI((v) => (v - 1 + pages) % pages);
+  const next = () => setI((v) => (v + 1) % pages);
 
   return (
     <div className="mt-6">
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-secondary/30">
+      <div className="relative overflow-hidden">
         <div
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(${i * 100}%)` }}
         >
-          {testimonials.map((t) => (
-            <div key={t.name} className="w-full shrink-0 p-8 text-right">
-              <div className="flex justify-end gap-0.5 text-amber-400">
-                {Array.from({ length: 5 }).map((_, k) => (
-                  <Star key={k} className="h-4 w-4 fill-current" />
-                ))}
+          {Array.from({ length: pages }).map((_, p) => {
+            const pair = testimonials.slice(p * 2, p * 2 + 2);
+            return (
+              <div key={p} className="w-full shrink-0">
+                <div className="grid grid-cols-1 gap-4 px-1 md:grid-cols-2">
+                  {pair.map((t) => (
+                    <div key={t.name} className="rounded-2xl border border-border/60 bg-white p-6 text-right shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
+                      <div className="flex justify-end gap-0.5 text-amber-400">
+                        {Array.from({ length: 5 }).map((_, k) => (
+                          <Star key={k} className="h-4 w-4 fill-current" />
+                        ))}
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-foreground/80">"{t.text}"</p>
+                      <div className="mt-4 text-xs">
+                        <div className="font-bold text-foreground">{t.name}</div>
+                        <div className="text-muted-foreground">{t.role}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="mt-4 text-base leading-8 text-foreground/80">"{t.text}"</p>
-              <div className="mt-5 text-xs">
-                <div className="font-bold text-foreground">{t.name}</div>
-                <div className="text-muted-foreground">{t.role}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="mt-5 flex items-center justify-between">
         <button
           onClick={prev}
           aria-label="السابق"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary hover:text-primary"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-1.5">
-          {testimonials.map((_, k) => (
+          {Array.from({ length: pages }).map((_, k) => (
             <button
               key={k}
               onClick={() => setI(k)}
@@ -433,7 +443,7 @@ function TestimonialsSlider() {
         <button
           onClick={next}
           aria-label="التالي"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
