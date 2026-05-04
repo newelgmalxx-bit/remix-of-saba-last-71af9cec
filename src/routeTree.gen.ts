@@ -48,9 +48,9 @@ const ServicesIndexRoute = ServicesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesWebDesignRoute = ServicesWebDesignRouteImport.update({
-  id: '/web-design',
-  path: '/web-design',
-  getParentRoute: () => ServicesRoute,
+  id: '/services/web-design',
+  path: '/services/web-design',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -117,6 +117,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   PortfolioRoute: typeof PortfolioRoute
+  ServicesWebDesignRoute: typeof ServicesWebDesignRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
@@ -166,10 +167,10 @@ declare module '@tanstack/react-router' {
     }
     '/services/web-design': {
       id: '/services/web-design'
-      path: '/web-design'
+      path: '/services/web-design'
       fullPath: '/services/web-design'
       preLoaderRoute: typeof ServicesWebDesignRouteImport
-      parentRoute: typeof ServicesRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -180,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   PortfolioRoute: PortfolioRoute,
+  ServicesWebDesignRoute: ServicesWebDesignRoute,
   ServicesIndexRoute: ServicesIndexRoute,
 }
 export const routeTree = rootRouteImport
