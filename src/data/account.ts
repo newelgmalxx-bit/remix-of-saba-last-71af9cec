@@ -4,6 +4,8 @@ import tabbyLogo from "@/assets/pay-tabby.webp";
 import tamaraLogo from "@/assets/pay-tamara.png";
 import madaLogo from "@/assets/pay-mada.png";
 import applePayLogo from "@/assets/pay-applepay.png";
+import visaLogo from "@/assets/pay-visa.webp";
+import mastercardLogo from "@/assets/pay-mastercard.png";
 
 export type PaymentMethod = "tabby" | "tamara" | "mada" | "mayfatoorah" | "cod";
 
@@ -25,8 +27,8 @@ export const paymentMethods: {
     desc: "فيزا، ماستر كارد، وApple Pay",
     icon: Banknote,
     brands: [
-      { name: "Visa", icon: CreditCard },
-      { name: "Mastercard", icon: CreditCard },
+      { name: "Visa", logo: visaLogo },
+      { name: "Mastercard", logo: mastercardLogo },
       { name: "Apple Pay", logo: applePayLogo },
     ],
   },
