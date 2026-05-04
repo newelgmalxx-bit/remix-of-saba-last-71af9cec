@@ -66,6 +66,13 @@ export function PortfolioSection() {
     <section className="bg-secondary/40 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-end">
+          <div className="text-center md:text-right">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary">نماذج الأعمال</span>
+            <h2 className="mt-2 text-3xl font-extrabold text-foreground sm:text-4xl">
+              مشاريع نفخر بها وعملاء يثقون بنا
+            </h2>
+            <div className="mt-3 h-1 w-16 rounded-full bg-primary/70" />
+          </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {tabs.map((t) => (
               <button
@@ -80,13 +87,6 @@ export function PortfolioSection() {
                 {t}
               </button>
             ))}
-          </div>
-          <div className="text-center md:text-right">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-primary">نماذج الأعمال</span>
-            <h2 className="mt-2 text-3xl font-extrabold text-foreground sm:text-4xl">
-              مشاريع نفخر بها وعملاء يثقون بنا
-            </h2>
-            <div className="ms-auto mt-3 h-1 w-16 rounded-full bg-primary/70" />
           </div>
         </div>
 
