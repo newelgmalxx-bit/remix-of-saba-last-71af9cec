@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, LogIn } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const navLinks: { to: any; label: string }[] = [
@@ -49,8 +49,9 @@ export function SiteHeader() {
           </button>
           <Link
             to={"/login" as any}
-            className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary-dark"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
           >
+            <LogIn className="h-4 w-4" />
             تسجيل الدخول
           </Link>
         </div>
