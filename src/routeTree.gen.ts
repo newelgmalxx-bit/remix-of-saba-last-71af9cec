@@ -38,6 +38,7 @@ import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as AdminServicesIndexRouteImport } from './routes/admin.services.index'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
 import { Route as AdminSettingsTeamRouteImport } from './routes/admin.settings.team'
@@ -195,6 +196,11 @@ const AccountProfileRoute = AccountProfileRouteImport.update({
   path: '/account/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminServicesIndexRoute = AdminServicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminServicesRoute,
+} as any)
 const AccountTicketsIndexRoute = AccountTicketsIndexRouteImport.update({
   id: '/account/tickets/',
   path: '/account/tickets/',
@@ -294,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
+  '/admin/services/': typeof AdminServicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -314,7 +321,6 @@ export interface FileRoutesByTo {
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/seo': typeof AdminSeoRoute
-  '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
@@ -335,6 +341,7 @@ export interface FileRoutesByTo {
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders': typeof AccountOrdersIndexRoute
   '/account/tickets': typeof AccountTicketsIndexRoute
+  '/admin/services': typeof AdminServicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -378,6 +385,7 @@ export interface FileRoutesById {
   '/admin/settings/team': typeof AdminSettingsTeamRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
+  '/admin/services/': typeof AdminServicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -422,6 +430,7 @@ export interface FileRouteTypes {
     | '/admin/settings/team'
     | '/account/orders/'
     | '/account/tickets/'
+    | '/admin/services/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -442,7 +451,6 @@ export interface FileRouteTypes {
     | '/admin/portfolio'
     | '/admin/reports'
     | '/admin/seo'
-    | '/admin/services'
     | '/admin/settings'
     | '/admin/site'
     | '/admin/tracking'
@@ -463,6 +471,7 @@ export interface FileRouteTypes {
     | '/admin/settings/team'
     | '/account/orders'
     | '/account/tickets'
+    | '/admin/services'
   id:
     | '__root__'
     | '/'
@@ -505,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/settings/team'
     | '/account/orders/'
     | '/account/tickets/'
+    | '/admin/services/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -733,6 +743,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/services/': {
+      id: '/admin/services/'
+      path: '/'
+      fullPath: '/admin/services/'
+      preLoaderRoute: typeof AdminServicesIndexRouteImport
+      parentRoute: typeof AdminServicesRoute
+    }
     '/account/tickets/': {
       id: '/account/tickets/'
       path: '/account/tickets'
@@ -815,10 +832,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminServicesRouteChildren {
   AdminServicesSlugRoute: typeof AdminServicesSlugRoute
+  AdminServicesIndexRoute: typeof AdminServicesIndexRoute
 }
 
 const AdminServicesRouteChildren: AdminServicesRouteChildren = {
   AdminServicesSlugRoute: AdminServicesSlugRoute,
+  AdminServicesIndexRoute: AdminServicesIndexRoute,
 }
 
 const AdminServicesRouteWithChildren = AdminServicesRoute._addFileChildren(
