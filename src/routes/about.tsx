@@ -313,7 +313,7 @@ function AboutPage() {
             {tools.map((t) => (
               <span
                 key={t}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:border-primary hover:text-primary"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
               >
                 <Zap className="h-3.5 w-3.5 text-primary" />
                 {t}
@@ -357,7 +357,7 @@ function AboutPage() {
                   { v: "100%", l: "ضمان الجودة" },
                   { v: "+50", l: "خبير في الفريق" },
                 ].map((b) => (
-                  <div key={b.l} className="rounded-3xl border border-border bg-background p-6 text-center shadow-sm">
+                  <div key={b.l} className="card-hover rounded-3xl border border-border bg-background p-6 text-center shadow-sm">
                     <div className="text-3xl font-extrabold text-gradient-primary">{b.v}</div>
                     <div className="mt-2 text-xs font-bold text-muted-foreground">{b.l}</div>
                   </div>
