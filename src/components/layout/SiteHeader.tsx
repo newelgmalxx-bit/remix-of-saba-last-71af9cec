@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X, Globe } from "lucide-react";
 
-const navLinks = [
+const navLinks: { to: any; label: string }[] = [
   { to: "/", label: "الرئيسية" },
   { to: "/services", label: "خدماتنا" },
   { to: "/portfolio", label: "أعمالنا" },
@@ -46,7 +46,7 @@ export function SiteHeader() {
             <Globe className="h-3.5 w-3.5" /> EN
           </button>
           <Link
-            to="/login"
+            to={"/login" as any}
             className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary-dark"
           >
             تسجيل الدخول
@@ -77,7 +77,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              to="/login"
+              to={"/login" as any}
               onClick={() => setOpen(false)}
               className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
             >
