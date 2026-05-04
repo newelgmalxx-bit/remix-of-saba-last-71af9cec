@@ -8,7 +8,6 @@ const navLinks: { to: any; label: string }[] = [
   { to: "/services", label: "خدماتنا" },
   { to: "/portfolio", label: "أعمالنا" },
   { to: "/about", label: "من نحن" },
-  { to: "/blog", label: "المدونة" },
   { to: "/contact", label: "تواصل" },
 ];
 
@@ -35,8 +34,8 @@ export function SiteHeader() {
               key={l.to}
               to={l.to}
               activeOptions={{ exact: l.to === "/" }}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
-              activeProps={{ className: "text-primary font-bold" }}
+              className="relative py-1 text-sm font-medium text-foreground/80 transition-colors hover:text-primary after:absolute after:inset-x-0 after:-bottom-2 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100"
+              activeProps={{ className: "text-primary font-bold after:scale-x-100" }}
             >
               {l.label}
             </Link>
