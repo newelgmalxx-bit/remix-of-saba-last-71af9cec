@@ -150,13 +150,14 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
 
 /* === Reusable bits === */
 
-export function StatCard({ label, value, hint, icon: Icon, accent = "primary" }: { label: string; value: React.ReactNode; hint?: React.ReactNode; icon: any; accent?: "primary" | "emerald" | "amber" | "rose" | "violet" }) {
+export function StatCard({ label, value, hint, icon: Icon, accent = "primary" }: { label: string; value: React.ReactNode; hint?: React.ReactNode; icon: any; accent?: "primary" | "emerald" | "amber" | "rose" | "violet" | "muted" }) {
   const tones: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
     emerald: "bg-emerald-100 text-emerald-700",
     amber: "bg-amber-100 text-amber-700",
     rose: "bg-rose-100 text-rose-600",
     violet: "bg-violet-100 text-violet-700",
+    muted: "bg-muted text-foreground/70",
   };
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
