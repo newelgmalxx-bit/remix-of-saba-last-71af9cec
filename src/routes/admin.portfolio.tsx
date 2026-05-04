@@ -3,6 +3,9 @@ import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton } from "@/compone
 import { ImageIcon, Eye, EyeOff, Tag, Plus, Search, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { adminPortfolio } from "@/data/admin";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { GhostButton } from "@/components/admin/AdminLayout";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/portfolio")({
   head: () => ({ meta: [{ title: "أعمالنا | لوحة التحكم" }] }),
@@ -12,14 +15,37 @@ export const Route = createFileRoute("/admin/portfolio")({
 function PortfolioPage() {
   const [items, setItems] = useState(adminPortfolio);
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const empty = { titleAr: "", titleEn: "", category: "", image: "🎨", link: "#", visible: true };
+  const [form, setForm] = useState(empty);
+
   const filtered = items.filter(i => i.titleAr.includes(q) || i.titleEn.toLowerCase().includes(q.toLowerCase()));
   const toggle = (id: string) => setItems(items.map(i => i.id === id ? { ...i, visible: !i.visible } : i));
+  const remove = (id: string) => { setItems(items.filter(i => i.id !== id)); toast.success("تم الحذف"); };
+  const openAdd = () => { setEditId(null); setForm(empty); setOpen(true); };
+  const openEdit = (id: string) => {
+    const it = items.find(i => i.id === id); if (!it) return;
+    setEditId(id); setForm({ titleAr: it.titleAr, titleEn: it.titleEn, category: it.category, image: it.image, link: it.link, visible: it.visible });
+    setOpen(true);
+  };
+  const handleSave = () => {
+    if (!form.titleAr) { toast.error("العنوان مطلوب"); return; }
+    if (editId) {
+      setItems(items.map(i => i.id === editId ? { ...i, ...form } : i));
+      toast.success("تم التحديث");
+    } else {
+      setItems([{ id: "p" + (items.length + 1 + Date.now()), ...form }, ...items]);
+      toast.success("تم إضافة العمل");
+    }
+    setOpen(false);
+  };
 
   const visible = items.filter(i => i.visible).length;
   const cats = new Set(items.map(i => i.category)).size;
 
   return (
-    <AdminLayout title="أعمالنا" subtitle="إدارة معرض الأعمال والمشاريع" action={<PrimaryButton><Plus className="h-4 w-4" /> إضافة عمل</PrimaryButton>}>
+    <AdminLayout title="أعمالنا" subtitle="إدارة معرض الأعمال والمشاريع" action={<PrimaryButton onClick={openAdd}><Plus className="h-4 w-4" /> إضافة عمل</PrimaryButton>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard label="إجمالي الأعمال" value={items.length} icon={ImageIcon} accent="primary" />
         <StatCard label="منشورة" value={visible} icon={Eye} accent="emerald" />
@@ -66,8 +92,8 @@ function PortfolioPage() {
                   </td>
                   <td className="px-3 py-3">
                     <div className="flex gap-1">
-                      <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Edit className="h-4 w-4" /></button>
-                      <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={() => openEdit(i.id)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Edit className="h-4 w-4" /></button>
+                      <button onClick={() => remove(i.id)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -76,6 +102,38 @@ function PortfolioPage() {
           </table>
         </div>
       </PanelCard>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader><DialogTitle>{editId ? "تعديل عمل" : "إضافة عمل جديد"}</DialogTitle></DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs font-bold space-y-1.5">العنوان (عربي)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">العنوان (English)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">التصنيف
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">الأيقونة (Emoji)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">الرابط
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+              </label>
+            </div>
+            <label className="flex items-center gap-2 text-xs font-bold">
+              <input type="checkbox" checked={form.visible} onChange={(e) => setForm({ ...form, visible: e.target.checked })} /> ظاهر للعرض
+            </label>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setOpen(false)}>إلغاء</GhostButton>
+            <PrimaryButton onClick={handleSave}>{editId ? "حفظ" : "إضافة"}</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
