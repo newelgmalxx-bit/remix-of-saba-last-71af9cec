@@ -4,7 +4,7 @@ import {
   CheckCircle2, Circle, FileText, Receipt,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { mockOrders, statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, mockUser } from "@/data/account";
+import { mockOrders, statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, mockUser, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/account/orders/$orderId")({
 });
 
 function OrderDetail() {
-  const { order } = Route.useLoaderData();
+  const { order } = Route.useLoaderData() as { order: Order };
   const s = statusLabels[order.status];
   const PayIcon = paymentIcon(order.payment);
   const currentIdx = statusFlow.indexOf(order.status);
