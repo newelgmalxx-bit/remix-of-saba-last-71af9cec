@@ -164,7 +164,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                     );
                   })}
                 </div>
-                <Link to="/admin/settings/notifications" className="block border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">عرض كل الإشعارات</Link>
+                <button className="block w-full border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">عرض كل الإشعارات</button>
               </PopoverContent>
             </Popover>
             <div className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5">
