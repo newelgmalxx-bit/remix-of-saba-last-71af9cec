@@ -289,7 +289,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* Plans */}
-        <section className="pb-12">
+        <section id="plans" className="scroll-mt-24 pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
                 <div className="text-right">
