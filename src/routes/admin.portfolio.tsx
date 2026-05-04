@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { ImageIcon, Eye, EyeOff, Tag, Plus, Search, Edit, Trash2, X } from "lucide-react";
+import { ImageIcon, Eye, EyeOff, Tag, Plus, Search, Edit, Trash2, X, Upload } from "lucide-react";
 import { useState } from "react";
 import { adminPortfolio, portfolioCategories, type AdminPortfolio } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -28,6 +28,14 @@ function PortfolioPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(empty);
   const [techInput, setTechInput] = useState("");
+
+  const onPickFile = (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, cover: String(reader.result) }));
+    reader.readAsDataURL(file);
+  };
 
   const filtered = items.filter(i => i.titleAr.includes(q) || i.titleEn.toLowerCase().includes(q.toLowerCase()));
   const toggle = (id: string) => setItems(items.map(i => i.id === id ? { ...i, visible: !i.visible } : i));
@@ -152,9 +160,17 @@ function PortfolioPage() {
               <label className="text-xs font-bold space-y-1.5 block">السنة
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 block col-span-2">رابط الصورة
-                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="https://..." value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
-              </label>
+              <div className="col-span-2 space-y-2">
+                <div className="text-xs font-bold">صورة الغلاف</div>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
+                    <Upload className="h-3.5 w-3.5" /> رفع من الجهاز
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
+                  </label>
+                  <input className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-xs" placeholder="أو ألصق رابط https://..." value={form.cover.startsWith("data:") ? "" : form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
+                  {form.cover && <button type="button" onClick={() => setForm({ ...form, cover: "" })} className="text-xs text-rose-600 font-bold">حذف</button>}
+                </div>
+              </div>
               {form.cover && <img src={form.cover} alt="معاينة" className="col-span-2 h-40 w-full rounded-lg object-cover border border-border" />}
               <label className="text-xs font-bold space-y-1.5 block col-span-2">وصف العمل
                 <textarea rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
