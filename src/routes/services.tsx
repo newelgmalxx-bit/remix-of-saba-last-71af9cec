@@ -100,9 +100,12 @@ function ServicesPage() {
                   </div>
                   <h3 className="text-sm font-bold text-foreground">{s.title}</h3>
                   <p className="mt-2 text-xs leading-6 text-muted-foreground">{s.desc}</p>
-                  <button className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-secondary/60 px-4 py-2 text-[11px] font-bold text-primary transition hover:bg-primary hover:text-white">
+                  <Link
+                    to={"/services/web-design" as any}
+                    className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-secondary/60 px-4 py-2 text-[11px] font-bold text-primary transition hover:bg-primary hover:text-white"
+                  >
                     عرض التفاصيل <ArrowLeft className="h-3 w-3" />
-                  </button>
+                  </Link>
                 </div>
               ))}
             </div>
