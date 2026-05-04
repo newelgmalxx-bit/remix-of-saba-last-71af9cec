@@ -1,5 +1,5 @@
 import { Link, useRouterState, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
