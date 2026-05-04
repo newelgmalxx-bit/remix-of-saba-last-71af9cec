@@ -33,17 +33,17 @@ export function HeroSection() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 to={"/contact" as any}
-                className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
+                className="group inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-8px_rgba(30,91,148,0.55)] transition-all hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_16px_36px_-10px_rgba(30,91,148,0.7)]"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 ابدأ مشروعك الآن
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
               </Link>
               <Link
                 to={"/services" as any}
-                className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-white px-7 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
+                className="group inline-flex h-12 items-center gap-2 rounded-full border border-border bg-white px-7 text-sm font-bold text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-4 w-4 transition-transform group-hover:rotate-6" />
                 تصفح خدماتنا
               </Link>
             </div>
