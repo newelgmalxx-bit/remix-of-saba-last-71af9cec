@@ -18,7 +18,26 @@ function ServicesPage() {
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
   const [items, setItems] = useState<AdminService[]>(initialServices);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "" });
+  const [form, setForm] = useState({
+    titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
+    subtitle: "", breadcrumb: "",
+    heroHighlights: ["", "", ""],
+    overview: [
+      { title: "لمن هذه الخدمة", desc: "" },
+      { title: "لماذا تهم؟", desc: "" },
+      { title: "القيمة الأساسية", desc: "" },
+    ],
+    benefits: [
+      { title: "", desc: "" },
+      { title: "", desc: "" },
+      { title: "", desc: "" },
+    ],
+    plans: [
+      { name: "Basic", price: "", featured: false, feats: [""] },
+      { name: "Pro", price: "", featured: true, feats: [""] },
+      { name: "Premium", price: "", featured: false, feats: [""] },
+    ],
+  });
   const navigate = useNavigate();
 
   const filtered = items.filter(s =>
@@ -38,7 +57,6 @@ function ServicesPage() {
     };
     setItems([newSvc, ...items]);
     setOpen(false);
-    setForm({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "" });
     // Seed a custom override so the editor & public page can render this new service
     try {
       const KEY = "saba_service_overrides_v1";
@@ -47,13 +65,15 @@ function ServicesPage() {
       store[slug] = {
         isCustom: true,
         title: newSvc.titleAr,
-        subtitle: "",
+        subtitle: form.subtitle,
         category: newSvc.category,
-        breadcrumb: newSvc.titleAr,
-        heroHighlights: [],
-        overview: [{ title: "نظرة عامة", desc: "" }],
-        benefits: [{ title: "ميزة 1", desc: "" }],
-        plans: [{ name: "Basic", price: String(newSvc.price), featured: false, feats: [] }],
+        breadcrumb: form.breadcrumb || newSvc.titleAr,
+        heroHighlights: form.heroHighlights.filter(h => h.trim()),
+        overview: form.overview.filter(o => o.title.trim()),
+        benefits: form.benefits.filter(b => b.title.trim()),
+        plans: form.plans
+          .filter(p => p.name.trim())
+          .map(p => ({ ...p, feats: p.feats.filter(f => f.trim()) })),
       };
       localStorage.setItem(KEY, JSON.stringify(store));
     } catch {}
@@ -151,10 +171,12 @@ function ServicesPage() {
       </PanelCard>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent dir="rtl">
+        <DialogContent dir="rtl" className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>إضافة خدمة جديدة</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground -mt-2">بعد الإضافة سيتم نقلك لمحرر التفاصيل لإكمال الوصف والباقات والمميزات.</p>
-          <div className="grid gap-3">
+          <p className="text-xs text-muted-foreground -mt-2">املأ كل تفاصيل الخدمة. يمكنك التعديل لاحقًا من محرر التفاصيل.</p>
+          <div className="grid gap-5">
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">المعلومات الأساسية</div>
             <div className="grid grid-cols-2 gap-3">
               <label className="text-xs font-bold space-y-1.5">الاسم (عربي)
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
@@ -174,7 +196,71 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">المعرّف (slug — اختياري)
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
+              <label className="text-xs font-bold space-y-1.5">المسار (Breadcrumb)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.breadcrumb} onChange={(e) => setForm({ ...form, breadcrumb: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">الوصف المختصر
+                <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+              </label>
             </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">نقاط الـ Hero (3 نقاط)</div>
+              <div className="space-y-2">
+                {form.heroHighlights.map((h, i) => (
+                  <input key={i} placeholder={`نقطة ${i + 1}`} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={h} onChange={(e) => { const n = [...form.heroHighlights]; n[i] = e.target.value; setForm({ ...form, heroHighlights: n }); }} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">نظرة عامة (3 بطاقات)</div>
+              <div className="grid gap-3 md:grid-cols-3">
+                {form.overview.map((o, i) => (
+                  <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                    <input placeholder="العنوان" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.title} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, overview: n }); }} />
+                    <textarea rows={2} placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.desc} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, overview: n }); }} />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">المميزات</div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {form.benefits.map((b, i) => (
+                  <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                    <input placeholder="عنوان الميزة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.title} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, benefits: n }); }} />
+                    <textarea rows={2} placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.desc} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, benefits: n }); }} />
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, benefits: [...form.benefits, { title: "", desc: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة ميزة</button>
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">الباقات والأسعار</div>
+              <div className="grid gap-3 md:grid-cols-3">
+                {form.plans.map((p, pi) => (
+                  <div key={pi} className={`rounded-lg border p-3 space-y-2 ${p.featured ? "border-primary bg-primary/5" : "border-border"}`}>
+                    <div className="flex items-center justify-between">
+                      <input placeholder="اسم الباقة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={p.name} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], name: e.target.value }; setForm({ ...form, plans: n }); }} />
+                    </div>
+                    <input placeholder="السعر" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.price} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], price: e.target.value }; setForm({ ...form, plans: n }); }} />
+                    <label className="flex items-center gap-1 text-[11px] font-bold">
+                      <input type="checkbox" checked={p.featured} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], featured: e.target.checked }; setForm({ ...form, plans: n }); }} /> مميزة
+                    </label>
+                    <div className="space-y-1">
+                      {p.feats.map((f, fi) => (
+                        <input key={fi} placeholder={`ميزة ${fi + 1}`} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-[11px]" value={f} onChange={(e) => { const n = [...form.plans]; const feats = [...n[pi].feats]; feats[fi] = e.target.value; n[pi] = { ...n[pi], feats }; setForm({ ...form, plans: n }); }} />
+                      ))}
+                      <button onClick={() => { const n = [...form.plans]; n[pi] = { ...n[pi], feats: [...n[pi].feats, ""] }; setForm({ ...form, plans: n }); }} className="text-[11px] text-primary font-bold">+ إضافة بند</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
             <GhostButton onClick={() => setOpen(false)}>إلغاء</GhostButton>
