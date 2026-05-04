@@ -290,40 +290,35 @@ function ServiceDetailPage() {
                 <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
                 <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
               </div>
-              <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+              <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
                 {plans.map((p) => (
                   <div
                     key={p.name}
-                    className={`relative rounded-2xl border p-6 text-right transition ${
+                    className={`relative rounded-2xl border bg-white p-6 text-right shadow-sm transition ${
                       p.featured
-                        ? "border-primary bg-primary text-white shadow-lg md:-translate-y-3"
-                        : "border-border bg-secondary/30 hover:-translate-y-1 hover:border-primary/40 hover:bg-white hover:shadow-md"
+                        ? "border-2 border-primary md:-translate-y-3 shadow-md"
+                        : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
                     }`}
                   >
                     {p.featured && (
-                      <span className="absolute -top-3 right-6 rounded-full bg-white px-3 py-1 text-[10px] font-bold text-primary shadow">
-                        الأكثر طلباً
+                      <span className="absolute -top-3 right-6 rounded-full bg-primary-light px-3 py-1 text-[10px] font-bold text-primary">
+                        موصى بها
                       </span>
                     )}
-                    <div className={`text-sm font-bold ${p.featured ? "text-white/90" : "text-muted-foreground"}`}>{p.name}</div>
-                    <div className={`mt-2 text-3xl font-extrabold ${p.featured ? "text-white" : "text-foreground"}`}>
+                    <div className="text-sm font-bold text-foreground">{p.name}</div>
+                    <div className="mt-2 text-3xl font-extrabold text-primary">
                       {p.price} <span className="text-sm font-bold">ر.س</span>
                     </div>
-                    <ul className="mt-5 space-y-2.5">
+                    <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
                       {p.feats.map((f) => (
-                        <li key={f} className={`flex items-center justify-end gap-2 text-xs ${p.featured ? "text-white/90" : "text-foreground/80"}`}>
+                        <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+                            <Check className="h-3 w-3" />
+                          </span>
                           <span>{f}</span>
-                          <Check className={`h-4 w-4 ${p.featured ? "text-white" : "text-primary"}`} />
                         </li>
                       ))}
                     </ul>
-                    <button
-                      className={`mt-6 inline-flex h-10 w-full items-center justify-center rounded-full text-xs font-bold transition ${
-                        p.featured ? "bg-white text-primary hover:-translate-y-0.5" : "bg-primary text-white hover:bg-primary-dark"
-                      }`}
-                    >
-                      اختر الباقة
-                    </button>
                   </div>
                 ))}
               </div>
