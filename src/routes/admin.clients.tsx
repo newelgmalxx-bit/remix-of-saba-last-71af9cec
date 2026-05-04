@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton } from "@/components/admin/AdminLayout";
-import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal } from "lucide-react";
+import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { adminClients, fmtSAR } from "@/data/admin";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "العملاء | لوحة التحكم" }] }),
@@ -95,7 +97,19 @@ function ClientsPage() {
                     <td className="px-3 py-3 font-bold">{fmtSAR(c.totalSpent)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground">{c.joinedAt}</td>
-                    <td className="px-3 py-3"><button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted"><MoreHorizontal className="h-4 w-4" /></button></td>
+                    <td className="px-3 py-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" dir="rtl">
+                          <DropdownMenuItem onClick={() => toast.info(`عرض بيانات: ${c.name}`)}><Eye className="ml-2 h-4 w-4" /> عرض التفاصيل</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { window.location.href = `mailto:${c.email}`; }}><Mail className="ml-2 h-4 w-4" /> إرسال بريد</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => toast.success("تم الحذف")} className="text-rose-600 focus:text-rose-600"><Trash2 className="ml-2 h-4 w-4" /> حذف العميل</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
                   </tr>
                 );
               })}
