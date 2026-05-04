@@ -30,7 +30,7 @@ function ServicesPage() {
         <StatCard label="إجمالي الخدمات" value={12} icon={Package} accent="primary" />
         <StatCard label="نشطة" value={9} icon={CheckCircle2} accent="emerald" />
         <StatCard label="مسودات" value={2} icon={FileEdit} accent="amber" />
-        <StatCard label="مؤرشفة" value={1} icon={Archive} accent="muted" as any />
+        <StatCard label="مؤرشفة" value={1} icon={Archive} accent="muted" />
       </div>
 
       <PanelCard>
