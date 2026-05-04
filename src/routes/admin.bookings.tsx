@@ -33,8 +33,8 @@ function BookingsPage() {
   );
 
   const exportCsv = () => {
-    const header = "Number,Client,Email,Service,Total,Payment,Status,Date";
-    const rows = filtered.map(b => `${b.number},${b.client},${b.email},${b.service},${b.total},${b.payment},${b.status},${b.date}`);
+    const header = "Number,Client,Email,Phone,City,Service,Total,Payment,Status,Date";
+    const rows = filtered.map(b => `${b.number},${b.client},${b.email},${b.phone ?? ""},${b.city ?? ""},${b.service},${b.total},${b.payment},${b.status},${b.date}`);
     const csv = [header, ...rows].join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -95,6 +95,8 @@ function BookingsPage() {
               <tr className="text-right text-xs text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">رقم الطلب</th>
                 <th className="px-3 py-3 font-medium">العميل</th>
+                <th className="px-3 py-3 font-medium">الجوال</th>
+                <th className="px-3 py-3 font-medium">المدينة</th>
                 <th className="px-3 py-3 font-medium">الخدمة</th>
                 <th className="px-3 py-3 font-medium">الإجمالي</th>
                 <th className="px-3 py-3 font-medium">الدفع</th>
@@ -110,6 +112,8 @@ function BookingsPage() {
                   <tr key={b.id} className="border-b border-border hover:bg-muted/40">
                     <td className="px-3 py-3 font-bold text-primary">#{b.number}</td>
                     <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.email}</div></td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{b.phone ?? "—"}</td>
+                    <td className="px-3 py-3 text-xs">{b.city ?? "—"}</td>
                     <td className="px-3 py-3">{b.service}</td>
                     <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3">
@@ -161,6 +165,8 @@ function BookingsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div><div className="text-xs text-muted-foreground">{viewing.email}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">الجوال</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">المدينة</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment}</div></div>
                 </div>
                 <div className="rounded-xl border border-border overflow-hidden">
@@ -193,6 +199,8 @@ function BookingsPage() {
             <div className="grid grid-cols-2 gap-3">
               <Lbl label="العميل"><input className={ic} value={editForm.client ?? ""} onChange={e => setEditForm({ ...editForm, client: e.target.value })} /></Lbl>
               <Lbl label="البريد"><input className={ic} value={editForm.email ?? ""} onChange={e => setEditForm({ ...editForm, email: e.target.value })} /></Lbl>
+              <Lbl label="رقم الجوال"><input className={ic} dir="ltr" value={editForm.phone ?? ""} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} /></Lbl>
+              <Lbl label="المدينة"><input className={ic} value={editForm.city ?? ""} onChange={e => setEditForm({ ...editForm, city: e.target.value })} /></Lbl>
               <Lbl label="الخدمة" full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
               <Lbl label="الإجمالي (ر.س)"><input type="number" className={ic} value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
               <Lbl label="طريقة الدفع">
