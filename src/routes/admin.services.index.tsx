@@ -37,6 +37,26 @@ function ServicesPage() {
       { name: "Pro", price: "", featured: true, feats: [""] },
       { name: "Premium", price: "", featured: false, feats: [""] },
     ],
+    steps: [
+      { title: "فهم المتطلبات" },
+      { title: "تحليل وتجهيز الفكرة" },
+      { title: "التصميم الأولي" },
+      { title: "المراجعة والتعديل" },
+      { title: "التسليم النهائي" },
+    ],
+    stats: [
+      { v: "+260", l: "عدد المشاريع المنفذة" },
+      { v: "98%", l: "نسبة رضا العملاء" },
+      { v: "14 يوم", l: "متوسط مدة التسليم" },
+      { v: "+180", l: "عدد العملاء" },
+    ],
+    testimonials: [
+      { name: "", role: "", text: "" },
+    ],
+    faqs: [
+      { q: "كم يستغرق تنفيذ الخدمة؟", a: "" },
+      { q: "هل يمكن التعديل بعد التسليم؟", a: "" },
+    ],
   });
   const navigate = useNavigate();
 
@@ -74,6 +94,10 @@ function ServicesPage() {
         plans: form.plans
           .filter(p => p.name.trim())
           .map(p => ({ ...p, feats: p.feats.filter(f => f.trim()) })),
+        steps: form.steps.filter(s => s.title.trim()),
+        stats: form.stats.filter(s => s.v.trim() || s.l.trim()),
+        testimonials: form.testimonials.filter(t => t.name.trim() || t.text.trim()),
+        faqs: form.faqs.filter(f => f.q.trim()),
       };
       localStorage.setItem(KEY, JSON.stringify(store));
     } catch {}
