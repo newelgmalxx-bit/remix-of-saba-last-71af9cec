@@ -23,6 +23,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
@@ -100,6 +101,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountProfileRoute = AccountProfileRouteImport.update({
   id: '/account/profile',
   path: '/account/profile',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
     | '/account'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/services'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -386,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/profile': {
       id: '/account/profile'
       path: '/account/profile'
@@ -432,10 +451,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -476,3 +497,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
