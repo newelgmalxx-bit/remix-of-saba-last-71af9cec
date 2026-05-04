@@ -148,7 +148,7 @@ function AboutPage() {
               </div>
               <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2">
                 {services.map((s) => (
-                  <div key={s.title} className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+                  <div key={s.title} className="card-hover flex items-center gap-3 rounded-xl border border-border bg-white p-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <s.icon className="h-4 w-4" />
                     </div>
@@ -200,7 +200,7 @@ function AboutPage() {
               ].map((c) => (
                 <div
                   key={c.title}
-                  className="group relative overflow-hidden rounded-3xl border border-border bg-background p-8 transition hover:-translate-y-1 hover:shadow-lg"
+                  className="card-hover group relative overflow-hidden rounded-3xl border border-border bg-background p-8"
                 >
                   <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition group-hover:scale-150" />
                   <div className="relative">
@@ -227,7 +227,7 @@ function AboutPage() {
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
-              <div key={v.title} className="relative rounded-3xl border border-border bg-white p-6 transition hover:border-primary/40 hover:shadow-md">
+              <div key={v.title} className="card-hover relative rounded-3xl border border-border bg-white p-6">
                 <div className="absolute -top-4 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-white shadow-md">
                   {String(i + 1).padStart(2, "0")}
                 </div>
@@ -256,7 +256,7 @@ function AboutPage() {
                 {journey.map((j, i) => (
                   <div key={j.year} className={`flex flex-col gap-4 md:flex-row md:items-center ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>
                     <div className="flex-1 md:text-left">
-                      <div className={`rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
+                    <div className={`card-hover rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
                         <div className="text-2xl font-extrabold text-primary">{j.year}</div>
                         <h3 className="mt-1 text-lg font-bold text-foreground">{j.title}</h3>
                         <p className="mt-2 text-sm leading-7 text-muted-foreground">{j.desc}</p>
@@ -282,7 +282,7 @@ function AboutPage() {
           </div>
           <div className="relative mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {process.map((p, i) => (
-              <div key={p.title} className="group relative rounded-3xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+              <div key={p.title} className="card-hover group relative rounded-3xl border border-border bg-white p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
                     <p.icon className="h-5 w-5" />
@@ -313,7 +313,7 @@ function AboutPage() {
             {tools.map((t) => (
               <span
                 key={t}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:border-primary hover:text-primary"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
               >
                 <Zap className="h-3.5 w-3.5 text-primary" />
                 {t}
@@ -357,7 +357,7 @@ function AboutPage() {
                   { v: "100%", l: "ضمان الجودة" },
                   { v: "+50", l: "خبير في الفريق" },
                 ].map((b) => (
-                  <div key={b.l} className="rounded-3xl border border-border bg-background p-6 text-center shadow-sm">
+                  <div key={b.l} className="card-hover rounded-3xl border border-border bg-background p-6 text-center shadow-sm">
                     <div className="text-3xl font-extrabold text-gradient-primary">{b.v}</div>
                     <div className="mt-2 text-xs font-bold text-muted-foreground">{b.l}</div>
                   </div>
@@ -412,23 +412,24 @@ export const Route = createFileRoute("/about")({
 });
 
 function TestimonialsSlider() {
-  const [idx, setIdx] = useState(0);
+  const [start, setStart] = useState(0);
   const total = testimonials.length;
+  const pageCount = Math.max(1, total - 2); // 3 visible at a time
 
   useEffect(() => {
-    const id = setInterval(() => setIdx((p) => (p + 1) % total), 5500);
+    const id = setInterval(() => setStart((p) => (p + 1) % pageCount), 5500);
     return () => clearInterval(id);
-  }, [total]);
+  }, [pageCount]);
 
-  const prev = () => setIdx((p) => (p - 1 + total) % total);
-  const next = () => setIdx((p) => (p + 1) % total);
-  const t = testimonials[idx];
+  const prev = () => setStart((p) => (p - 1 + pageCount) % pageCount);
+  const next = () => setStart((p) => (p + 1) % pageCount);
+  const visible = [0, 1, 2].map((o) => testimonials[(start + o) % total]);
 
   return (
     <section className="relative overflow-hidden bg-secondary/30 py-24">
       <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="relative mx-auto max-w-5xl px-4">
+      <div className="relative mx-auto max-w-7xl px-4">
         <div className="text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
           <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
@@ -436,55 +437,58 @@ function TestimonialsSlider() {
           </h2>
         </div>
 
-        <div className="relative mt-12">
-          <div
-            key={idx}
-            className="relative mx-auto max-w-3xl rounded-3xl border border-border bg-background p-8 shadow-lg md:p-12 animate-fade-up"
-          >
-            <Quote className="absolute right-8 top-8 h-12 w-12 text-primary/15" />
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="mt-6 text-lg leading-9 text-foreground md:text-xl">"{t.quote}"</p>
-            <div className="mt-8 flex items-center gap-4 border-t border-border pt-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-base font-extrabold text-white">
-                {t.name.charAt(0)}
+        <div className="mt-12 grid gap-6 md:grid-cols-3" key={start}>
+          {visible.map((t, i) => (
+            <div
+              key={`${start}-${i}`}
+              className="card-hover relative rounded-3xl border border-border bg-background p-7 shadow-sm animate-fade-up"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <Quote className="absolute right-6 top-6 h-9 w-9 text-primary/15" />
+              <div className="flex gap-1">
+                {Array.from({ length: 5 }).map((_, k) => (
+                  <Star key={k} className="h-4 w-4 fill-primary text-primary" />
+                ))}
               </div>
-              <div>
-                <div className="text-sm font-extrabold text-foreground">{t.name}</div>
-                <div className="text-xs text-muted-foreground">{t.role}</div>
+              <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
+              <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-sm font-extrabold text-white">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-extrabold text-foreground">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="mt-8 flex items-center justify-center gap-5">
-            <button
-              onClick={prev}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
-              aria-label="السابق"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  className={`h-2 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
-                  aria-label={`رأي رقم ${i + 1}`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={next}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
-              aria-label="التالي"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
+        <div className="mt-10 flex items-center justify-center gap-5">
+          <button
+            onClick={prev}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
+            aria-label="السابق"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setStart(i)}
+                className={`h-2 rounded-full transition-all ${i === start ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
+                aria-label={`صفحة ${i + 1}`}
+              />
+            ))}
           </div>
+          <button
+            onClick={next}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
+            aria-label="التالي"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </section>
