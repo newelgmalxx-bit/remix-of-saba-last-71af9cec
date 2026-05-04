@@ -1,6 +1,6 @@
 import {
   Layout, MonitorSmartphone, Megaphone, Sparkles, Users2, Video, TrendingUp, Code2, Search,
-  Target, Gem, FileCode2, LifeBuoy, Smartphone, Palette, Image as ImageIcon, Share2, BarChart3, Globe2, Bug, Rocket,
+  Target, Gem, FileCode2, LifeBuoy, Smartphone, Palette, Image as ImageIcon, Share2, BarChart3, Globe2, Bug, Rocket, Wrench, ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 
