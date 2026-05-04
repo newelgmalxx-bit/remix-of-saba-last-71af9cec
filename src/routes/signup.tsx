@@ -39,22 +39,22 @@ function SignupPage() {
                 <PasswordField label="تأكيد كلمة المرور" show={show2} onToggle={() => setShow2(!show2)} />
               </div>
 
-              <label className="flex cursor-pointer items-center justify-end gap-2 text-xs">
+              <label className="flex cursor-pointer items-center justify-start gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setAgree(!agree)}
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                    agree ? "border-primary bg-primary text-white" : "border-border bg-white"
+                  }`}
+                >
+                  {agree && <Check className="h-3 w-3" />}
+                </button>
                 <span className="text-muted-foreground">
                   أوافق على{" "}
                   <a href="#" className="font-bold text-primary hover:underline">سياسة الخصوصية</a>
                   {" و "}
                   <a href="#" className="font-bold text-primary hover:underline">شروط الاستخدام</a>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setAgree(!agree)}
-                  className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                    agree ? "border-primary bg-primary text-white" : "border-border bg-white"
-                  }`}
-                >
-                  {agree && <Check className="h-3 w-3" />}
-                </button>
               </label>
 
               <button type="submit" className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
