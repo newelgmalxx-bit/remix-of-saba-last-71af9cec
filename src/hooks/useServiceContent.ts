@@ -13,6 +13,10 @@ export type ServiceOverride = {
   overview?: { title: string; desc: string }[];
   benefits?: { title: string; desc: string }[];
   plans?: { name: string; price: string; featured: boolean; feats: string[] }[];
+  steps?: { title: string }[];
+  stats?: { v: string; l: string }[];
+  testimonials?: { name: string; role: string; text: string }[];
+  faqs?: { q: string; a: string }[];
   isCustom?: boolean;
 };
 
@@ -50,6 +54,10 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
       overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       plans: o.plans ?? [],
+      steps: o.steps,
+      stats: o.stats,
+      testimonials: o.testimonials,
+      faqs: o.faqs,
     } as ServiceContent;
   }
   if (!o) return base;
@@ -67,6 +75,10 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
       ? base.benefits.map((b, i) => ({ ...b, title: o.benefits![i]?.title ?? b.title, desc: o.benefits![i]?.desc ?? b.desc }))
       : base.benefits,
     plans: o.plans ?? base.plans,
+    steps: o.steps ?? base.steps,
+    stats: o.stats ?? base.stats,
+    testimonials: o.testimonials ?? base.testimonials,
+    faqs: o.faqs ?? base.faqs,
   };
 }
 

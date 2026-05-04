@@ -14,6 +14,10 @@ export type ServiceContent = {
   overview: { icon: LucideIcon; title: string; desc: string }[];
   benefits: { icon: LucideIcon; title: string; desc: string }[];
   plans: { name: string; price: string; featured: boolean; feats: string[] }[];
+  steps?: { title: string }[];
+  stats?: { v: string; l: string }[];
+  testimonials?: { name: string; role: string; text: string }[];
+  faqs?: { q: string; a: string }[];
 };
 
 const defaultPlans = [
