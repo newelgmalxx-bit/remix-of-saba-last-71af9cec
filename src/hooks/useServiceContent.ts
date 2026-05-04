@@ -12,6 +12,7 @@ export type ServiceOverride = {
   overview?: { title: string; desc: string }[];
   benefits?: { title: string; desc: string }[];
   plans?: { name: string; price: string; featured: boolean; feats: string[] }[];
+  isCustom?: boolean;
 };
 
 type Store = Record<string, ServiceOverride>;
@@ -34,8 +35,22 @@ function writeStore(s: Store) {
 
 export function mergeService(slug: string, override?: ServiceOverride): ServiceContent | undefined {
   const base = serviceMap[slug];
-  if (!base) return undefined;
   const o = override ?? readStore()[slug];
+  if (!base) {
+    if (!o || !o.isCustom) return undefined;
+    // Build minimal content from override only
+    return {
+      slug,
+      category: o.category ?? "عام",
+      breadcrumb: o.breadcrumb ?? o.title ?? slug,
+      title: o.title ?? slug,
+      subtitle: o.subtitle ?? "",
+      heroHighlights: o.heroHighlights ?? [],
+      overview: (o.overview ?? []).map((x) => ({ icon: undefined as any, title: x.title, desc: x.desc })),
+      benefits: (o.benefits ?? []).map((x) => ({ icon: undefined as any, title: x.title, desc: x.desc })),
+      plans: o.plans ?? [],
+    } as ServiceContent;
+  }
   if (!o) return base;
   return {
     ...base,
