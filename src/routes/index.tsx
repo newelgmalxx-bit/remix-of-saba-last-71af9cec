@@ -1,26 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { HeroSection } from "@/components/sections/HeroSection";
+import { ServicesGrid } from "@/components/sections/ServicesGrid";
+import { PortfolioSection } from "@/components/sections/PortfolioSection";
+import { StatsBanner } from "@/components/sections/StatsBanner";
+import { WhyUsSection } from "@/components/sections/WhyUsSection";
+import { CtaBanner } from "@/components/sections/CtaBanner";
+import { ContactSection } from "@/components/sections/ContactSection";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "سابا ديزاين | تجارب رقمية تترك أثراً يدوم" },
+      {
+        name: "description",
+        content:
+          "وكالة سابا ديزاين الرقمية - تصميم وتطوير المواقع، تطبيقات الجوال، المتاجر الإلكترونية، الهوية البصرية والتسويق الرقمي.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex min-h-screen flex-col bg-background">
+      <SiteHeader />
+      <main className="flex-1">
+        <HeroSection />
+        <ServicesGrid />
+        <PortfolioSection />
+        <StatsBanner />
+        <WhyUsSection />
+        <CtaBanner />
+        <ContactSection />
+      </main>
+      <SiteFooter />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
