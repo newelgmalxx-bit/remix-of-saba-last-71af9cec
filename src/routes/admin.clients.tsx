@@ -102,7 +102,7 @@ function ClientsPage() {
                         <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted">
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" dir="rtl">
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => toast.info(`عرض بيانات: ${c.name}`)}><Eye className="ml-2 h-4 w-4" /> عرض التفاصيل</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { window.location.href = `mailto:${c.email}`; }}><Mail className="ml-2 h-4 w-4" /> إرسال بريد</DropdownMenuItem>
                           <DropdownMenuSeparator />
