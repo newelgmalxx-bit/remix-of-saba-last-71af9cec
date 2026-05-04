@@ -452,7 +452,7 @@ function TestimonialsSlider() {
   );
 }
 
-export const Route = createFileRoute("/services/web-design")({
+export const Route = createFileRoute("/services/")({
   head: () => ({
     meta: [
       { title: "تصميم مواقع الكترونية | سابا ديزاين" },
