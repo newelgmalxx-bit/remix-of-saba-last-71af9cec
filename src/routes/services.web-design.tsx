@@ -65,6 +65,10 @@ const plans = [
 const testimonials = [
   { name: "خالد العتيبي", role: "Founder", text: "تجربة احترافية، التسليم في الموعد المحدد ودعم ممتاز." },
   { name: "نورة الحربي", role: "Marketing Lead", text: "تصميم رفع تحويلات الموقع بشكل واضح خلال أسبوع." },
+  { name: "سعد القحطاني", role: "Product Manager", text: "فريق متعاون وسريع الاستجابة، النتيجة فاقت توقعاتنا." },
+  { name: "ريم السبيعي", role: "Owner – Bloom", text: "هوية وموقع كاملين باحترافية عالية وبدقة في التفاصيل." },
+  { name: "فهد المطيري", role: "CTO", text: "كود نظيف وموثّق، تكاملنا معه بسهولة في فريقنا التقني." },
+  { name: "هاجر العتيبي", role: "Marketing Director", text: "حملاتنا الرقمية تحسّنت بعد إطلاق الموقع الجديد." },
 ];
 
 const faqs = [
@@ -91,25 +95,8 @@ function ServiceDetailPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/60 to-primary-dark/95" />
           <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
-            {/* Feature card (left in LTR / right of layout in RTL flow second) */}
-            <div className="order-2 lg:order-1">
-              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
-                <div className="text-center text-sm font-bold text-white/90">
-                  واجهة أوضح + ثقة أعلى + تحويل أفضل
-                </div>
-                <div className="mt-4 space-y-2">
-                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
-                    <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
-                      <Check className="h-4 w-4 text-white/80" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Headline */}
-            <div className="order-1 text-right lg:order-2">
+            {/* Headline first (right side in RTL) */}
+            <div className="order-1 text-right">
               <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
                 <Link to="/" className="hover:underline">الرئيسية</Link>
                 <ChevronLeft className="h-3 w-3" />
@@ -130,13 +117,30 @@ function ServiceDetailPage() {
                 </button>
               </div>
             </div>
+
+            {/* Feature card */}
+            <div className="order-2">
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
+                <div className="text-center text-sm font-bold text-white/90">
+                  واجهة أوضح + ثقة أعلى + تحويل أفضل
+                </div>
+                <div className="mt-4 space-y-2">
+                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
+                    <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
+                      <Check className="h-4 w-4 text-white/80" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Overview */}
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">نظرة عامة عن الخدمة</h2>
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -161,7 +165,7 @@ function ServiceDetailPage() {
         {/* What you get */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">ماذا ستحصل عليه</h2>
                 <p className="mt-2 text-xs text-muted-foreground">مخرجات واضحة تضمن لك جودة الناتج وسهولة التطوير.</p>
@@ -186,24 +190,24 @@ function ServiceDetailPage() {
         {/* How we work */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+            <div className="rounded-2xl border border-border/60 bg-white p-8 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">كيف نعمل</h2>
                 <p className="mt-2 text-xs text-muted-foreground">خطوات بسيطة منظمة من البداية حتى التسليم النهائي.</p>
               </div>
-              <div className="relative mt-10 grid grid-cols-2 gap-5 md:grid-cols-5">
-                <div className="pointer-events-none absolute right-[10%] left-[10%] top-7 hidden h-px bg-border md:block" />
+              <div className="relative mt-12 grid grid-cols-2 gap-6 md:grid-cols-5">
+                <div className="pointer-events-none absolute right-[10%] left-[10%] top-9 hidden h-0.5 bg-gradient-to-l from-primary/10 via-primary/40 to-primary/10 md:block" />
                 {steps.map((s) => (
                   <div key={s.n} className="relative flex flex-col items-center text-center">
                     <div className="relative">
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow">
-                        <s.icon className="h-6 w-6" />
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary shadow-[0_10px_25px_-10px_rgba(30,91,148,0.45)] ring-2 ring-primary">
+                        <s.icon className="h-7 w-7" />
                       </span>
-                      <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-primary shadow ring-1 ring-border">
+                      <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white shadow-md ring-2 ring-white">
                         {s.n}
                       </span>
                     </div>
-                    <div className="mt-3 text-sm font-bold text-foreground">{s.title}</div>
+                    <div className="mt-4 text-sm font-bold text-foreground">{s.title}</div>
                   </div>
                 ))}
               </div>
@@ -214,7 +218,7 @@ function ServiceDetailPage() {
         {/* Previous works */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="flex flex-col items-end justify-between gap-4 md:flex-row-reverse md:items-center">
                 <div className="text-right">
                   <h2 className="text-2xl font-extrabold text-foreground">أعمال سابقة</h2>
@@ -257,7 +261,7 @@ function ServiceDetailPage() {
         {/* Stats */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">أرقام تعكس الثقة</h2>
                 <p className="mt-1 text-xs text-muted-foreground">مؤشرات من أداء فريقنا الفعلي.</p>
@@ -277,7 +281,7 @@ function ServiceDetailPage() {
         {/* Plans */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
                 <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
@@ -321,7 +325,7 @@ function ServiceDetailPage() {
         {/* Testimonials */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">آراء العملاء</h2>
                 <p className="mt-1 text-xs text-muted-foreground">تجارب حقيقية من فرق اعتمدت علينا.</p>
@@ -334,7 +338,7 @@ function ServiceDetailPage() {
         {/* FAQ */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الأسئلة الشائعة</h2>
                 <p className="mt-1 text-xs text-muted-foreground">إجابات سريعة على ما يهمك.</p>
@@ -381,43 +385,53 @@ function ServiceDetailPage() {
 
 function TestimonialsSlider() {
   const [i, setI] = useState(0);
-  const total = testimonials.length;
-  const prev = () => setI((v) => (v - 1 + total) % total);
-  const next = () => setI((v) => (v + 1) % total);
+  // group into pairs (2 per slide on md+)
+  const pages = Math.ceil(testimonials.length / 2);
+  const prev = () => setI((v) => (v - 1 + pages) % pages);
+  const next = () => setI((v) => (v + 1) % pages);
 
   return (
     <div className="mt-6">
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-secondary/30">
+      <div className="relative overflow-hidden">
         <div
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(${i * 100}%)` }}
         >
-          {testimonials.map((t) => (
-            <div key={t.name} className="w-full shrink-0 p-8 text-right">
-              <div className="flex justify-end gap-0.5 text-amber-400">
-                {Array.from({ length: 5 }).map((_, k) => (
-                  <Star key={k} className="h-4 w-4 fill-current" />
-                ))}
+          {Array.from({ length: pages }).map((_, p) => {
+            const pair = testimonials.slice(p * 2, p * 2 + 2);
+            return (
+              <div key={p} className="w-full shrink-0">
+                <div className="grid grid-cols-1 gap-4 px-1 md:grid-cols-2">
+                  {pair.map((t) => (
+                    <div key={t.name} className="rounded-2xl border border-border/60 bg-white p-6 text-right shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
+                      <div className="flex justify-end gap-0.5 text-amber-400">
+                        {Array.from({ length: 5 }).map((_, k) => (
+                          <Star key={k} className="h-4 w-4 fill-current" />
+                        ))}
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-foreground/80">"{t.text}"</p>
+                      <div className="mt-4 text-xs">
+                        <div className="font-bold text-foreground">{t.name}</div>
+                        <div className="text-muted-foreground">{t.role}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="mt-4 text-base leading-8 text-foreground/80">"{t.text}"</p>
-              <div className="mt-5 text-xs">
-                <div className="font-bold text-foreground">{t.name}</div>
-                <div className="text-muted-foreground">{t.role}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="mt-5 flex items-center justify-between">
         <button
           onClick={prev}
           aria-label="السابق"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary hover:text-primary"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-1.5">
-          {testimonials.map((_, k) => (
+          {Array.from({ length: pages }).map((_, k) => (
             <button
               key={k}
               onClick={() => setI(k)}
@@ -429,7 +443,7 @@ function TestimonialsSlider() {
         <button
           onClick={next}
           aria-label="التالي"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground transition hover:border-primary hover:text-primary"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
