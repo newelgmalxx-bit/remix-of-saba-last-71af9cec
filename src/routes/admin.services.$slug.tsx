@@ -38,6 +38,24 @@ function ServiceEditorPage() {
   const [overview, setOverview] = useState(initial?.overview.map(o => ({ title: o.title, desc: o.desc })) ?? []);
   const [benefits, setBenefits] = useState(initial?.benefits.map(b => ({ title: b.title, desc: b.desc })) ?? []);
   const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
+  const [steps, setSteps] = useState<{ title: string }[]>(
+    initial?.steps?.map(s => ({ title: s.title })) ?? [
+      { title: "فهم المتطلبات" }, { title: "تحليل وتجهيز الفكرة" }, { title: "التصميم الأولي" }, { title: "المراجعة والتعديل" }, { title: "التسليم النهائي" },
+    ]
+  );
+  const [stats, setStats] = useState<{ v: string; l: string }[]>(
+    initial?.stats ?? [
+      { v: "+260", l: "عدد المشاريع المنفذة" }, { v: "98%", l: "نسبة رضا العملاء" }, { v: "14 يوم", l: "متوسط مدة التسليم" }, { v: "+180", l: "عدد العملاء" },
+    ]
+  );
+  const [testimonials, setTestimonials] = useState<{ name: string; role: string; text: string }[]>(
+    initial?.testimonials ?? []
+  );
+  const [faqs, setFaqs] = useState<{ q: string; a: string }[]>(
+    initial?.faqs ?? [
+      { q: "كم يستغرق تنفيذ الخدمة؟", a: "بين 2 إلى 4 أسابيع حسب حجم المشروع." },
+    ]
+  );
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
   if (!base && !initial) {
@@ -52,7 +70,7 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -68,6 +86,10 @@ function ServiceEditorPage() {
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
     setPlans(base.plans.map(p => ({ ...p, feats: [...p.feats] })));
+    setSteps(base.steps?.map(s => ({ title: s.title })) ?? []);
+    setStats(base.stats ?? []);
+    setTestimonials(base.testimonials ?? []);
+    setFaqs(base.faqs ?? []);
     setSavedAt(null);
   };
 
