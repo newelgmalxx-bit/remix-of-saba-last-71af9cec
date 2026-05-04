@@ -13,10 +13,20 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
+import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
+import { Route as AccountTicketsNewRouteImport } from './routes/account.tickets.new'
+import { Route as AccountTicketsTicketIdRouteImport } from './routes/account.tickets.$ticketId'
+import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -38,6 +48,16 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -53,85 +73,194 @@ const ServicesIndexRoute = ServicesIndexRouteImport.update({
   path: '/services/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/services/$slug',
   path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const AccountProfileRoute = AccountProfileRouteImport.update({
+  id: '/account/profile',
+  path: '/account/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountTicketsIndexRoute = AccountTicketsIndexRouteImport.update({
+  id: '/account/tickets/',
+  path: '/account/tickets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
+  id: '/account/orders/',
+  path: '/account/orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountTicketsNewRoute = AccountTicketsNewRouteImport.update({
+  id: '/account/tickets/new',
+  path: '/account/tickets/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountTicketsTicketIdRoute = AccountTicketsTicketIdRouteImport.update({
+  id: '/account/tickets/$ticketId',
+  path: '/account/tickets/$ticketId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
+  id: '/account/orders/$orderId',
+  path: '/account/orders/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/account/': typeof AccountIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/account/orders/': typeof AccountOrdersIndexRoute
+  '/account/tickets/': typeof AccountTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/account': typeof AccountIndexRoute
   '/services': typeof ServicesIndexRoute
+  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/account/orders': typeof AccountOrdersIndexRoute
+  '/account/tickets': typeof AccountTicketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/account/': typeof AccountIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
+  '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/account/orders/': typeof AccountOrdersIndexRoute
+  '/account/tickets/': typeof AccountTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/cart'
+    | '/checkout'
     | '/contact'
     | '/login'
     | '/portfolio'
     | '/signup'
+    | '/account/profile'
+    | '/checkout/success'
     | '/services/$slug'
+    | '/account/'
     | '/services/'
+    | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
+    | '/account/orders/'
+    | '/account/tickets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/cart'
+    | '/checkout'
     | '/contact'
     | '/login'
     | '/portfolio'
     | '/signup'
+    | '/account/profile'
+    | '/checkout/success'
     | '/services/$slug'
+    | '/account'
     | '/services'
+    | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
+    | '/account/orders'
+    | '/account/tickets'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/cart'
+    | '/checkout'
     | '/contact'
     | '/login'
     | '/portfolio'
     | '/signup'
+    | '/account/profile'
+    | '/checkout/success'
     | '/services/$slug'
+    | '/account/'
     | '/services/'
+    | '/account/orders/$orderId'
+    | '/account/tickets/$ticketId'
+    | '/account/tickets/new'
+    | '/account/orders/'
+    | '/account/tickets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   PortfolioRoute: typeof PortfolioRoute
   SignupRoute: typeof SignupRoute
+  AccountProfileRoute: typeof AccountProfileRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
+  AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
+  AccountTicketsTicketIdRoute: typeof AccountTicketsTicketIdRoute
+  AccountTicketsNewRoute: typeof AccountTicketsNewRoute
+  AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
+  AccountTicketsIndexRoute: typeof AccountTicketsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -164,6 +293,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -185,6 +328,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services/$slug': {
       id: '/services/$slug'
       path: '/services/$slug'
@@ -192,28 +342,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/account/profile': {
+      id: '/account/profile'
+      path: '/account/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof AccountProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/tickets/': {
+      id: '/account/tickets/'
+      path: '/account/tickets'
+      fullPath: '/account/tickets/'
+      preLoaderRoute: typeof AccountTicketsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/orders/': {
+      id: '/account/orders/'
+      path: '/account/orders'
+      fullPath: '/account/orders/'
+      preLoaderRoute: typeof AccountOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/tickets/new': {
+      id: '/account/tickets/new'
+      path: '/account/tickets/new'
+      fullPath: '/account/tickets/new'
+      preLoaderRoute: typeof AccountTicketsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/tickets/$ticketId': {
+      id: '/account/tickets/$ticketId'
+      path: '/account/tickets/$ticketId'
+      fullPath: '/account/tickets/$ticketId'
+      preLoaderRoute: typeof AccountTicketsTicketIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/orders/$orderId': {
+      id: '/account/orders/$orderId'
+      path: '/account/orders/$orderId'
+      fullPath: '/account/orders/$orderId'
+      preLoaderRoute: typeof AccountOrdersOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface CheckoutRouteChildren {
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   PortfolioRoute: PortfolioRoute,
   SignupRoute: SignupRoute,
+  AccountProfileRoute: AccountProfileRoute,
   ServicesSlugRoute: ServicesSlugRoute,
+  AccountIndexRoute: AccountIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
+  AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
+  AccountTicketsTicketIdRoute: AccountTicketsTicketIdRoute,
+  AccountTicketsNewRoute: AccountTicketsNewRoute,
+  AccountOrdersIndexRoute: AccountOrdersIndexRoute,
+  AccountTicketsIndexRoute: AccountTicketsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

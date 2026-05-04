@@ -1,9 +1,10 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, ShoppingCart, Zap,
 } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
@@ -274,40 +275,13 @@ function ServiceDetailPage() {
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
-              <div className="text-right">
+                <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
                 <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
               </div>
               <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
                 {plans.map((p) => (
-                  <div
-                    key={p.name}
-                    className={`relative rounded-2xl border bg-white p-6 text-right shadow-sm transition ${
-                      p.featured
-                        ? "border-2 border-primary md:-translate-y-3 shadow-md"
-                        : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-                    }`}
-                  >
-                    {p.featured && (
-                      <span className="absolute -top-3 right-6 rounded-full bg-primary-light px-3 py-1 text-[10px] font-bold text-primary">
-                        موصى بها
-                      </span>
-                    )}
-                    <div className="text-sm font-bold text-foreground">{p.name}</div>
-                    <div className="mt-2 text-3xl font-extrabold text-primary">
-                      {p.price} <span className="text-sm font-bold">ر.س</span>
-                    </div>
-                    <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
-                      {p.feats.map((f) => (
-                        <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
-                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-                            <Check className="h-3 w-3" />
-                          </span>
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <PlanCard key={p.name} plan={p} serviceSlug={service.slug} serviceTitle={title} />
                 ))}
               </div>
             </div>
@@ -460,3 +434,79 @@ export const Route = createFileRoute("/services/$slug")({
   },
   component: ServiceDetailPage,
 });
+
+function PlanCard({
+  plan,
+  serviceSlug,
+  serviceTitle,
+}: {
+  plan: { name: string; price: string; featured: boolean; feats: string[] };
+  serviceSlug: string;
+  serviceTitle: string;
+}) {
+  const { add } = useCart();
+  const navigate = useNavigate();
+  const [added, setAdded] = useState(false);
+  const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
+
+  const handleAdd = () => {
+    add({ serviceSlug, serviceTitle, planName: plan.name, price: priceNum });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
+  };
+
+  const handleBuyNow = () => {
+    add({ serviceSlug, serviceTitle, planName: plan.name, price: priceNum });
+    navigate({ to: "/checkout" as any });
+  };
+
+  return (
+    <div
+      className={`relative rounded-2xl border bg-white p-6 text-right shadow-sm transition ${
+        plan.featured
+          ? "border-2 border-primary md:-translate-y-3 shadow-md"
+          : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+      }`}
+    >
+      {plan.featured && (
+        <span className="absolute -top-3 right-6 rounded-full bg-primary-light px-3 py-1 text-[10px] font-bold text-primary">
+          موصى بها
+        </span>
+      )}
+      <div className="text-sm font-bold text-foreground">{plan.name}</div>
+      <div className="mt-2 text-3xl font-extrabold text-primary">
+        {plan.price} <span className="text-sm font-bold">ر.س</span>
+      </div>
+      <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
+        {plan.feats.map((f) => (
+          <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+              <Check className="h-3 w-3" />
+            </span>
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-5 flex flex-col gap-2">
+        <button
+          onClick={handleBuyNow}
+          className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition ${
+            plan.featured
+              ? "bg-primary text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
+              : "bg-primary-dark text-white hover:opacity-90"
+          }`}
+        >
+          <Zap className="h-4 w-4" />
+          اطلب الآن
+        </button>
+        <button
+          onClick={handleAdd}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white text-sm font-bold text-foreground/80 hover:border-primary hover:text-primary transition"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {added ? "✓ تمت الإضافة للسلة" : "أضف للسلة"}
+        </button>
+      </div>
+    </div>
+  );
+}
