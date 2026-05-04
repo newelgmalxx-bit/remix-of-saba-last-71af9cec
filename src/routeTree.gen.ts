@@ -21,6 +21,7 @@ import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
 
@@ -84,6 +85,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AccountTicketsIndexRoute = AccountTicketsIndexRouteImport.update({
+  id: '/account/tickets/',
+  path: '/account/tickets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
   id: '/account/orders/',
   path: '/account/orders/',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
+  '/account/tickets/': typeof AccountTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/orders': typeof AccountOrdersIndexRoute
+  '/account/tickets': typeof AccountTicketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
+  '/account/tickets/': typeof AccountTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/account/orders/$orderId'
     | '/account/orders/'
+    | '/account/tickets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/account/orders/$orderId'
     | '/account/orders'
+    | '/account/tickets'
   id:
     | '__root__'
     | '/'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/account/orders/$orderId'
     | '/account/orders/'
+    | '/account/tickets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   ServicesIndexRoute: typeof ServicesIndexRoute
   AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
   AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
+  AccountTicketsIndexRoute: typeof AccountTicketsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/account/tickets/': {
+      id: '/account/tickets/'
+      path: '/account/tickets'
+      fullPath: '/account/tickets/'
+      preLoaderRoute: typeof AccountTicketsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/orders/': {
       id: '/account/orders/'
       path: '/account/orders'
@@ -340,7 +360,17 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesIndexRoute: ServicesIndexRoute,
   AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
   AccountOrdersIndexRoute: AccountOrdersIndexRoute,
+  AccountTicketsIndexRoute: AccountTicketsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
