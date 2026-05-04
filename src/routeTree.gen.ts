@@ -15,15 +15,27 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
+import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminClientsRouteImport } from './routes/admin.clients'
+import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
+import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
+import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin.settings.appearance'
 import { Route as AccountTicketsNewRouteImport } from './routes/account.tickets.new'
 import { Route as AccountTicketsTicketIdRouteImport } from './routes/account.tickets.$ticketId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
@@ -58,6 +70,11 @@ const CartRoute = CartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -72,6 +89,11 @@ const ServicesIndexRoute = ServicesIndexRouteImport.update({
   id: '/services/',
   path: '/services/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/account/',
@@ -88,6 +110,46 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountProfileRoute = AccountProfileRouteImport.update({
   id: '/account/profile',
   path: '/account/profile',
@@ -102,6 +164,17 @@ const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
   id: '/account/orders/',
   path: '/account/orders/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsIntegrationsRoute =
+  AdminSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AdminSettingsRoute,
+  } as any)
+const AdminSettingsAppearanceRoute = AdminSettingsAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
 const AccountTicketsNewRoute = AccountTicketsNewRouteImport.update({
   id: '/account/tickets/new',
@@ -122,6 +195,7 @@ const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
@@ -129,13 +203,24 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -149,13 +234,24 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/services': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders': typeof AccountOrdersIndexRoute
   '/account/tickets': typeof AccountTicketsIndexRoute
 }
@@ -163,6 +259,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
@@ -170,13 +267,24 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -185,6 +293,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -192,13 +301,24 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/analytics'
+    | '/admin/bookings'
+    | '/admin/clients'
+    | '/admin/invoices'
+    | '/admin/portfolio'
+    | '/admin/reports'
+    | '/admin/services'
+    | '/admin/settings'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
+    | '/admin/'
     | '/services/'
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/settings/appearance'
+    | '/admin/settings/integrations'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesByTo: FileRoutesByTo
@@ -212,19 +332,31 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/analytics'
+    | '/admin/bookings'
+    | '/admin/clients'
+    | '/admin/invoices'
+    | '/admin/portfolio'
+    | '/admin/reports'
+    | '/admin/services'
+    | '/admin/settings'
     | '/checkout/success'
     | '/services/$slug'
     | '/account'
+    | '/admin'
     | '/services'
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/settings/appearance'
+    | '/admin/settings/integrations'
     | '/account/orders'
     | '/account/tickets'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -232,13 +364,24 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/signup'
     | '/account/profile'
+    | '/admin/analytics'
+    | '/admin/bookings'
+    | '/admin/clients'
+    | '/admin/invoices'
+    | '/admin/portfolio'
+    | '/admin/reports'
+    | '/admin/services'
+    | '/admin/settings'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
+    | '/admin/'
     | '/services/'
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/settings/appearance'
+    | '/admin/settings/integrations'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesById: FileRoutesById
@@ -246,6 +389,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
@@ -307,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -327,6 +478,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/services/'
       preLoaderRoute: typeof ServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/account/': {
       id: '/account/'
@@ -349,6 +507,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/portfolio': {
+      id: '/admin/portfolio'
+      path: '/portfolio'
+      fullPath: '/admin/portfolio'
+      preLoaderRoute: typeof AdminPortfolioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/invoices': {
+      id: '/admin/invoices'
+      path: '/invoices'
+      fullPath: '/admin/invoices'
+      preLoaderRoute: typeof AdminInvoicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/profile': {
       id: '/account/profile'
       path: '/account/profile'
@@ -369,6 +583,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/orders/'
       preLoaderRoute: typeof AccountOrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings/integrations': {
+      id: '/admin/settings/integrations'
+      path: '/integrations'
+      fullPath: '/admin/settings/integrations'
+      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/appearance': {
+      id: '/admin/settings/appearance'
+      path: '/appearance'
+      fullPath: '/admin/settings/appearance'
+      preLoaderRoute: typeof AdminSettingsAppearanceRouteImport
+      parentRoute: typeof AdminSettingsRoute
     }
     '/account/tickets/new': {
       id: '/account/tickets/new'
@@ -394,6 +622,46 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminSettingsRouteChildren {
+  AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
+  AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+}
+
+const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
+  AdminSettingsAppearanceRoute: AdminSettingsAppearanceRoute,
+  AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+}
+
+const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
+  AdminSettingsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminClientsRoute: typeof AdminClientsRoute
+  AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminPortfolioRoute: typeof AdminPortfolioRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminServicesRoute: typeof AdminServicesRoute
+  AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminClientsRoute: AdminClientsRoute,
+  AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminPortfolioRoute: AdminPortfolioRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminServicesRoute: AdminServicesRoute,
+  AdminSettingsRoute: AdminSettingsRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface CheckoutRouteChildren {
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
 }
@@ -409,6 +677,7 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
