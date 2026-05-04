@@ -4,23 +4,25 @@ import { Sparkles, Star, ArrowLeft } from "lucide-react";
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/40 via-background to-background">
+      {/* animated grid */}
+      <div className="pointer-events-none absolute inset-0 bg-grid" />
       {/* decorative blobs */}
-      <div className="pointer-events-none absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute top-32 left-0 h-[320px] w-[320px] rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-primary/15 blur-3xl animate-pulse-glow" />
+      <div className="pointer-events-none absolute top-32 left-0 h-[320px] w-[320px] rounded-full bg-primary/10 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
       <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-20 sm:px-6 lg:px-8 lg:pt-20 lg:pb-28">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Text */}
-          <div className="order-2 text-right lg:order-1">
+          <div className="order-2 text-right lg:order-1 animate-fade-up">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-1.5 text-xs font-semibold text-primary shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
               تصميم المستقبل
             </span>
 
             <h1 className="mt-6 text-4xl font-extrabold leading-[1.2] text-foreground sm:text-5xl lg:text-6xl">
-              نصمم <span className="text-primary">تجارب رقمية</span>
+              نصمم <span className="text-gradient-primary">تجارب رقمية</span>
               <br />
-              تترك <span className="text-primary">أثراً</span> يدوم
+              تترك <span className="text-gradient-primary">أثراً</span> يدوم
             </h1>
 
             <p className="mt-5 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">
@@ -45,9 +47,9 @@ export function HeroSection() {
           </div>
 
           {/* Visual mock */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative mx-auto aspect-[4/5] max-w-md">
-              <div className="absolute inset-0 rounded-[2.5rem] bg-primary-dark shadow-[0_30px_80px_-20px_rgba(30,91,148,0.5)]" />
+          <div className="relative order-1 lg:order-2 animate-fade-up" style={{ animationDelay: "0.15s" }}>
+            <div className="relative mx-auto aspect-[4/5] max-w-md animate-float-slow">
+              <div className="absolute inset-0 rounded-[2.5rem] bg-primary-dark glow-primary" />
               <div className="absolute inset-x-6 top-6 bottom-6 rounded-[2rem] bg-primary-dark/95 ring-1 ring-white/5">
                 {/* window dots */}
                 <div className="flex items-center gap-1.5 border-b border-white/5 px-5 py-4">
