@@ -11,7 +11,7 @@ import servicesHero from "@/assets/services-hero.png";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 
-const steps = [
+const defaultSteps = [
   { n: 1, icon: MessageSquare, title: "فهم المتطلبات" },
   { n: 2, icon: ScanSearch, title: "تحليل وتجهيز الفكرة" },
   { n: 3, icon: Wrench, title: "التصميم الأولي" },
@@ -29,14 +29,14 @@ const works = [
   { tag: "Mobile", title: "تطبيق تتبع مشاريع", img: "https://images.unsplash.com/photo-1517292987719-0369a794ec0f?w=800&auto=format&fit=crop&q=80" },
 ];
 
-const stats = [
+const defaultStats = [
   { v: "+260", l: "عدد المشاريع المنفذة" },
   { v: "98%", l: "نسبة رضا العملاء" },
   { v: "14 يوم", l: "متوسط مدة التسليم" },
   { v: "+180", l: "عدد العملاء" },
 ];
 
-const testimonials = [
+const defaultTestimonials = [
   { name: "خالد العتيبي", role: "Founder", text: "تجربة احترافية، التسليم في الموعد المحدد ودعم ممتاز." },
   { name: "نورة الحربي", role: "Marketing Lead", text: "تصميم رفع تحويلات الموقع بشكل واضح خلال أسبوع." },
   { name: "سعد القحطاني", role: "Product Manager", text: "فريق متعاون وسريع الاستجابة، النتيجة فاقت توقعاتنا." },
@@ -45,7 +45,7 @@ const testimonials = [
   { name: "هاجر العتيبي", role: "Marketing Director", text: "حملاتنا الرقمية تحسّنت بعد إطلاق الموقع الجديد." },
 ];
 
-const faqs = [
+const defaultFaqs = [
   { q: "كم يستغرق تنفيذ الخدمة؟", a: "بين 2 إلى 4 أسابيع حسب حجم المشروع." },
   { q: "هل يمكن التعديل بعد التسليم؟", a: "نعم، تشمل كل الباقات جولات تعديل مجانية." },
   { q: "هل يتم التسليم بصيغة قابلة للتطوير؟", a: "بالتأكيد — نسلّم كود نظيف وملفات تصميم قابلة للتعديل." },
@@ -82,6 +82,13 @@ function ServiceDetailPage() {
   }
 
   const { overview, benefits, plans, title, subtitle, breadcrumb, heroHighlights } = service;
+  const stepIcons = [MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck];
+  const steps = (service.steps && service.steps.length
+    ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
+    : defaultSteps);
+  const stats = service.stats && service.stats.length ? service.stats : defaultStats;
+  const testimonials = service.testimonials && service.testimonials.length ? service.testimonials : defaultTestimonials;
+  const faqs = service.faqs && service.faqs.length ? service.faqs : defaultFaqs;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -315,7 +322,7 @@ function ServiceDetailPage() {
                 <h2 className="text-2xl font-extrabold text-foreground">آراء العملاء</h2>
                 <p className="mt-1 text-xs text-muted-foreground">تجارب حقيقية من فرق اعتمدت علينا.</p>
               </div>
-              <TestimonialsSlider />
+              <TestimonialsSlider testimonials={testimonials} />
             </div>
           </div>
         </section>
