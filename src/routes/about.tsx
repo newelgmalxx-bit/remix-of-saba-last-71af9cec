@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import aboutHero from "@/assets/about-hero.jpg";
+import aboutBg from "@/assets/about-bg.jpg";
 import {
   Sparkles, Target, Eye, Heart, Award, Users, Rocket, Globe2,
   Lightbulb, ShieldCheck, Handshake, TrendingUp, ArrowLeft, Quote,
   Briefcase, Code2, Palette, Megaphone, CheckCircle2, Star, Zap, Layers,
+  ChevronRight, ChevronLeft,
 } from "lucide-react";
 
 const stats = [
@@ -40,6 +43,8 @@ const testimonials = [
   { name: "خالد العبدالله", role: "مدير عام، شركة تك ستارت", quote: "تجربة استثنائية. الفريق فهم رؤيتنا من أول اجتماع وقدّم نتيجة فاقت توقعاتنا بمراحل." },
   { name: "نورة السالم", role: "مؤسسة، علامة نمط", quote: "احترافية في كل تفصيلة، التزام بالمواعيد، وذوق راقي. سابا ديزاين شريك حقيقي وليس مجرد مزود خدمة." },
   { name: "عبدالرحمن المالكي", role: "مدير تسويق، مجموعة الأفق", quote: "حصلنا على هوية رقمية رفعت من قيمة علامتنا التجارية وضاعفت معدل التحويل بشكل ملموس." },
+  { name: "هدى الفهد", role: "مديرة منتج، تطبيق رواق", quote: "السرعة في التنفيذ مع الجودة العالية شيء نادر، لكن سابا ديزاين قدّمت لنا الاثنين معاً." },
+  { name: "ياسر الحربي", role: "الرئيس التنفيذي، متجر نور", quote: "متجرنا الإلكتروني انطلق بشكل احترافي وزادت مبيعاتنا 3 أضعاف في أول ربع بعد الإطلاق." },
 ];
 
 const tools = [
@@ -61,40 +66,41 @@ function AboutPage() {
       <main className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-40" />
+          <img src={aboutBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
           <div
-            className="absolute inset-0 -z-0"
-            style={{ background: "linear-gradient(135deg, rgba(84,130,174,0.10) 0%, rgba(30,91,148,0.04) 60%, transparent 100%)" }}
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.85) 0%, rgba(30,91,148,0.78) 50%, rgba(15,40,75,0.92) 100%)" }}
           />
-          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl animate-pulse-glow" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse-glow" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl animate-pulse-glow" />
 
           <div className="relative mx-auto max-w-7xl px-4 py-24 lg:py-32">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary">
+            <div className="mx-auto max-w-3xl text-center text-white">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold text-white backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
                 من نحن
               </span>
-              <h1 className="mt-6 text-4xl font-extrabold leading-tight text-foreground md:text-6xl">
-                نصنع <span className="text-gradient-primary">تجارب رقمية</span>
+              <h1 className="mt-6 text-4xl font-extrabold leading-tight md:text-6xl">
+                نصنع <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">تجارب رقمية</span>
                 <br />
                 تترك أثراً يدوم
               </h1>
-              <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              <p className="mt-6 text-lg leading-8 text-white/85">
                 سابا ديزاين وكالة رقمية متخصصة في تحويل أفكارك إلى منتجات عصرية تجمع بين
                 الجمال والوظيفة. نؤمن بأن التصميم العظيم يبدأ من فهم عميق للإنسان قبل التقنية.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   to="/contact"
-                  className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-primary-dark"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-xl transition hover:bg-white/90"
                 >
                   ابدأ مشروعك معنا
                   <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
                 </Link>
                 <Link
                   to="/portfolio"
-                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
                 >
                   استعرض أعمالنا
                 </Link>
@@ -293,38 +299,7 @@ function AboutPage() {
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="bg-secondary/30 py-24">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
-              <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                ما يقوله من عملوا معنا
-              </h2>
-            </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {testimonials.map((t) => (
-                <div key={t.name} className="relative rounded-3xl border border-border bg-background p-7 shadow-sm transition hover:shadow-md">
-                  <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/15" />
-                  <div className="flex gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
-                  <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-foreground">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.role}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <TestimonialsSlider />
 
         {/* TOOLS / TECH */}
         <section className="mx-auto max-w-7xl px-4 py-20">
@@ -435,3 +410,83 @@ export const Route = createFileRoute("/about")({
   }),
   component: AboutPage,
 });
+
+function TestimonialsSlider() {
+  const [idx, setIdx] = useState(0);
+  const total = testimonials.length;
+
+  useEffect(() => {
+    const id = setInterval(() => setIdx((p) => (p + 1) % total), 5500);
+    return () => clearInterval(id);
+  }, [total]);
+
+  const prev = () => setIdx((p) => (p - 1 + total) % total);
+  const next = () => setIdx((p) => (p + 1) % total);
+  const t = testimonials[idx];
+
+  return (
+    <section className="relative overflow-hidden bg-secondary/30 py-24">
+      <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
+      <div className="relative mx-auto max-w-5xl px-4">
+        <div className="text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
+          <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
+            ما يقوله من عملوا معنا
+          </h2>
+        </div>
+
+        <div className="relative mt-12">
+          <div
+            key={idx}
+            className="relative mx-auto max-w-3xl rounded-3xl border border-border bg-background p-8 shadow-lg md:p-12 animate-fade-up"
+          >
+            <Quote className="absolute right-8 top-8 h-12 w-12 text-primary/15" />
+            <div className="flex gap-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+              ))}
+            </div>
+            <p className="mt-6 text-lg leading-9 text-foreground md:text-xl">"{t.quote}"</p>
+            <div className="mt-8 flex items-center gap-4 border-t border-border pt-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-base font-extrabold text-white">
+                {t.name.charAt(0)}
+              </div>
+              <div>
+                <div className="text-sm font-extrabold text-foreground">{t.name}</div>
+                <div className="text-xs text-muted-foreground">{t.role}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-5">
+            <button
+              onClick={prev}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
+              aria-label="السابق"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIdx(i)}
+                  className={`h-2 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
+                  aria-label={`رأي رقم ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={next}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
+              aria-label="التالي"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
