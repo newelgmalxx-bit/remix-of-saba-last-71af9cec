@@ -274,40 +274,13 @@ function ServiceDetailPage() {
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
-              <div className="text-right">
+                <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
                 <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
               </div>
               <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
                 {plans.map((p) => (
-                  <div
-                    key={p.name}
-                    className={`relative rounded-2xl border bg-white p-6 text-right shadow-sm transition ${
-                      p.featured
-                        ? "border-2 border-primary md:-translate-y-3 shadow-md"
-                        : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-                    }`}
-                  >
-                    {p.featured && (
-                      <span className="absolute -top-3 right-6 rounded-full bg-primary-light px-3 py-1 text-[10px] font-bold text-primary">
-                        موصى بها
-                      </span>
-                    )}
-                    <div className="text-sm font-bold text-foreground">{p.name}</div>
-                    <div className="mt-2 text-3xl font-extrabold text-primary">
-                      {p.price} <span className="text-sm font-bold">ر.س</span>
-                    </div>
-                    <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
-                      {p.feats.map((f) => (
-                        <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
-                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-                            <Check className="h-3 w-3" />
-                          </span>
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <PlanCard key={p.name} plan={p} serviceSlug={service.slug} serviceTitle={title} />
                 ))}
               </div>
             </div>
