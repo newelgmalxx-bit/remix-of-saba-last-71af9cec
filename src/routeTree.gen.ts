@@ -40,6 +40,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
+import { Route as AdminSettingsProfileRouteImport } from './routes/admin.settings.profile'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin.settings.appearance'
 import { Route as AdminServicesSlugRouteImport } from './routes/admin.services.$slug'
@@ -202,6 +203,11 @@ const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
   path: '/account/orders/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsProfileRoute = AdminSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
 const AdminSettingsIntegrationsRoute =
   AdminSettingsIntegrationsRouteImport.update({
     id: '/integrations',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/account/orders': typeof AccountOrdersIndexRoute
   '/account/tickets': typeof AccountTicketsIndexRoute
 }
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/profile': typeof AdminSettingsProfileRoute
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
 }
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/profile'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesByTo: FileRoutesByTo
@@ -427,6 +437,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/profile'
     | '/account/orders'
     | '/account/tickets'
   id:
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
+    | '/admin/settings/profile'
     | '/account/orders/'
     | '/account/tickets/'
   fileRoutesById: FileRoutesById
@@ -710,6 +722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountOrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings/profile': {
+      id: '/admin/settings/profile'
+      path: '/profile'
+      fullPath: '/admin/settings/profile'
+      preLoaderRoute: typeof AdminSettingsProfileRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
     '/admin/settings/integrations': {
       id: '/admin/settings/integrations'
       path: '/integrations'
@@ -770,11 +789,13 @@ const AdminServicesRouteWithChildren = AdminServicesRoute._addFileChildren(
 interface AdminSettingsRouteChildren {
   AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
   AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+  AdminSettingsProfileRoute: typeof AdminSettingsProfileRoute
 }
 
 const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
   AdminSettingsAppearanceRoute: AdminSettingsAppearanceRoute,
   AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+  AdminSettingsProfileRoute: AdminSettingsProfileRoute,
 }
 
 const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
@@ -854,3 +875,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
