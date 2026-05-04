@@ -5,7 +5,7 @@ import heroMock from "@/assets/hero-mock.png";
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/40 via-background to-background">
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-50" />
       <div className="pointer-events-none absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-primary/15 blur-3xl" />
       <div className="pointer-events-none absolute top-32 left-0 h-[320px] w-[320px] rounded-full bg-primary/10 blur-3xl" />
 
@@ -20,10 +20,10 @@ export function HeroSection() {
               <span className="text-foreground/60">2026</span>
             </span>
 
-            <h1 className="mt-6 text-4xl font-extrabold leading-[1.25] text-foreground sm:text-5xl lg:text-[3.4rem]">
-              نصمم <span className="text-primary">تجارب رقمية</span>
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.25] text-primary sm:text-5xl lg:text-[3.4rem]">
+              نصمم تجارب رقمية
               <br />
-              تترك <span className="text-primary">أثراً</span> يدوم
+              تترك أثراً يدوم
             </h1>
 
             <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8">
@@ -59,16 +59,16 @@ export function HeroSection() {
               />
               <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
 
-              {/* rating badge — bottom-left of mockup per design */}
-              <div className="absolute -bottom-3 left-2 z-20 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-lg ring-1 ring-border">
-                <div className="flex flex-col items-center">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <div className="mt-1 text-base font-extrabold leading-none text-foreground">4.9/5</div>
+              {/* rating badge — bottom-right of mockup per design */}
+              <div className="absolute -bottom-4 right-0 z-20 rounded-2xl bg-white px-5 py-3 text-center shadow-xl ring-1 ring-border">
+                <div className="text-[10px] font-semibold text-muted-foreground">تقييم العملاء</div>
+                <div className="mt-1 flex justify-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
+                <div className="mt-1 text-lg font-extrabold leading-none text-foreground">4.9/5</div>
+                <div className="mt-1 text-[10px] text-muted-foreground">من +1200 تقييم</div>
               </div>
             </div>
           </div>
@@ -77,10 +77,10 @@ export function HeroSection() {
         {/* Feature row — full-width 4 columns under hero */}
         <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-4">
           {[
-            { icon: ShieldCheck, t: "أمان وموثوقية", d: "حماية بياناتك ضمن أعلى المعايير في كل خطوة" },
-            { icon: Gauge, t: "أداء عالي", d: "سرعة وفعالية بأداء يحقق نتائج ملموسة" },
-            { icon: Headphones, t: "دعم مستمر", d: "فريق جاهز لمساعدتك بعد الإطلاق وخلال التطوير" },
             { icon: BadgeCheck, t: "جودة مضمونة", d: "تسليم احترافي بتوازن بين الشكل والوظيفة" },
+            { icon: Headphones, t: "دعم مستمر", d: "فريق جاهز لمساعدتك بعد الإطلاق وخلال التطوير" },
+            { icon: Gauge, t: "أداء عالي", d: "سرعة وفعالية بأداء يحقق نتائج ملموسة" },
+            { icon: ShieldCheck, t: "أمان وموثوقية", d: "حماية بياناتك ضمن أعلى المعايير في كل خطوة" },
           ].map((f) => (
             <div key={f.t} className="text-center">
               <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary-light text-primary">
@@ -95,24 +95,26 @@ export function HeroSection() {
 
       {/* Stats strip */}
       <div className="relative mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-6 rounded-2xl border border-border bg-white px-6 py-7 shadow-sm lg:grid-cols-5">
-          <div className="text-center lg:order-2 lg:col-span-2 lg:text-right">
+        <div className="flex flex-col items-center gap-6 rounded-2xl border border-border bg-white px-8 py-8 shadow-sm lg:flex-row lg:justify-between">
+          <div className="flex flex-1 items-center justify-around gap-6">
+            {[
+              { v: "+50", l: "خبير ومختص" },
+              { v: "+150", l: "مشروع مكتمل" },
+              { v: "+200", l: "عميل سعيد" },
+              { v: "+3", l: "سنوات خبرة" },
+            ].map((s) => (
+              <div key={s.l} className="text-center">
+                <div className="text-3xl font-extrabold text-primary">{s.v}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{s.l}</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center lg:max-w-xs lg:text-right">
             <h3 className="text-lg font-extrabold text-foreground">شريكك في التحول الرقمي</h3>
             <p className="mt-1 text-xs leading-6 text-muted-foreground">
-              نساعدك على بناء مستقبل رقمي أفضل بتجربة واضحة ونتيجة فائقة الجودة.
+              نساعدك على بناء مستقبل رقمي أفضل بتجربة واضحة ونتيجة فائقة الجودة تليق بالنمو.
             </p>
           </div>
-          {[
-            { v: "+3", l: "سنوات خبرة" },
-            { v: "+200", l: "عميل سعيد" },
-            { v: "+150", l: "مشروع مكتمل" },
-            { v: "+50", l: "خبير ومختص" },
-          ].map((s, i) => (
-            <div key={s.l} className="text-center lg:order-1" style={{ order: i + 1 }}>
-              <div className="text-3xl font-extrabold text-primary">{s.v}</div>
-              <div className="mt-1 text-xs text-muted-foreground">{s.l}</div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
