@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Star, ArrowLeft, ShieldCheck, Gauge, Headphones, BadgeCheck } from "lucide-react";
-import heroMock from "@/assets/hero-mock.png";
+import { Sparkles, ArrowLeft, ShieldCheck, Gauge, Headphones, BadgeCheck, Send, LayoutGrid } from "lucide-react";
+import { HeroMock } from "@/components/sections/HeroMock";
 
 export function HeroSection() {
   return (
@@ -35,6 +35,7 @@ export function HeroSection() {
                 to={"/contact" as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
               >
+                <Send className="h-4 w-4" />
                 ابدأ مشروعك الآن
                 <ArrowLeft className="h-4 w-4" />
               </Link>
@@ -42,6 +43,7 @@ export function HeroSection() {
                 to={"/services" as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-white px-7 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
               >
+                <LayoutGrid className="h-4 w-4" />
                 تصفح خدماتنا
               </Link>
             </div>
@@ -49,27 +51,9 @@ export function HeroSection() {
 
           {/* Visual mock — LEFT side in RTL */}
           <div className="relative order-1 lg:order-2 animate-fade-up" style={{ animationDelay: "0.15s" }}>
-            <div className="relative mx-auto max-w-md animate-float-slow">
-              <img
-                src={heroMock}
-                alt="منصة سابا ديزاين"
-                width={520}
-                height={680}
-                className="relative z-10 h-auto w-full drop-shadow-[0_30px_60px_rgba(30,91,148,0.35)]"
-              />
+            <div className="relative animate-float-slow">
               <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
-
-              {/* rating badge — bottom-right of mockup per design */}
-              <div className="absolute -bottom-4 right-0 z-20 rounded-2xl bg-white px-5 py-3 text-center shadow-xl ring-1 ring-border">
-                <div className="text-[10px] font-semibold text-muted-foreground">تقييم العملاء</div>
-                <div className="mt-1 flex justify-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <div className="mt-1 text-lg font-extrabold leading-none text-foreground">4.9/5</div>
-                <div className="mt-1 text-[10px] text-muted-foreground">من +1200 تقييم</div>
-              </div>
+              <HeroMock />
             </div>
           </div>
         </div>
@@ -104,7 +88,7 @@ export function HeroSection() {
               { v: "+3", l: "سنوات خبرة" },
             ].map((s) => (
               <div key={s.l} className="text-center">
-                <div className="text-3xl font-extrabold text-primary">{s.v}</div>
+                <div className="text-3xl font-extrabold text-primary" dir="ltr">{s.v}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{s.l}</div>
               </div>
             ))}

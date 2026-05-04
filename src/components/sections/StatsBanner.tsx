@@ -14,7 +14,7 @@ export function StatsBanner() {
         {stats.map((s) => (
           <div key={s.l} className="flex items-center justify-center gap-3 text-white">
             <div className="text-right">
-              <div className="text-2xl font-extrabold">{s.v}</div>
+              <div className="text-2xl font-extrabold" dir="ltr">{s.v}</div>
               <div className="text-[11px] text-white/80">{s.l}</div>
             </div>
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15">
