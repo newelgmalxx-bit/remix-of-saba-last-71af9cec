@@ -1,5 +1,5 @@
 import { Link, useRouterState, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
@@ -252,10 +252,10 @@ export function GhostButton({ children, onClick }: { children: React.ReactNode; 
 }
 
 function LangToggle() {
-  const [lang, setLang] = useState<"ar" | "en">(() => {
-    if (typeof window === "undefined") return "ar";
-    return (localStorage.getItem("saba_admin_lang") as "ar" | "en") || "ar";
-  });
+  const [lang, setLang] = useState<"ar" | "en">("ar");
+  useEffect(() => {
+    try { const v = localStorage.getItem("saba_admin_lang") as "ar" | "en" | null; if (v) setLang(v); } catch {}
+  }, []);
   const toggle = () => {
     const next = lang === "ar" ? "en" : "ar";
     setLang(next);

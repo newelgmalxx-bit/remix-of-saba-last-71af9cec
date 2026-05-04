@@ -37,6 +37,26 @@ function ServicesPage() {
       { name: "Pro", price: "", featured: true, feats: [""] },
       { name: "Premium", price: "", featured: false, feats: [""] },
     ],
+    steps: [
+      { title: "فهم المتطلبات" },
+      { title: "تحليل وتجهيز الفكرة" },
+      { title: "التصميم الأولي" },
+      { title: "المراجعة والتعديل" },
+      { title: "التسليم النهائي" },
+    ],
+    stats: [
+      { v: "+260", l: "عدد المشاريع المنفذة" },
+      { v: "98%", l: "نسبة رضا العملاء" },
+      { v: "14 يوم", l: "متوسط مدة التسليم" },
+      { v: "+180", l: "عدد العملاء" },
+    ],
+    testimonials: [
+      { name: "", role: "", text: "" },
+    ],
+    faqs: [
+      { q: "كم يستغرق تنفيذ الخدمة؟", a: "" },
+      { q: "هل يمكن التعديل بعد التسليم؟", a: "" },
+    ],
   });
   const navigate = useNavigate();
 
@@ -74,6 +94,10 @@ function ServicesPage() {
         plans: form.plans
           .filter(p => p.name.trim())
           .map(p => ({ ...p, feats: p.feats.filter(f => f.trim()) })),
+        steps: form.steps.filter(s => s.title.trim()),
+        stats: form.stats.filter(s => s.v.trim() || s.l.trim()),
+        testimonials: form.testimonials.filter(t => t.name.trim() || t.text.trim()),
+        faqs: form.faqs.filter(f => f.q.trim()),
       };
       localStorage.setItem(KEY, JSON.stringify(store));
     } catch {}
@@ -259,6 +283,65 @@ function ServicesPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">خطوات العمل</div>
+              <div className="grid gap-2 md:grid-cols-2">
+                {form.steps.map((s, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs font-bold">{i + 1}</span>
+                    <input placeholder="الخطوة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.title} onChange={(e) => { const n = [...form.steps]; n[i] = { title: e.target.value }; setForm({ ...form, steps: n }); }} />
+                    <button onClick={() => setForm({ ...form, steps: form.steps.filter((_, x) => x !== i) })} className="text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, steps: [...form.steps, { title: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة خطوة</button>
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">الأرقام (إحصائيات)</div>
+              <div className="grid gap-2 md:grid-cols-2">
+                {form.stats.map((s, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-center">
+                    <input placeholder="القيمة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.v} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], v: e.target.value }; setForm({ ...form, stats: n }); }} />
+                    <input placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.l} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], l: e.target.value }; setForm({ ...form, stats: n }); }} />
+                    <button onClick={() => setForm({ ...form, stats: form.stats.filter((_, x) => x !== i) })} className="text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, stats: [...form.stats, { v: "", l: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5 md:col-span-2">+ إضافة رقم</button>
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">آراء العملاء</div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {form.testimonials.map((t, i) => (
+                  <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input placeholder="الاسم" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.name} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], name: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                      <input placeholder="المسمى" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.role} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], role: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                    </div>
+                    <textarea rows={2} placeholder="النص" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.text} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], text: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                    <button onClick={() => setForm({ ...form, testimonials: form.testimonials.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, testimonials: [...form.testimonials, { name: "", role: "", text: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة رأي</button>
+              </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">الأسئلة الشائعة</div>
+              <div className="space-y-2">
+                {form.faqs.map((f, i) => (
+                  <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                    <input placeholder="السؤال" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={f.q} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], q: e.target.value }; setForm({ ...form, faqs: n }); }} />
+                    <textarea rows={2} placeholder="الإجابة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={f.a} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], a: e.target.value }; setForm({ ...form, faqs: n }); }} />
+                    <button onClick={() => setForm({ ...form, faqs: form.faqs.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, faqs: [...form.faqs, { q: "", a: "" }] })} className="w-full rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة سؤال</button>
               </div>
             </section>
           </div>
