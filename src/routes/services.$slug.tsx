@@ -1,26 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, Sparkles, Target, Gem,
-  Layout, Users2, FileCode2, LifeBuoy, Smartphone, MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
-
-const overview = [
-  { icon: Users2, title: "لمن هذه الخدمة", desc: "للشركات الناشئة والعلامات التي تريد حضورًا رقميًا قويًا وموقعًا احترافيًا." },
-  { icon: Sparkles, title: "لماذا تهم؟", desc: "لأن الواجهة الواضحة ترفع الثقة، تقلّل التشتيت، وتزيد التحويل." },
-  { icon: Gem, title: "القيمة الأساسية", desc: "موقع سريع ومتجاوب وآمن يعكس هويتك ويحقق نتائج تجارية حقيقية." },
-];
-
-const benefits = [
-  { icon: Layout, title: "تصميم كامل للمشروع", desc: "واجهات متناسقة لجميع الصفحات الرئيسية." },
-  { icon: Target, title: "تجربة مستخدم احترافية", desc: "تدفقات واضحة وسهلة الإستخدام لكل العملاء." },
-  { icon: FileCode2, title: "ملفات قابلة للتطوير", desc: "كود نظيف وسهل التعديل والتوسعة لاحقًا." },
-  { icon: Smartphone, title: "نسخة للموبايل والويب", desc: "تجربة مثالية على كل الأجهزة." },
-  { icon: LifeBuoy, title: "دعم بعد التسليم", desc: "متابعة فنية لأكثر من شهر بعد الإطلاق." },
-];
+import { serviceMap } from "@/data/services";
 
 const steps = [
   { n: 1, icon: MessageSquare, title: "فهم المتطلبات" },
@@ -47,21 +34,6 @@ const stats = [
   { v: "+180", l: "عدد العملاء" },
 ];
 
-const plans = [
-  {
-    name: "Basic", price: "3,500", featured: false,
-    feats: ["تصميم 5 صفحات", "متجاوب", "هوية بسيطة", "صياغة محتوى مبدئي"],
-  },
-  {
-    name: "Pro", price: "7,900", featured: true,
-    feats: ["تصميم 10 صفحات", "هوية متكاملة", "ربط نماذج تواصل", "تحسين سرعة", "SEO أساسي"],
-  },
-  {
-    name: "Premium", price: "12,500", featured: false,
-    feats: ["كل ما في باقة Pro", "متجر إلكتروني", "لوحة تحكم", "دعم أولوية"],
-  },
-];
-
 const testimonials = [
   { name: "خالد العتيبي", role: "Founder", text: "تجربة احترافية، التسليم في الموعد المحدد ودعم ممتاز." },
   { name: "نورة الحربي", role: "Marketing Lead", text: "تصميم رفع تحويلات الموقع بشكل واضح خلال أسبوع." },
@@ -79,9 +51,31 @@ const faqs = [
 ];
 
 function ServiceDetailPage() {
+  const { slug } = Route.useParams();
+  const service = serviceMap[slug];
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
+
+  if (!service) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteHeader />
+        <main className="flex-1">
+          <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+            <h1 className="text-2xl font-extrabold text-foreground">الخدمة غير موجودة</h1>
+            <p className="mt-3 text-sm text-muted-foreground">قد يكون الرابط منتهي الصلاحية أو غير صحيح.</p>
+            <Link to="/services" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-white">
+              العودة لكل الخدمات <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  const { overview, benefits, plans, title, subtitle, breadcrumb, heroHighlights } = service;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -102,11 +96,11 @@ function ServiceDetailPage() {
                 <ChevronLeft className="h-3 w-3" />
                 <Link to="/services" className="hover:underline">خدماتنا</Link>
                 <ChevronLeft className="h-3 w-3" />
-                <span>تصميم مواقع</span>
+                <span>{breadcrumb}</span>
               </div>
-              <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">تصميم مواقع الكترونية</h1>
+              <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">{title}</h1>
               <p className="mt-3 text-sm text-white/85 sm:text-base">
-                مواقع سريعة ومتجاوبة تعكس هويتك التجارية وتُحقق التحويل.
+                {subtitle}
               </p>
               <div className="mt-6 flex flex-wrap justify-end gap-3">
                 <button className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5">
@@ -121,11 +115,9 @@ function ServiceDetailPage() {
             {/* Feature card */}
             <div className="order-2">
               <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
-                <div className="text-center text-sm font-bold text-white/90">
-                  واجهة أوضح + ثقة أعلى + تحويل أفضل
-                </div>
+                <div className="text-center text-sm font-bold text-white/90">{title}</div>
                 <div className="mt-4 space-y-2">
-                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
+                  {heroHighlights.map((f) => (
                     <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
                       <Check className="h-4 w-4 text-white/80" />
                       <span>{f}</span>
@@ -452,14 +444,19 @@ function TestimonialsSlider() {
   );
 }
 
-export const Route = createFileRoute("/services/web-design")({
-  head: () => ({
-    meta: [
-      { title: "تصميم مواقع الكترونية | سابا ديزاين" },
-      { name: "description", content: "خدمة تصميم مواقع احترافية متجاوبة سريعة تعكس هويتك وتحقق التحويل." },
-      { property: "og:title", content: "تصميم مواقع الكترونية | سابا ديزاين" },
-      { property: "og:description", content: "مواقع سريعة ومتجاوبة تعكس هويتك التجارية وتحقق التحويل." },
-    ],
-  }),
+export const Route = createFileRoute("/services/$slug")({
+  head: ({ params }) => {
+    const s = serviceMap[params.slug];
+    const t = s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين";
+    const d = s?.subtitle ?? "حلول رقمية متكاملة لنمو أعمالك.";
+    return {
+      meta: [
+        { title: t },
+        { name: "description", content: d },
+        { property: "og:title", content: t },
+        { property: "og:description", content: d },
+      ],
+    };
+  },
   component: ServiceDetailPage,
 });
