@@ -23,8 +23,10 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminSiteRouteImport } from './routes/admin.site'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
@@ -111,6 +113,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminSiteRoute = AdminSiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -119,6 +126,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminServicesRoute = AdminServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSeoRoute = AdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
@@ -215,8 +227,10 @@ export interface FileRoutesByFullPath {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -247,8 +261,10 @@ export interface FileRoutesByTo {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
@@ -281,8 +297,10 @@ export interface FileRoutesById {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
+  '/admin/site': typeof AdminSiteRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -316,8 +334,10 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -348,8 +368,10 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
     | '/checkout/success'
     | '/services/$slug'
     | '/account'
@@ -381,8 +403,10 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site'
     | '/checkout/success'
     | '/services/$slug'
     | '/account/'
@@ -519,6 +543,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/site': {
+      id: '/admin/site'
+      path: '/site'
+      fullPath: '/admin/site'
+      preLoaderRoute: typeof AdminSiteRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -531,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/admin/services'
       preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/seo': {
+      id: '/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reports': {
@@ -674,8 +712,10 @@ interface AdminRouteChildren {
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminSeoRoute: typeof AdminSeoRoute
   AdminServicesRoute: typeof AdminServicesRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
+  AdminSiteRoute: typeof AdminSiteRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -686,8 +726,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminSeoRoute: AdminSeoRoute,
   AdminServicesRoute: AdminServicesRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRouteWithChildren,
+  AdminSiteRoute: AdminSiteRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -728,3 +770,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
