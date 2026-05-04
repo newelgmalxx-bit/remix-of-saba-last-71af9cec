@@ -7,6 +7,7 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { useLanguage } from "@/hooks/useLanguage";
 import logoImg from "@/assets/logo.png";
 
 type NavItem = { to: string; label: string; icon: any; children?: { to: string; label: string; icon: any }[] };
@@ -130,6 +131,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
           </div>
           <div className="flex items-center gap-2">
             {action}
+            <LangToggle />
             <Popover>
               <PopoverTrigger asChild>
                 <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
