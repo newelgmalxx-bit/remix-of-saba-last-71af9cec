@@ -87,15 +87,15 @@ export const adminInvoices: AdminInvoice[] = [
 export type AdminClient = {
   id: string; name: string; email: string; phone: string; orders: number;
   totalSpent: number; segment: "vip" | "regular" | "new"; joinedAt: string;
-  region?: string; language?: string; address?: string; notes?: string;
+  region?: string; city?: string; language?: string; address?: string; notes?: string;
 };
 
 export const adminClients: AdminClient[] = [
-  { id: "c1", name: "أحمد العبدالله", email: "ahmed@example.com", phone: "+966 55 111 2222", orders: 12, totalSpent: 48320, segment: "vip", joinedAt: "مارس 2024", region: "الرياض، السعودية", language: "العربية", address: "حي الملقا، الرياض", notes: "عميل VIP — مشاريع متعددة" },
-  { id: "c2", name: "نورة السالم", email: "noura@example.com", phone: "+966 50 333 4444", orders: 8, totalSpent: 32158, segment: "regular", joinedAt: "يونيو 2024", region: "جدة، السعودية", language: "العربية", address: "حي الروضة، جدة", notes: "تفضّل التواصل عبر البريد" },
-  { id: "c3", name: "محمد الزهراني", email: "m.z@example.com", phone: "+966 56 555 6666", orders: 15, totalSpent: 67452, segment: "vip", joinedAt: "يناير 2024", region: "الدمام، السعودية", language: "العربية", address: "حي الشاطئ، الدمام", notes: "" },
-  { id: "c4", name: "ريم الشهري", email: "reem@example.com", phone: "+966 53 777 8888", orders: 3, totalSpent: 8920, segment: "new", joinedAt: "أكتوبر 2025", region: "الرياض، السعودية", language: "العربية", address: "—", notes: "عميلة جديدة" },
-  { id: "c5", name: "خالد القحطاني", email: "k@example.com", phone: "+966 55 999 0000", orders: 7, totalSpent: 28764, segment: "regular", joinedAt: "أغسطس 2024", region: "مكة، السعودية", language: "العربية", address: "—", notes: "" },
+  { id: "c1", name: "أحمد العبدالله", email: "ahmed@example.com", phone: "+966 55 111 2222", orders: 12, totalSpent: 48320, segment: "vip", joinedAt: "مارس 2024", region: "السعودية", city: "الرياض", language: "العربية", address: "حي الملقا، الرياض", notes: "عميل VIP — مشاريع متعددة" },
+  { id: "c2", name: "نورة السالم", email: "noura@example.com", phone: "+966 50 333 4444", orders: 8, totalSpent: 32158, segment: "regular", joinedAt: "يونيو 2024", region: "السعودية", city: "جدة", language: "العربية", address: "حي الروضة، جدة", notes: "تفضّل التواصل عبر البريد" },
+  { id: "c3", name: "محمد الزهراني", email: "m.z@example.com", phone: "+966 56 555 6666", orders: 15, totalSpent: 67452, segment: "vip", joinedAt: "يناير 2024", region: "السعودية", city: "الدمام", language: "العربية", address: "حي الشاطئ، الدمام", notes: "" },
+  { id: "c4", name: "ريم الشهري", email: "reem@example.com", phone: "+966 53 777 8888", orders: 3, totalSpent: 8920, segment: "new", joinedAt: "أكتوبر 2025", region: "السعودية", city: "الرياض", language: "العربية", address: "—", notes: "عميلة جديدة" },
+  { id: "c5", name: "خالد القحطاني", email: "k@example.com", phone: "+966 55 999 0000", orders: 7, totalSpent: 28764, segment: "regular", joinedAt: "أغسطس 2024", region: "السعودية", city: "مكة", language: "العربية", address: "—", notes: "" },
 ];
 
 export type AdminPortfolio = {
