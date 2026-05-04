@@ -148,7 +148,7 @@ function AboutPage() {
               </div>
               <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2">
                 {services.map((s) => (
-                  <div key={s.title} className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+                  <div key={s.title} className="card-hover flex items-center gap-3 rounded-xl border border-border bg-white p-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <s.icon className="h-4 w-4" />
                     </div>
@@ -200,7 +200,7 @@ function AboutPage() {
               ].map((c) => (
                 <div
                   key={c.title}
-                  className="group relative overflow-hidden rounded-3xl border border-border bg-background p-8 transition hover:-translate-y-1 hover:shadow-lg"
+                  className="card-hover group relative overflow-hidden rounded-3xl border border-border bg-background p-8"
                 >
                   <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition group-hover:scale-150" />
                   <div className="relative">
@@ -227,7 +227,7 @@ function AboutPage() {
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
-              <div key={v.title} className="relative rounded-3xl border border-border bg-white p-6 transition hover:border-primary/40 hover:shadow-md">
+              <div key={v.title} className="card-hover relative rounded-3xl border border-border bg-white p-6">
                 <div className="absolute -top-4 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-white shadow-md">
                   {String(i + 1).padStart(2, "0")}
                 </div>
@@ -256,7 +256,7 @@ function AboutPage() {
                 {journey.map((j, i) => (
                   <div key={j.year} className={`flex flex-col gap-4 md:flex-row md:items-center ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>
                     <div className="flex-1 md:text-left">
-                      <div className={`rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
+                    <div className={`card-hover rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
                         <div className="text-2xl font-extrabold text-primary">{j.year}</div>
                         <h3 className="mt-1 text-lg font-bold text-foreground">{j.title}</h3>
                         <p className="mt-2 text-sm leading-7 text-muted-foreground">{j.desc}</p>
@@ -282,7 +282,7 @@ function AboutPage() {
           </div>
           <div className="relative mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {process.map((p, i) => (
-              <div key={p.title} className="group relative rounded-3xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+              <div key={p.title} className="card-hover group relative rounded-3xl border border-border bg-white p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
                     <p.icon className="h-5 w-5" />
