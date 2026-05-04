@@ -1,5 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import { Banknote, CreditCard, Wallet, Truck, Smartphone } from "lucide-react";
+import tabbyLogo from "@/assets/pay-tabby.webp";
+import tamaraLogo from "@/assets/pay-tamara.png";
+import madaLogo from "@/assets/pay-mada.png";
+import applePayLogo from "@/assets/pay-applepay.png";
 
 export type PaymentMethod = "tabby" | "tamara" | "mada" | "mayfatoorah" | "cod";
 
@@ -8,12 +12,24 @@ export const paymentMethods: {
   name: string;
   desc: string;
   icon: LucideIcon;
+  logo?: string;
+  brands?: { name: string; logo?: string; icon?: LucideIcon }[];
   badge?: string;
 }[] = [
-  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, badge: "الأكثر استخداماً" },
-  { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet },
-  { id: "mada", name: "مدى", desc: "بطاقة مدى البنكية السعودية", icon: CreditCard },
-  { id: "mayfatoorah", name: "ماي فاتورة", desc: "كل وسائل الدفع الإلكترونية", icon: Banknote },
+  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, badge: "الأكثر استخداماً" },
+  { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
+  { id: "mada", name: "مدى", desc: "بطاقة مدى البنكية السعودية", icon: CreditCard, logo: madaLogo },
+  {
+    id: "mayfatoorah",
+    name: "ماي فاتورة",
+    desc: "فيزا، ماستر كارد، وApple Pay",
+    icon: Banknote,
+    brands: [
+      { name: "Visa", icon: CreditCard },
+      { name: "Mastercard", icon: CreditCard },
+      { name: "Apple Pay", logo: applePayLogo },
+    ],
+  },
   { id: "cod", name: "الدفع عند الاستلام", desc: "ادفع بعد استلام الخدمة", icon: Truck },
 ];
 
