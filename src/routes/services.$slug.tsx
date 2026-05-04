@@ -51,9 +51,31 @@ const faqs = [
 ];
 
 function ServiceDetailPage() {
+  const { slug } = Route.useParams();
+  const service = serviceMap[slug];
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
+
+  if (!service) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteHeader />
+        <main className="flex-1">
+          <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+            <h1 className="text-2xl font-extrabold text-foreground">الخدمة غير موجودة</h1>
+            <p className="mt-3 text-sm text-muted-foreground">قد يكون الرابط منتهي الصلاحية أو غير صحيح.</p>
+            <Link to="/services" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-white">
+              العودة لكل الخدمات <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  const { overview, benefits, plans, title, subtitle, breadcrumb, heroHighlights } = service;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -74,11 +96,11 @@ function ServiceDetailPage() {
                 <ChevronLeft className="h-3 w-3" />
                 <Link to="/services" className="hover:underline">خدماتنا</Link>
                 <ChevronLeft className="h-3 w-3" />
-                <span>تصميم مواقع</span>
+                <span>{breadcrumb}</span>
               </div>
-              <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">تصميم مواقع الكترونية</h1>
+              <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">{title}</h1>
               <p className="mt-3 text-sm text-white/85 sm:text-base">
-                مواقع سريعة ومتجاوبة تعكس هويتك التجارية وتُحقق التحويل.
+                {subtitle}
               </p>
               <div className="mt-6 flex flex-wrap justify-end gap-3">
                 <button className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5">
@@ -93,11 +115,9 @@ function ServiceDetailPage() {
             {/* Feature card */}
             <div className="order-2">
               <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
-                <div className="text-center text-sm font-bold text-white/90">
-                  واجهة أوضح + ثقة أعلى + تحويل أفضل
-                </div>
+                <div className="text-center text-sm font-bold text-white/90">{title}</div>
                 <div className="mt-4 space-y-2">
-                  {["تصميم متجاوب", "تصميم متناسق مع البراند", "دعم التطوير وتجهيز الموقع"].map((f) => (
+                  {heroHighlights.map((f) => (
                     <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
                       <Check className="h-4 w-4 text-white/80" />
                       <span>{f}</span>
