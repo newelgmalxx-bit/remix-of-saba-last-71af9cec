@@ -21,8 +21,8 @@ const growth = [
   { m: "ديس", n: 14, r: 25 }, { m: "ينا", n: 12, r: 28 }, { m: "فبر", n: 15, r: 32 },
 ];
 
-type AddForm = { name: string; email: string; phone: string; region: string; language: string; address: string; segment: AdminClient["segment"]; notes: string };
-const emptyAdd: AddForm = { name: "", email: "", phone: "", region: "", language: "العربية", address: "", segment: "new", notes: "" };
+type AddForm = { name: string; email: string; phone: string; city: string; region: string; language: string; address: string; segment: AdminClient["segment"]; notes: string };
+const emptyAdd: AddForm = { name: "", email: "", phone: "", city: "", region: "", language: "العربية", address: "", segment: "new", notes: "" };
 
 function ClientsPage() {
   const [clients, setClients] = useState<AdminClient[]>(initialClients);
@@ -41,7 +41,7 @@ function ClientsPage() {
     const month = new Date().toLocaleDateString("ar-SA", { month: "long", year: "numeric" });
     setClients([
       { id: "c" + Date.now(), name: add.name, email: add.email, phone: add.phone, orders: 0, totalSpent: 0,
-        segment: add.segment, joinedAt: month, region: add.region, language: add.language, address: add.address, notes: add.notes },
+        segment: add.segment, joinedAt: month, region: add.region, city: add.city, language: add.language, address: add.address, notes: add.notes },
       ...clients,
     ]);
     setAdd(emptyAdd); setAddOpen(false);
@@ -93,6 +93,8 @@ function ClientsPage() {
               <tr className="text-right text-xs text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">العميل</th>
                 <th className="px-3 py-3 font-medium">البريد</th>
+                <th className="px-3 py-3 font-medium">الجوال</th>
+                <th className="px-3 py-3 font-medium">المدينة</th>
                 <th className="px-3 py-3 font-medium">الطلبات</th>
                 <th className="px-3 py-3 font-medium">إجمالي الإنفاق</th>
                 <th className="px-3 py-3 font-medium">الشريحة</th>
@@ -116,6 +118,8 @@ function ClientsPage() {
                       </div>
                     </td>
                     <td className="px-3 py-3 text-muted-foreground">{c.email}</td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{c.phone}</td>
+                    <td className="px-3 py-3 text-xs">{c.city ?? "—"}</td>
                     <td className="px-3 py-3">{c.orders}</td>
                     <td className="px-3 py-3 font-bold">{fmtSAR(c.totalSpent)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
@@ -149,6 +153,7 @@ function ClientsPage() {
             <Lbl label="الاسم الكامل"><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
             <Lbl label="رقم الجوال"><input className={ic} value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
             <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
+            <Lbl label="المدينة"><input className={ic} value={add.city} onChange={e => setAdd({ ...add, city: e.target.value })} /></Lbl>
             <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
             <Lbl label="اللغة المفضلة">
               <input className={ic} value={add.language} onChange={e => setAdd({ ...add, language: e.target.value })} />
@@ -186,6 +191,7 @@ function ClientsPage() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Info icon={Mail} label="البريد" value={viewing.email} />
                 <Info icon={Phone} label="الجوال" value={viewing.phone} />
+                <Info icon={MapPin} label="المدينة" value={viewing.city ?? "—"} />
                 <Info icon={MapPin} label="المنطقة" value={viewing.region ?? "—"} />
                 <Info icon={Globe} label="اللغة" value={viewing.language ?? "—"} />
                 <Info icon={MapPin} label="العنوان" value={viewing.address ?? "—"} />
