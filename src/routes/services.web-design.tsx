@@ -195,19 +195,19 @@ function ServiceDetailPage() {
                 <h2 className="text-2xl font-extrabold text-foreground">كيف نعمل</h2>
                 <p className="mt-2 text-xs text-muted-foreground">خطوات بسيطة منظمة من البداية حتى التسليم النهائي.</p>
               </div>
-              <div className="relative mt-10 grid grid-cols-2 gap-5 md:grid-cols-5">
-                <div className="pointer-events-none absolute right-[10%] left-[10%] top-7 hidden h-px bg-border md:block" />
+              <div className="relative mt-12 grid grid-cols-2 gap-6 md:grid-cols-5">
+                <div className="pointer-events-none absolute right-[10%] left-[10%] top-9 hidden h-0.5 bg-gradient-to-l from-primary/10 via-primary/40 to-primary/10 md:block" />
                 {steps.map((s) => (
                   <div key={s.n} className="relative flex flex-col items-center text-center">
                     <div className="relative">
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow">
-                        <s.icon className="h-6 w-6" />
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary shadow-[0_10px_25px_-10px_rgba(30,91,148,0.45)] ring-2 ring-primary">
+                        <s.icon className="h-7 w-7" />
                       </span>
-                      <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-primary shadow ring-1 ring-border">
+                      <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white shadow-md ring-2 ring-white">
                         {s.n}
                       </span>
                     </div>
-                    <div className="mt-3 text-sm font-bold text-foreground">{s.title}</div>
+                    <div className="mt-4 text-sm font-bold text-foreground">{s.title}</div>
                   </div>
                 ))}
               </div>
