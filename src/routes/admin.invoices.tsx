@@ -20,7 +20,7 @@ function InvoicesPage() {
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
-    orderNumber: "", client: "", email: "", phone: "", payment: paymentMethods[0],
+    orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0],
     amount: 0, status: "pending", issued: new Date().toLocaleDateString("ar-SA"),
   });
   const filtered = invoices.filter(i =>
@@ -31,8 +31,8 @@ function InvoicesPage() {
   const total = invoices.reduce((s, i) => s + (i.status === "paid" ? i.amount : 0), 0);
 
   const exportCsv = () => {
-    const csv = ["Number,Order,Client,Email,Phone,Payment,Amount,Status,Issued",
-      ...invoices.map(i => `${i.number},${i.orderNumber},${i.client},${i.email},${i.phone ?? ""},${i.payment ?? ""},${i.amount},${i.status},${i.issued}`)
+    const csv = ["Number,Order,Client,Email,Phone,City,Payment,Amount,Status,Issued",
+      ...invoices.map(i => `${i.number},${i.orderNumber},${i.client},${i.email},${i.phone ?? ""},${i.city ?? ""},${i.payment ?? ""},${i.amount},${i.status},${i.issued}`)
     ].join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -85,6 +85,7 @@ function InvoicesPage() {
                 <th className="px-3 py-3 font-medium">الطلب</th>
                 <th className="px-3 py-3 font-medium">العميل</th>
                 <th className="px-3 py-3 font-medium">الجوال</th>
+                <th className="px-3 py-3 font-medium">المدينة</th>
                 <th className="px-3 py-3 font-medium">الدفع</th>
                 <th className="px-3 py-3 font-medium">المبلغ</th>
                 <th className="px-3 py-3 font-medium">الحالة</th>
@@ -101,6 +102,7 @@ function InvoicesPage() {
                     <td className="px-3 py-3 text-muted-foreground">#{i.orderNumber}</td>
                     <td className="px-3 py-3"><div className="font-medium">{i.client}</div><div className="text-[11px] text-muted-foreground">{i.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
+                    <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
                     <td className="px-3 py-3">
                       <select value={i.payment ?? paymentMethods[0]} onChange={(e) => setInvoices(invoices.map(x => x.id === i.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
                         {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
@@ -137,6 +139,7 @@ function InvoicesPage() {
                   <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">البريد</div><div className="font-bold">{viewing.email}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">الجوال</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">المدينة</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
                 </div>
                 <div className="border-t border-border pt-3 space-y-1.5">
@@ -159,6 +162,7 @@ function InvoicesPage() {
             <L label="اسم العميل"><input className={ic} value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></L>
             <L label="البريد"><input className={ic} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></L>
             <L label="رقم الجوال"><input className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
+            <L label="المدينة"><input className={ic} value={form.city ?? ""} onChange={e => setForm({ ...form, city: e.target.value })} /></L>
             <L label="رقم الطلب"><input className={ic} value={form.orderNumber} onChange={e => setForm({ ...form, orderNumber: e.target.value })} /></L>
             <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
             <L label="طريقة الدفع">
