@@ -25,6 +25,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
@@ -113,6 +114,11 @@ const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminBookingsRoute = AdminBookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/services': typeof AdminServicesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/account/profile'
     | '/admin/bookings'
+    | '/admin/clients'
     | '/admin/invoices'
     | '/admin/services'
     | '/checkout/success'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/account/profile'
     | '/admin/bookings'
+    | '/admin/clients'
     | '/admin/invoices'
     | '/admin/services'
     | '/checkout/success'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/account/profile'
     | '/admin/bookings'
+    | '/admin/clients'
     | '/admin/invoices'
     | '/admin/services'
     | '/checkout/success'
@@ -436,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInvoicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/bookings': {
       id: '/admin/bookings'
       path: '/bookings'
@@ -490,6 +509,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminClientsRoute: typeof AdminClientsRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -497,6 +517,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
+  AdminClientsRoute: AdminClientsRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
