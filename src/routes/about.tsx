@@ -43,6 +43,8 @@ const testimonials = [
   { name: "خالد العبدالله", role: "مدير عام، شركة تك ستارت", quote: "تجربة استثنائية. الفريق فهم رؤيتنا من أول اجتماع وقدّم نتيجة فاقت توقعاتنا بمراحل." },
   { name: "نورة السالم", role: "مؤسسة، علامة نمط", quote: "احترافية في كل تفصيلة، التزام بالمواعيد، وذوق راقي. سابا ديزاين شريك حقيقي وليس مجرد مزود خدمة." },
   { name: "عبدالرحمن المالكي", role: "مدير تسويق، مجموعة الأفق", quote: "حصلنا على هوية رقمية رفعت من قيمة علامتنا التجارية وضاعفت معدل التحويل بشكل ملموس." },
+  { name: "هدى الفهد", role: "مديرة منتج، تطبيق رواق", quote: "السرعة في التنفيذ مع الجودة العالية شيء نادر، لكن سابا ديزاين قدّمت لنا الاثنين معاً." },
+  { name: "ياسر الحربي", role: "الرئيس التنفيذي، متجر نور", quote: "متجرنا الإلكتروني انطلق بشكل احترافي وزادت مبيعاتنا 3 أضعاف في أول ربع بعد الإطلاق." },
 ];
 
 const tools = [
@@ -297,38 +299,7 @@ function AboutPage() {
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="bg-secondary/30 py-24">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
-              <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                ما يقوله من عملوا معنا
-              </h2>
-            </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {testimonials.map((t) => (
-                <div key={t.name} className="relative rounded-3xl border border-border bg-background p-7 shadow-sm transition hover:shadow-md">
-                  <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/15" />
-                  <div className="flex gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
-                  <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-foreground">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.role}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <TestimonialsSlider />
 
         {/* TOOLS / TECH */}
         <section className="mx-auto max-w-7xl px-4 py-20">
