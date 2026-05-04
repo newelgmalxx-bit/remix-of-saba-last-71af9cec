@@ -140,7 +140,7 @@ function ServiceDetailPage() {
         {/* Overview */}
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">نظرة عامة عن الخدمة</h2>
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -165,7 +165,7 @@ function ServiceDetailPage() {
         {/* What you get */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">ماذا ستحصل عليه</h2>
                 <p className="mt-2 text-xs text-muted-foreground">مخرجات واضحة تضمن لك جودة الناتج وسهولة التطوير.</p>
@@ -190,7 +190,7 @@ function ServiceDetailPage() {
         {/* How we work */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+            <div className="rounded-2xl border border-border/60 bg-white p-8 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">كيف نعمل</h2>
                 <p className="mt-2 text-xs text-muted-foreground">خطوات بسيطة منظمة من البداية حتى التسليم النهائي.</p>
@@ -218,7 +218,7 @@ function ServiceDetailPage() {
         {/* Previous works */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="flex flex-col items-end justify-between gap-4 md:flex-row-reverse md:items-center">
                 <div className="text-right">
                   <h2 className="text-2xl font-extrabold text-foreground">أعمال سابقة</h2>
@@ -261,7 +261,7 @@ function ServiceDetailPage() {
         {/* Stats */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">أرقام تعكس الثقة</h2>
                 <p className="mt-1 text-xs text-muted-foreground">مؤشرات من أداء فريقنا الفعلي.</p>
@@ -281,7 +281,7 @@ function ServiceDetailPage() {
         {/* Plans */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
                 <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
@@ -325,7 +325,7 @@ function ServiceDetailPage() {
         {/* Testimonials */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">آراء العملاء</h2>
                 <p className="mt-1 text-xs text-muted-foreground">تجارب حقيقية من فرق اعتمدت علينا.</p>
@@ -338,7 +338,7 @@ function ServiceDetailPage() {
         {/* FAQ */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="text-right">
                 <h2 className="text-2xl font-extrabold text-foreground">الأسئلة الشائعة</h2>
                 <p className="mt-1 text-xs text-muted-foreground">إجابات سريعة على ما يهمك.</p>
