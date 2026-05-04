@@ -412,23 +412,24 @@ export const Route = createFileRoute("/about")({
 });
 
 function TestimonialsSlider() {
-  const [idx, setIdx] = useState(0);
+  const [start, setStart] = useState(0);
   const total = testimonials.length;
+  const pageCount = Math.max(1, total - 2); // 3 visible at a time
 
   useEffect(() => {
-    const id = setInterval(() => setIdx((p) => (p + 1) % total), 5500);
+    const id = setInterval(() => setStart((p) => (p + 1) % pageCount), 5500);
     return () => clearInterval(id);
-  }, [total]);
+  }, [pageCount]);
 
-  const prev = () => setIdx((p) => (p - 1 + total) % total);
-  const next = () => setIdx((p) => (p + 1) % total);
-  const t = testimonials[idx];
+  const prev = () => setStart((p) => (p - 1 + pageCount) % pageCount);
+  const next = () => setStart((p) => (p + 1) % pageCount);
+  const visible = [0, 1, 2].map((o) => testimonials[(start + o) % total]);
 
   return (
     <section className="relative overflow-hidden bg-secondary/30 py-24">
       <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="relative mx-auto max-w-5xl px-4">
+      <div className="relative mx-auto max-w-7xl px-4">
         <div className="text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
           <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
@@ -436,55 +437,58 @@ function TestimonialsSlider() {
           </h2>
         </div>
 
-        <div className="relative mt-12">
-          <div
-            key={idx}
-            className="relative mx-auto max-w-3xl rounded-3xl border border-border bg-background p-8 shadow-lg md:p-12 animate-fade-up"
-          >
-            <Quote className="absolute right-8 top-8 h-12 w-12 text-primary/15" />
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="mt-6 text-lg leading-9 text-foreground md:text-xl">"{t.quote}"</p>
-            <div className="mt-8 flex items-center gap-4 border-t border-border pt-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-base font-extrabold text-white">
-                {t.name.charAt(0)}
+        <div className="mt-12 grid gap-6 md:grid-cols-3" key={start}>
+          {visible.map((t, i) => (
+            <div
+              key={`${start}-${i}`}
+              className="card-hover relative rounded-3xl border border-border bg-background p-7 shadow-sm animate-fade-up"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <Quote className="absolute right-6 top-6 h-9 w-9 text-primary/15" />
+              <div className="flex gap-1">
+                {Array.from({ length: 5 }).map((_, k) => (
+                  <Star key={k} className="h-4 w-4 fill-primary text-primary" />
+                ))}
               </div>
-              <div>
-                <div className="text-sm font-extrabold text-foreground">{t.name}</div>
-                <div className="text-xs text-muted-foreground">{t.role}</div>
+              <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
+              <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-sm font-extrabold text-white">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-extrabold text-foreground">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="mt-8 flex items-center justify-center gap-5">
-            <button
-              onClick={prev}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
-              aria-label="السابق"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  className={`h-2 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
-                  aria-label={`رأي رقم ${i + 1}`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={next}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:border-primary hover:text-primary"
-              aria-label="التالي"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
+        <div className="mt-10 flex items-center justify-center gap-5">
+          <button
+            onClick={prev}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
+            aria-label="السابق"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setStart(i)}
+                className={`h-2 rounded-full transition-all ${i === start ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
+                aria-label={`صفحة ${i + 1}`}
+              />
+            ))}
           </div>
+          <button
+            onClick={next}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
+            aria-label="التالي"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </section>
