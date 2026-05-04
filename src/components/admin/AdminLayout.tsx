@@ -7,7 +7,7 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { useLanguage } from "@/hooks/useLanguage";
+import { Languages } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
 type NavItem = { to: string; label: string; icon: any; children?: { to: string; label: string; icon: any }[] };
@@ -247,6 +247,24 @@ export function GhostButton({ children, onClick }: { children: React.ReactNode; 
   return (
     <button onClick={onClick} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-bold hover:bg-muted">
       {children}
+    </button>
+  );
+}
+
+function LangToggle() {
+  const [lang, setLang] = useState<"ar" | "en">(() => {
+    if (typeof window === "undefined") return "ar";
+    return (localStorage.getItem("saba_admin_lang") as "ar" | "en") || "ar";
+  });
+  const toggle = () => {
+    const next = lang === "ar" ? "en" : "ar";
+    setLang(next);
+    try { localStorage.setItem("saba_admin_lang", next); } catch {}
+  };
+  return (
+    <button onClick={toggle} title="تبديل اللغة / Toggle language" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border px-2.5 hover:bg-muted">
+      <Languages className="h-4 w-4 text-primary" />
+      <span className="text-[11px] font-bold">{lang === "ar" ? "EN" : "AR"}</span>
     </button>
   );
 }
