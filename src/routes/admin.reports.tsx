@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { DollarSign, ShoppingCart, TrendingUp, Users, Package, Activity, Calendar, Download } from "lucide-react";
+import { DollarSign, ShoppingCart, TrendingUp, Users, Package, Activity, Download } from "lucide-react";
 import { fmtSAR } from "@/data/admin";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ function ReportsPage() {
   const [type, setType] = useState("الملخص المالي");
   const [period, setPeriod] = useState("آخر 30 يوم");
   const [format, setFormat] = useState("CSV");
+  const [topPeriod, setTopPeriod] = useState("آخر 30 يوم");
 
   const generate = () => {
     const rows = [
@@ -56,7 +57,9 @@ function ReportsPage() {
   return (
     <AdminLayout title="التقارير" subtitle="تحليلات متقدمة وتقارير الأعمال" action={
       <div className="flex gap-2">
-        <GhostButton><Calendar className="h-4 w-4" /> آخر 30 يوم</GhostButton>
+        <select value={topPeriod} onChange={(e) => setTopPeriod(e.target.value)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+          <option>آخر 7 أيام</option><option>آخر 30 يوم</option><option>آخر 90 يوم</option><option>هذا العام</option>
+        </select>
         <PrimaryButton onClick={exportTopCsv}><Download className="h-4 w-4" /> تصدير CSV</PrimaryButton>
       </div>
     }>

@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download } from "lucide-react";
+import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
 import { toast } from "sonner";
@@ -18,7 +18,8 @@ function ServicesPage() {
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
   const [items, setItems] = useState<AdminService[]>(initialServices);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "web-design" });
+  const [form, setForm] = useState({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "" });
+  const navigate = useNavigate();
 
   const filtered = items.filter(s =>
     (tab === "all" || s.status === tab) &&
@@ -27,18 +28,40 @@ function ServicesPage() {
 
   const handleAdd = () => {
     if (!form.titleAr || !form.sku) { toast.error("الاسم والـ SKU مطلوبان"); return; }
+    const slug = (form.slug || form.titleEn || form.titleAr).trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "service-" + Date.now();
     const newSvc: AdminService = {
       id: "s" + (items.length + 1),
-      sku: form.sku, slug: form.slug,
+      sku: form.sku, slug,
       titleAr: form.titleAr, titleEn: form.titleEn || form.titleAr,
       category: form.category || "عام",
       price: Number(form.price) || 0, bookings: 0, status: "draft",
     };
     setItems([newSvc, ...items]);
     setOpen(false);
-    setForm({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "web-design" });
-    toast.success("تم إضافة الخدمة");
+    setForm({ titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "" });
+    // Seed a custom override so the editor & public page can render this new service
+    try {
+      const KEY = "saba_service_overrides_v1";
+      const raw = localStorage.getItem(KEY);
+      const store = raw ? JSON.parse(raw) : {};
+      store[slug] = {
+        isCustom: true,
+        title: newSvc.titleAr,
+        subtitle: "",
+        category: newSvc.category,
+        breadcrumb: newSvc.titleAr,
+        heroHighlights: [],
+        overview: [{ title: "نظرة عامة", desc: "" }],
+        benefits: [{ title: "ميزة 1", desc: "" }],
+        plans: [{ name: "Basic", price: String(newSvc.price), featured: false, feats: [] }],
+      };
+      localStorage.setItem(KEY, JSON.stringify(store));
+    } catch {}
+    toast.success("تم إضافة الخدمة — أكمل التفاصيل");
+    navigate({ to: "/admin/services/$slug", params: { slug } });
   };
+
+  const handleDelete = (id: string) => { setItems(items.filter(s => s.id !== id)); toast.success("تم حذف الخدمة"); };
 
   const handleExport = () => {
     const csv = ["SKU,Title,Category,Price,Bookings,Status", ...items.map(s => `${s.sku},${s.titleAr},${s.category},${s.price},${s.bookings},${s.status}`)].join("\n");
@@ -110,9 +133,14 @@ function ServicesPage() {
                     <td className="px-3 py-3">{s.bookings}</td>
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
                     <td className="px-3 py-3">
-                      <Link to="/admin/services/$slug" params={{ slug: s.slug }} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:bg-muted">
-                        <Pencil className="h-3 w-3" /> التفاصيل
-                      </Link>
+                      <div className="flex gap-1">
+                        <Link to="/admin/services/$slug" params={{ slug: s.slug }} title="تعديل التفاصيل" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary">
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                        <button onClick={() => handleDelete(s.id)} title="حذف" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -125,6 +153,7 @@ function ServicesPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl">
           <DialogHeader><DialogTitle>إضافة خدمة جديدة</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground -mt-2">بعد الإضافة سيتم نقلك لمحرر التفاصيل لإكمال الوصف والباقات والمميزات.</p>
           <div className="grid gap-3">
             <div className="grid grid-cols-2 gap-3">
               <label className="text-xs font-bold space-y-1.5">الاسم (عربي)
@@ -142,8 +171,8 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">السعر (ر.س)
                 <input type="number" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">المعرّف (slug)
-                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+              <label className="text-xs font-bold space-y-1.5">المعرّف (slug — اختياري)
+                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
             </div>
           </div>

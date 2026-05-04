@@ -4,6 +4,7 @@ import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components
 import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star, CheckCircle2 } from "lucide-react";
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/services/$slug")({
   head: () => ({ meta: [{ title: "تعديل الخدمة | لوحة التحكم" }] }),
@@ -24,10 +25,10 @@ const inputCls = "w-full rounded-xl border border-border bg-background px-3 py-2
 function ServiceEditorPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
-  const base = serviceMap[slug];
   const { override, save, reset } = useServiceOverrideEditor(slug);
-
+  const base = serviceMap[slug];
   const initial = useMemo(() => mergeService(slug, override) ?? base, [slug, override, base]);
+  const isCustom = !base && !!initial;
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? "");
@@ -39,7 +40,7 @@ function ServiceEditorPage() {
   const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
-  if (!base) {
+  if (!base && !initial) {
     return (
       <AdminLayout title="خدمة غير موجودة">
         <PanelCard>
@@ -51,12 +52,13 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
 
   const handleReset = () => {
+    if (!base) { toast.info("لا توجد نسخة افتراضية لاستعادتها"); return; }
     reset();
     setTitle(base.title);
     setSubtitle(base.subtitle);
@@ -71,7 +73,7 @@ function ServiceEditorPage() {
 
   return (
     <AdminLayout
-      title={`تعديل: ${base.title}`}
+      title={`تعديل: ${initial?.title ?? slug}`}
       subtitle="تحديث جميع تفاصيل الخدمة التي تظهر في صفحة التفاصيل"
       action={
         <div className="hidden sm:flex gap-2">

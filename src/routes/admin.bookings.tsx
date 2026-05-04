@@ -1,34 +1,72 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Plus, Download } from "lucide-react";
+import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Plus, Download, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { adminBookings, bookingStatusMap, fmtSAR } from "@/data/admin";
+import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, type AdminBooking } from "@/data/admin";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الحجوزات | لوحة التحكم" }] }),
   component: BookingsPage,
 });
 
+const statusKeys: AdminBooking["status"][] = ["pending", "in_progress", "review", "completed", "cancelled"];
+
 function BookingsPage() {
-  const [tab, setTab] = useState<"all" | "pending" | "in_progress" | "completed" | "cancelled">("all");
+  const [bookings, setBookings] = useState<AdminBooking[]>(initialBookings);
+  const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
   const [q, setQ] = useState("");
-  const filtered = adminBookings.filter(b =>
+  const [period, setPeriod] = useState<"7" | "30" | "90" | "all">("all");
+  const [viewing, setViewing] = useState<AdminBooking | null>(null);
+  const [editing, setEditing] = useState<AdminBooking | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
+
+  // crude period filter using index (mock data shares similar dates)
+  const limit = period === "7" ? 2 : period === "30" ? 4 : period === "90" ? 6 : bookings.length;
+
+  const filtered = bookings.slice(0, limit).filter(b =>
     (tab === "all" || b.status === tab) &&
     (b.client.includes(q) || b.number.toLowerCase().includes(q.toLowerCase()))
   );
 
+  const exportCsv = () => {
+    const header = "Number,Client,Email,Service,Total,Payment,Status,Date";
+    const rows = filtered.map(b => `${b.number},${b.client},${b.email},${b.service},${b.total},${b.payment},${b.status},${b.date}`);
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "bookings.csv"; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("تم تصدير الحجوزات");
+  };
+
+  const openEdit = (b: AdminBooking) => { setEditing(b); setEditForm({ ...b }); };
+  const saveEdit = () => {
+    if (!editing) return;
+    setBookings(bookings.map(b => b.id === editing.id ? { ...b, ...editForm } as AdminBooking : b));
+    toast.success("تم تحديث الطلب");
+    setEditing(null);
+  };
+  const remove = (id: string) => { setBookings(bookings.filter(b => b.id !== id)); toast.success("تم الحذف"); };
+
   return (
     <AdminLayout title="الحجوزات" subtitle="تتبع وإدارة دورة حياة الطلبات" action={
       <div className="hidden sm:flex gap-2">
-        <GhostButton><Download className="h-4 w-4" /> تصدير</GhostButton>
-        <PrimaryButton><Plus className="h-4 w-4" /> حجز جديد</PrimaryButton>
+        <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+          <option value="7">آخر 7 أيام</option>
+          <option value="30">آخر 30 يوم</option>
+          <option value="90">آخر 90 يوم</option>
+          <option value="all">كل الفترة</option>
+        </select>
+        <GhostButton onClick={exportCsv}><Download className="h-4 w-4" /> تصدير</GhostButton>
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي الحجوزات" value={184} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
-        <StatCard label="بانتظار التأكيد" value={21} icon={Clock} accent="amber" />
-        <StatCard label="قيد التنفيذ" value={38} icon={Loader2} accent="violet" />
-        <StatCard label="مكتملة" value={112} hint="↑ +12.5%" icon={CheckCircle2} accent="emerald" />
+        <StatCard label="إجمالي الحجوزات" value={bookings.length} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
+        <StatCard label="بانتظار التأكيد" value={bookings.filter(b => b.status === "pending").length} icon={Clock} accent="amber" />
+        <StatCard label="قيد التنفيذ" value={bookings.filter(b => b.status === "in_progress").length} icon={Loader2} accent="violet" />
+        <StatCard label="مكتملة" value={bookings.filter(b => b.status === "completed").length} hint="↑ +12.5%" icon={CheckCircle2} accent="emerald" />
       </div>
 
       <PanelCard>
@@ -68,9 +106,19 @@ function BookingsPage() {
                     <td className="px-3 py-3">{b.service}</td>
                     <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3 text-muted-foreground">{b.payment}</td>
-                    <td className="px-3 py-3"><Pill tone={s.tone}>{s.label}</Pill></td>
+                    <td className="px-3 py-3">
+                      <select value={b.status} onChange={(e) => { setBookings(bookings.map(x => x.id === b.id ? { ...x, status: e.target.value as any } : x)); toast.success("تم تحديث الحالة"); }} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
+                        {statusKeys.map(k => <option key={k} value={k}>{bookingStatusMap[k].label}</option>)}
+                      </select>
+                    </td>
                     <td className="px-3 py-3 text-muted-foreground text-xs">{b.date}</td>
-                    <td className="px-3 py-3"><button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button></td>
+                    <td className="px-3 py-3">
+                      <div className="flex gap-1">
+                        <button onClick={() => setViewing(b)} title="عرض الفاتورة" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button>
+                        <button onClick={() => openEdit(b)} title="تعديل" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-foreground/70"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => remove(b.id)} title="حذف" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -78,6 +126,83 @@ function BookingsPage() {
           </table>
         </div>
       </PanelCard>
+
+      {/* Invoice view */}
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent dir="rtl" className="max-w-2xl">
+          <DialogHeader><DialogTitle>فاتورة الطلب #{viewing?.number}</DialogTitle></DialogHeader>
+          {viewing && (() => {
+            const subtotal = Math.round(viewing.total / 1.15);
+            const vat = viewing.total - subtotal;
+            return (
+              <div className="space-y-4">
+                <div className="rounded-2xl bg-gradient-to-l from-primary to-primary-dark text-white p-5">
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="text-xs opacity-80">سابا ديزاين — فاتورة</div>
+                      <div className="text-2xl font-extrabold mt-1">#{viewing.number}</div>
+                    </div>
+                    <div className="text-left text-xs">
+                      <div className="opacity-80">التاريخ</div>
+                      <div className="font-bold">{viewing.date}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div><div className="text-xs text-muted-foreground">{viewing.email}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment}</div></div>
+                </div>
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-xs"><tr><th className="px-3 py-2 text-right font-medium">الخدمة</th><th className="px-3 py-2 text-right font-medium">الكمية</th><th className="px-3 py-2 text-right font-medium">السعر</th></tr></thead>
+                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service}</td><td className="px-3 py-3">1</td><td className="px-3 py-3 font-bold">{fmtSAR(subtotal)}</td></tr></tbody>
+                  </table>
+                </div>
+                <div className="space-y-1.5 text-sm border-t border-border pt-3">
+                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-medium">{fmtSAR(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة القيمة المضافة (15%)</span><span className="font-medium">{fmtSAR(vat)}</span></div>
+                  <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>الإجمالي</span><span>{fmtSAR(viewing.total)}</span></div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <Pill tone={bookingStatusMap[viewing.status].tone}>{bookingStatusMap[viewing.status].label}</Pill>
+                  <button onClick={() => window.print()} className="text-xs font-bold text-primary hover:underline">طباعة</button>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter><GhostButton onClick={() => setViewing(null)}>إغلاق</GhostButton></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit booking */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent dir="rtl" className="max-w-lg">
+          <DialogHeader><DialogTitle>تعديل الطلب #{editing?.number}</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="grid grid-cols-2 gap-3">
+              <Lbl label="العميل"><input className={ic} value={editForm.client ?? ""} onChange={e => setEditForm({ ...editForm, client: e.target.value })} /></Lbl>
+              <Lbl label="البريد"><input className={ic} value={editForm.email ?? ""} onChange={e => setEditForm({ ...editForm, email: e.target.value })} /></Lbl>
+              <Lbl label="الخدمة" full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
+              <Lbl label="الإجمالي (ر.س)"><input type="number" className={ic} value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
+              <Lbl label="طريقة الدفع"><input className={ic} value={editForm.payment ?? ""} onChange={e => setEditForm({ ...editForm, payment: e.target.value })} /></Lbl>
+              <Lbl label="الحالة" full>
+                <select className={ic} value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value as any })}>
+                  {statusKeys.map(k => <option key={k} value={k}>{bookingStatusMap[k].label}</option>)}
+                </select>
+              </Lbl>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setEditing(null)}>إلغاء</GhostButton>
+            <PrimaryButton onClick={saveEdit}>حفظ التغييرات</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
+}
+
+const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
+function Lbl({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
 }

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton } from "@/components/admin/AdminLayout";
-import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2 } from "lucide-react";
+import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
+import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2, Phone, MapPin, Calendar, Globe } from "lucide-react";
 import { useState } from "react";
-import { adminClients, fmtSAR } from "@/data/admin";
+import { adminClients as initialClients, fmtSAR, type AdminClient } from "@/data/admin";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/clients")({
@@ -20,18 +21,40 @@ const growth = [
   { m: "ديس", n: 14, r: 25 }, { m: "ينا", n: 12, r: 28 }, { m: "فبر", n: 15, r: 32 },
 ];
 
+type AddForm = { name: string; email: string; phone: string; region: string; language: string; address: string; segment: AdminClient["segment"]; notes: string };
+const emptyAdd: AddForm = { name: "", email: "", phone: "", region: "", language: "العربية", address: "", segment: "new", notes: "" };
+
 function ClientsPage() {
+  const [clients, setClients] = useState<AdminClient[]>(initialClients);
   const [tab, setTab] = useState<"all" | "vip" | "regular" | "new">("all");
   const [q, setQ] = useState("");
-  const filtered = adminClients.filter(c =>
+  const [addOpen, setAddOpen] = useState(false);
+  const [add, setAdd] = useState<AddForm>(emptyAdd);
+  const [viewing, setViewing] = useState<AdminClient | null>(null);
+
+  const filtered = clients.filter(c =>
     (tab === "all" || c.segment === tab) && (c.name.includes(q) || c.email.toLowerCase().includes(q.toLowerCase()))
   );
 
+  const handleAdd = () => {
+    if (!add.name || !add.email) { toast.error("الاسم والبريد مطلوبان"); return; }
+    const month = new Date().toLocaleDateString("ar-SA", { month: "long", year: "numeric" });
+    setClients([
+      { id: "c" + Date.now(), name: add.name, email: add.email, phone: add.phone, orders: 0, totalSpent: 0,
+        segment: add.segment, joinedAt: month, region: add.region, language: add.language, address: add.address, notes: add.notes },
+      ...clients,
+    ]);
+    setAdd(emptyAdd); setAddOpen(false);
+    toast.success("تم إضافة العميل");
+  };
+
+  const remove = (id: string) => { setClients(clients.filter(c => c.id !== id)); toast.success("تم حذف العميل"); };
+
   return (
-    <AdminLayout title="العملاء" subtitle="رؤى وشرائح وإحصائيات الاحتفاظ بالعملاء" action={<PrimaryButton><Plus className="h-4 w-4" /> إضافة عميل</PrimaryButton>}>
+    <AdminLayout title="العملاء" subtitle="رؤى وشرائح وإحصائيات الاحتفاظ بالعملاء" action={<PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> إضافة عميل</PrimaryButton>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي العملاء" value={96} icon={Users} accent="emerald" />
-        <StatCard label="عملاء VIP" value={14} icon={Star} accent="amber" />
+        <StatCard label="إجمالي العملاء" value={clients.length} icon={Users} accent="emerald" />
+        <StatCard label="عملاء VIP" value={clients.filter(c => c.segment === "vip").length} icon={Star} accent="amber" />
         <StatCard label="معدل النمو" value="+23.1%" icon={TrendingUp} accent="primary" />
         <StatCard label="متوسط الطلب" value={fmtSAR(1420)} icon={ShoppingBag} accent="violet" />
       </div>
@@ -103,10 +126,10 @@ function ClientsPage() {
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => toast.info(`عرض بيانات: ${c.name}`)}><Eye className="ml-2 h-4 w-4" /> عرض التفاصيل</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setViewing(c)}><Eye className="ml-2 h-4 w-4" /> عرض التفاصيل</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { window.location.href = `mailto:${c.email}`; }}><Mail className="ml-2 h-4 w-4" /> إرسال بريد</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => toast.success("تم الحذف")} className="text-rose-600 focus:text-rose-600"><Trash2 className="ml-2 h-4 w-4" /> حذف العميل</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => remove(c.id)} className="text-rose-600 focus:text-rose-600"><Trash2 className="ml-2 h-4 w-4" /> حذف العميل</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -117,6 +140,88 @@ function ClientsPage() {
           </table>
         </div>
       </PanelCard>
+
+      {/* Add client */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent dir="rtl" className="max-w-xl">
+          <DialogHeader><DialogTitle>إضافة عميل جديد</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <Lbl label="الاسم الكامل"><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
+            <Lbl label="رقم الجوال"><input className={ic} value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
+            <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
+            <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
+            <Lbl label="اللغة المفضلة">
+              <select className={ic} value={add.language} onChange={e => setAdd({ ...add, language: e.target.value })}>
+                <option>العربية</option><option>English</option>
+              </select>
+            </Lbl>
+            <Lbl label="الشريحة">
+              <select className={ic} value={add.segment} onChange={e => setAdd({ ...add, segment: e.target.value as any })}>
+                <option value="new">جديد</option><option value="regular">منتظم</option><option value="vip">VIP</option>
+              </select>
+            </Lbl>
+            <Lbl label="العنوان" full><input className={ic} value={add.address} onChange={e => setAdd({ ...add, address: e.target.value })} /></Lbl>
+            <Lbl label="ملاحظات" full><textarea rows={2} className={ic} value={add.notes} onChange={e => setAdd({ ...add, notes: e.target.value })} /></Lbl>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setAddOpen(false)}>إلغاء</GhostButton>
+            <PrimaryButton onClick={handleAdd}>إضافة</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View client */}
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent dir="rtl" className="max-w-xl">
+          <DialogHeader><DialogTitle>تفاصيل العميل</DialogTitle></DialogHeader>
+          {viewing && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 pb-3 border-b border-border">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
+                  {viewing.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+                </div>
+                <div>
+                  <div className="font-bold text-base">{viewing.name}</div>
+                  <Pill tone={segMap[viewing.segment].t}>{segMap[viewing.segment].l}</Pill>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <Info icon={Mail} label="البريد" value={viewing.email} />
+                <Info icon={Phone} label="الجوال" value={viewing.phone} />
+                <Info icon={MapPin} label="المنطقة" value={viewing.region ?? "—"} />
+                <Info icon={Globe} label="اللغة" value={viewing.language ?? "—"} />
+                <Info icon={MapPin} label="العنوان" value={viewing.address ?? "—"} />
+                <Info icon={Calendar} label="الانضمام" value={viewing.joinedAt} />
+                <Info icon={ShoppingBag} label="عدد الطلبات" value={String(viewing.orders)} />
+                <Info icon={Star} label="إجمالي الإنفاق" value={fmtSAR(viewing.totalSpent)} />
+              </div>
+              {viewing.notes && (
+                <div className="rounded-xl bg-muted/50 p-3 text-sm">
+                  <div className="text-[11px] font-bold text-muted-foreground mb-1">ملاحظات</div>
+                  {viewing.notes}
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter><GhostButton onClick={() => setViewing(null)}>إغلاق</GhostButton></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
+  );
+}
+
+const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
+function Lbl({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
+}
+function Info({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <Icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[11px] text-muted-foreground">{label}</div>
+        <div className="font-medium truncate">{value}</div>
+      </div>
+    </div>
   );
 }

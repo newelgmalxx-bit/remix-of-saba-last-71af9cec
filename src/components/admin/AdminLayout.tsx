@@ -7,6 +7,7 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import logoImg from "@/assets/logo.png";
 
 type NavItem = { to: string; label: string; icon: any; children?: { to: string; label: string; icon: any }[] };
 
@@ -56,11 +57,8 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
       {/* Sidebar */}
       <aside className={`${mobileOpen ? "translate-x-0" : "translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 right-0 z-40 h-screen w-72 shrink-0 border-l border-border bg-card transition-transform overflow-y-auto`}>
         <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">س</div>
-          <div>
-            <div className="text-sm font-bold">سابا ديزاين</div>
-            <div className="text-[11px] text-muted-foreground">لوحة التحكم</div>
-          </div>
+          <img src={logoImg} alt="سابا ديزاين" className="h-9 w-auto object-contain" />
+          <div className="text-[11px] text-muted-foreground">لوحة التحكم</div>
         </div>
         <nav className="p-3 space-y-1 pb-10">
           {navGroups.map((g, i) => {
