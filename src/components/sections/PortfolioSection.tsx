@@ -2,6 +2,13 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 
 const tabs = ["كل الأعمال", "تطوير ويب", "تطبيقات", "هوية بصرية", "واجهات UI/UX"];
+const tabToCats: Record<string, string[]> = {
+  "كل الأعمال": [],
+  "تطوير ويب": ["تطوير ويب"],
+  "تطبيقات": ["تطبيقات موبايل"],
+  "هوية بصرية": ["هوية بصرية"],
+  "واجهات UI/UX": ["تصميم واجهات"],
+};
 
 const projects = [
   {
@@ -62,6 +69,9 @@ const projects = [
 
 export function PortfolioSection() {
   const [active, setActive] = useState(tabs[0]);
+  const filtered = active === "كل الأعمال"
+    ? projects
+    : projects.filter((p) => tabToCats[active]?.includes(p.cat));
   return (
     <section className="bg-secondary/40 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -91,7 +101,7 @@ export function PortfolioSection() {
         </div>
 
         <div className="mt-10 grid auto-rows-[220px] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {projects.map((p) => (
+          {filtered.map((p) => (
             <article
               key={p.title}
               className={`group relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${p.span}`}
