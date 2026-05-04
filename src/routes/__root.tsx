@@ -1,7 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -33,11 +32,15 @@ export const Route = createRootRoute({
       { title: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
       { name: "description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
       { name: "author", content: "SABA DESIGN" },
-      { property: "og:title", content: "سابا ديزاين | SABA DESIGN" },
-      { property: "og:description", content: "نصمم تجارب رقمية تترك أثراً يدوم." },
+      { property: "og:title", content: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
+      { property: "og:description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@sabadesign" },
+      { name: "twitter:title", content: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
+      { name: "twitter:description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6858bf39-5e04-4df7-93ca-cced8c9c16a4/id-preview-8b52bdfb--3e74ddaf-5741-44a3-8ad0-de9f7e4b5986.lovable.app-1777931035993.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6858bf39-5e04-4df7-93ca-cced8c9c16a4/id-preview-8b52bdfb--3e74ddaf-5741-44a3-8ad0-de9f7e4b5986.lovable.app-1777931035993.png" },
     ],
     links: [
       {
@@ -72,10 +75,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-    <>
-      <Outlet />
-      <Toaster position="top-center" richColors />
-    </>
-  );
+  return <Outlet />;
 }
