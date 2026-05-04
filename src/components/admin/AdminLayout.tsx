@@ -4,8 +4,9 @@ import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
   UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug,
-  Users2, BellRing,
+  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 type NavItem = { to: string; label: string; icon: any; children?: { to: string; label: string; icon: any }[] };
 
@@ -131,10 +132,41 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
           </div>
           <div className="flex items-center gap-2">
             {action}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-rose-500" />
-            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-rose-500" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-0" dir="rtl">
+                <div className="border-b border-border px-4 py-3 flex items-center justify-between">
+                  <div className="font-bold text-sm">الإشعارات</div>
+                  <span className="text-[11px] text-primary font-bold">3 جديدة</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                  {[
+                    { i: ShoppingBag, t: "primary", title: "طلب جديد #SD-1024", desc: "أحمد العبدالله — تصميم مواقع", time: "منذ 5 دقائق" },
+                    { i: CheckCircle2, t: "emerald", title: "تم استلام دفعة", desc: "فاتورة INV-7820 — 4,025 ر.س", time: "منذ 1 ساعة" },
+                    { i: AlertCircle, t: "amber", title: "تذكرة دعم جديدة", desc: "ريم الشهري بحاجة لمراجعة", time: "منذ 3 ساعات" },
+                  ].map((n, idx) => {
+                    const Ic = n.i;
+                    const tone = n.t === "primary" ? "bg-primary/10 text-primary" : n.t === "emerald" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700";
+                    return (
+                      <div key={idx} className="flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer">
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone}`}><Ic className="h-4 w-4" /></div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-bold truncate">{n.title}</div>
+                          <div className="text-xs text-muted-foreground truncate">{n.desc}</div>
+                          <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Link to="/admin/settings/notifications" className="block border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">عرض كل الإشعارات</Link>
+              </PopoverContent>
+            </Popover>
             <div className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">JD</div>
               <span className="hidden sm:block text-xs font-bold">John Doe</span>
