@@ -88,7 +88,7 @@ export function HeroSection() {
               { v: "+3", l: "سنوات خبرة" },
             ].map((s) => (
               <div key={s.l} className="text-center">
-                <div className="text-3xl font-extrabold text-primary">{s.v}</div>
+                <div className="text-3xl font-extrabold text-primary" dir="ltr">{s.v}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{s.l}</div>
               </div>
             ))}
