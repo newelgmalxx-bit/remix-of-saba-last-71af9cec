@@ -3,6 +3,7 @@ import { CheckCircle2, Package, FileText } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({ o: z.string().optional() }),
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/checkout/success")({
 
 function SuccessPage() {
   const { o } = Route.useSearch();
+  const { t } = useLang();
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
       <SiteHeader />
@@ -22,13 +24,11 @@ function SuccessPage() {
             <CheckCircle2 className="h-14 w-14 text-white" />
           </div>
         </div>
-        <h1 className="mt-8 text-3xl font-bold">تم استلام طلبك بنجاح! 🎉</h1>
-        <p className="mt-3 max-w-md text-muted-foreground">
-          شكراً لثقتك. تم إرسال تفاصيل الطلب على بريدك الإلكتروني، وسيقوم فريقنا بالتواصل معك خلال 24 ساعة.
-        </p>
+        <h1 className="mt-8 text-3xl font-bold">{t("checkout.success.h1")}</h1>
+        <p className="mt-3 max-w-md text-muted-foreground">{t("checkout.success.body")}</p>
         {o && (
           <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
-            <span className="text-sm text-muted-foreground">رقم الطلب:</span>
+            <span className="text-sm text-muted-foreground">{t("checkout.success.orderLabel")}</span>
             <span className="text-base font-bold text-primary">{o}</span>
           </div>
         )}
@@ -38,14 +38,14 @@ function SuccessPage() {
             className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
           >
             <Package className="h-4 w-4" />
-            متابعة طلباتي
+            {t("checkout.success.orders")}
           </Link>
           <Link
             to={"/" as any}
             className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
           >
             <FileText className="h-4 w-4" />
-            العودة للرئيسية
+            {t("checkout.success.home")}
           </Link>
         </div>
       </main>

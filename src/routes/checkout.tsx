@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
 import { paymentMethods, type PaymentMethod, formatCurrency, mockUser } from "@/data/account";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -13,12 +14,12 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-const steps = ["معلومات العميل", "طريقة الدفع", "المراجعة"] as const;
-
 function CheckoutPage() {
   const navigate = useNavigate();
   const { items, subtotal, vat, total, clear } = useCart();
   const [step, setStep] = useState(0);
+  const { t } = useLang();
+  const steps = [t("checkout.steps.info"), t("checkout.steps.payment"), t("checkout.steps.review")];
 
   const [info, setInfo] = useState({
     name: mockUser.name,
@@ -36,10 +37,10 @@ function CheckoutPage() {
       <div className="flex min-h-screen flex-col bg-muted/30">
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold">لا توجد عناصر للدفع</h1>
-          <p className="mt-2 text-sm text-muted-foreground">سلتك فارغة. أضف باقة لتبدأ.</p>
+          <h1 className="text-2xl font-bold">{t("checkout.empty.title")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t("checkout.empty.desc")}</p>
           <Link to={"/services" as any} className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground">
-            تصفح الخدمات
+            {t("checkout.empty.cta")}
           </Link>
         </main>
         <SiteFooter />
@@ -72,9 +73,9 @@ function CheckoutPage() {
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to={"/cart" as any} className="hover:text-primary">السلة</Link>
+            <Link to={"/cart" as any} className="hover:text-primary">{t("checkout.crumb.cart")}</Link>
             <span>/</span>
-            <span className="text-foreground">إتمام الطلب</span>
+            <span className="text-foreground">{t("checkout.crumb.checkout")}</span>
           </div>
 
           {/* Stepper */}
@@ -112,20 +113,20 @@ function CheckoutPage() {
             <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-sm min-h-[400px]">
               {step === 0 && (
                 <div className="space-y-5">
-                  <h2 className="text-lg font-bold">معلومات العميل</h2>
+                  <h2 className="text-lg font-bold">{t("checkout.contact")}</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="الاسم الكامل" value={info.name} onChange={(v) => setInfo({ ...info, name: v })} />
-                    <Field label="البريد الإلكتروني" type="email" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} />
-                    <Field label="رقم الجوال" value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} dir="ltr" type="tel" />
-                    <Field label="اسم الشركة (اختياري)" value={info.company} onChange={(v) => setInfo({ ...info, company: v })} />
+                    <Field label={t("checkout.fullName")} value={info.name} onChange={(v) => setInfo({ ...info, name: v })} />
+                    <Field label={t("checkout.email")} type="email" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} />
+                    <Field label={t("checkout.phone")} value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} dir="ltr" type="tel" />
+                    <Field label={t("checkout.company")} value={info.company} onChange={(v) => setInfo({ ...info, company: v })} />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-bold">ملاحظات إضافية</label>
+                    <label className="mb-1.5 block text-sm font-bold">{t("checkout.notes")}</label>
                     <textarea
                       value={info.notes}
                       onChange={(e) => setInfo({ ...info, notes: e.target.value })}
                       rows={4}
-                      placeholder="أخبرنا عن متطلباتك أو أي تفاصيل تريد توضيحها..."
+                      placeholder={t("checkout.notesAlt")}
                       className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
@@ -137,7 +138,7 @@ function CheckoutPage() {
                       className="mt-1 h-4 w-4 accent-primary"
                     />
                     <span className="text-muted-foreground">
-                      أوافق على <Link to={"/contact" as any} className="text-primary underline">الشروط والأحكام</Link> وسياسة الخصوصية
+                      {t("checkout.agree")}
                     </span>
                   </label>
                 </div>
@@ -146,8 +147,8 @@ function CheckoutPage() {
               {step === 1 && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-lg font-bold">طريقة الدفع</h2>
-                    <p className="text-sm text-muted-foreground">اختر الطريقة الأنسب لك. كل العمليات آمنة ومشفّرة.</p>
+                    <h2 className="text-lg font-bold">{t("checkout.payment.title")}</h2>
+                    <p className="text-sm text-muted-foreground">{t("checkout.payment.desc")}</p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {paymentMethods.map((m) => {
@@ -211,30 +212,30 @@ function CheckoutPage() {
                   </div>
                   <div className="flex items-center gap-2 rounded-xl bg-primary-light/60 p-3 text-xs text-primary-dark">
                     <ShieldCheck className="h-4 w-4 shrink-0" />
-                    <span>عملية الدفع تتم عبر بوابة آمنة ومشفّرة بمعايير PCI-DSS.</span>
+                    <span>{t("checkout.payment.note")}</span>
                   </div>
                 </div>
               )}
 
               {step === 2 && (
                 <div className="space-y-5">
-                  <h2 className="text-lg font-bold">مراجعة الطلب</h2>
-                  <ReviewBlock title="معلومات العميل">
-                    <ReviewRow label="الاسم" value={info.name} />
-                    <ReviewRow label="البريد" value={info.email} />
-                    <ReviewRow label="الجوال" value={info.phone} ltr />
-                    {info.company && <ReviewRow label="الشركة" value={info.company} />}
-                    {info.notes && <ReviewRow label="ملاحظات" value={info.notes} />}
+                  <h2 className="text-lg font-bold">{t("checkout.review.title")}</h2>
+                  <ReviewBlock title={t("checkout.review.customer")}>
+                    <ReviewRow label={t("checkout.review.name")} value={info.name} />
+                    <ReviewRow label={t("checkout.review.email")} value={info.email} />
+                    <ReviewRow label={t("checkout.review.phone")} value={info.phone} ltr />
+                    {info.company && <ReviewRow label={t("checkout.review.company")} value={info.company} />}
+                    {info.notes && <ReviewRow label={t("checkout.review.notes")} value={info.notes} />}
                   </ReviewBlock>
-                  <ReviewBlock title="طريقة الدفع">
-                    <ReviewRow label="الطريقة" value={paymentMethods.find((m) => m.id === payment)?.name ?? ""} />
+                  <ReviewBlock title={t("checkout.review.payment")}>
+                    <ReviewRow label={t("checkout.review.method")} value={paymentMethods.find((m) => m.id === payment)?.name ?? ""} />
                   </ReviewBlock>
-                  <ReviewBlock title="العناصر">
+                  <ReviewBlock title={t("checkout.review.items")}>
                     {items.map((it) => (
                       <div key={it.id} className="flex items-center justify-between border-b border-dashed border-border py-2 last:border-0 text-sm">
                         <div>
                           <div className="font-bold">{it.serviceTitle}</div>
-                          <div className="text-xs text-muted-foreground">باقة {it.planName} × {it.qty}</div>
+                          <div className="text-xs text-muted-foreground">{t("cart.planLabel")} {it.planName} × {it.qty}</div>
                         </div>
                         <div className="font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
                       </div>
@@ -251,7 +252,7 @@ function CheckoutPage() {
                   className="inline-flex items-center gap-1 rounded-full border border-border px-5 py-2.5 text-sm font-bold disabled:opacity-40 hover:bg-muted"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  السابق
+                  {t("checkout.prev")}
                 </button>
                 {step < steps.length - 1 ? (
                   <button
@@ -259,7 +260,7 @@ function CheckoutPage() {
                     disabled={step === 0 && !info.agree}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-50"
                   >
-                    التالي
+                    {t("checkout.next")}
                   </button>
                 ) : (
                   <button
@@ -268,7 +269,7 @@ function CheckoutPage() {
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                   >
                     <Lock className="h-4 w-4" />
-                    {submitting ? "جارِ التأكيد..." : `تأكيد الطلب وإتمام الدفع — ${formatCurrency(total)}`}
+                    {submitting ? t("checkout.confirming") : `${t("checkout.confirm.full")} — ${formatCurrency(total)}`}
                   </button>
                 )}
               </div>
@@ -277,7 +278,7 @@ function CheckoutPage() {
             {/* Sidebar summary */}
             <aside className="space-y-4">
               <div className="sticky top-24 rounded-2xl border border-border bg-card p-6 shadow-sm">
-                <h3 className="text-base font-bold">ملخّص</h3>
+                <h3 className="text-base font-bold">{t("checkout.summary.short")}</h3>
                 <div className="mt-4 max-h-64 space-y-3 overflow-auto">
                   {items.map((it) => (
                     <div key={it.id} className="flex items-start justify-between gap-3 text-sm">
@@ -291,16 +292,16 @@ function CheckoutPage() {
                 </div>
                 <div className="my-4 h-px bg-border" />
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع</span><span data-ltr-number>{formatCurrency(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ض. القيمة المضافة</span><span data-ltr-number>{formatCurrency(vat)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t("checkout.summary.subtotal")}</span><span data-ltr-number>{formatCurrency(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t("checkout.summary.vat")}</span><span data-ltr-number>{formatCurrency(vat)}</span></div>
                   <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
-                    <span>الإجمالي</span>
+                    <span>{t("checkout.summary.total")}</span>
                     <span className="text-primary" data-ltr-number>{formatCurrency(total)}</span>
                   </div>
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-[11px] text-muted-foreground">
                   <FileText className="h-3.5 w-3.5" />
-                  ستحصل على فاتورة ضريبية فور إتمام الدفع.
+                  {t("checkout.invoice.note")}
                 </div>
               </div>
             </aside>

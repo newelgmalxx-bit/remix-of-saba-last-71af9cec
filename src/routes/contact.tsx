@@ -8,48 +8,29 @@ import {
   Headphones, Zap, ShieldCheck, ChevronDown, ArrowLeft,
 } from "lucide-react";
 import { useState } from "react";
-
-const quickChannels = [
-  {
-    icon: MessageCircle,
-    label: "واتساب",
-    value: "محادثة مباشرة الآن",
-    href: "https://wa.me/966501234567",
-    accent: "from-emerald-500 to-emerald-600",
-  },
-  {
-    icon: Phone,
-    label: "اتصال هاتفي",
-    value: "+966 50 123 4567",
-    href: "tel:+966501234567",
-    accent: "from-primary to-primary-dark",
-  },
-  {
-    icon: Mail,
-    label: "البريد الإلكتروني",
-    value: "info@sabadesign.com",
-    href: "mailto:info@sabadesign.com",
-    accent: "from-sky-500 to-sky-700",
-  },
-];
-
-const promises = [
-  { icon: Zap, title: "رد خلال 24 ساعة", desc: "فريقنا يجيب على كل طلب بسرعة وبخطة واضحة." },
-  { icon: ShieldCheck, title: "خصوصية تامة", desc: "كل ما تشاركه يبقى محفوظاً بسرية كاملة بيننا." },
-  { icon: Headphones, title: "استشارة مجانية", desc: "نناقش فكرتك ونقدم اقتراحات قبل أي التزام." },
-];
-
-const faqs = [
-  { q: "كم يستغرق تنفيذ المشروع عادة؟", a: "يعتمد على حجم المشروع. الموقع التعريفي من 2-4 أسابيع، التطبيقات والمتاجر الإلكترونية من 6-12 أسبوع." },
-  { q: "هل تقدمون دعم بعد إطلاق المشروع؟", a: "نعم، نقدم دعم فني مجاني لمدة 30 يوماً بعد الإطلاق، مع باقات صيانة شهرية اختيارية." },
-  { q: "ما هي طريقة الدفع المعتمدة؟", a: "ندعم التحويل البنكي، البطاقات الائتمانية، ومدى. نبدأ بدفعة 50% ودفعة 50% عند التسليم." },
-  { q: "هل يمكنني تعديل التصميم بعد البدء؟", a: "بالتأكيد، نسمح بجولتي تعديل في كل مرحلة من المشروع لضمان رضاك الكامل عن النتيجة." },
-  { q: "هل تعملون مع عملاء خارج المملكة؟", a: "نعم، نخدم عملاء في أكثر من 15 دولة حول العالم بنفس مستوى الجودة والاحترافية." },
-];
+import { useLang } from "@/i18n/LanguageProvider";
 
 function ContactPage() {
+  const { t, dir, lang } = useLang();
+  const quickChannels = [
+    { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: t("contactPage.ch.whatsapp.v"), href: "https://wa.me/966501234567", accent: "from-emerald-500 to-emerald-600" },
+    { icon: Phone, label: t("contactPage.ch.phone"), value: "+966 50 123 4567", href: "tel:+966501234567", accent: "from-primary to-primary-dark", ltr: true },
+    { icon: Mail, label: t("contactPage.ch.email"), value: "info@sabadesign.com", href: "mailto:info@sabadesign.com", accent: "from-sky-500 to-sky-700", ltr: true },
+  ];
+  const promises = [
+    { icon: Zap, title: t("contactPage.promise1.t"), desc: t("contactPage.promise1.d") },
+    { icon: ShieldCheck, title: t("contactPage.promise2.t"), desc: t("contactPage.promise2.d") },
+    { icon: Headphones, title: t("contactPage.promise3.t"), desc: t("contactPage.promise3.d") },
+  ];
+  const faqs = [
+    { q: t("contactPage.faq1.q"), a: t("contactPage.faq1.a") },
+    { q: t("contactPage.faq2.q"), a: t("contactPage.faq2.a") },
+    { q: t("contactPage.faq3.q"), a: t("contactPage.faq3.a") },
+    { q: t("contactPage.faq4.q"), a: t("contactPage.faq4.a") },
+    { q: t("contactPage.faq5.q"), a: t("contactPage.faq5.a") },
+  ];
   return (
-    <div dir="rtl" className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
       <main className="flex-1">
         {/* HERO */}
@@ -67,16 +48,15 @@ function ContactPage() {
             <div className="mx-auto max-w-3xl text-center text-white">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
-                تواصل معنا
+                {t("contactPage.badge")}
               </span>
               <h1 className="mt-6 text-4xl font-extrabold leading-tight md:text-6xl">
-                لنبدأ <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">مشروعك</span>
+                {t("contactPage.title.l1")} <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">{t("contactPage.title.highlight")}</span>
                 <br />
-                خطوة بخطوة
+                {t("contactPage.title.l2")}
               </h1>
               <p className="mt-6 text-lg leading-8 text-white/85">
-                لديك فكرة؟ سؤال؟ أو حتى مجرد فضول لمعرفة المزيد؟ نحن هنا للاستماع لك
-                ومساعدتك في تحويل الرؤية إلى منتج رقمي حقيقي.
+                {t("contactPage.subtitle")}
               </p>
             </div>
           </div>
@@ -99,11 +79,11 @@ function ContactPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{c.label}</div>
-                    <div className="mt-1 truncate text-base font-extrabold text-foreground" dir={c.label === "البريد الإلكتروني" || c.label === "اتصال هاتفي" ? "ltr" : undefined}>
+                    <div className="mt-1 truncate text-base font-extrabold text-foreground" dir={c.ltr ? "ltr" : undefined}>
                       {c.value}
                     </div>
                   </div>
-                  <ArrowLeft className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:-translate-x-1 group-hover:text-primary" />
+                  <ArrowLeft className={`h-5 w-5 shrink-0 text-muted-foreground transition group-hover:-translate-x-1 group-hover:text-primary ${dir === "ltr" ? "rotate-180" : ""}`} />
                 </div>
               </a>
             ))}
@@ -132,18 +112,17 @@ function ContactPage() {
         <section className="mx-auto max-w-7xl px-4 py-16">
           <div className="grid gap-6 overflow-hidden rounded-3xl border border-border bg-white shadow-sm lg:grid-cols-[1fr_1.4fr]">
             <div className="p-8 md:p-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">موقعنا</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("contactPage.location.kicker")}</span>
               <h2 className="mt-3 text-2xl font-extrabold text-foreground md:text-3xl">
-                زرنا في مكتبنا
+                {t("contactPage.location.title")}
               </h2>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                نسعد باستقبالك في مكتبنا بالرياض. ننصح بالحجز المسبق لضمان توفر فريق
-                مختص يستقبلك ويناقش مشروعك.
+                {t("contactPage.location.desc")}
               </p>
               <ul className="mt-6 space-y-4">
-                <Row icon={MapPin} label="العنوان" value="حي الملقا، طريق الملك فهد، الرياض" />
-                <Row icon={Clock} label="ساعات الزيارة" value="السبت - الخميس | 9:00 ص - 6:00 م" />
-                <Row icon={Phone} label="هاتف المكتب" value="+966 11 123 4567" ltr />
+                <Row icon={MapPin} label={t("contactPage.row.address")} value={t("contactPage.row.address.v")} />
+                <Row icon={Clock} label={t("contactPage.row.hours")} value={t("contactPage.row.hours.v")} />
+                <Row icon={Phone} label={t("contactPage.row.officePhone")} value="+966 11 123 4567" ltr />
               </ul>
               <a
                 href="https://maps.google.com/?q=Riyadh,Saudi+Arabia"
@@ -151,14 +130,14 @@ function ContactPage() {
                 rel="noreferrer"
                 className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
               >
-                فتح في الخرائط
-                <ArrowLeft className="h-4 w-4" />
+                {t("common.openInMaps")}
+                <ArrowLeft className={`h-4 w-4 ${dir === "ltr" ? "rotate-180" : ""}`} />
               </a>
             </div>
             <div className="relative min-h-[320px] overflow-hidden">
               <iframe
-                title="موقع سابا ديزاين"
-                src="https://www.google.com/maps?q=Riyadh,Saudi+Arabia&hl=ar&z=12&output=embed"
+                title="SABA Design location"
+                src={`https://www.google.com/maps?q=Riyadh,Saudi+Arabia&hl=${lang}&z=12&output=embed`}
                 className="absolute inset-0 h-full w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -171,12 +150,12 @@ function ContactPage() {
         <section className="bg-secondary/30 py-24">
           <div className="mx-auto max-w-4xl px-4">
             <div className="text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">الأسئلة الشائعة</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("contactPage.faqs.kicker")}</span>
               <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                إجابات سريعة لاستفساراتك
+                {t("contactPage.faqs.title")}
               </h2>
               <p className="mt-4 text-muted-foreground">
-                لم تجد إجابتك؟ تواصل معنا مباشرة وسنرد عليك خلال 24 ساعة.
+                {t("contactPage.faqs.desc")}
               </p>
             </div>
             <div className="mt-12 space-y-3">
@@ -199,18 +178,18 @@ function ContactPage() {
             <div className="relative grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
               <div>
                 <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">
-                  جاهز للبدء؟ نحن جاهزون لاستقبال فكرتك
+                  {t("contactPage.cta.title")}
                 </h2>
                 <p className="mt-3 text-white/85">
-                  استشارة مجانية بدون أي التزامات — فقط تحدث معنا.
+                  {t("contactPage.cta.desc")}
                 </p>
               </div>
               <Link
                 to="/services"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-extrabold text-primary shadow-xl transition hover:bg-white/90"
               >
-                استعرض خدماتنا
-                <ArrowLeft className="h-4 w-4" />
+                {t("contactPage.cta.btn")}
+                <ArrowLeft className={`h-4 w-4 ${dir === "ltr" ? "rotate-180" : ""}`} />
               </Link>
             </div>
           </div>
@@ -242,7 +221,7 @@ function FaqItem({ q, a, defaultOpen }: { q: string; a: string; defaultOpen?: bo
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-right"
+        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-start"
       >
         <span className="text-sm font-extrabold text-foreground md:text-base">{q}</span>
         <ChevronDown className={`h-5 w-5 shrink-0 text-primary transition-transform ${open ? "rotate-180" : ""}`} />

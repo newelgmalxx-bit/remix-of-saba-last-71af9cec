@@ -2,24 +2,26 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
+import { useLang } from "@/i18n/LanguageProvider";
 
 function LoginPage() {
   const [tab, setTab] = useState<"email" | "phone">("email");
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
+  const { t, dir } = useLang();
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
         <AuthHero />
 
         {/* Form side */}
         <div className="flex items-center px-6 py-10 sm:px-12 lg:py-14">
           <div className="mx-auto w-full max-w-md">
-            <div className="text-right">
-              <h1 className="text-3xl font-extrabold text-foreground">تسجيل الدخول</h1>
-              <p className="mt-2 text-sm text-muted-foreground">أدخل بياناتك للمتابعة إلى حسابك</p>
-              <div className="mt-3 h-0.5 w-16 rounded-full bg-primary mr-0 ml-auto" />
+            <div className="text-start">
+              <h1 className="text-3xl font-extrabold text-foreground">{t("auth.login.title")}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{t("auth.login.subtitleAlt")}</p>
+              <div className={`mt-3 h-0.5 w-16 rounded-full bg-primary ${dir === "rtl" ? "mr-0 ml-auto" : "ml-0 mr-auto"}`} />
             </div>
 
             {/* Tabs */}
@@ -31,7 +33,7 @@ function LoginPage() {
                 }`}
               >
                 <Mail className="h-4 w-4" />
-                البريد الإلكتروني
+                {t("auth.tab.email")}
               </button>
               <button
                 onClick={() => setTab("phone")}
@@ -40,44 +42,45 @@ function LoginPage() {
                 }`}
               >
                 <Phone className="h-4 w-4" />
-                رقم الجوال
+                {t("auth.tab.phone")}
               </button>
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={(e) => e.preventDefault()}>
               <Field
-                label={tab === "email" ? "البريد الإلكتروني" : "رقم الجوال"}
+                label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
                 type={tab === "email" ? "email" : "tel"}
-                placeholder={tab === "email" ? "example@email.com" : "05XXXXXXXX"}
+                placeholder={tab === "email" ? t("auth.emailPh") : t("auth.phonePh")}
                 icon={tab === "email" ? <Mail className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+                dirCtx={dir}
               />
 
-              <div className="text-right">
-                <label className="mb-1.5 block text-xs font-bold text-foreground">كلمة المرور</label>
+              <div className="text-start">
+                <label className="mb-1.5 block text-xs font-bold text-foreground">{t("auth.password")}</label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+                  <span className={`pointer-events-none absolute inset-y-0 ${dir === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>
                     <Lock className="h-4 w-4" />
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowPwd((v) => !v)}
-                    className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition hover:text-primary"
-                    aria-label="إظهار كلمة المرور"
+                    className={`absolute inset-y-0 ${dir === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground transition hover:text-primary`}
+                    aria-label={t("auth.show")}
                   >
                     {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                   <input
                     type={showPwd ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="w-full rounded-xl border border-border bg-white px-10 py-3 text-right text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder={t("auth.passwordPh")}
+                    className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <a href="#" className="text-xs font-bold text-primary hover:underline">نسيت كلمة المرور؟</a>
+                <a href="#" className="text-xs font-bold text-primary hover:underline">{t("auth.forgot")}</a>
                 <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
-                  <span>تذكرني</span>
+                  <span>{t("auth.remember")}</span>
                   <button
                     type="button"
                     onClick={() => setRemember(!remember)}
@@ -94,13 +97,13 @@ function LoginPage() {
                 type="submit"
                 className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
               >
-                تسجيل الدخول
+                {t("auth.signIn")}
               </button>
             </form>
 
             <div className="my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-[11px] text-muted-foreground">أو سجّل دخولك باستخدام</span>
+              <span className="text-[11px] text-muted-foreground">{t("auth.orSocial")}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
@@ -111,9 +114,9 @@ function LoginPage() {
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">
-              ليس لديك حساب؟{" "}
+              {t("auth.noAccount")}{" "}
               <Link to="/signup" className="font-bold text-primary hover:underline">
-                إنشاء حساب جديد
+                {t("auth.signup.cta")}
               </Link>
             </p>
           </div>
@@ -123,20 +126,21 @@ function LoginPage() {
   );
 }
 
-function Field({ label, type, placeholder, icon }: { label: string; type: string; placeholder: string; icon: React.ReactNode }) {
+function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr" }) {
   const isPhone = type === "tel";
+  const d = dirCtx || "rtl";
 
   return (
-    <div className="text-right">
+    <div className="text-start">
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">{icon}</span>
+        <span className={`pointer-events-none absolute inset-y-0 ${d === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>{icon}</span>
         <input
           type={type}
           dir={isPhone ? "ltr" : undefined}
           inputMode={isPhone ? "tel" : undefined}
           placeholder={placeholder}
-          className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-right"}`}
+          className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-start"}`}
         />
       </div>
     </div>
