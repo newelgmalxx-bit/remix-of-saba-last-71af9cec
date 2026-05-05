@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { fileToWebp } from "@/lib/image";
 
 export const Route = createFileRoute("/admin/services/")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
@@ -21,6 +22,7 @@ function ServicesPage() {
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
     subtitle: "", breadcrumb: "", bannerImage: "",
+    seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
     heroHighlights: ["", "", ""],
     overview: [
       { title: "لمن هذه الخدمة", desc: "" },
@@ -89,6 +91,12 @@ function ServicesPage() {
         category: newSvc.category,
         breadcrumb: form.breadcrumb || newSvc.titleAr,
         bannerImage: form.bannerImage,
+        seo: {
+          title: form.seoTitle,
+          description: form.seoDescription,
+          keywords: form.seoKeywords,
+          ogImage: form.seoOgImage || form.bannerImage,
+        },
         heroHighlights: form.heroHighlights.filter(h => h.trim()),
         overview: form.overview.filter(o => o.title.trim()),
         benefits: form.benefits.filter(b => b.title.trim()),
@@ -229,13 +237,35 @@ function ServicesPage() {
               </label>
               <label className="text-xs font-bold space-y-1.5 col-span-2">صورة البنر (رابط الصورة)
                 <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
-                <input type="file" accept="image/*" className="w-full text-[11px]" onChange={(e) => {
+                <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
                   const f = e.target.files?.[0]; if (!f) return;
-                  const r = new FileReader(); r.onload = () => setForm({ ...form, bannerImage: String(r.result) }); r.readAsDataURL(f);
+                  setForm({ ...form, bannerImage: await fileToWebp(f) });
                 }} />
                 {form.bannerImage && <img src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
               </label>
             </div>
+            </section>
+
+            <section>
+              <div className="text-xs font-extrabold mb-2 text-primary">إعدادات SEO</div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="text-xs font-bold space-y-1.5">عنوان الصفحة (SEO Title)
+                  <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
+                </label>
+                <label className="text-xs font-bold space-y-1.5">الكلمات المفتاحية
+                  <input placeholder="كلمة، كلمة، ..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoKeywords} onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })} />
+                </label>
+                <label className="text-xs font-bold space-y-1.5 col-span-2">وصف الميتا (Meta Description)
+                  <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
+                </label>
+                <label className="text-xs font-bold space-y-1.5 col-span-2">صورة المشاركة (OG Image)
+                  <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
+                  <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
+                    const f = e.target.files?.[0]; if (!f) return;
+                    setForm({ ...form, seoOgImage: await fileToWebp(f) });
+                  }} />
+                </label>
+              </div>
             </section>
 
             <section>
