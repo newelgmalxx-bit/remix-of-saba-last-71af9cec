@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as PlansRouteImport } from './routes/plans'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -59,6 +60,11 @@ const SignupRoute = SignupRouteImport.update({
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -352,6 +360,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -397,6 +406,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -439,6 +449,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -525,6 +537,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PlansRoute: typeof PlansRoute
   PortfolioRoute: typeof PortfolioRoute
   SignupRoute: typeof SignupRoute
   AccountProfileRoute: typeof AccountProfileRoute
@@ -552,6 +565,13 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/portfolio'
       preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -922,6 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PlansRoute: PlansRoute,
   PortfolioRoute: PortfolioRoute,
   SignupRoute: SignupRoute,
   AccountProfileRoute: AccountProfileRoute,
