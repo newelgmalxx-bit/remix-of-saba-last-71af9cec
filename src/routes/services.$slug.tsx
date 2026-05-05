@@ -104,6 +104,13 @@ function ServiceDetailPage() {
 
   const startingPlan = plans[0];
   const startingPrice = startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
+  const startingOriginal = startingPlan?.originalPrice
+    ? parseInt(startingPlan.originalPrice.replace(/[^\d]/g, ""), 10) || 0
+    : 0;
+  const startingDiscount =
+    startingOriginal > 0 && startingOriginal > startingPrice
+      ? Math.round(((startingOriginal - startingPrice) / startingOriginal) * 100)
+      : 0;
   const heroImg = service.bannerImage || servicesHero;
   const gallery = [heroImg, servicesHero, heroImg, servicesHero];
   const handleAddToCart = () => {
@@ -172,8 +179,20 @@ function ServiceDetailPage() {
                 <div className="flex items-end justify-between gap-3">
                   <div className={startAlign}>
                     <div className="text-[11px] font-bold text-muted-foreground">{t("svcDetail.price.from")}</div>
-                    <div className="mt-1 text-3xl font-extrabold text-primary" dir="ltr">
-                      {startingPlan?.price ?? "—"} <span className="text-sm">{t("common.sar")}</span>
+                    <div className="mt-1 flex flex-wrap items-end gap-2" dir="ltr">
+                      <div className="text-3xl font-extrabold text-primary">
+                        {startingPlan?.price ?? "—"} <span className="text-sm">{t("common.sar")}</span>
+                      </div>
+                      {startingDiscount > 0 && (
+                        <>
+                          <div className="text-base font-bold text-muted-foreground line-through">
+                            {startingPlan?.originalPrice}
+                          </div>
+                          <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600">
+                            -{startingDiscount}%
+                          </span>
+                        </>
+                      )}
                     </div>
                     <div className="mt-1 text-[11px] text-muted-foreground">{t("svcDetail.price.vat")}</div>
                   </div>

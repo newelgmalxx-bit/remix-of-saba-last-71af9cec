@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { serviceMap, type ServiceContent } from "@/data/services";
 import { Sparkles } from "lucide-react";
+import { useLang } from "@/i18n/LanguageProvider";
 
 const KEY = "saba_service_overrides_v1";
 
@@ -52,58 +53,77 @@ function writeStore(s: Store) {
   window.dispatchEvent(new Event("saba:service-overrides"));
 }
 
-export function mergeService(slug: string, override?: ServiceOverride): ServiceContent | undefined {
+export function mergeService(slug: string, override?: ServiceOverride, lang: "ar" | "en" = "ar"): ServiceContent | undefined {
   const base = serviceMap[slug];
   const o = override ?? readStore()[slug];
+  const en = lang === "en";
+  const pick = (ar?: string, ene?: string) => (en && ene ? ene : ar ?? "");
   if (!base) {
     if (!o || !o.isCustom) return undefined;
     // Build minimal content from override only
     return {
       slug,
-      category: o.category ?? "عام",
-      breadcrumb: o.breadcrumb ?? o.title ?? slug,
-      title: o.title ?? slug,
-      subtitle: o.subtitle ?? "",
-      heroHighlights: o.heroHighlights ?? [],
+      category: pick(o.category ?? "عام", o.categoryEn),
+      breadcrumb: pick(o.breadcrumb ?? o.title ?? slug, o.breadcrumbEn),
+      title: pick(o.title ?? slug, o.titleEn),
+      subtitle: pick(o.subtitle ?? "", o.subtitleEn),
+      heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? []),
       bannerImage: o.bannerImage,
-      overviewDescription: o.overviewDescription,
+      overviewDescription: pick(o.overviewDescription, o.overviewDescriptionEn),
       seo: o.seo,
-      overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
-      benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
+      overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: pick(x.title, x.titleEn), desc: pick(x.desc, x.descEn) })),
+      benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: pick(x.title, x.titleEn), desc: pick(x.desc, x.descEn) })),
       plans: o.plans ?? [],
-      steps: o.steps,
-      stats: o.stats,
-      testimonials: o.testimonials,
-      faqs: o.faqs,
+      steps: o.steps?.map((s) => ({ title: pick(s.title, s.titleEn) })),
+      stats: o.stats?.map((s) => ({ v: s.v, l: pick(s.l, s.lEn) })),
+      testimonials: o.testimonials?.map((tt) => ({ name: pick(tt.name, tt.nameEn), role: pick(tt.role, tt.roleEn), text: pick(tt.text, tt.textEn) })),
+      faqs: o.faqs?.map((f) => ({ q: pick(f.q, f.qEn), a: pick(f.a, f.aEn) })),
     } as ServiceContent;
   }
   if (!o) return base;
   return {
     ...base,
-    title: o.title ?? base.title,
-    subtitle: o.subtitle ?? base.subtitle,
-    category: o.category ?? base.category,
-    breadcrumb: o.breadcrumb ?? base.breadcrumb,
-    heroHighlights: o.heroHighlights ?? base.heroHighlights,
+    title: en ? (o.titleEn || o.title || base.title) : (o.title ?? base.title),
+    subtitle: en ? (o.subtitleEn || o.subtitle || base.subtitle) : (o.subtitle ?? base.subtitle),
+    category: en ? (o.categoryEn || o.category || base.category) : (o.category ?? base.category),
+    breadcrumb: en ? (o.breadcrumbEn || o.breadcrumb || base.breadcrumb) : (o.breadcrumb ?? base.breadcrumb),
+    heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? base.heroHighlights),
     bannerImage: o.bannerImage ?? base.bannerImage,
-    overviewDescription: o.overviewDescription ?? base.overviewDescription,
+    overviewDescription: en ? (o.overviewDescriptionEn || o.overviewDescription || base.overviewDescription) : (o.overviewDescription ?? base.overviewDescription),
     seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
     overview: o.overview
-      ? base.overview.map((b, i) => ({ ...b, title: o.overview![i]?.title ?? b.title, desc: o.overview![i]?.desc ?? b.desc }))
+      ? base.overview.map((b, i) => ({
+          ...b,
+          title: en ? (o.overview![i]?.titleEn || o.overview![i]?.title || b.title) : (o.overview![i]?.title ?? b.title),
+          desc: en ? (o.overview![i]?.descEn || o.overview![i]?.desc || b.desc) : (o.overview![i]?.desc ?? b.desc),
+        }))
       : base.overview,
     benefits: o.benefits
-      ? base.benefits.map((b, i) => ({ ...b, title: o.benefits![i]?.title ?? b.title, desc: o.benefits![i]?.desc ?? b.desc }))
+      ? base.benefits.map((b, i) => ({
+          ...b,
+          title: en ? (o.benefits![i]?.titleEn || o.benefits![i]?.title || b.title) : (o.benefits![i]?.title ?? b.title),
+          desc: en ? (o.benefits![i]?.descEn || o.benefits![i]?.desc || b.desc) : (o.benefits![i]?.desc ?? b.desc),
+        }))
       : base.benefits,
     plans: o.plans ?? base.plans,
-    steps: o.steps ?? base.steps,
-    stats: o.stats ?? base.stats,
-    testimonials: o.testimonials ?? base.testimonials,
-    faqs: o.faqs ?? base.faqs,
+    steps: o.steps ? o.steps.map((s) => ({ title: en ? (s.titleEn || s.title) : s.title })) : base.steps,
+    stats: o.stats ? o.stats.map((s) => ({ v: s.v, l: en ? (s.lEn || s.l) : s.l })) : base.stats,
+    testimonials: o.testimonials
+      ? o.testimonials.map((tt) => ({
+          name: en ? (tt.nameEn || tt.name) : tt.name,
+          role: en ? (tt.roleEn || tt.role) : tt.role,
+          text: en ? (tt.textEn || tt.text) : tt.text,
+        }))
+      : base.testimonials,
+    faqs: o.faqs
+      ? o.faqs.map((f) => ({ q: en ? (f.qEn || f.q) : f.q, a: en ? (f.aEn || f.a) : f.a }))
+      : base.faqs,
   };
 }
 
 export function useServiceContent(slug: string): ServiceContent | undefined {
   const [, setTick] = useState(0);
+  const { lang } = useLang();
   useEffect(() => {
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
@@ -113,11 +133,12 @@ export function useServiceContent(slug: string): ServiceContent | undefined {
       window.removeEventListener("storage", fn);
     };
   }, []);
-  return mergeService(slug);
+  return mergeService(slug, undefined, lang);
 }
 
 export function useAllServices(): ServiceContent[] {
   const [, setTick] = useState(0);
+  const { lang } = useLang();
   useEffect(() => {
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
@@ -131,7 +152,7 @@ export function useAllServices(): ServiceContent[] {
   const baseSlugs = Object.keys(serviceMap);
   const customSlugs = Object.keys(store).filter((s) => !serviceMap[s] && store[s]?.isCustom);
   return [...baseSlugs, ...customSlugs]
-    .map((s) => mergeService(s))
+    .map((s) => mergeService(s, undefined, lang))
     .filter((x): x is ServiceContent => !!x);
 }
 
