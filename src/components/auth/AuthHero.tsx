@@ -1,17 +1,20 @@
 import logoWhite from "@/assets/logo-white.png";
 import authIllustration from "@/assets/auth-illustration.jpg";
 import { ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
+import { useLang } from "@/i18n/LanguageProvider";
 
-const features = [
-  { icon: CloudCog, title: "مزامنة فورية", desc: "في جميع أجهزتك" },
-  { icon: BarChart3, title: "إدارة سهلة", desc: "لوحة متكاملة" },
-  { icon: Headphones, title: "دعم مستمر", desc: "على مدار الساعة" },
-  { icon: ShieldCheck, title: "أمان عالي", desc: "حماية بياناتك" },
-];
-
-export function AuthHero() {
+export function AuthHero({ variant = "login" }: { variant?: "login" | "signup" }) {
+  const { t, dir } = useLang();
+  const features = [
+    { icon: CloudCog, title: t("auth.hero.f1.t"), desc: t("auth.hero.f1.d") },
+    { icon: BarChart3, title: t("auth.hero.f2.t"), desc: t("auth.hero.f2.d") },
+    { icon: Headphones, title: t("auth.hero.f3.t"), desc: t("auth.hero.f3.d") },
+    { icon: ShieldCheck, title: t("auth.hero.f4.t"), desc: t("auth.hero.f4.d") },
+  ];
+  const align = dir === "rtl" ? "text-right" : "text-left";
+  const dividerAlign = dir === "rtl" ? "ms-auto" : "me-auto";
   return (
-    <div dir="rtl" className="relative flex flex-col justify-between overflow-hidden p-6 text-white sm:p-10" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
+    <div dir={dir} className="relative flex flex-col justify-between overflow-hidden p-6 text-white sm:p-10" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
       <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
@@ -19,13 +22,13 @@ export function AuthHero() {
         <img src={logoWhite} alt="سابا ديزاين" className="h-20 w-auto opacity-95" />
       </div>
 
-      <div className="relative mt-6 text-right">
+      <div className={`relative mt-6 ${align}`}>
         <h2 className="text-3xl font-extrabold leading-tight">
-          مرحباً بك في <span className="whitespace-nowrap">SABA DESIGN</span>
+          {t("auth.hero.welcome")} <span className="whitespace-nowrap">SABA DESIGN</span>
         </h2>
-        <div className="my-3 h-0.5 w-16 rounded-full bg-white/60 ms-auto" />
+        <div className={`my-3 h-0.5 w-16 rounded-full bg-white/60 ${dividerAlign}`} />
         <p className="text-sm leading-7 text-white/80">
-          سجّل دخولك للوصول إلى لوحة التحكم وإدارة مشاريعك بسهولة
+          {variant === "signup" ? t("auth.hero.tagline.signup") : t("auth.hero.tagline.login")}
         </p>
       </div>
 
