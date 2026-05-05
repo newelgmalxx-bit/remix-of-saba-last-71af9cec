@@ -20,7 +20,7 @@ function ServicesPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
-    subtitle: "", breadcrumb: "",
+    subtitle: "", breadcrumb: "", bannerImage: "",
     heroHighlights: ["", "", ""],
     overview: [
       { title: "لمن هذه الخدمة", desc: "" },
@@ -88,6 +88,7 @@ function ServicesPage() {
         subtitle: form.subtitle,
         category: newSvc.category,
         breadcrumb: form.breadcrumb || newSvc.titleAr,
+        bannerImage: form.bannerImage,
         heroHighlights: form.heroHighlights.filter(h => h.trim()),
         overview: form.overview.filter(o => o.title.trim()),
         benefits: form.benefits.filter(b => b.title.trim()),
