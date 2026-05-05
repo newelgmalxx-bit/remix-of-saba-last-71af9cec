@@ -12,6 +12,12 @@ export type ServiceContent = {
   subtitle: string;
   heroHighlights: string[];
   bannerImage?: string;
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
   overview: { icon: LucideIcon; title: string; desc: string }[];
   benefits: { icon: LucideIcon; title: string; desc: string }[];
   plans: { name: string; price: string; featured: boolean; feats: string[] }[];
