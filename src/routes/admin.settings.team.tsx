@@ -1,44 +1,47 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AdminLayout, PanelCard, PrimaryButton, Pill } from "@/components/admin/AdminLayout";
+import { AdminLayout, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { useState } from "react";
 import { Check, Users2 } from "lucide-react";
 import { adminUsers } from "@/data/admin";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/settings/team")({
   head: () => ({ meta: [{ title: "الفريق والصلاحيات | الإعدادات" }] }),
   component: TeamPage,
 });
 
-const roles = [
-  { key: "owner", label: "مالك", desc: "صلاحيات كاملة بما فيها الفوترة وحذف الحساب", tone: "amber" as const },
-  { key: "admin", label: "مدير", desc: "إدارة كل المحتوى والإعدادات والمستخدمين", tone: "primary" as const },
-  { key: "manager", label: "مشرف", desc: "إدارة الطلبات والعملاء والخدمات بدون إعدادات حسّاسة", tone: "violet" as const },
-  { key: "support", label: "دعم", desc: "عرض الطلبات والرد على العملاء فقط", tone: "emerald" as const },
-];
-
-const matrix = [
-  { feature: "لوحة التحكم", owner: true, admin: true, manager: true, support: true },
-  { feature: "إدارة الخدمات", owner: true, admin: true, manager: true, support: false },
-  { feature: "إدارة الطلبات", owner: true, admin: true, manager: true, support: true },
-  { feature: "إدارة الفواتير", owner: true, admin: true, manager: true, support: false },
-  { feature: "إدارة العملاء", owner: true, admin: true, manager: true, support: true },
-  { feature: "إدارة المستخدمين", owner: true, admin: true, manager: false, support: false },
-  { feature: "إعدادات الموقع/SEO", owner: true, admin: true, manager: false, support: false },
-  { feature: "إعدادات الدفع/API", owner: true, admin: false, manager: false, support: false },
-];
-
 function TeamPage() {
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const roles = [
+    { key: "owner", label: L("مالك", "Owner"), desc: L("صلاحيات كاملة بما فيها الفوترة وحذف الحساب", "Full access including billing and account deletion"), tone: "amber" as const },
+    { key: "admin", label: L("مدير", "Admin"), desc: L("إدارة كل المحتوى والإعدادات والمستخدمين", "Manage all content, settings and users"), tone: "primary" as const },
+    { key: "manager", label: L("مشرف", "Manager"), desc: L("إدارة الطلبات والعملاء والخدمات بدون إعدادات حسّاسة", "Manage orders, clients, services — no sensitive settings"), tone: "violet" as const },
+    { key: "support", label: L("دعم", "Support"), desc: L("عرض الطلبات والرد على العملاء فقط", "View orders and reply to clients only"), tone: "emerald" as const },
+  ];
+  const matrix = [
+    { feature: L("لوحة التحكم", "Dashboard"), owner: true, admin: true, manager: true, support: true },
+    { feature: L("إدارة الخدمات", "Manage Services"), owner: true, admin: true, manager: true, support: false },
+    { feature: L("إدارة الطلبات", "Manage Orders"), owner: true, admin: true, manager: true, support: true },
+    { feature: L("إدارة الفواتير", "Manage Invoices"), owner: true, admin: true, manager: true, support: false },
+    { feature: L("إدارة العملاء", "Manage Clients"), owner: true, admin: true, manager: true, support: true },
+    { feature: L("إدارة المستخدمين", "Manage Users"), owner: true, admin: true, manager: false, support: false },
+    { feature: L("إعدادات الموقع/SEO", "Site / SEO Settings"), owner: true, admin: true, manager: false, support: false },
+    { feature: L("إعدادات الدفع/API", "Payment / API Settings"), owner: true, admin: false, manager: false, support: false },
+  ];
+
   const [tab, setTab] = useState<"members" | "roles">("members");
+  const textAlign = dir === "rtl" ? "text-right" : "text-left";
   return (
-    <AdminLayout title="الإعدادات" subtitle="الفريق والصلاحيات" action={<Link to="/admin/users" className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-xs font-bold">إدارة المستخدمين</Link>}>
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("الفريق والصلاحيات", "Team & Permissions")} action={<Link to="/admin/users" className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-xs font-bold">{L("إدارة المستخدمين", "Manage Users")}</Link>}>
       <div className="mb-6 inline-flex rounded-xl border border-border bg-card p-1">
-        {[["members", "الأعضاء"], ["roles", "الأدوار والصلاحيات"]].map(([k, l]) => (
+        {[["members", L("الأعضاء", "Members")], ["roles", L("الأدوار والصلاحيات", "Roles & Permissions")]].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k as any)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
         ))}
       </div>
 
       {tab === "members" && (
-        <PanelCard title="أعضاء الفريق" subtitle={`${adminUsers.length} مستخدم`} action={<Link to="/admin/users" className="text-xs font-bold text-primary hover:underline">إدارة كاملة ←</Link>}>
+        <PanelCard title={L("أعضاء الفريق", "Team Members")} subtitle={`${adminUsers.length} ${L("مستخدم", "users")}`} action={<Link to="/admin/users" className="text-xs font-bold text-primary hover:underline">{L("إدارة كاملة ←", "Full management →")}</Link>}>
           <div className="space-y-2">
             {adminUsers.map(u => {
               const initials = u.name.split(" ").map(n => n[0]).slice(0, 2).join("");
@@ -54,7 +57,7 @@ function TeamPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Pill tone={role.tone}>{role.label}</Pill>
-                    <Pill tone={u.active ? "emerald" : "muted"}>{u.active ? "نشط" : "موقوف"}</Pill>
+                    <Pill tone={u.active ? "emerald" : "muted"}>{u.active ? L("نشط", "Active") : L("موقوف", "Suspended")}</Pill>
                   </div>
                 </div>
               );
@@ -76,12 +79,12 @@ function TeamPage() {
               </div>
             ))}
           </div>
-          <PanelCard title="مصفوفة الصلاحيات">
+          <PanelCard title={L("مصفوفة الصلاحيات", "Permissions Matrix")}>
             <div className="overflow-x-auto -mx-2">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                    <th className="px-3 py-3 font-medium">الميزة</th>
+                  <tr className={`${textAlign} text-xs text-muted-foreground border-b border-border`}>
+                    <th className="px-3 py-3 font-medium">{L("الميزة", "Feature")}</th>
                     {roles.map(r => <th key={r.key} className="px-3 py-3 font-medium text-center">{r.label}</th>)}
                   </tr>
                 </thead>
