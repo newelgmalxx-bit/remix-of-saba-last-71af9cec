@@ -107,6 +107,25 @@ export function useServiceContent(slug: string): ServiceContent | undefined {
   return mergeService(slug);
 }
 
+export function useAllServices(): ServiceContent[] {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const fn = () => setTick((t) => t + 1);
+    window.addEventListener("saba:service-overrides", fn);
+    window.addEventListener("storage", fn);
+    return () => {
+      window.removeEventListener("saba:service-overrides", fn);
+      window.removeEventListener("storage", fn);
+    };
+  }, []);
+  const store = readStore();
+  const baseSlugs = Object.keys(serviceMap);
+  const customSlugs = Object.keys(store).filter((s) => !serviceMap[s] && store[s]?.isCustom);
+  return [...baseSlugs, ...customSlugs]
+    .map((s) => mergeService(s))
+    .filter((x): x is ServiceContent => !!x);
+}
+
 export function useServiceOverrideEditor(slug: string) {
   const [override, setOverride] = useState<ServiceOverride>(() => readStore()[slug] ?? {});
 
