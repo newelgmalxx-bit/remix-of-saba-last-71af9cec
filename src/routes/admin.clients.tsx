@@ -151,7 +151,7 @@ function ClientsPage() {
           <DialogHeader><DialogTitle>إضافة عميل جديد</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <Lbl label="الاسم الكامل"><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
-            <Lbl label="رقم الجوال"><input className={ic} value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
+            <Lbl label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
             <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
             <Lbl label="المدينة"><input className={ic} value={add.city} onChange={e => setAdd({ ...add, city: e.target.value })} /></Lbl>
             <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
@@ -219,12 +219,14 @@ function Lbl({ label, children, full }: { label: string; children: React.ReactNo
   return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
 }
 function Info({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const ltr = label.includes("الجوال") || label.includes("عدد") || label.includes("إجمالي");
+
   return (
     <div className="flex items-start gap-2">
       <Icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
       <div className="min-w-0">
         <div className="text-[11px] text-muted-foreground">{label}</div>
-        <div className="font-medium truncate">{value}</div>
+        <div dir={ltr ? "ltr" : undefined} className="font-medium truncate">{value}</div>
       </div>
     </div>
   );
