@@ -2,12 +2,11 @@ import type { LucideIcon } from "lucide-react";
 import { Banknote, CreditCard, Wallet, Truck, Smartphone } from "lucide-react";
 import tabbyLogo from "@/assets/pay-tabby.webp";
 import tamaraLogo from "@/assets/pay-tamara.png";
-import madaLogo from "@/assets/pay-mada.png";
 import applePayLogo from "@/assets/pay-applepay.png";
 import visaLogo from "@/assets/pay-visa.webp";
 import mastercardLogo from "@/assets/pay-mastercard.png";
 
-export type PaymentMethod = "tabby" | "tamara" | "mada" | "mayfatoorah" | "cod";
+export type PaymentMethod = "tabby" | "tamara" | "mayfatoorah" | "cod";
 
 export const paymentMethods: {
   id: PaymentMethod;
@@ -20,7 +19,6 @@ export const paymentMethods: {
 }[] = [
   { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, badge: "الأكثر استخداماً" },
   { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
-  { id: "mada", name: "مدى", desc: "بطاقة مدى البنكية السعودية", icon: CreditCard, logo: madaLogo },
   {
     id: "mayfatoorah",
     name: "ماي فاتورة",
@@ -139,7 +137,7 @@ export const mockOrders: Order[] = [
     number: "SD-1018",
     createdAt: "2026-03-08",
     status: "completed",
-    payment: "mada",
+    payment: "mayfatoorah",
     paid: true,
     items: [
       { id: "i1", serviceSlug: "social-media-design", serviceTitle: "تصميم سوشيال ميديا", planName: "Pro", price: 3500, qty: 1 },

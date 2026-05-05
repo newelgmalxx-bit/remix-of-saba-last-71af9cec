@@ -8,7 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <img src={logo} alt="سابا ديزاين" width={260} height={104} className="-mt-2 mb-5 h-24 w-auto object-contain sm:h-28" />
+          <img src={logo} alt="سابا ديزاين" width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
           <p className="text-base leading-8 text-white/80">
             وكالة رقمية متخصصة في تصميم وتطوير الحلول الرقمية المبتكرة لتحويل أفكارك إلى واقع.
           </p>
