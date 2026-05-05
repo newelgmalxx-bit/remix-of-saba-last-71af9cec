@@ -32,12 +32,18 @@ function ServiceEditorPage() {
   const isCustom = !base && !!initial;
 
   const [title, setTitle] = useState(initial?.title ?? "");
+  const [titleEn, setTitleEn] = useState(override?.titleEn ?? "");
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? "");
+  const [subtitleEn, setSubtitleEn] = useState(override?.subtitleEn ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
+  const [categoryEn, setCategoryEn] = useState(override?.categoryEn ?? "");
   const [breadcrumb, setBreadcrumb] = useState(initial?.breadcrumb ?? "");
+  const [breadcrumbEn, setBreadcrumbEn] = useState(override?.breadcrumbEn ?? "");
   const [heroHighlights, setHeroHighlights] = useState<string[]>(initial?.heroHighlights ?? []);
+  const [heroHighlightsEn, setHeroHighlightsEn] = useState<string[]>(override?.heroHighlightsEn ?? []);
   const [bannerImage, setBannerImage] = useState<string>(initial?.bannerImage ?? "");
   const [overviewDescription, setOverviewDescription] = useState<string>(initial?.overviewDescription ?? "");
+  const [overviewDescriptionEn, setOverviewDescriptionEn] = useState<string>(override?.overviewDescriptionEn ?? "");
   const [seo, setSeo] = useState({
     title: initial?.seo?.title ?? "",
     description: initial?.seo?.description ?? "",
@@ -78,7 +84,12 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overviewDescription, seo, overview, benefits, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = {
+      title, titleEn, subtitle, subtitleEn, category, categoryEn, breadcrumb, breadcrumbEn,
+      heroHighlights, heroHighlightsEn, bannerImage, overviewDescription, overviewDescriptionEn,
+      seo, overview, benefits, steps, stats, testimonials, faqs,
+      isCustom: isCustom || override?.isCustom,
+    };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -87,12 +98,18 @@ function ServiceEditorPage() {
     if (!base) { toast.info("لا توجد نسخة افتراضية لاستعادتها"); return; }
     reset();
     setTitle(base.title);
+    setTitleEn("");
     setSubtitle(base.subtitle);
+    setSubtitleEn("");
     setCategory(base.category);
+    setCategoryEn("");
     setBreadcrumb(base.breadcrumb);
+    setBreadcrumbEn("");
     setHeroHighlights(base.heroHighlights);
+    setHeroHighlightsEn([]);
     setBannerImage(base.bannerImage ?? "");
     setOverviewDescription(base.overviewDescription ?? "");
+    setOverviewDescriptionEn("");
     setSeo({ title: base.seo?.title ?? "", description: base.seo?.description ?? "", keywords: base.seo?.keywords ?? "", ogImage: base.seo?.ogImage ?? "" });
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
@@ -131,12 +148,18 @@ function ServiceEditorPage() {
         {/* Basic */}
         <PanelCard title="المعلومات الأساسية">
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="عنوان الخدمة"><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
-            <Field label="مسار العرض (Breadcrumb)"><input className={inputCls} value={breadcrumb} onChange={(e) => setBreadcrumb(e.target.value)} /></Field>
-            <Field label="التصنيف"><input className={inputCls} value={category} onChange={(e) => setCategory(e.target.value)} /></Field>
+            <Field label="عنوان الخدمة (AR)"><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+            <Field label="Service Title (EN)"><input className={inputCls} dir="ltr" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label="مسار العرض (Breadcrumb AR)"><input className={inputCls} value={breadcrumb} onChange={(e) => setBreadcrumb(e.target.value)} /></Field>
+            <Field label="Breadcrumb (EN)"><input className={inputCls} dir="ltr" value={breadcrumbEn} onChange={(e) => setBreadcrumbEn(e.target.value)} /></Field>
+            <Field label="التصنيف (AR)"><input className={inputCls} value={category} onChange={(e) => setCategory(e.target.value)} /></Field>
+            <Field label="Category (EN)"><input className={inputCls} dir="ltr" value={categoryEn} onChange={(e) => setCategoryEn(e.target.value)} /></Field>
             <Field label="المعرّف (slug)"><input className={inputCls} value={slug} disabled /></Field>
             <div className="md:col-span-2">
-              <Field label="الوصف المختصر"><textarea rows={3} className={inputCls} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} /></Field>
+              <Field label="الوصف المختصر (AR)"><textarea rows={3} className={inputCls} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} /></Field>
+            </div>
+            <div className="md:col-span-2">
+              <Field label="Short Description (EN)"><textarea rows={3} className={inputCls} dir="ltr" value={subtitleEn} onChange={(e) => setSubtitleEn(e.target.value)} /></Field>
             </div>
             <div className="md:col-span-2">
               <Field label="صورة البنر (Hero)">
@@ -182,9 +205,10 @@ function ServiceEditorPage() {
         }>
           <div className="space-y-2">
             {heroHighlights.map((h, i) => (
-              <div key={i} className="flex gap-2">
-                <input className={inputCls} value={h} onChange={(e) => { const n = [...heroHighlights]; n[i] = e.target.value; setHeroHighlights(n); }} />
-                <button onClick={() => setHeroHighlights(heroHighlights.filter((_, x) => x !== i))} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-rose-500 hover:bg-rose-50"><Trash2 className="h-4 w-4" /></button>
+              <div key={i} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_auto]">
+                <input className={inputCls} placeholder="عربي" value={h} onChange={(e) => { const n = [...heroHighlights]; n[i] = e.target.value; setHeroHighlights(n); }} />
+                <input className={inputCls} dir="ltr" placeholder="English" value={heroHighlightsEn[i] ?? ""} onChange={(e) => { const n = [...heroHighlightsEn]; n[i] = e.target.value; setHeroHighlightsEn(n); }} />
+                <button onClick={() => { setHeroHighlights(heroHighlights.filter((_, x) => x !== i)); setHeroHighlightsEn(heroHighlightsEn.filter((_, x) => x !== i)); }} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-rose-500 hover:bg-rose-50"><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
           </div>
@@ -193,9 +217,14 @@ function ServiceEditorPage() {
         {/* Overview */}
         <PanelCard title="نظرة عامة عن الخدمة">
           <div className="mb-4">
-            <Field label="وصف عام للخدمة (يظهر أعلى البطاقات)">
+            <Field label="وصف عام للخدمة (AR)">
               <textarea rows={5} className={inputCls} placeholder="اكتب وصفًا تفصيليًا واضحًا عن الخدمة..." value={overviewDescription} onChange={(e) => setOverviewDescription(e.target.value)} />
             </Field>
+            <div className="mt-3">
+              <Field label="Overview Description (EN)">
+                <textarea rows={5} className={inputCls} dir="ltr" placeholder="Detailed description of the service..." value={overviewDescriptionEn} onChange={(e) => setOverviewDescriptionEn(e.target.value)} />
+              </Field>
+            </div>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {overview.map((o, i) => (
