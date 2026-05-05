@@ -236,7 +236,7 @@ function CheckoutPage() {
                           <div className="font-bold">{it.serviceTitle}</div>
                           <div className="text-xs text-muted-foreground">باقة {it.planName} × {it.qty}</div>
                         </div>
-                        <div className="font-bold text-primary">{formatCurrency(it.price * it.qty)}</div>
+                        <div className="font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
                       </div>
                     ))}
                   </ReviewBlock>
@@ -285,17 +285,17 @@ function CheckoutPage() {
                         <div className="font-bold line-clamp-1">{it.serviceTitle}</div>
                         <div className="text-xs text-muted-foreground">{it.planName} × {it.qty}</div>
                       </div>
-                      <div className="text-xs font-bold text-primary whitespace-nowrap">{formatCurrency(it.price * it.qty)}</div>
+                      <div className="text-xs font-bold text-primary whitespace-nowrap" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
                     </div>
                   ))}
                 </div>
                 <div className="my-4 h-px bg-border" />
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع</span><span>{formatCurrency(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ض. القيمة المضافة</span><span>{formatCurrency(vat)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع</span><span data-ltr-number>{formatCurrency(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">ض. القيمة المضافة</span><span data-ltr-number>{formatCurrency(vat)}</span></div>
                   <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
                     <span>الإجمالي</span>
-                    <span className="text-primary">{formatCurrency(total)}</span>
+                    <span className="text-primary" data-ltr-number>{formatCurrency(total)}</span>
                   </div>
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-[11px] text-muted-foreground">
