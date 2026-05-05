@@ -110,12 +110,12 @@ function BookingsPage() {
                 const s = bookingStatusMap[b.status];
                 return (
                   <tr key={b.id} className="border-b border-border hover:bg-muted/40">
-                    <td className="px-3 py-3 font-bold text-primary">#{b.number}</td>
+                    <td className="px-3 py-3 font-bold text-primary" dir="ltr">#{b.number}</td>
                     <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{b.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{b.city ?? "—"}</td>
                     <td className="px-3 py-3">{b.service}</td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3">
                       <select value={b.payment} onChange={(e) => setBookings(bookings.map(x => x.id === b.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
                         {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
@@ -126,7 +126,7 @@ function BookingsPage() {
                         {statusKeys.map(k => <option key={k} value={k}>{bookingStatusMap[k].label}</option>)}
                       </select>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground text-xs">{b.date}</td>
+                    <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{b.date}</td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => setViewing(b)} title="عرض الفاتورة" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button>
