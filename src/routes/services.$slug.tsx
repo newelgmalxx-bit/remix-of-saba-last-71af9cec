@@ -1,14 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
   MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
+import { usePlans } from "@/hooks/usePlans";
+import { useCart } from "@/hooks/useCart";
 
 const defaultSteps = [
   { n: 1, icon: MessageSquare, title: "فهم المتطلبات" },
@@ -58,6 +61,10 @@ function ServiceDetailPage() {
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
+  const { plans } = usePlans();
+  const { add } = useCart();
+  const navigate = useNavigate();
+  const [activeImg, setActiveImg] = useState(0);
 
   if (!service) {
     return (
@@ -86,58 +93,118 @@ function ServiceDetailPage() {
   const testimonials = service.testimonials && service.testimonials.length ? service.testimonials : defaultTestimonials;
   const faqs = service.faqs && service.faqs.length ? service.faqs : defaultFaqs;
 
+  const startingPlan = plans[0];
+  const startingPrice = startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
+  const heroImg = service.bannerImage || servicesHero;
+  const gallery = [heroImg, servicesHero, heroImg, servicesHero];
+  const handleAddToCart = () => {
+    if (!startingPlan) return;
+    add({ serviceSlug: slug, serviceTitle: title, planName: startingPlan.name, price: startingPrice });
+    toast.success("تمت الإضافة للسلة", { description: `${title} — باقة ${startingPlan.name}` });
+  };
+  const handleBuyNow = () => {
+    if (!startingPlan) return;
+    add({ serviceSlug: slug, serviceTitle: title, planName: startingPlan.name, price: startingPrice });
+    navigate({ to: "/checkout" as any });
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
       <main className="flex-1">
-        {/* Hero */}
-        <section className="relative overflow-hidden text-white">
-          <div
-            className="absolute inset-0 bg-cover bg-no-repeat"
-            style={{ backgroundImage: `url(${service.bannerImage || servicesHero})`, backgroundPosition: "center" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/60 to-primary-dark/95" />
-          <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
-            {/* Headline first (right side in RTL) */}
-            <div className="order-1 text-right">
-              <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
-                <Link to="/" className="hover:underline">الرئيسية</Link>
-                <ChevronLeft className="h-3 w-3" />
-                <Link to="/services" className="hover:underline">خدماتنا</Link>
-                <ChevronLeft className="h-3 w-3" />
-                <span>{breadcrumb}</span>
+        {/* Product-style header */}
+        <section className="border-b border-border/60 bg-gradient-to-b from-secondary/40 to-background">
+          <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap items-center justify-end gap-1 text-[11px] font-bold text-muted-foreground">
+              <Link to="/" className="hover:text-primary">الرئيسية</Link>
+              <ChevronLeft className="h-3 w-3" />
+              <Link to="/services" className="hover:text-primary">خدماتنا</Link>
+              <ChevronLeft className="h-3 w-3" />
+              <span className="text-foreground">{breadcrumb}</span>
+            </div>
+          </div>
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div className="order-1">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/60 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)]">
+                <img src={gallery[activeImg]} alt={title} className="h-full w-full object-cover transition duration-500" />
+                <span className="absolute right-4 top-4 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white shadow">متاحة الآن</span>
+                <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary shadow">{breadcrumb}</span>
               </div>
-              <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">{title}</h1>
-              <p className="mt-3 text-sm text-white/85 sm:text-base">
-                {subtitle}
-              </p>
-              <div className="mt-6 flex flex-wrap justify-end gap-3">
-                <Link
-                  to={"/plans" as any}
-                  className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5"
-                >
-                  استعراض الباقات
-                </Link>
-                <Link
-                  to={"/contact" as any}
-                  className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
-                >
-                  اطلب عرض سعر
-                </Link>
+              <div className="mt-3 grid grid-cols-4 gap-2.5">
+                {gallery.map((g, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    className={`relative aspect-[4/3] overflow-hidden rounded-xl border bg-white transition ${
+                      activeImg === i ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <img src={g} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Feature card */}
-            <div className="order-2">
-              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md">
-                <div className="text-center text-sm font-bold text-white/90">{title}</div>
-                <div className="mt-4 space-y-2">
-                  {heroHighlights.map((f) => (
-                    <div key={f} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs">
-                      <Check className="h-4 w-4 text-white/80" />
-                      <span>{f}</span>
-                    </div>
+            <div className="order-2 text-right">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-light px-3 py-1 text-[11px] font-bold text-primary">
+                <Award className="h-3 w-3" /> خدمة احترافية
+              </div>
+              <h1 className="mt-3 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">{title}</h1>
+              <div className="mt-2 flex items-center justify-end gap-2 text-xs text-muted-foreground">
+                <span>(+180 تقييم)</span>
+                <span className="font-bold text-foreground" data-ltr-number>4.9</span>
+                <div className="flex gap-0.5 text-amber-400">
+                  {Array.from({ length: 5 }).map((_, k) => (
+                    <Star key={k} className="h-3.5 w-3.5 fill-current" />
                   ))}
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">{subtitle}</p>
+
+              <div className="mt-5 rounded-2xl border border-border/60 bg-white p-5 shadow-sm">
+                <div className="flex items-end justify-between gap-3">
+                  <div className="text-right">
+                    <div className="text-[11px] font-bold text-muted-foreground">يبدأ من</div>
+                    <div className="mt-1 text-3xl font-extrabold text-primary" dir="ltr">
+                      {startingPlan?.price ?? "—"} <span className="text-sm">ر.س</span>
+                    </div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">شامل ضريبة القيمة المضافة</div>
+                  </div>
+                  <Link to={"/plans" as any} className="inline-flex h-9 items-center rounded-full border border-border bg-secondary/60 px-3 text-[11px] font-bold text-foreground/80 hover:border-primary hover:text-primary">
+                    كل الباقات
+                  </Link>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button onClick={handleBuyNow} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-12px_rgba(30,91,148,0.6)] transition hover:bg-primary-dark">
+                    <Zap className="h-4 w-4" /> اطلب الآن
+                  </button>
+                  <button onClick={handleAddToCart} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white text-sm font-bold text-primary transition hover:bg-primary-light">
+                    <ShoppingCart className="h-4 w-4" /> أضف للسلة
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-border/60 bg-secondary/30 p-4">
+                <div className="mb-3 text-xs font-bold text-foreground">أبرز ما تحصل عليه</div>
+                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {heroHighlights.map((f) => (
+                    <li key={f} className="flex items-center justify-end gap-2 rounded-lg bg-white px-3 py-2 text-xs text-foreground/85">
+                      <span>{f}</span>
+                      <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] text-muted-foreground">
+                <div className="flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-white p-3">
+                  <Truck className="h-4 w-4 text-primary" /> تسليم سريع
+                </div>
+                <div className="flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-white p-3">
+                  <ShieldCheck className="h-4 w-4 text-primary" /> ضمان الجودة
+                </div>
+                <div className="flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-white p-3">
+                  <Clock className="h-4 w-4 text-primary" /> دعم 24/7
                 </div>
               </div>
             </div>
