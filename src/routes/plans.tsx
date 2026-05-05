@@ -67,11 +67,17 @@ function PlansPage() {
 }
 
 function PlanCard({ plan }: { plan: Plan }) {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const { add } = useCart();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
+  const origNum = parseInt((plan.originalPrice || "").replace(/[^\d]/g, ""), 10) || 0;
+  const discountPct = origNum > priceNum && priceNum > 0 ? Math.round(((origNum - priceNum) / origNum) * 100) : 0;
+  const name = lang === "en" ? (plan.nameEn || plan.name) : plan.name;
+  const badge = lang === "en" ? (plan.badgeEn || plan.badge) : plan.badge;
+  const description = lang === "en" ? (plan.descriptionEn || plan.description) : plan.description;
+  const feats = lang === "en" && plan.featsEn?.length ? plan.featsEn : plan.feats;
 
   const handleAdd = () => {
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
@@ -92,18 +98,26 @@ function PlanCard({ plan }: { plan: Plan }) {
           : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
       }`}
     >
-      {plan.badge && (
+      {badge && (
         <span className={`absolute -top-3 ${dir === "rtl" ? "right-6" : "left-6"} rounded-full px-3 py-1 text-[10px] font-bold ${plan.featured ? "bg-primary text-white" : "bg-primary-light text-primary"}`}>
-          {plan.badge}
+          {badge}
         </span>
       )}
-      <div className="text-sm font-bold text-foreground">{plan.name}</div>
-      <div className="mt-2 text-3xl font-extrabold text-primary" dir="ltr">
-        {plan.price} <span className="text-sm font-bold">{t("common.sar")}</span>
+      <div className="text-sm font-bold text-foreground">{name}</div>
+      <div className="mt-2 flex items-baseline gap-2 flex-wrap" dir="ltr">
+        <div className="text-3xl font-extrabold text-primary">
+          {plan.price} <span className="text-sm font-bold">{t("common.sar")}</span>
+        </div>
+        {discountPct > 0 && (
+          <>
+            <div className="text-sm text-muted-foreground line-through">{plan.originalPrice}</div>
+            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-600">-{discountPct}%</span>
+          </>
+        )}
       </div>
-      {plan.description && <p className="mt-2 text-xs leading-6 text-muted-foreground">{plan.description}</p>}
+      {description && <p className="mt-2 text-xs leading-6 text-muted-foreground">{description}</p>}
       <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
-        {plan.feats.map((f) => (
+        {feats.map((f) => (
           <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
               <Check className="h-3 w-3" />

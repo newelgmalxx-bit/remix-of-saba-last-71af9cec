@@ -3,11 +3,16 @@ import { useEffect, useState, useCallback } from "react";
 export type Plan = {
   id: string;
   name: string;
+  nameEn?: string;
   price: string;
+  originalPrice?: string;
   featured: boolean;
   badge?: string;
+  badgeEn?: string;
   description?: string;
+  descriptionEn?: string;
   feats: string[];
+  featsEn?: string[];
 };
 
 const KEY = "saba_plans_v1";
