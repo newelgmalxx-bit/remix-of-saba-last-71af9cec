@@ -134,8 +134,8 @@ function InvoicesPage() {
             return (
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><div className="text-[11px] text-muted-foreground">رقم الطلب</div><div className="font-bold">#{viewing.orderNumber}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">التاريخ</div><div className="font-bold">{viewing.issued}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">رقم الطلب</div><div className="font-bold" dir="ltr">#{viewing.orderNumber}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">التاريخ</div><div className="font-bold" data-ltr-number>{viewing.issued}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">البريد</div><div className="font-bold">{viewing.email}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">الجوال</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
@@ -143,9 +143,9 @@ function InvoicesPage() {
                   <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
                 </div>
                 <div className="border-t border-border pt-3 space-y-1.5">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span>{fmtSAR(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة 15%</span><span>{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>الإجمالي</span><span>{fmtSAR(viewing.amount)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span data-ltr-number>{fmtSAR(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة 15%</span><span data-ltr-number>{fmtSAR(vat)}</span></div>
+                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>الإجمالي</span><span data-ltr-number>{fmtSAR(viewing.amount)}</span></div>
                 </div>
                 <Pill tone={map[viewing.status].t}>{map[viewing.status].l}</Pill>
               </div>
