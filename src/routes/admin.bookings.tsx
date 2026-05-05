@@ -145,7 +145,7 @@ function BookingsPage() {
       {/* Invoice view */}
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
         <DialogContent dir="rtl" className="max-w-2xl">
-          <DialogHeader><DialogTitle>فاتورة الطلب #{viewing?.number}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>فاتورة الطلب <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
           {viewing && (() => {
             const subtotal = Math.round(viewing.total / 1.15);
             const vat = viewing.total - subtotal;
@@ -155,11 +155,11 @@ function BookingsPage() {
                   <div className="flex justify-between">
                     <div>
                       <div className="text-xs opacity-80">سابا ديزاين — فاتورة</div>
-                      <div className="text-2xl font-extrabold mt-1">#{viewing.number}</div>
+                      <div className="text-2xl font-extrabold mt-1" dir="ltr">#{viewing.number}</div>
                     </div>
                     <div className="text-left text-xs">
                       <div className="opacity-80">التاريخ</div>
-                      <div className="font-bold">{viewing.date}</div>
+                      <div className="font-bold" data-ltr-number>{viewing.date}</div>
                     </div>
                   </div>
                 </div>
@@ -172,13 +172,13 @@ function BookingsPage() {
                 <div className="rounded-xl border border-border overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50 text-xs"><tr><th className="px-3 py-2 text-right font-medium">الخدمة</th><th className="px-3 py-2 text-right font-medium">الكمية</th><th className="px-3 py-2 text-right font-medium">السعر</th></tr></thead>
-                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service}</td><td className="px-3 py-3">1</td><td className="px-3 py-3 font-bold">{fmtSAR(subtotal)}</td></tr></tbody>
+                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service}</td><td className="px-3 py-3" data-ltr-number>1</td><td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(subtotal)}</td></tr></tbody>
                   </table>
                 </div>
                 <div className="space-y-1.5 text-sm border-t border-border pt-3">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-medium">{fmtSAR(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة القيمة المضافة (15%)</span><span className="font-medium">{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>الإجمالي</span><span>{fmtSAR(viewing.total)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-medium" data-ltr-number>{fmtSAR(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة القيمة المضافة (15%)</span><span className="font-medium" data-ltr-number>{fmtSAR(vat)}</span></div>
+                  <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>الإجمالي</span><span data-ltr-number>{fmtSAR(viewing.total)}</span></div>
                 </div>
                 <div className="flex justify-between items-center">
                   <Pill tone={bookingStatusMap[viewing.status].tone}>{bookingStatusMap[viewing.status].label}</Pill>
