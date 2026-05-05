@@ -3,6 +3,7 @@ import { AdminLayout, PanelCard, PrimaryButton, GhostButton, Pill } from "@/comp
 import { useState } from "react";
 import { Upload, Camera, Mail, Phone, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { fileToWebp } from "@/lib/image";
 
 export const Route = createFileRoute("/admin/settings/profile")({
   head: () => ({ meta: [{ title: "الملف الشخصي | الإعدادات" }] }),
@@ -16,9 +17,9 @@ function ProfilePage() {
   });
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
 
-  const upload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader(); r.onload = () => setP({ ...p, avatar: String(r.result) }); r.readAsDataURL(f);
+    setP({ ...p, avatar: await fileToWebp(f) });
   };
   const initials = p.name.split(" ").map(n => n[0]).slice(0, 2).join("");
 

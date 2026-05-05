@@ -3,6 +3,7 @@ import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminL
 import { useState } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
+import { fileToWebp } from "@/lib/image";
 
 export const Route = createFileRoute("/admin/site")({
   head: () => ({ meta: [{ title: "إعدادات الموقع | لوحة التحكم" }] }),
@@ -18,9 +19,9 @@ function SiteSettingsPage() {
     workHours: "الأحد - الخميس · 9 ص - 6 م",
     maintenance: false, primaryLang: "ar", currency: "SAR",
   });
-  const upload = (k: "logo" | "favicon") => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = (k: "logo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader(); r.onload = () => setS({ ...s, [k]: String(r.result) }); r.readAsDataURL(f);
+    setS({ ...s, [k]: await fileToWebp(f) });
   };
   return (
     <AdminLayout title="إعدادات الموقع" subtitle="معلومات الشركة والهوية والتواصل" action={<PrimaryButton onClick={() => toast.success("تم حفظ الإعدادات")}>حفظ التغييرات</PrimaryButton>}>

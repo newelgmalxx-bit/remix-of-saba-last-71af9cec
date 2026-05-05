@@ -11,6 +11,12 @@ export type ServiceOverride = {
   breadcrumb?: string;
   heroHighlights?: string[];
   bannerImage?: string;
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
   overview?: { title: string; desc: string }[];
   benefits?: { title: string; desc: string }[];
   plans?: { name: string; price: string; featured: boolean; feats: string[] }[];
@@ -53,6 +59,7 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
       subtitle: o.subtitle ?? "",
       heroHighlights: o.heroHighlights ?? [],
       bannerImage: o.bannerImage,
+      seo: o.seo,
       overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       plans: o.plans ?? [],
@@ -71,6 +78,7 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
     breadcrumb: o.breadcrumb ?? base.breadcrumb,
     heroHighlights: o.heroHighlights ?? base.heroHighlights,
     bannerImage: o.bannerImage ?? base.bannerImage,
+    seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
     overview: o.overview
       ? base.overview.map((b, i) => ({ ...b, title: o.overview![i]?.title ?? b.title, desc: o.overview![i]?.desc ?? b.desc }))
       : base.overview,
@@ -97,6 +105,25 @@ export function useServiceContent(slug: string): ServiceContent | undefined {
     };
   }, []);
   return mergeService(slug);
+}
+
+export function useAllServices(): ServiceContent[] {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const fn = () => setTick((t) => t + 1);
+    window.addEventListener("saba:service-overrides", fn);
+    window.addEventListener("storage", fn);
+    return () => {
+      window.removeEventListener("saba:service-overrides", fn);
+      window.removeEventListener("storage", fn);
+    };
+  }, []);
+  const store = readStore();
+  const baseSlugs = Object.keys(serviceMap);
+  const customSlugs = Object.keys(store).filter((s) => !serviceMap[s] && store[s]?.isCustom);
+  return [...baseSlugs, ...customSlugs]
+    .map((s) => mergeService(s))
+    .filter((x): x is ServiceContent => !!x);
 }
 
 export function useServiceOverrideEditor(slug: string) {
