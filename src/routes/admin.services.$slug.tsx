@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, CheckCircle2 } from "lucide-react";
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
 import { toast } from "sonner";
@@ -46,7 +46,6 @@ function ServiceEditorPage() {
   });
   const [overview, setOverview] = useState(initial?.overview.map(o => ({ title: o.title, desc: o.desc })) ?? []);
   const [benefits, setBenefits] = useState(initial?.benefits.map(b => ({ title: b.title, desc: b.desc })) ?? []);
-  const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
   const [steps, setSteps] = useState<{ title: string }[]>(
     initial?.steps?.map(s => ({ title: s.title })) ?? [
       { title: "فهم المتطلبات" }, { title: "تحليل وتجهيز الفكرة" }, { title: "التصميم الأولي" }, { title: "المراجعة والتعديل" }, { title: "التسليم النهائي" },
@@ -79,7 +78,7 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overviewDescription, seo, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overviewDescription, seo, overview, benefits, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -97,7 +96,6 @@ function ServiceEditorPage() {
     setSeo({ title: base.seo?.title ?? "", description: base.seo?.description ?? "", keywords: base.seo?.keywords ?? "", ogImage: base.seo?.ogImage ?? "" });
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
-    setPlans(base.plans.map(p => ({ ...p, feats: [...p.feats] })));
     setSteps(base.steps?.map(s => ({ title: s.title })) ?? []);
     setStats(base.stats ?? []);
     setTestimonials(base.testimonials ?? []);
