@@ -87,7 +87,7 @@ function UsersPage() {
                         <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${u.active ? "right-0.5" : "right-5"}`} />
                       </button>
                     </td>
-                    <td className="px-3 py-3 text-xs text-muted-foreground">{u.joinedAt}</td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{u.joinedAt}</td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => openEdit(u)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Edit className="h-4 w-4" /></button>
@@ -108,7 +108,7 @@ function UsersPage() {
           <div className="grid grid-cols-2 gap-3">
             <L label="الاسم"><input className={ic} value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></L>
             <L label="البريد"><input className={ic} value={f.email} onChange={e => setF({ ...f, email: e.target.value })} /></L>
-            <L label="الجوال"><input className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></L>
+            <L label="الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></L>
             <L label="الدور">
               <select className={ic} value={f.role} onChange={e => setF({ ...f, role: e.target.value as any })}>
                 <option value="admin">مدير</option><option value="manager">مشرف</option><option value="support">دعم</option><option value="owner">مالك</option>
