@@ -146,7 +146,7 @@ export function SiteHeader() {
   );
 }
 
-function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en"; onClick: () => void; compact?: boolean; label?: string }) {
+export function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en"; onClick: () => void; compact?: boolean; label?: string }) {
   // Show the flag of the language we will switch TO (next language)
   const next = lang === "ar" ? "en" : "ar";
   const flagSrc = next === "en" ? flagUS : flagSA;

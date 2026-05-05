@@ -2,16 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
+import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
 
 function LoginPage() {
   const [tab, setTab] = useState<"email" | "phone">("email");
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
-  const { t, dir } = useLang();
+  const { t, dir, lang, toggle } = useLang();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8" dir={dir}>
+      <div className={`absolute top-4 z-20 ${dir === "rtl" ? "left-4" : "right-4"} sm:top-6 ${dir === "rtl" ? "sm:left-6" : "sm:right-6"}`}>
+        <LangSwitch lang={lang} onClick={toggle} />
+      </div>
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
         <AuthHero />
 
