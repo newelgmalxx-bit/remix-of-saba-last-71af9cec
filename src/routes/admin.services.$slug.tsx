@@ -5,6 +5,7 @@ import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, Star, CheckCircle2 } fr
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
 import { toast } from "sonner";
+import { fileToWebp } from "@/lib/image";
 
 export const Route = createFileRoute("/admin/services/$slug")({
   head: () => ({ meta: [{ title: "تعديل الخدمة | لوحة التحكم" }] }),
@@ -36,6 +37,12 @@ function ServiceEditorPage() {
   const [breadcrumb, setBreadcrumb] = useState(initial?.breadcrumb ?? "");
   const [heroHighlights, setHeroHighlights] = useState<string[]>(initial?.heroHighlights ?? []);
   const [bannerImage, setBannerImage] = useState<string>(initial?.bannerImage ?? "");
+  const [seo, setSeo] = useState({
+    title: initial?.seo?.title ?? "",
+    description: initial?.seo?.description ?? "",
+    keywords: initial?.seo?.keywords ?? "",
+    ogImage: initial?.seo?.ogImage ?? "",
+  });
   const [overview, setOverview] = useState(initial?.overview.map(o => ({ title: o.title, desc: o.desc })) ?? []);
   const [benefits, setBenefits] = useState(initial?.benefits.map(b => ({ title: b.title, desc: b.desc })) ?? []);
   const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
@@ -71,7 +78,7 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, seo, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -85,6 +92,7 @@ function ServiceEditorPage() {
     setBreadcrumb(base.breadcrumb);
     setHeroHighlights(base.heroHighlights);
     setBannerImage(base.bannerImage ?? "");
+    setSeo({ title: base.seo?.title ?? "", description: base.seo?.description ?? "", keywords: base.seo?.keywords ?? "", ogImage: base.seo?.ogImage ?? "" });
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
     setPlans(base.plans.map(p => ({ ...p, feats: [...p.feats] })));
@@ -134,11 +142,34 @@ function ServiceEditorPage() {
               <Field label="صورة البنر (Hero)">
                 <div className="space-y-2">
                   <input type="url" placeholder="https://..." className={inputCls} value={bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
-                  <input type="file" accept="image/*" className="text-xs" onChange={(e) => {
+                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
                     const f = e.target.files?.[0]; if (!f) return;
-                    const r = new FileReader(); r.onload = () => setBannerImage(String(r.result)); r.readAsDataURL(f);
+                    setBannerImage(await fileToWebp(f));
                   }} />
                   {bannerImage && <img src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
+                </div>
+              </Field>
+            </div>
+          </div>
+        </PanelCard>
+
+        {/* SEO */}
+        <PanelCard title="إعدادات SEO للخدمة">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="عنوان الصفحة (Title)"><input className={inputCls} placeholder={`${title} | سابا ديزاين`} value={seo.title} onChange={(e) => setSeo({ ...seo, title: e.target.value })} /></Field>
+            <Field label="الكلمات المفتاحية (Keywords)"><input className={inputCls} placeholder="افصل بفواصل" value={seo.keywords} onChange={(e) => setSeo({ ...seo, keywords: e.target.value })} /></Field>
+            <div className="md:col-span-2">
+              <Field label="وصف الصفحة (Meta Description)"><textarea rows={3} className={inputCls} value={seo.description} onChange={(e) => setSeo({ ...seo, description: e.target.value })} /></Field>
+            </div>
+            <div className="md:col-span-2">
+              <Field label="صورة المشاركة (Open Graph)">
+                <div className="space-y-2">
+                  <input type="url" placeholder="https://..." className={inputCls} value={seo.ogImage} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })} />
+                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
+                    const f = e.target.files?.[0]; if (!f) return;
+                    setSeo({ ...seo, ogImage: await fileToWebp(f) });
+                  }} />
+                  {seo.ogImage && <img src={seo.ogImage} alt="og preview" className="h-28 w-full object-cover rounded-xl border border-border" />}
                 </div>
               </Field>
             </div>
