@@ -48,26 +48,26 @@ export function SiteFooter() {
 
         <div>
           <h4 className="mb-5 text-lg font-bold">تواصل معنا</h4>
-          <ul className="space-y-3 text-base text-white/85">
-            <li className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                <Phone className="h-5 w-5" />
-              </span>
-              +966 50 000 0000
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                <Mail className="h-5 w-5" />
-              </span>
-              info@sabadesign.sa
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                <MapPin className="h-5 w-5" />
-              </span>
-              الرياض، المملكة العربية السعودية
-            </li>
+          <ul className="space-y-3">
+            {[
+              { Icon: Phone, text: "+966 50 123 4567" },
+              { Icon: Mail, text: "info@sabadesign.com" },
+              { Icon: MapPin, text: "المملكة العربية السعودية" },
+            ].map(({ Icon, text }, i) => (
+              <li key={i} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="flex-1 text-right text-sm text-white/85">{text}</span>
+              </li>
+            ))}
           </ul>
+          <Link
+            to={"/contact" as any}
+            className="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-white text-sm font-bold text-primary-dark shadow-md transition hover:-translate-y-0.5"
+          >
+            اطلب عرض سعر
+          </Link>
         </div>
       </div>
 
