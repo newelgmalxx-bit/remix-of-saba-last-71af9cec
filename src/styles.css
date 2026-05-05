@@ -167,6 +167,10 @@
     text-align: left;
   }
 
+  :where(td, th) {
+    unicode-bidi: plaintext;
+  }
+
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: "Tajawal", system-ui, sans-serif;
     letter-spacing: -0.01em;
