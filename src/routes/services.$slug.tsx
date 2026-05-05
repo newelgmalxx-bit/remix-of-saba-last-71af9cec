@@ -1,10 +1,9 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, ShoppingCart, Zap,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
-import { useCart } from "@/hooks/useCart";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
@@ -59,9 +58,6 @@ function ServiceDetailPage() {
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
-  const { add } = useCart();
-  const navigate = useNavigate();
-  const [heroAdded, setHeroAdded] = useState(false);
 
   if (!service) {
     return (
@@ -81,7 +77,7 @@ function ServiceDetailPage() {
     );
   }
 
-  const { overview, benefits, plans, title, subtitle, breadcrumb, heroHighlights } = service;
+  const { overview, benefits, title, subtitle, breadcrumb, heroHighlights } = service;
   const stepIcons = [MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck];
   const steps = (service.steps && service.steps.length
     ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
@@ -116,26 +112,18 @@ function ServiceDetailPage() {
                 {subtitle}
               </p>
               <div className="mt-6 flex flex-wrap justify-end gap-3">
-                <button
-                  onClick={() => {
-                    const featured = plans.find((p) => p.featured) ?? plans[0];
-                    if (!featured) return;
-                    const priceNum = Number(String(featured.price).replace(/[^\d]/g, "")) || 0;
-                    add({ serviceSlug: service.slug, serviceTitle: title, planName: featured.name, price: priceNum });
-                    setHeroAdded(true);
-                    setTimeout(() => navigate({ to: "/cart" as any }), 600);
-                  }}
+                <Link
+                  to={"/plans" as any}
                   className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5"
                 >
-                  <ShoppingCart className="h-4 w-4" />
-                  {heroAdded ? "✓ تمت الإضافة..." : "اطلب الخدمة الآن"}
-                </button>
-                <a
-                  href="#plans"
+                  استعراض الباقات
+                </Link>
+                <Link
+                  to={"/contact" as any}
                   className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
                 >
-                  استعراض الباقات
-                </a>
+                  اطلب عرض سعر
+                </Link>
               </div>
             </div>
 
