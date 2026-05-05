@@ -56,7 +56,7 @@ function OrderDetail() {
               <Package className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">{order.number}</h2>
+              <h2 className="text-xl font-bold" dir="ltr">{order.number}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <StatusBadge label={s.label} color={s.color} />
                 {order.paid ? (
@@ -144,12 +144,12 @@ function OrderDetail() {
                       >
                         {it.serviceTitle}
                       </Link>
-                      <p className="text-xs text-muted-foreground">باقة {it.planName} • الكمية: {it.qty}</p>
+                      <p className="text-xs text-muted-foreground">باقة {it.planName} • الكمية: <span data-ltr-number>{it.qty}</span></p>
                     </div>
                   </div>
                   <div className="text-left shrink-0">
-                    <div className="text-sm font-bold text-primary">{formatCurrency(it.price * it.qty)}</div>
-                    <div className="text-[11px] text-muted-foreground">{formatCurrency(it.price)} / للوحدة</div>
+                    <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
+                    <div className="text-[11px] text-muted-foreground" data-ltr-number>{formatCurrency(it.price)} / للوحدة</div>
                   </div>
                 </div>
               ))}
