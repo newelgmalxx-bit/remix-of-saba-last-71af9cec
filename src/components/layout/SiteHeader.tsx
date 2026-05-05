@@ -3,28 +3,22 @@ import { useEffect, useState } from "react";
 import { Menu, X, Globe, LogIn, ShoppingCart, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/hooks/useCart";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
-const navLinks: { to: any; label: string }[] = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/services", label: "خدماتنا" },
-  { to: "/plans", label: "الباقات" },
-  { to: "/portfolio", label: "أعمالنا" },
-  { to: "/about", label: "من نحن" },
-  { to: "/contact", label: "تواصل" },
+const navLinks: { to: any; key: TKey }[] = [
+  { to: "/", key: "nav.home" },
+  { to: "/services", key: "nav.services" },
+  { to: "/plans", key: "nav.plans" },
+  { to: "/portfolio", key: "nav.portfolio" },
+  { to: "/about", key: "nav.about" },
+  { to: "/contact", key: "nav.contact" },
 ];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
-  const [lang, setLang] = useState<"ar" | "en">(() => {
-    if (typeof window === "undefined") return "ar";
-    return (localStorage.getItem("saba_lang") as "ar" | "en") || "ar";
-  });
-  const toggleLang = () => {
-    const next = lang === "ar" ? "en" : "ar";
-    setLang(next);
-    if (typeof window !== "undefined") localStorage.setItem("saba_lang", next);
-  };
+  const { lang, toggle: toggleLang, t } = useLang();
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -48,13 +42,13 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-7 lg:flex">
           {navLinks.map((l) => (
             <Link
-              key={l.to}
+              key={l.key}
               to={l.to}
               activeOptions={{ exact: l.to === "/" }}
               className="relative py-1 text-sm font-medium text-foreground/80 transition-colors hover:text-primary after:absolute after:inset-x-0 after:-bottom-2 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100"
               activeProps={{ className: "text-primary font-bold after:scale-x-100" }}
             >
-              {l.label}
+              {t(l.key)}
             </Link>
           ))}
         </nav>
@@ -66,7 +60,7 @@ export function SiteHeader() {
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
-            aria-label="السلة"
+            aria-label={t("nav.cart")}
           >
             <ShoppingCart className="h-4 w-4" />
             {count > 0 && (
@@ -78,7 +72,7 @@ export function SiteHeader() {
           <Link
             to={"/account" as any}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
-            aria-label="حسابي"
+            aria-label={t("nav.account")}
           >
             <User className="h-4 w-4" />
           </Link>
@@ -87,19 +81,19 @@ export function SiteHeader() {
             className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
           >
             <LogIn className="h-4 w-4" />
-            تسجيل الدخول
+            {t("nav.login")}
           </Link>
         </div>
 
         {/* Mobile/Tablet quick actions */}
         <div className="flex items-center gap-1.5 lg:hidden">
-          <button onClick={toggleLang} aria-label="تغيير اللغة" className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-white px-2.5 text-[11px] font-bold text-foreground/70 hover:border-primary hover:text-primary">
+          <button onClick={toggleLang} aria-label={t("nav.toggleLang")} className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-white px-2.5 text-[11px] font-bold text-foreground/70 hover:border-primary hover:text-primary">
             <Globe className="h-3.5 w-3.5" /> {lang === "ar" ? "EN" : "AR"}
           </button>
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground/70"
-            aria-label="السلة"
+            aria-label={t("nav.cart")}
           >
             <ShoppingCart className="h-4 w-4" />
             {count > 0 && (
@@ -111,7 +105,7 @@ export function SiteHeader() {
           <button
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menu"
+            aria-label={t("nav.menu")}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -123,13 +117,13 @@ export function SiteHeader() {
         <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
           {navLinks.map((l) => (
             <Link
-              key={l.to}
+              key={l.key}
               to={l.to}
               onClick={() => setOpen(false)}
               className="rounded-xl px-4 py-3 text-base font-medium text-foreground/80 hover:bg-muted"
               activeProps={{ className: "text-primary font-bold bg-primary-light" }}
             >
-              {l.label}
+              {t(l.key)}
             </Link>
           ))}
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -138,14 +132,14 @@ export function SiteHeader() {
               onClick={() => setOpen(false)}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-white text-sm font-bold text-foreground/80"
             >
-              <User className="h-4 w-4" /> حسابي
+              <User className="h-4 w-4" /> {t("nav.account")}
             </Link>
             <Link
               to={"/login" as any}
               onClick={() => setOpen(false)}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-primary-foreground"
             >
-              <LogIn className="h-4 w-4" /> تسجيل الدخول
+              <LogIn className="h-4 w-4" /> {t("nav.login")}
             </Link>
           </div>
         </nav>
