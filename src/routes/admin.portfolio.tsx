@@ -5,6 +5,7 @@ import { useState } from "react";
 import { adminPortfolio, portfolioCategories, type AdminPortfolio } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { fileToWebp } from "@/lib/image";
 
 export const Route = createFileRoute("/admin/portfolio")({
   head: () => ({ meta: [{ title: "أعمالنا | لوحة التحكم" }] }),
@@ -29,12 +30,11 @@ function PortfolioPage() {
   const [form, setForm] = useState<FormState>(empty);
   const [techInput, setTechInput] = useState("");
 
-  const onPickFile = (file?: File) => {
+  const onPickFile = async (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, cover: String(reader.result) }));
-    reader.readAsDataURL(file);
+    const webp = await fileToWebp(file);
+    setForm((f) => ({ ...f, cover: webp }));
   };
 
   const filtered = items.filter(i => i.titleAr.includes(q) || i.titleEn.toLowerCase().includes(q.toLowerCase()));
