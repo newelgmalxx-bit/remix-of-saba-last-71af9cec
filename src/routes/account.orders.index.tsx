@@ -80,7 +80,7 @@ function OrdersList() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base font-bold">{o.number}</h3>
+                      <h3 className="text-base font-bold" dir="ltr">{o.number}</h3>
                       <StatusBadge label={s.label} color={s.color} />
                       {!o.paid && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">غير مدفوع</span>}
                     </div>
@@ -88,14 +88,14 @@ function OrdersList() {
                       {o.items.length} خدمة • {o.items.map((i) => `${i.serviceTitle} (${i.planName})`).join(" • ")}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      تاريخ: {o.createdAt} • الدفع عبر {paymentName(o.payment)}
+                      تاريخ: <span data-ltr-number>{o.createdAt}</span> • الدفع عبر {paymentName(o.payment)}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-3 lg:justify-end">
                   <div className="text-left">
                     <div className="text-xs text-muted-foreground">الإجمالي</div>
-                    <div className="text-lg font-bold text-primary">{formatCurrency(o.total)}</div>
+                    <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total)}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {o.paid && (
