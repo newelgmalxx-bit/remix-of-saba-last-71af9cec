@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/settings/notifications")({
   head: () => ({ meta: [{ title: "الإشعارات | الإعدادات" }] }),
@@ -11,35 +12,40 @@ export const Route = createFileRoute("/admin/settings/notifications")({
 type Channel = { email: boolean; sms: boolean; push: boolean };
 type Item = { key: string; label: string; desc: string; ch: Channel };
 
-const initial: Item[] = [
-  { key: "new_order", label: "طلب جديد", desc: "عند استلام حجز جديد", ch: { email: true, sms: true, push: true } },
-  { key: "payment_received", label: "تأكيد دفع", desc: "عند استلام دفعة من العميل", ch: { email: true, sms: false, push: true } },
-  { key: "order_completed", label: "اكتمال طلب", desc: "عند تحديث حالة الطلب إلى مكتمل", ch: { email: true, sms: false, push: false } },
-  { key: "new_client", label: "عميل جديد", desc: "عند تسجيل عميل جديد", ch: { email: false, sms: false, push: true } },
-  { key: "ticket", label: "تذكرة دعم", desc: "عند إنشاء تذكرة دعم جديدة", ch: { email: true, sms: false, push: true } },
-  { key: "invoice_overdue", label: "فاتورة متأخرة", desc: "عند تأخر فاتورة عن السداد", ch: { email: true, sms: true, push: true } },
-  { key: "weekly_report", label: "تقرير أسبوعي", desc: "ملخّص الأداء كل يوم أحد", ch: { email: true, sms: false, push: false } },
-  { key: "marketing", label: "تحديثات وتسويق", desc: "أخبار وميزات جديدة", ch: { email: false, sms: false, push: false } },
-];
-
 function NotificationsPage() {
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const initial: Item[] = [
+    { key: "new_order", label: L("طلب جديد", "New Order"), desc: L("عند استلام حجز جديد", "When a new booking is received"), ch: { email: true, sms: true, push: true } },
+    { key: "payment_received", label: L("تأكيد دفع", "Payment Received"), desc: L("عند استلام دفعة من العميل", "When a client payment is received"), ch: { email: true, sms: false, push: true } },
+    { key: "order_completed", label: L("اكتمال طلب", "Order Completed"), desc: L("عند تحديث حالة الطلب إلى مكتمل", "When an order is marked complete"), ch: { email: true, sms: false, push: false } },
+    { key: "new_client", label: L("عميل جديد", "New Client"), desc: L("عند تسجيل عميل جديد", "When a new client signs up"), ch: { email: false, sms: false, push: true } },
+    { key: "ticket", label: L("تذكرة دعم", "Support Ticket"), desc: L("عند إنشاء تذكرة دعم جديدة", "When a new support ticket is created"), ch: { email: true, sms: false, push: true } },
+    { key: "invoice_overdue", label: L("فاتورة متأخرة", "Invoice Overdue"), desc: L("عند تأخر فاتورة عن السداد", "When an invoice is overdue"), ch: { email: true, sms: true, push: true } },
+    { key: "weekly_report", label: L("تقرير أسبوعي", "Weekly Report"), desc: L("ملخّص الأداء كل يوم أحد", "Performance summary every Sunday"), ch: { email: true, sms: false, push: false } },
+    { key: "marketing", label: L("تحديثات وتسويق", "Updates & Marketing"), desc: L("أخبار وميزات جديدة", "News and new features"), ch: { email: false, sms: false, push: false } },
+  ];
   const [items, setItems] = useState<Item[]>(initial);
   const [quiet, setQuiet] = useState({ enabled: false, from: "22:00", to: "07:00" });
 
   const toggle = (key: string, ch: keyof Channel) =>
     setItems(items.map(i => i.key === key ? { ...i, ch: { ...i.ch, [ch]: !i.ch[ch] } } : i));
 
+  const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
+  const knobOff = dir === "rtl" ? "right-5" : "left-5";
+  const textAlign = dir === "rtl" ? "text-right" : "text-left";
+
   return (
-    <AdminLayout title="الإعدادات" subtitle="تفضيلات الإشعارات" action={<PrimaryButton onClick={() => toast.success("تم حفظ التفضيلات")}>حفظ</PrimaryButton>}>
-      <PanelCard title="قنوات الإشعارات" subtitle="اختر القنوات لكل نوع تنبيه" className="mb-6">
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("تفضيلات الإشعارات", "Notification preferences")} action={<PrimaryButton onClick={() => toast.success(L("تم حفظ التفضيلات", "Preferences saved"))}>{L("حفظ", "Save")}</PrimaryButton>}>
+      <PanelCard title={L("قنوات الإشعارات", "Notification Channels")} subtitle={L("اختر القنوات لكل نوع تنبيه", "Choose channels for each alert")} className="mb-6">
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                <th className="px-3 py-3 font-medium">النوع</th>
-                <th className="px-3 py-3 font-medium text-center">بريد</th>
+              <tr className={`${textAlign} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("النوع", "Type")}</th>
+                <th className="px-3 py-3 font-medium text-center">{L("بريد", "Email")}</th>
                 <th className="px-3 py-3 font-medium text-center">SMS</th>
-                <th className="px-3 py-3 font-medium text-center">إشعار فوري</th>
+                <th className="px-3 py-3 font-medium text-center">{L("إشعار فوري", "Push")}</th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +58,7 @@ function NotificationsPage() {
                   {(["email", "sms", "push"] as const).map(c => (
                     <td key={c} className="px-3 py-3 text-center">
                       <button onClick={() => toggle(i.key, c)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${i.ch[c] ? "bg-primary" : "bg-muted"}`}>
-                        <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${i.ch[c] ? "right-0.5" : "right-5"}`} />
+                        <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${i.ch[c] ? knobOn : knobOff}`} />
                       </button>
                     </td>
                   ))}
@@ -63,20 +69,20 @@ function NotificationsPage() {
         </div>
       </PanelCard>
 
-      <PanelCard title="ساعات الهدوء" subtitle="إيقاف الإشعارات خلال فترة محددة">
+      <PanelCard title={L("ساعات الهدوء", "Quiet Hours")} subtitle={L("إيقاف الإشعارات خلال فترة محددة", "Pause notifications during a window")}>
         <div className="grid gap-3 sm:grid-cols-3 items-end">
           <label className="flex items-center gap-2 text-sm font-bold">
             <input type="checkbox" className="h-4 w-4" checked={quiet.enabled} onChange={e => setQuiet({ ...quiet, enabled: e.target.checked })} />
-            تفعيل
+            {L("تفعيل", "Enable")}
           </label>
-          <L label="من"><input type="time" className={ic} value={quiet.from} onChange={e => setQuiet({ ...quiet, from: e.target.value })} /></L>
-          <L label="إلى"><input type="time" className={ic} value={quiet.to} onChange={e => setQuiet({ ...quiet, to: e.target.value })} /></L>
+          <Lb label={L("من", "From")}><input type="time" className={ic} value={quiet.from} onChange={e => setQuiet({ ...quiet, from: e.target.value })} /></Lb>
+          <Lb label={L("إلى", "To")}><input type="time" className={ic} value={quiet.to} onChange={e => setQuiet({ ...quiet, to: e.target.value })} /></Lb>
         </div>
       </PanelCard>
     </AdminLayout>
   );
 }
 const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
-function L({ label, children }: { label: string; children: React.ReactNode }) {
+function Lb({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="text-xs font-bold space-y-1.5 block">{label}{children}</label>;
 }
