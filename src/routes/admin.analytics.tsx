@@ -4,26 +4,30 @@ import { Eye, MousePointerClick, TrendingUp, Clock } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
 import { monthlyRevenue } from "@/data/admin";
 import { useState } from "react";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "التحليلات | لوحة التحكم" }] }),
   component: AnalyticsPage,
 });
 
-const traffic = [
-  { d: "الأحد", v: 220 }, { d: "الإثنين", v: 410 }, { d: "الثلاثاء", v: 380 },
-  { d: "الأربعاء", v: 520 }, { d: "الخميس", v: 480 }, { d: "الجمعة", v: 290 }, { d: "السبت", v: 180 },
-];
-const sources = [
-  { name: "بحث Google", v: 1840 }, { name: "مباشر", v: 1240 }, { name: "Instagram", v: 980 },
-  { name: "Twitter", v: 620 }, { name: "إحالات", v: 420 },
-];
-
 function AnalyticsPage() {
+  const { lang } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const traffic = lang === "en"
+    ? [{ d: "Sun", v: 220 }, { d: "Mon", v: 410 }, { d: "Tue", v: 380 }, { d: "Wed", v: 520 }, { d: "Thu", v: 480 }, { d: "Fri", v: 290 }, { d: "Sat", v: 180 }]
+    : [{ d: "الأحد", v: 220 }, { d: "الإثنين", v: 410 }, { d: "الثلاثاء", v: 380 }, { d: "الأربعاء", v: 520 }, { d: "الخميس", v: 480 }, { d: "الجمعة", v: 290 }, { d: "السبت", v: 180 }];
+  const sources = [
+    { name: L("بحث Google", "Google Search"), v: 1840 },
+    { name: L("مباشر", "Direct"), v: 1240 },
+    { name: "Instagram", v: 980 },
+    { name: "Twitter", v: 620 },
+    { name: L("إحالات", "Referrals"), v: 420 },
+  ];
   const [tab, setTab] = useState<"visits" | "engagement" | "conversions" | "revenue">("visits");
-  const tabs: [typeof tab, string][] = [["visits", "الزيارات"], ["engagement", "التفاعل"], ["conversions", "التحويلات"], ["revenue", "الإيرادات"]];
+  const tabs: [typeof tab, string][] = [["visits", L("الزيارات", "Visits")], ["engagement", L("التفاعل", "Engagement")], ["conversions", L("التحويلات", "Conversions")], ["revenue", L("الإيرادات", "Revenue")]];
   return (
-    <AdminLayout title="التحليلات" subtitle="رؤى متقدمة لأداء الموقع والتفاعل">
+    <AdminLayout title={L("التحليلات", "Analytics")} subtitle={L("رؤى متقدمة لأداء الموقع والتفاعل", "Advanced insights into site performance and engagement")}>
       <div className="mb-6 inline-flex flex-wrap rounded-xl border border-border bg-card p-1">
         {tabs.map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
@@ -33,13 +37,13 @@ function AnalyticsPage() {
       {tab === "visits" && (
       <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="مشاهدات الصفحة" value="48,210" hint="↑ +18.2%" icon={Eye} accent="primary" />
-        <StatCard label="زوار فريدون" value="12,840" hint="↑ +9.3%" icon={Eye} accent="violet" />
-        <StatCard label="جلسات" value="18,520" hint="↑ +6.1%" icon={MousePointerClick} accent="emerald" />
-        <StatCard label="متوسط مدة الزيارة" value="4م 12ث" hint="↑ +12ث" icon={Clock} accent="amber" />
+        <StatCard label={L("مشاهدات الصفحة", "Page Views")} value="48,210" hint="↑ +18.2%" icon={Eye} accent="primary" />
+        <StatCard label={L("زوار فريدون", "Unique Visitors")} value="12,840" hint="↑ +9.3%" icon={Eye} accent="violet" />
+        <StatCard label={L("جلسات", "Sessions")} value="18,520" hint="↑ +6.1%" icon={MousePointerClick} accent="emerald" />
+        <StatCard label={L("متوسط مدة الزيارة", "Avg. Session Duration")} value={L("4م 12ث", "4m 12s")} hint={L("↑ +12ث", "↑ +12s")} icon={Clock} accent="amber" />
       </div>
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
-        <PanelCard title="حركة المرور الأسبوعية" subtitle="الزيارات حسب اليوم" className="lg:col-span-2">
+        <PanelCard title={L("حركة المرور الأسبوعية", "Weekly Traffic")} subtitle={L("الزيارات حسب اليوم", "Visits by day")} className="lg:col-span-2">
           <div className="h-72">
             <ResponsiveContainer>
               <LineChart data={traffic}>
@@ -52,7 +56,7 @@ function AnalyticsPage() {
             </ResponsiveContainer>
           </div>
         </PanelCard>
-        <PanelCard title="مصادر الزيارات" subtitle="من أين يأتي العملاء">
+        <PanelCard title={L("مصادر الزيارات", "Traffic Sources")} subtitle={L("من أين يأتي العملاء", "Where visitors come from")}>
           <ul className="space-y-3">
             {sources.map(s => (
               <li key={s.name}>
@@ -70,24 +74,24 @@ function AnalyticsPage() {
 
       {tab === "engagement" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <StatCard label="معدل الارتداد" value="32.4%" hint="↓ -2.1%" icon={MousePointerClick} accent="amber" />
-          <StatCard label="صفحات/جلسة" value="3.8" hint="↑ +0.5" icon={Eye} accent="primary" />
-          <StatCard label="متوسط مدة الجلسة" value="4م 12ث" icon={Clock} accent="violet" />
-          <StatCard label="جلسات متفاعلة" value="68%" hint="↑ +4%" icon={TrendingUp} accent="emerald" />
+          <StatCard label={L("معدل الارتداد", "Bounce Rate")} value="32.4%" hint="↓ -2.1%" icon={MousePointerClick} accent="amber" />
+          <StatCard label={L("صفحات/جلسة", "Pages / Session")} value="3.8" hint="↑ +0.5" icon={Eye} accent="primary" />
+          <StatCard label={L("متوسط مدة الجلسة", "Avg. Session")} value={L("4م 12ث", "4m 12s")} icon={Clock} accent="violet" />
+          <StatCard label={L("جلسات متفاعلة", "Engaged Sessions")} value="68%" hint="↑ +4%" icon={TrendingUp} accent="emerald" />
         </div>
       )}
 
       {tab === "conversions" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <StatCard label="معدل التحويل" value="3.8%" hint="↑ +0.4%" icon={TrendingUp} accent="emerald" />
-          <StatCard label="إضافات للسلة" value="1,240" icon={MousePointerClick} accent="primary" />
-          <StatCard label="بدء دفع" value="420" icon={Clock} accent="amber" />
-          <StatCard label="طلبات مكتملة" value="184" hint="↑ +12.5%" icon={Eye} accent="violet" />
+          <StatCard label={L("معدل التحويل", "Conversion Rate")} value="3.8%" hint="↑ +0.4%" icon={TrendingUp} accent="emerald" />
+          <StatCard label={L("إضافات للسلة", "Add to Cart")} value="1,240" icon={MousePointerClick} accent="primary" />
+          <StatCard label={L("بدء دفع", "Checkouts Started")} value="420" icon={Clock} accent="amber" />
+          <StatCard label={L("طلبات مكتملة", "Completed Orders")} value="184" hint="↑ +12.5%" icon={Eye} accent="violet" />
         </div>
       )}
 
       {tab === "revenue" && (
-      <PanelCard title="الإيرادات الشهرية" subtitle="آخر 12 شهر">
+      <PanelCard title={L("الإيرادات الشهرية", "Monthly Revenue")} subtitle={L("آخر 12 شهر", "Last 12 months")}>
         <div className="h-72">
           <ResponsiveContainer>
             <BarChart data={monthlyRevenue}>
