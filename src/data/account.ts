@@ -138,7 +138,7 @@ export const mockOrders: Order[] = [
     number: "SD-1018",
     createdAt: "2026-03-08",
     status: "completed",
-    payment: "mada",
+    payment: "mayfatoorah",
     paid: true,
     items: [
       { id: "i1", serviceSlug: "social-media-design", serviceTitle: "تصميم سوشيال ميديا", planName: "Pro", price: 3500, qty: 1 },
