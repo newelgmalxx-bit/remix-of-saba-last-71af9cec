@@ -447,16 +447,22 @@ function TestimonialsSlider({ testimonials }: { testimonials: { name: string; ro
 export const Route = createFileRoute("/services/$slug")({
   head: ({ params }) => {
     const s = serviceMap[params.slug];
-    const t = s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين";
-    const d = s?.subtitle ?? "حلول رقمية متكاملة لنمو أعمالك.";
-    return {
-      meta: [
-        { title: t },
-        { name: "description", content: d },
-        { property: "og:title", content: t },
-        { property: "og:description", content: d },
-      ],
-    };
+    const t = s?.seo?.title || (s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين");
+    const d = s?.seo?.description || s?.subtitle || "حلول رقمية متكاملة لنمو أعمالك.";
+    const k = s?.seo?.keywords;
+    const img = s?.seo?.ogImage || s?.bannerImage;
+    const meta: Array<Record<string, string>> = [
+      { title: t },
+      { name: "description", content: d },
+      { property: "og:title", content: t },
+      { property: "og:description", content: d },
+    ];
+    if (k) meta.push({ name: "keywords", content: k });
+    if (img) {
+      meta.push({ property: "og:image", content: img });
+      meta.push({ name: "twitter:image", content: img });
+    }
+    return { meta };
   },
   component: ServiceDetailPage,
 });
