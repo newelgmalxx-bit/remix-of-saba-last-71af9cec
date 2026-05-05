@@ -74,7 +74,7 @@ function CartPage() {
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </button>
-                          <span className="w-8 text-center text-sm font-bold">{it.qty}</span>
+                          <span className="w-8 text-center text-sm font-bold" data-ltr-number>{it.qty}</span>
                           <button
                             onClick={() => updateQty(it.id, it.qty + 1)}
                             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted"
@@ -84,8 +84,8 @@ function CartPage() {
                           </button>
                         </div>
                         <div className="min-w-[100px] text-left">
-                          <div className="text-base font-bold text-primary">{formatCurrency(it.price * it.qty)}</div>
-                          <div className="text-[11px] text-muted-foreground">{formatCurrency(it.price)} / للوحدة</div>
+                          <div className="text-base font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
+                          <div className="text-[11px] text-muted-foreground" data-ltr-number>{formatCurrency(it.price)} / للوحدة</div>
                         </div>
                         <button
                           onClick={() => remove(it.id)}
