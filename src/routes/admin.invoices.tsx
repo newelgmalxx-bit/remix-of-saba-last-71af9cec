@@ -98,8 +98,8 @@ function InvoicesPage() {
                 const s = map[i.status];
                 return (
                   <tr key={i.id} className="border-b border-border hover:bg-muted/40">
-                    <td className="px-3 py-3 font-bold text-primary">{i.number}</td>
-                    <td className="px-3 py-3 text-muted-foreground">#{i.orderNumber}</td>
+                    <td className="px-3 py-3 font-bold text-primary" dir="ltr">{i.number}</td>
+                    <td className="px-3 py-3 text-muted-foreground" dir="ltr">#{i.orderNumber}</td>
                     <td className="px-3 py-3"><div className="font-medium">{i.client}</div><div className="text-[11px] text-muted-foreground">{i.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
@@ -108,9 +108,9 @@ function InvoicesPage() {
                         {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(i.amount)}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(i.amount)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
-                    <td className="px-3 py-3 text-muted-foreground text-xs">{i.issued}</td>
+                    <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{i.issued}</td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => setViewing(i)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button>
