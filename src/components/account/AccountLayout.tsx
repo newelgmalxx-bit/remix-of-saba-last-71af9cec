@@ -10,29 +10,32 @@ import {
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { mockUser } from "@/data/account";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
-const nav = [
-  { to: "/account", label: "نظرة عامة", icon: LayoutDashboard, exact: true },
-  { to: "/account/orders", label: "طلباتي", icon: Package, exact: false },
-  { to: "/account/tickets", label: "الدعم والتذاكر", icon: LifeBuoy, exact: false },
-  { to: "/cart", label: "السلة", icon: ShoppingCart, exact: false },
-  { to: "/account/profile", label: "الملف الشخصي", icon: User, exact: false },
-] as const;
+const nav: { to: string; key: TKey; icon: any; exact: boolean }[] = [
+  { to: "/account", key: "account.nav.overview", icon: LayoutDashboard, exact: true },
+  { to: "/account/orders", key: "account.nav.orders", icon: Package, exact: false },
+  { to: "/account/tickets", key: "account.nav.tickets", icon: LifeBuoy, exact: false },
+  { to: "/cart", key: "account.nav.cart", icon: ShoppingCart, exact: false },
+  { to: "/account/profile", key: "account.nav.profile", icon: User, exact: false },
+];
 
 export function AccountLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle?: string }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { t, dir } = useLang();
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
       <SiteHeader />
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Hero strip */}
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-l from-primary to-primary-dark p-6 sm:p-8 text-white shadow-[0_20px_50px_-25px_rgba(30,91,148,0.6)]">
+          <div className={`relative overflow-hidden rounded-3xl border border-border bg-gradient-to-${dir === "rtl" ? "l" : "r"} from-primary to-primary-dark p-6 sm:p-8 text-white shadow-[0_20px_50px_-25px_rgba(30,91,148,0.6)]`}>
             <div className="absolute -left-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
             <div className="absolute -right-16 -bottom-16 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
             <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm text-white/75">حساب العميل</p>
+                <p className="text-sm text-white/75">{t("account.client")}</p>
                 <h1 className="mt-1 text-2xl sm:text-3xl font-bold">{title}</h1>
                 {subtitle && <p className="mt-1 text-sm text-white/80">{subtitle}</p>}
               </div>
@@ -40,7 +43,7 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary font-bold text-lg">
                   {mockUser.avatar}
                 </div>
-                <div className="text-right">
+                <div className={dir === "rtl" ? "text-right" : "text-left"}>
                   <div className="text-sm font-bold">{mockUser.name}</div>
                   <div className="text-xs text-white/75">{mockUser.email}</div>
                 </div>
@@ -66,7 +69,7 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span>{n.label}</span>
+                      <span>{t(n.key)}</span>
                     </Link>
                   );
                 })}
@@ -76,7 +79,7 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>تسجيل الخروج</span>
+                  <span>{t("account.nav.logout")}</span>
                 </Link>
               </nav>
             </aside>
