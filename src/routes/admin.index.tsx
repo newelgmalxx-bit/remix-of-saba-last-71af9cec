@@ -7,6 +7,7 @@ import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
   PieChart, Pie, Cell,
 } from "recharts";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "لوحة التحكم | سابا ديزاين" }] }),
@@ -14,36 +15,52 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminDashboard() {
-  const [period, setPeriod] = useState("آخر 30 يوم");
-  const filteredRevenue = period === "آخر 7 أيام" ? monthlyRevenue.slice(-2)
-    : period === "آخر 30 يوم" ? monthlyRevenue.slice(-3)
-    : period === "آخر 90 يوم" ? monthlyRevenue.slice(-6)
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const periods = [
+    { v: "7", l: L("آخر 7 أيام", "Last 7 days") },
+    { v: "30", l: L("آخر 30 يوم", "Last 30 days") },
+    { v: "90", l: L("آخر 90 يوم", "Last 90 days") },
+    { v: "all", l: L("كل الفترة", "All time") },
+  ];
+  const [period, setPeriod] = useState("30");
+  const filteredRevenue = period === "7" ? monthlyRevenue.slice(-2)
+    : period === "30" ? monthlyRevenue.slice(-3)
+    : period === "90" ? monthlyRevenue.slice(-6)
     : monthlyRevenue;
+
+  const bookingStatusLabel = (key: keyof typeof bookingStatusMap) => {
+    const m: Record<string, string> = {
+      pending: "Pending", in_progress: "In Progress", review: "Review", completed: "Completed", cancelled: "Cancelled",
+    };
+    return lang === "en" ? (m[key] ?? bookingStatusMap[key].label) : bookingStatusMap[key].label;
+  };
+
   return (
-    <AdminLayout title="لوحة التحكم" subtitle="مرحباً بعودتك! إليك نظرة عامة على نشاط الأعمال" action={
+    <AdminLayout title={L("لوحة التحكم", "Dashboard")} subtitle={L("مرحباً بعودتك! إليك نظرة عامة على نشاط الأعمال", "Welcome back! Here's an overview of your business activity")} action={
       <select value={period} onChange={(e) => setPeriod(e.target.value)} className="hidden sm:inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-xs font-bold">
-        <option>آخر 7 أيام</option><option>آخر 30 يوم</option><option>آخر 90 يوم</option><option>كل الفترة</option>
+        {periods.map(p => <option key={p.v} value={p.v}>{p.l}</option>)}
       </select>
     }>
       {/* Hero card */}
-      <div className="rounded-2xl bg-gradient-to-l from-primary to-primary-dark p-6 text-white shadow-md mb-6 relative overflow-hidden">
+      <div className={`rounded-2xl bg-gradient-to-l from-primary to-primary-dark p-6 text-white shadow-md mb-6 relative overflow-hidden`}>
         <div className="absolute -left-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-12 -bottom-12 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
         <div className="relative grid gap-6 md:grid-cols-2 items-center">
           <div>
-            <div className="text-sm text-white/75">مرحباً، John 👋</div>
+            <div className="text-sm text-white/75">{L("مرحباً", "Hello")}, John 👋</div>
             <div className="mt-2 text-4xl font-extrabold">{fmtSAR(adminStats.revenue)}</div>
-            <div className="text-sm text-white/80 mt-1">إجمالي إيرادات هذا الشهر</div>
+            <div className="text-sm text-white/80 mt-1">{L("إجمالي إيرادات هذا الشهر", "Total revenue this month")}</div>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-                <TrendingUp className="h-3.5 w-3.5" /> +{adminStats.revenueGrowth}% مقارنة بالشهر الماضي
+                <TrendingUp className="h-3.5 w-3.5" /> +{adminStats.revenueGrowth}% {L("مقارنة بالشهر الماضي", "vs last month")}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-                {adminStats.ordersCount.toLocaleString("ar-SA")} طلب
+                {adminStats.ordersCount.toLocaleString(lang === "en" ? "en-US" : "ar-SA")} {L("طلب", "orders")}
               </span>
             </div>
           </div>
-          <div className="md:justify-self-end flex items-center gap-4">
+          <div className={`${dir === "rtl" ? "md:justify-self-end" : "md:justify-self-start"} flex items-center gap-4`}>
             <div className="relative h-28 w-28">
               <svg viewBox="0 0 36 36" className="h-28 w-28 -rotate-90">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
@@ -51,13 +68,13 @@ function AdminDashboard() {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <div className="text-2xl font-bold">78%</div>
-                <div className="text-[10px] text-white/75">من الهدف</div>
+                <div className="text-[10px] text-white/75">{L("من الهدف", "of target")}</div>
               </div>
             </div>
             <div className="text-sm">
-              <div className="text-white/75">الهدف الشهري</div>
+              <div className="text-white/75">{L("الهدف الشهري", "Monthly target")}</div>
               <div className="text-lg font-bold">{fmtSAR(adminStats.monthlyTarget)}</div>
-              <div className="mt-2 text-white/75">المتبقي</div>
+              <div className="mt-2 text-white/75">{L("المتبقي", "Remaining")}</div>
               <div className="text-lg font-bold">{fmtSAR(adminStats.remaining)}</div>
             </div>
           </div>
@@ -66,15 +83,15 @@ function AdminDashboard() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي الإيرادات" value={fmtSAR(adminStats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
-        <StatCard label="إجمالي الطلبات" value={adminStats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
-        <StatCard label="إجمالي العملاء" value={adminStats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
-        <StatCard label="الخدمات النشطة" value={adminStats.activeServices} hint="من أصل 12" icon={Package} accent="amber" />
+        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(adminStats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={adminStats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={adminStats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={adminStats.activeServices} hint={L("من أصل 12", "of 12")} icon={Package} accent="amber" />
       </div>
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
-        <PanelCard title="نظرة عامة على الإيرادات" subtitle="الأداء الشهري" className="lg:col-span-2">
+        <PanelCard title={L("نظرة عامة على الإيرادات", "Revenue Overview")} subtitle={L("الأداء الشهري", "Monthly performance")} className="lg:col-span-2">
           <div className="h-72">
             <ResponsiveContainer>
               <AreaChart data={filteredRevenue}>
@@ -94,7 +111,7 @@ function AdminDashboard() {
           </div>
         </PanelCard>
 
-        <PanelCard title="المبيعات حسب التصنيف" subtitle="توزيع الخدمات">
+        <PanelCard title={L("المبيعات حسب التصنيف", "Sales by Category")} subtitle={L("توزيع الخدمات", "Service distribution")}>
           <div className="h-44">
             <ResponsiveContainer>
               <PieChart>
@@ -120,15 +137,15 @@ function AdminDashboard() {
 
       {/* Recent bookings + activity */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <PanelCard title="أحدث الطلبات" className="lg:col-span-2" action={<a href="/admin/bookings" className="text-xs font-bold text-primary hover:underline">عرض الكل ←</a>}>
+        <PanelCard title={L("أحدث الطلبات", "Latest Orders")} className="lg:col-span-2" action={<a href="/admin/bookings" className="text-xs font-bold text-primary hover:underline">{L("عرض الكل ←", "View all →")}</a>}>
           <div className="overflow-x-auto -mx-2">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-right text-xs text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">الطلب</th>
-                  <th className="px-3 py-2 font-medium">العميل</th>
-                  <th className="px-3 py-2 font-medium">الإجمالي</th>
-                  <th className="px-3 py-2 font-medium">الحالة</th>
+                <tr className={`${dir === "rtl" ? "text-right" : "text-left"} text-xs text-muted-foreground`}>
+                  <th className="px-3 py-2 font-medium">{L("الطلب", "Order")}</th>
+                  <th className="px-3 py-2 font-medium">{L("العميل", "Client")}</th>
+                  <th className="px-3 py-2 font-medium">{L("الإجمالي", "Total")}</th>
+                  <th className="px-3 py-2 font-medium">{L("الحالة", "Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,7 +156,7 @@ function AdminDashboard() {
                       <td className="px-3 py-3 font-bold text-primary">#{b.number}</td>
                       <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.service}</div></td>
                       <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
-                      <td className="px-3 py-3"><Pill tone={s.tone}>{s.label}</Pill></td>
+                      <td className="px-3 py-3"><Pill tone={s.tone}>{bookingStatusLabel(b.status)}</Pill></td>
                     </tr>
                   );
                 })}
@@ -148,14 +165,14 @@ function AdminDashboard() {
           </div>
         </PanelCard>
 
-        <PanelCard title="آخر الأنشطة">
+        <PanelCard title={L("آخر الأنشطة", "Recent Activity")}>
           <ul className="space-y-3 text-sm">
             {[
-              { icon: ShoppingCart, text: "حجز جديد #SD-1024", time: "قبل 2 د" },
-              { icon: DollarSign, text: "تأكيد دفع 4,025 ر.س", time: "قبل 15 د" },
-              { icon: Users, text: "تسجيل عميل جديد: ريم الشهري", time: "قبل ساعة" },
-              { icon: Package, text: "تحديث خدمة تصميم المواقع", time: "قبل 3 س" },
-              { icon: Bell, text: "تنبيه: فاتورة معلقة", time: "قبل 5 س" },
+              { icon: ShoppingCart, text: L("حجز جديد #SD-1024", "New booking #SD-1024"), time: L("قبل 2 د", "2m ago") },
+              { icon: DollarSign, text: L("تأكيد دفع 4,025 ر.س", "Payment confirmed 4,025 SAR"), time: L("قبل 15 د", "15m ago") },
+              { icon: Users, text: L("تسجيل عميل جديد: ريم الشهري", "New client signup: Reem Al Shehri"), time: L("قبل ساعة", "1h ago") },
+              { icon: Package, text: L("تحديث خدمة تصميم المواقع", "Web design service updated"), time: L("قبل 3 س", "3h ago") },
+              { icon: Bell, text: L("تنبيه: فاتورة معلقة", "Alert: pending invoice"), time: L("قبل 5 س", "5h ago") },
             ].map((a, i) => {
               const I = a.icon;
               return (

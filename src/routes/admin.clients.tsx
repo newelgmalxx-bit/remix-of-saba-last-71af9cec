@@ -14,18 +14,29 @@ export const Route = createFileRoute("/admin/clients")({
   component: ClientsPage,
 });
 
-const segMap = { vip: { l: "VIP", t: "amber" as const }, regular: { l: "منتظم", t: "primary" as const }, new: { l: "جديد", t: "emerald" as const } };
-
-const growth = [
+const growthAr = [
   { m: "يون", n: 4, r: 8 }, { m: "يول", n: 6, r: 10 }, { m: "أغس", n: 7, r: 12 },
   { m: "سبت", n: 9, r: 15 }, { m: "أكت", n: 11, r: 18 }, { m: "نوف", n: 10, r: 22 },
   { m: "ديس", n: 14, r: 25 }, { m: "ينا", n: 12, r: 28 }, { m: "فبر", n: 15, r: 32 },
+];
+const growthEn = [
+  { m: "Jun", n: 4, r: 8 }, { m: "Jul", n: 6, r: 10 }, { m: "Aug", n: 7, r: 12 },
+  { m: "Sep", n: 9, r: 15 }, { m: "Oct", n: 11, r: 18 }, { m: "Nov", n: 10, r: 22 },
+  { m: "Dec", n: 14, r: 25 }, { m: "Jan", n: 12, r: 28 }, { m: "Feb", n: 15, r: 32 },
 ];
 
 type AddForm = { name: string; email: string; phone: string; city: string; region: string; language: string; address: string; segment: AdminClient["segment"]; notes: string };
 const emptyAdd: AddForm = { name: "", email: "", phone: "", city: "", region: "", language: "العربية", address: "", segment: "new", notes: "" };
 
 function ClientsPage() {
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const segMap = {
+    vip: { l: "VIP", t: "amber" as const },
+    regular: { l: L("منتظم", "Regular"), t: "primary" as const },
+    new: { l: L("جديد", "New"), t: "emerald" as const },
+  };
+
   const [clients, setClients] = useState<AdminClient[]>(initialClients);
   const [tab, setTab] = useState<"all" | "vip" | "regular" | "new">("all");
   const [q, setQ] = useState("");
@@ -38,38 +49,43 @@ function ClientsPage() {
   );
 
   const handleAdd = () => {
-    if (!add.name || !add.email) { toast.error("الاسم والبريد مطلوبان"); return; }
-    const month = new Date().toLocaleDateString("ar-SA", { month: "long", year: "numeric" });
+    if (!add.name || !add.email) { toast.error(L("الاسم والبريد مطلوبان", "Name and email are required")); return; }
+    const month = new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA", { month: "long", year: "numeric" });
     setClients([
       { id: "c" + Date.now(), name: add.name, email: add.email, phone: add.phone, orders: 0, totalSpent: 0,
         segment: add.segment, joinedAt: month, region: add.region, city: add.city, language: add.language, address: add.address, notes: add.notes },
       ...clients,
     ]);
     setAdd(emptyAdd); setAddOpen(false);
-    toast.success("تم إضافة العميل");
+    toast.success(L("تم إضافة العميل", "Client added"));
   };
 
-  const remove = (id: string) => { setClients(clients.filter(c => c.id !== id)); toast.success("تم حذف العميل"); };
+  const remove = (id: string) => { setClients(clients.filter(c => c.id !== id)); toast.success(L("تم حذف العميل", "Client deleted")); };
+
+  const startSide = dir === "rtl" ? "right-3" : "left-3";
+  const padStart = dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3";
+  const textAlign = dir === "rtl" ? "text-right" : "text-left";
+  const iconMargin = dir === "rtl" ? "ml-2" : "mr-2";
 
   return (
-    <AdminLayout title="العملاء" subtitle="رؤى وشرائح وإحصائيات الاحتفاظ بالعملاء" action={<PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> إضافة عميل</PrimaryButton>}>
+    <AdminLayout title={L("العملاء", "Clients")} subtitle={L("رؤى وشرائح وإحصائيات الاحتفاظ بالعملاء", "Insights, segments and retention stats")} action={<PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> {L("إضافة عميل", "Add Client")}</PrimaryButton>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي العملاء" value={clients.length} icon={Users} accent="emerald" />
-        <StatCard label="عملاء VIP" value={clients.filter(c => c.segment === "vip").length} icon={Star} accent="amber" />
-        <StatCard label="معدل النمو" value="+23.1%" icon={TrendingUp} accent="primary" />
-        <StatCard label="متوسط الطلب" value={fmtSAR(1420)} icon={ShoppingBag} accent="violet" />
+        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={clients.length} icon={Users} accent="emerald" />
+        <StatCard label={L("عملاء VIP", "VIP Clients")} value={clients.filter(c => c.segment === "vip").length} icon={Star} accent="amber" />
+        <StatCard label={L("معدل النمو", "Growth Rate")} value="+23.1%" icon={TrendingUp} accent="primary" />
+        <StatCard label={L("متوسط الطلب", "Avg. Order")} value={fmtSAR(1420)} icon={ShoppingBag} accent="violet" />
       </div>
 
-      <PanelCard title="نمو العملاء" subtitle="جدد مقابل عائدين عبر الوقت" className="mb-6">
+      <PanelCard title={L("نمو العملاء", "Client Growth")} subtitle={L("جدد مقابل عائدين عبر الوقت", "New vs returning over time")} className="mb-6">
         <div className="h-64">
           <ResponsiveContainer>
-            <BarChart data={growth}>
+            <BarChart data={lang === "en" ? growthEn : growthAr}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
               <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
               <YAxis stroke="#7c8aa0" fontSize={12} />
               <Tooltip />
-              <Bar dataKey="r" name="عائدون" fill="#1E5B94" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="n" name="جدد" fill="#9bc4e8" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="r" name={L("عائدون", "Returning")} fill="#1E5B94" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="n" name={L("جدد", "New")} fill="#9bc4e8" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -78,11 +94,11 @@ function ClientsPage() {
       <PanelCard>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث عن العملاء..." className="w-full rounded-xl border border-border bg-background pr-10 pl-3 py-2.5 text-sm" />
+            <Search className={`absolute ${startSide} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L("ابحث عن العملاء...", "Search clients...")} className={`w-full rounded-xl border border-border bg-background ${padStart} py-2.5 text-sm`} />
           </div>
           <div className="inline-flex rounded-xl border border-border bg-background p-1">
-            {[["all", "الكل"], ["vip", "VIP"], ["regular", "منتظم"], ["new", "جدد"]].map(([k, l]) => (
+            {[["all", L("الكل", "All")], ["vip", "VIP"], ["regular", L("منتظم", "Regular")], ["new", L("جدد", "New")]].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k as any)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
             ))}
           </div>
@@ -91,15 +107,15 @@ function ClientsPage() {
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                <th className="px-3 py-3 font-medium">العميل</th>
-                <th className="px-3 py-3 font-medium">البريد</th>
-                <th className="px-3 py-3 font-medium">الجوال</th>
-                <th className="px-3 py-3 font-medium">المدينة</th>
-                <th className="px-3 py-3 font-medium">الطلبات</th>
-                <th className="px-3 py-3 font-medium">إجمالي الإنفاق</th>
-                <th className="px-3 py-3 font-medium">الشريحة</th>
-                <th className="px-3 py-3 font-medium">الانضمام</th>
+              <tr className={`${textAlign} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("العميل", "Client")}</th>
+                <th className="px-3 py-3 font-medium">{L("البريد", "Email")}</th>
+                <th className="px-3 py-3 font-medium">{L("الجوال", "Phone")}</th>
+                <th className="px-3 py-3 font-medium">{L("المدينة", "City")}</th>
+                <th className="px-3 py-3 font-medium">{L("الطلبات", "Orders")}</th>
+                <th className="px-3 py-3 font-medium">{L("إجمالي الإنفاق", "Total Spent")}</th>
+                <th className="px-3 py-3 font-medium">{L("الشريحة", "Segment")}</th>
+                <th className="px-3 py-3 font-medium">{L("الانضمام", "Joined")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -131,10 +147,10 @@ function ClientsPage() {
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setViewing(c)}><Eye className="ml-2 h-4 w-4" /> عرض التفاصيل</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { window.location.href = `mailto:${c.email}`; }}><Mail className="ml-2 h-4 w-4" /> إرسال بريد</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setViewing(c)}><Eye className={`${iconMargin} h-4 w-4`} /> {L("عرض التفاصيل", "View details")}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { window.location.href = `mailto:${c.email}`; }}><Mail className={`${iconMargin} h-4 w-4`} /> {L("إرسال بريد", "Send email")}</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => remove(c.id)} className="text-rose-600 focus:text-rose-600"><Trash2 className="ml-2 h-4 w-4" /> حذف العميل</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => remove(c.id)} className="text-rose-600 focus:text-rose-600"><Trash2 className={`${iconMargin} h-4 w-4`} /> {L("حذف العميل", "Delete client")}</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -148,36 +164,36 @@ function ClientsPage() {
 
       {/* Add client */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent dir="rtl" className="max-w-xl">
-          <DialogHeader><DialogTitle>إضافة عميل جديد</DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-xl">
+          <DialogHeader><DialogTitle>{L("إضافة عميل جديد", "Add New Client")}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
-            <Lbl label="الاسم الكامل"><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
-            <Lbl label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
-            <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
-            <Lbl label="المدينة"><input className={ic} value={add.city} onChange={e => setAdd({ ...add, city: e.target.value })} /></Lbl>
-            <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
-            <Lbl label="اللغة المفضلة">
+            <Lbl label={L("الاسم الكامل", "Full Name")}><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
+            <Lbl label={L("رقم الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
+            <Lbl label={L("البريد الإلكتروني", "Email")}><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
+            <Lbl label={L("المدينة", "City")}><input className={ic} value={add.city} onChange={e => setAdd({ ...add, city: e.target.value })} /></Lbl>
+            <Lbl label={L("المنطقة / الدولة", "Region / Country")}><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
+            <Lbl label={L("اللغة المفضلة", "Preferred Language")}>
               <input className={ic} value={add.language} onChange={e => setAdd({ ...add, language: e.target.value })} />
             </Lbl>
-            <Lbl label="الشريحة">
+            <Lbl label={L("الشريحة", "Segment")}>
               <select className={ic} value={add.segment} onChange={e => setAdd({ ...add, segment: e.target.value as any })}>
-                <option value="new">جديد</option><option value="regular">منتظم</option><option value="vip">VIP</option>
+                <option value="new">{L("جديد", "New")}</option><option value="regular">{L("منتظم", "Regular")}</option><option value="vip">VIP</option>
               </select>
             </Lbl>
-            <Lbl label="العنوان" full><input className={ic} value={add.address} onChange={e => setAdd({ ...add, address: e.target.value })} /></Lbl>
-            <Lbl label="ملاحظات" full><textarea rows={2} className={ic} value={add.notes} onChange={e => setAdd({ ...add, notes: e.target.value })} /></Lbl>
+            <Lbl label={L("العنوان", "Address")} full><input className={ic} value={add.address} onChange={e => setAdd({ ...add, address: e.target.value })} /></Lbl>
+            <Lbl label={L("ملاحظات", "Notes")} full><textarea rows={2} className={ic} value={add.notes} onChange={e => setAdd({ ...add, notes: e.target.value })} /></Lbl>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
-            <GhostButton onClick={() => setAddOpen(false)}>إلغاء</GhostButton>
-            <PrimaryButton onClick={handleAdd}>إضافة</PrimaryButton>
+            <GhostButton onClick={() => setAddOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
+            <PrimaryButton onClick={handleAdd}>{L("إضافة", "Add")}</PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* View client */}
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent dir="rtl" className="max-w-xl">
-          <DialogHeader><DialogTitle>تفاصيل العميل</DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-xl">
+          <DialogHeader><DialogTitle>{L("تفاصيل العميل", "Client Details")}</DialogTitle></DialogHeader>
           {viewing && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -190,25 +206,25 @@ function ClientsPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Info icon={Mail} label="البريد" value={viewing.email} />
-                <Info icon={Phone} label="الجوال" value={viewing.phone} />
-                <Info icon={MapPin} label="المدينة" value={viewing.city ?? "—"} />
-                <Info icon={MapPin} label="المنطقة" value={viewing.region ?? "—"} />
-                <Info icon={Globe} label="اللغة" value={viewing.language ?? "—"} />
-                <Info icon={MapPin} label="العنوان" value={viewing.address ?? "—"} />
-                <Info icon={Calendar} label="الانضمام" value={viewing.joinedAt} />
-                <Info icon={ShoppingBag} label="عدد الطلبات" value={String(viewing.orders)} />
-                <Info icon={Star} label="إجمالي الإنفاق" value={fmtSAR(viewing.totalSpent)} />
+                <Info icon={Mail} label={L("البريد", "Email")} value={viewing.email} />
+                <Info icon={Phone} label={L("الجوال", "Phone")} value={viewing.phone} ltr />
+                <Info icon={MapPin} label={L("المدينة", "City")} value={viewing.city ?? "—"} />
+                <Info icon={MapPin} label={L("المنطقة", "Region")} value={viewing.region ?? "—"} />
+                <Info icon={Globe} label={L("اللغة", "Language")} value={viewing.language ?? "—"} />
+                <Info icon={MapPin} label={L("العنوان", "Address")} value={viewing.address ?? "—"} />
+                <Info icon={Calendar} label={L("الانضمام", "Joined")} value={viewing.joinedAt} />
+                <Info icon={ShoppingBag} label={L("عدد الطلبات", "Orders")} value={String(viewing.orders)} ltr />
+                <Info icon={Star} label={L("إجمالي الإنفاق", "Total Spent")} value={fmtSAR(viewing.totalSpent)} ltr />
               </div>
               {viewing.notes && (
                 <div className="rounded-xl bg-muted/50 p-3 text-sm">
-                  <div className="text-[11px] font-bold text-muted-foreground mb-1">ملاحظات</div>
+                  <div className="text-[11px] font-bold text-muted-foreground mb-1">{L("ملاحظات", "Notes")}</div>
                   {viewing.notes}
                 </div>
               )}
             </div>
           )}
-          <DialogFooter><GhostButton onClick={() => setViewing(null)}>إغلاق</GhostButton></DialogFooter>
+          <DialogFooter><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
         </DialogContent>
       </Dialog>
     </AdminLayout>
@@ -219,9 +235,7 @@ const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-
 function Lbl({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
   return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
 }
-function Info({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  const ltr = label.includes("الجوال") || label.includes("عدد") || label.includes("إجمالي");
-
+function Info({ icon: Icon, label, value, ltr }: { icon: any; label: string; value: string; ltr?: boolean }) {
   return (
     <div className="flex items-start gap-2">
       <Icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
