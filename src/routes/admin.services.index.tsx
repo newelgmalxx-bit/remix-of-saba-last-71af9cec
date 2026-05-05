@@ -22,6 +22,7 @@ function ServicesPage() {
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
     subtitle: "", breadcrumb: "", bannerImage: "",
+    overviewDescription: "",
     seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
     heroHighlights: ["", "", ""],
     overview: [
@@ -91,6 +92,7 @@ function ServicesPage() {
         category: newSvc.category,
         breadcrumb: form.breadcrumb || newSvc.titleAr,
         bannerImage: form.bannerImage,
+        overviewDescription: form.overviewDescription,
         seo: {
           title: form.seoTitle,
           description: form.seoDescription,
@@ -234,6 +236,9 @@ function ServicesPage() {
               </label>
               <label className="text-xs font-bold space-y-1.5 col-span-2">الوصف المختصر
                 <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">نظرة عامة عن الخدمة (وصف تفصيلي)
+                <textarea rows={4} placeholder="وصف تفصيلي يظهر في قسم نظرة عامة بصفحة الخدمة" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescription} onChange={(e) => setForm({ ...form, overviewDescription: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5 col-span-2">صورة البنر (رابط الصورة)
                 <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />

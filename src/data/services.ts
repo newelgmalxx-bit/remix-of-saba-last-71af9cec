@@ -12,6 +12,7 @@ export type ServiceContent = {
   subtitle: string;
   heroHighlights: string[];
   bannerImage?: string;
+  overviewDescription?: string;
   seo?: {
     title?: string;
     description?: string;
