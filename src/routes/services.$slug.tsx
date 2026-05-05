@@ -98,7 +98,7 @@ function ServiceDetailPage() {
         <section className="relative overflow-hidden text-white">
           <div
             className="absolute inset-0 bg-cover bg-no-repeat"
-            style={{ backgroundImage: `url(${servicesHero})`, backgroundPosition: "right center" }}
+            style={{ backgroundImage: `url(${service.bannerImage || servicesHero})`, backgroundPosition: "center" }}
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/60 to-primary-dark/95" />
           <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
