@@ -75,8 +75,8 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
           <p>© {new Date().getFullYear()} سابا ديزاين. جميع الحقوق محفوظة.</p>
           <div className="flex items-center gap-5">
-            <a href="#" className="hover:text-white">سياسة الخصوصية</a>
-            <a href="#" className="hover:text-white">الشروط والأحكام</a>
+            <Link to={"/privacy" as any} className="hover:text-white">سياسة الخصوصية</Link>
+            <Link to={"/terms" as any} className="hover:text-white">الشروط والأحكام</Link>
           </div>
         </div>
       </div>
