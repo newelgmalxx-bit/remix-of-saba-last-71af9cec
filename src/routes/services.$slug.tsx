@@ -98,13 +98,11 @@ function ServiceDetailPage() {
   const heroImg = service.bannerImage || servicesHero;
   const gallery = [heroImg, servicesHero, heroImg, servicesHero];
   const handleAddToCart = () => {
-    if (!startingPlan) return;
-    add({ serviceSlug: slug, serviceTitle: title, planName: startingPlan.name, price: startingPrice });
-    toast.success("تمت الإضافة للسلة", { description: `${title} — باقة ${startingPlan.name}` });
+    add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
+    toast.success("تمت الإضافة للسلة", { description: title });
   };
   const handleBuyNow = () => {
-    if (!startingPlan) return;
-    add({ serviceSlug: slug, serviceTitle: title, planName: startingPlan.name, price: startingPrice });
+    add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     navigate({ to: "/checkout" as any });
   };
 
