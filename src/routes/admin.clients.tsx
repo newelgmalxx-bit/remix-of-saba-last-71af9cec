@@ -113,17 +113,17 @@ function ClientsPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{initials}</div>
                         <div>
                           <div className="font-bold">{c.name}</div>
-                          <div className="text-[11px] text-muted-foreground">{c.phone}</div>
+                          <div className="text-[11px] text-muted-foreground" dir="ltr">{c.phone}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-muted-foreground">{c.email}</td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{c.phone}</td>
                     <td className="px-3 py-3 text-xs">{c.city ?? "—"}</td>
-                    <td className="px-3 py-3">{c.orders}</td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(c.totalSpent)}</td>
+                    <td className="px-3 py-3" data-ltr-number>{c.orders}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(c.totalSpent)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
-                    <td className="px-3 py-3 text-xs text-muted-foreground">{c.joinedAt}</td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{c.joinedAt}</td>
                     <td className="px-3 py-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted">
