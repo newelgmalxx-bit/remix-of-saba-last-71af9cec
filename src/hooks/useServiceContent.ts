@@ -11,6 +11,7 @@ export type ServiceOverride = {
   breadcrumb?: string;
   heroHighlights?: string[];
   bannerImage?: string;
+  overviewDescription?: string;
   seo?: {
     title?: string;
     description?: string;
@@ -59,6 +60,7 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
       subtitle: o.subtitle ?? "",
       heroHighlights: o.heroHighlights ?? [],
       bannerImage: o.bannerImage,
+      overviewDescription: o.overviewDescription,
       seo: o.seo,
       overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
       benefits: (o.benefits ?? []).map((x) => ({ icon: Sparkles, title: x.title, desc: x.desc })),
@@ -78,6 +80,7 @@ export function mergeService(slug: string, override?: ServiceOverride): ServiceC
     breadcrumb: o.breadcrumb ?? base.breadcrumb,
     heroHighlights: o.heroHighlights ?? base.heroHighlights,
     bannerImage: o.bannerImage ?? base.bannerImage,
+    overviewDescription: o.overviewDescription ?? base.overviewDescription,
     seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
     overview: o.overview
       ? base.overview.map((b, i) => ({ ...b, title: o.overview![i]?.title ?? b.title, desc: o.overview![i]?.desc ?? b.desc }))

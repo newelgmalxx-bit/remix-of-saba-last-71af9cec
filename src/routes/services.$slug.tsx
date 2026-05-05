@@ -166,6 +166,13 @@ function ServiceDetailPage() {
                   ما الخدمة، لمن تناسب، وما القيمة التي تحققها.
                 </p>
               </div>
+              {service.overviewDescription && (
+                <div className="mt-5 rounded-2xl border border-border/60 bg-secondary/30 p-5 text-right">
+                  <p className="text-sm leading-8 text-foreground/80 whitespace-pre-line">
+                    {service.overviewDescription}
+                  </p>
+                </div>
+              )}
               <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                 {overview.map((o) => (
                   <div key={o.title} className="group rounded-2xl border border-border bg-secondary/30 p-6 text-center transition hover:-translate-y-1 hover:border-primary/40 hover:bg-white hover:shadow-md">
