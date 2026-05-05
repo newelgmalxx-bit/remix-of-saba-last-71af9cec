@@ -182,10 +182,10 @@ function ServicesPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground">{s.sku}</td>
+                    <td className="px-3 py-3 text-muted-foreground" dir="ltr">{s.sku}</td>
                     <td className="px-3 py-3"><Pill tone="primary">{s.category}</Pill></td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(s.price)}</td>
-                    <td className="px-3 py-3">{s.bookings}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(s.price)}</td>
+                    <td className="px-3 py-3" data-ltr-number>{s.bookings}</td>
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
@@ -226,7 +226,7 @@ function ServicesPage() {
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5">السعر (ر.س)
-                <input type="number" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+                <input type="number" dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5">المعرّف (slug — اختياري)
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
