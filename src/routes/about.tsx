@@ -10,67 +10,65 @@ import {
   Briefcase, Code2, Palette, Megaphone, CheckCircle2, Star, Zap, Layers,
   ChevronRight, ChevronLeft,
 } from "lucide-react";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
-const stats = [
-  { value: "+250", label: "مشروع منجز", icon: Briefcase },
-  { value: "+120", label: "عميل سعيد", icon: Users },
-  { value: "+15", label: "دولة حول العالم", icon: Globe2 },
-  { value: "+8", label: "سنوات من الخبرة", icon: Award },
+const tools = ["Figma", "React", "Next.js", "Webflow", "Shopify", "TypeScript", "Node.js", "Tailwind", "Framer", "Adobe"];
+
+const journeyItems: { year: string; tKey: TKey; dKey: TKey }[] = [
+  { year: "2017", tKey: "aboutPage.journey.start.t", dKey: "aboutPage.journey.start.d" },
+  { year: "2019", tKey: "aboutPage.journey.expand.t", dKey: "aboutPage.journey.expand.d" },
+  { year: "2022", tKey: "aboutPage.journey.recog.t", dKey: "aboutPage.journey.recog.d" },
+  { year: "2025", tKey: "aboutPage.journey.global.t", dKey: "aboutPage.journey.global.d" },
 ];
 
-const values = [
-  { icon: Lightbulb, title: "الإبداع", desc: "نحول الأفكار إلى تجارب رقمية ملهمة تترك أثراً." },
-  { icon: ShieldCheck, title: "الجودة", desc: "نلتزم بأعلى معايير الجودة في كل تفصيلة من تفاصيل العمل." },
-  { icon: Handshake, title: "الشراكة", desc: "علاقتنا مع العميل شراكة طويلة المدى مبنية على الثقة." },
-  { icon: TrendingUp, title: "النمو", desc: "نسعى دائماً لتطوير مهاراتنا وأدواتنا لنواكب المستقبل." },
-];
-
-const services = [
-  { icon: Code2, title: "تطوير المواقع والتطبيقات" },
-  { icon: Palette, title: "الهوية البصرية والتصميم" },
-  { icon: Megaphone, title: "التسويق الرقمي" },
-  { icon: Rocket, title: "إطلاق المنتجات الرقمية" },
-];
-
-const process = [
-  { icon: Lightbulb, title: "الاكتشاف", desc: "نفهم عملك، عملاءك، وأهدافك بعمق قبل أي خط أو كود." },
-  { icon: Layers, title: "التصميم", desc: "نحوّل الرؤية إلى واجهات بصرية أنيقة ومدروسة بدقة." },
-  { icon: Code2, title: "التطوير", desc: "نبني المنتج بأحدث التقنيات مع التركيز على الأداء والأمان." },
-  { icon: Rocket, title: "الإطلاق والنمو", desc: "نطلق مشروعك ونواكبه بالتحسينات والدعم المستمر." },
-];
-
-const testimonials = [
-  { name: "خالد العبدالله", role: "مدير عام، شركة تك ستارت", quote: "تجربة استثنائية. الفريق فهم رؤيتنا من أول اجتماع وقدّم نتيجة فاقت توقعاتنا بمراحل." },
-  { name: "نورة السالم", role: "مؤسسة، علامة نمط", quote: "احترافية في كل تفصيلة، التزام بالمواعيد، وذوق راقي. سابا ديزاين شريك حقيقي وليس مجرد مزود خدمة." },
-  { name: "عبدالرحمن المالكي", role: "مدير تسويق، مجموعة الأفق", quote: "حصلنا على هوية رقمية رفعت من قيمة علامتنا التجارية وضاعفت معدل التحويل بشكل ملموس." },
-  { name: "هدى الفهد", role: "مديرة منتج، تطبيق رواق", quote: "السرعة في التنفيذ مع الجودة العالية شيء نادر، لكن سابا ديزاين قدّمت لنا الاثنين معاً." },
-  { name: "ياسر الحربي", role: "الرئيس التنفيذي، متجر نور", quote: "متجرنا الإلكتروني انطلق بشكل احترافي وزادت مبيعاتنا 3 أضعاف في أول ربع بعد الإطلاق." },
-];
-
-const tools = [
-  "Figma", "React", "Next.js", "Webflow", "Shopify",
-  "TypeScript", "Node.js", "Tailwind", "Framer", "Adobe",
-];
-
-const journey = [
-  { year: "2017", title: "البداية", desc: "تأسست سابا ديزاين بفريق صغير وحلم كبير." },
-  { year: "2019", title: "التوسع", desc: "افتتاح أول فرع إقليمي وتوسع المحفظة لـ 50 مشروعاً." },
-  { year: "2022", title: "الاعتراف", desc: "حصلنا على عدة جوائز إقليمية في التصميم والابتكار." },
-  { year: "2025", title: "الانطلاق العالمي", desc: "خدمة عملاء في أكثر من 15 دولة حول العالم." },
+const testimonialKeys: { n: TKey; r: TKey; q: TKey }[] = [
+  { n: "aboutPage.t1.name", r: "aboutPage.t1.role", q: "aboutPage.t1.q" },
+  { n: "aboutPage.t2.name", r: "aboutPage.t2.role", q: "aboutPage.t2.q" },
+  { n: "aboutPage.t3.name", r: "aboutPage.t3.role", q: "aboutPage.t3.q" },
+  { n: "aboutPage.t4.name", r: "aboutPage.t4.role", q: "aboutPage.t4.q" },
+  { n: "aboutPage.t5.name", r: "aboutPage.t5.role", q: "aboutPage.t5.q" },
 ];
 
 function AboutPage() {
+  const { t, dir, lang } = useLang();
+  const arrowFlip = dir === "ltr" ? "rotate-180" : "";
+
+  const stats = [
+    { value: "+250", label: t("aboutPage.stats.projects"), icon: Briefcase },
+    { value: "+120", label: t("aboutPage.stats.clients"), icon: Users },
+    { value: "+15", label: t("aboutPage.stats.countries"), icon: Globe2 },
+    { value: "+8", label: t("aboutPage.stats.years"), icon: Award },
+  ];
+  const values = [
+    { icon: Lightbulb, title: t("aboutPage.value.creativity.t"), desc: t("aboutPage.value.creativity.d") },
+    { icon: ShieldCheck, title: t("aboutPage.value.quality.t"), desc: t("aboutPage.value.quality.d") },
+    { icon: Handshake, title: t("aboutPage.value.partnership.t"), desc: t("aboutPage.value.partnership.d") },
+    { icon: TrendingUp, title: t("aboutPage.value.growth.t"), desc: t("aboutPage.value.growth.d") },
+  ];
+  const services = [
+    { icon: Code2, title: t("aboutPage.svc.web") },
+    { icon: Palette, title: t("aboutPage.svc.brand") },
+    { icon: Megaphone, title: t("aboutPage.svc.marketing") },
+    { icon: Rocket, title: t("aboutPage.svc.launch") },
+  ];
+  const processArr = [
+    { icon: Lightbulb, title: t("aboutPage.process.discover.t"), desc: t("aboutPage.process.discover.d") },
+    { icon: Layers, title: t("aboutPage.process.design.t"), desc: t("aboutPage.process.design.d") },
+    { icon: Code2, title: t("aboutPage.process.dev.t"), desc: t("aboutPage.process.dev.d") },
+    { icon: Rocket, title: t("aboutPage.process.launch.t"), desc: t("aboutPage.process.launch.d") },
+  ];
+  const journey = journeyItems.map((j) => ({ year: j.year, title: t(j.tKey), desc: t(j.dKey) }));
+  const testimonials = testimonialKeys.map((k) => ({ name: t(k.n), role: t(k.r), quote: t(k.q) }));
+
   return (
-    <div dir="rtl" className="flex min-h-screen flex-col bg-background">
+    <div dir={dir} className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
       <main className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden">
           <img src={aboutBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.85) 0%, rgba(30,91,148,0.78) 50%, rgba(15,40,75,0.92) 100%)" }}
-          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.85) 0%, rgba(30,91,148,0.78) 50%, rgba(15,40,75,0.92) 100%)" }} />
           <div className="absolute inset-0 bg-grid opacity-20" />
           <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse-glow" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl animate-pulse-glow" />
@@ -79,30 +77,21 @@ function AboutPage() {
             <div className="mx-auto max-w-3xl text-center text-white">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold text-white backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
-                من نحن
+                {t("aboutPage.kicker")}
               </span>
               <h1 className="mt-6 text-4xl font-extrabold leading-tight md:text-6xl">
-                نصنع <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">تجارب رقمية</span>
+                {t("aboutPage.hero.title.l1")} <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">{t("aboutPage.hero.title.highlight")}</span>
                 <br />
-                تترك أثراً يدوم
+                {t("aboutPage.hero.title.l2")}
               </h1>
-              <p className="mt-6 text-lg leading-8 text-white/85">
-                سابا ديزاين وكالة رقمية متخصصة في تحويل أفكارك إلى منتجات عصرية تجمع بين
-                الجمال والوظيفة. نؤمن بأن التصميم العظيم يبدأ من فهم عميق للإنسان قبل التقنية.
-              </p>
+              <p className="mt-6 text-lg leading-8 text-white/85">{t("aboutPage.hero.desc")}</p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <Link
-                  to="/contact"
-                  className="group inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-xl transition hover:bg-white/90"
-                >
-                  ابدأ مشروعك معنا
-                  <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
+                <Link to="/contact" className="group inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-xl transition hover:bg-white/90">
+                  {t("aboutPage.startProject")}
+                  <ArrowLeft className={`h-4 w-4 transition ${arrowFlip} group-hover:-translate-x-1`} />
                 </Link>
-                <Link
-                  to="/portfolio"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
-                >
-                  استعرض أعمالنا
+                <Link to="/portfolio" className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">
+                  {t("aboutPage.viewWork")}
                 </Link>
               </div>
             </div>
@@ -128,23 +117,15 @@ function AboutPage() {
         <section className="mx-auto max-w-7xl px-4 py-24">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div className="order-2 lg:order-1">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">قصتنا</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.story.kicker")}</span>
               <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                من فكرة بسيطة
+                {t("aboutPage.story.title.l1")}
                 <br />
-                إلى وكالة بصمة عربية
+                {t("aboutPage.story.title.l2")}
               </h2>
               <div className="mt-6 space-y-4 text-base leading-8 text-muted-foreground">
-                <p>
-                  بدأت رحلتنا عام 2017 بإيمان عميق بأن المنطقة العربية تستحق تجارب رقمية
-                  بمستوى عالمي. جمعنا فريقاً من المصممين والمطورين الذين يشاركون نفس الشغف:
-                  صناعة منتجات يفتخر بها العميل.
-                </p>
-                <p>
-                  اليوم، ومع أكثر من 250 مشروعاً مكتملاً وعملاء في 15 دولة، ما زلنا نحافظ
-                  على نفس المبدأ: الاهتمام بالتفاصيل، احترام وقت العميل، وتقديم قيمة حقيقية
-                  تتجاوز التوقعات.
-                </p>
+                <p>{t("aboutPage.story.p1")}</p>
+                <p>{t("aboutPage.story.p2")}</p>
               </div>
               <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2">
                 {services.map((s) => (
@@ -160,28 +141,21 @@ function AboutPage() {
 
             <div className="relative order-1 lg:order-2">
               <div className="relative aspect-square overflow-hidden rounded-3xl shadow-lg">
-                <img src={aboutHero} alt="منصة سابا ديزاين الرقمية" className="absolute inset-0 h-full w-full object-cover" />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: "linear-gradient(180deg, rgba(30,91,148,0) 30%, rgba(15,40,75,0.85) 100%)" }}
-                />
+                <img src={aboutHero} alt={t("aboutPage.story.imageAlt")} className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(30,91,148,0) 30%, rgba(15,40,75,0.85) 100%)" }} />
                 <div className="relative flex h-full flex-col justify-end p-8 text-white md:p-10">
                   <Quote className="mb-4 h-10 w-10 opacity-70" />
-                  <p className="text-xl font-bold leading-relaxed md:text-2xl">
-                    "نحن لا نصمم مواقع.
-                    <br />
-                    نصنع تجارب رقمية يتذكرها الناس."
-                  </p>
+                  <p className="text-xl font-bold leading-relaxed md:text-2xl whitespace-pre-line">{`"${t("aboutPage.story.quote")}"`}</p>
                   <div className="mt-5 h-0.5 w-16 bg-white/70" />
-                  <span className="mt-2 text-sm text-white/85">— فلسفة سابا ديزاين</span>
+                  <span className="mt-2 text-sm text-white/85">{t("aboutPage.story.quoteBy")}</span>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -left-6 hidden h-32 w-32 rounded-2xl border-4 border-background bg-white p-4 shadow-lg lg:block">
+              <div className={`absolute -bottom-6 hidden h-32 w-32 rounded-2xl border-4 border-background bg-white p-4 shadow-lg lg:block ${dir === "rtl" ? "-left-6" : "-right-6"}`}>
                 <div className="flex h-full flex-col justify-between">
                   <Award className="h-6 w-6 text-primary" />
                   <div>
                     <div className="text-2xl font-extrabold text-foreground">+15</div>
-                    <div className="text-[10px] font-bold text-muted-foreground">جائزة عالمية</div>
+                    <div className="text-[10px] font-bold text-muted-foreground">{t("aboutPage.story.awardBadge")}</div>
                   </div>
                 </div>
               </div>
@@ -194,15 +168,12 @@ function AboutPage() {
           <div className="mx-auto max-w-7xl px-4">
             <div className="grid gap-6 md:grid-cols-3">
               {[
-                { icon: Target, title: "رسالتنا", desc: "تمكين الشركات والأفراد من بناء حضور رقمي قوي ومتميز يحقق أهدافهم بأفضل الممارسات العالمية." },
-                { icon: Eye, title: "رؤيتنا", desc: "أن نكون الوكالة الرقمية الأولى التي تختارها العلامات الطموحة في المنطقة العربية والعالم." },
-                { icon: Heart, title: "وعدنا", desc: "نلتزم بالشفافية، الجودة، والتسليم في الوقت — لأن سمعتنا تُبنى مع كل مشروع نسلمه." },
+                { icon: Target, title: t("aboutPage.mvp.mission.t"), desc: t("aboutPage.mvp.mission.d") },
+                { icon: Eye, title: t("aboutPage.mvp.vision.t"), desc: t("aboutPage.mvp.vision.d") },
+                { icon: Heart, title: t("aboutPage.mvp.promise.t"), desc: t("aboutPage.mvp.promise.d") },
               ].map((c) => (
-                <div
-                  key={c.title}
-                  className="card-hover group relative overflow-hidden rounded-3xl border border-border bg-background p-8"
-                >
-                  <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition group-hover:scale-150" />
+                <div key={c.title} className="card-hover group relative overflow-hidden rounded-3xl border border-border bg-background p-8">
+                  <div className={`absolute -top-8 h-24 w-24 rounded-full bg-primary/5 transition group-hover:scale-150 ${dir === "rtl" ? "-right-8" : "-left-8"}`} />
                   <div className="relative">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
                       <c.icon className="h-6 w-6" />
@@ -219,16 +190,14 @@ function AboutPage() {
         {/* VALUES */}
         <section className="mx-auto max-w-7xl px-4 py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">قيمنا</span>
-            <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-              المبادئ التي تحركنا كل يوم
-            </h2>
-            <p className="mt-4 text-muted-foreground">أربعة أركان نبني عليها كل قرار وكل سطر كود وكل بكسل.</p>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.values.kicker")}</span>
+            <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">{t("aboutPage.values.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("aboutPage.values.desc")}</p>
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
               <div key={v.title} className="card-hover relative rounded-3xl border border-border bg-white p-6">
-                <div className="absolute -top-4 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-white shadow-md">
+                <div className={`absolute -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-white shadow-md ${dir === "rtl" ? "right-6" : "left-6"}`}>
                   {String(i + 1).padStart(2, "0")}
                 </div>
                 <div className="mt-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -245,18 +214,16 @@ function AboutPage() {
         <section className="bg-secondary/30 py-24">
           <div className="mx-auto max-w-5xl px-4">
             <div className="text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">رحلتنا</span>
-              <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                ثمانية أعوام من النمو المستمر
-              </h2>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.journey.kicker")}</span>
+              <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">{t("aboutPage.journey.title")}</h2>
             </div>
             <div className="relative mt-16">
               <div className="absolute right-1/2 top-0 hidden h-full w-0.5 translate-x-1/2 bg-gradient-to-b from-primary via-primary/30 to-transparent md:block" />
               <div className="space-y-10">
                 {journey.map((j, i) => (
                   <div key={j.year} className={`flex flex-col gap-4 md:flex-row md:items-center ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>
-                    <div className="flex-1 md:text-left">
-                    <div className={`card-hover rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
+                    <div className="flex-1">
+                      <div className={`card-hover rounded-2xl border border-border bg-background p-6 shadow-sm ${i % 2 === 0 ? "md:mr-12 md:text-right" : "md:ml-12 md:text-left"}`}>
                         <div className="text-2xl font-extrabold text-primary">{j.year}</div>
                         <h3 className="mt-1 text-lg font-bold text-foreground">{j.title}</h3>
                         <p className="mt-2 text-sm leading-7 text-muted-foreground">{j.desc}</p>
@@ -274,14 +241,12 @@ function AboutPage() {
         {/* PROCESS */}
         <section className="mx-auto max-w-7xl px-4 py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">منهجيتنا</span>
-            <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-              كيف نعمل من الفكرة إلى الإطلاق
-            </h2>
-            <p className="mt-4 text-muted-foreground">منهجية واضحة بأربع مراحل تضمن تسليماً ناجحاً ونتائج تستمر.</p>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.process.kicker")}</span>
+            <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">{t("aboutPage.process.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("aboutPage.process.desc")}</p>
           </div>
           <div className="relative mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {process.map((p, i) => (
+            {processArr.map((p, i) => (
               <div key={p.title} className="card-hover group relative rounded-3xl border border-border bg-white p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
@@ -299,24 +264,19 @@ function AboutPage() {
         </section>
 
         {/* TESTIMONIALS */}
-        <TestimonialsSlider />
+        <TestimonialsSlider testimonials={testimonials} />
 
         {/* TOOLS / TECH */}
         <section className="mx-auto max-w-7xl px-4 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">أدواتنا</span>
-            <h2 className="mt-3 text-2xl font-extrabold text-foreground md:text-3xl">
-              تقنيات عالمية في يد فريق محترف
-            </h2>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.tools.kicker")}</span>
+            <h2 className="mt-3 text-2xl font-extrabold text-foreground md:text-3xl">{t("aboutPage.tools.title")}</h2>
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            {tools.map((t) => (
-              <span
-                key={t}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
-              >
+            {tools.map((tt) => (
+              <span key={tt} className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md">
                 <Zap className="h-3.5 w-3.5 text-primary" />
-                {t}
+                {tt}
               </span>
             ))}
           </div>
@@ -327,35 +287,24 @@ function AboutPage() {
           <div className="mx-auto max-w-7xl px-4">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-primary">لماذا سابا ديزاين؟</span>
-                <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-                  ما يميزنا عن غيرنا
-                </h2>
-                <p className="mt-4 leading-8 text-muted-foreground">
-                  لا نقدم خدمات جاهزة — نصمم حلولاً مفصلة على مقاس مشروعك وأهدافك. كل عميل
-                  يحصل على فريق متخصص واهتمام شخصي حقيقي.
-                </p>
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.why.kicker")}</span>
+                <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">{t("aboutPage.why.title")}</h2>
+                <p className="mt-4 leading-8 text-muted-foreground">{t("aboutPage.why.desc")}</p>
                 <ul className="mt-6 space-y-3">
-                  {[
-                    "فريق محترف بخبرة تتجاوز 8 سنوات في السوق",
-                    "تسليم في الوقت المتفق عليه — 98% التزام",
-                    "دعم فني مستمر بعد إطلاق المشروع",
-                    "أسعار تنافسية مقابل جودة عالمية",
-                    "ضمان رضا العميل على كل مرحلة من المشروع",
-                  ].map((t) => (
-                    <li key={t} className="flex items-start gap-3">
+                  {[t("aboutPage.why.b1"), t("aboutPage.why.b2"), t("aboutPage.why.b3"), t("aboutPage.why.b4"), t("aboutPage.why.b5")].map((tt) => (
+                    <li key={tt} className="flex items-start gap-3">
                       <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                      <span className="text-sm text-foreground">{t}</span>
+                      <span className="text-sm text-foreground">{tt}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { v: "98%", l: "نسبة العملاء الراضين" },
-                  { v: "24h", l: "متوسط زمن الاستجابة" },
-                  { v: "100%", l: "ضمان الجودة" },
-                  { v: "+50", l: "خبير في الفريق" },
+                  { v: "98%", l: t("aboutPage.why.kpi.satisfaction") },
+                  { v: "24h", l: t("aboutPage.why.kpi.response") },
+                  { v: "100%", l: t("aboutPage.why.kpi.quality") },
+                  { v: "+50", l: t("aboutPage.why.kpi.experts") },
                 ].map((b) => (
                   <div key={b.l} className="card-hover rounded-3xl border border-border bg-background p-6 text-center shadow-sm">
                     <div className="text-3xl font-extrabold text-gradient-primary">{b.v}</div>
@@ -369,28 +318,18 @@ function AboutPage() {
 
         {/* CTA */}
         <section className="mx-auto max-w-7xl px-4 py-24">
-          <div
-            className="relative overflow-hidden rounded-3xl p-10 text-white md:p-16"
-            style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}
-          >
+          <div className="relative overflow-hidden rounded-3xl p-10 text-white md:p-16" style={{ background: "linear-gradient(135deg, #5482AE 0%, #1E5B94 100%)" }}>
             <div className="absolute inset-0 bg-grid opacity-20" />
             <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
             <div className="relative grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
               <div>
-                <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">
-                  جاهزون لبناء شيء استثنائي معاً؟
-                </h2>
-                <p className="mt-3 text-white/85">
-                  أخبرنا عن مشروعك وسنرد عليك خلال 24 ساعة بخطة مبدئية واقتراحات عملية.
-                </p>
+                <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">{t("aboutPage.cta.title")}</h2>
+                <p className="mt-3 text-white/85">{t("aboutPage.cta.desc")}</p>
               </div>
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-extrabold text-primary shadow-xl transition hover:bg-white/90"
-              >
-                تواصل معنا الآن
-                <ArrowLeft className="h-4 w-4" />
+              <Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-extrabold text-primary shadow-xl transition hover:bg-white/90">
+                {t("aboutPage.cta.btn")}
+                <ArrowLeft className={`h-4 w-4 ${arrowFlip}`} />
               </Link>
             </div>
           </div>
@@ -411,10 +350,11 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
-function TestimonialsSlider() {
+function TestimonialsSlider({ testimonials }: { testimonials: { name: string; role: string; quote: string }[] }) {
+  const { t, dir } = useLang();
   const [start, setStart] = useState(0);
   const total = testimonials.length;
-  const pageCount = Math.max(1, total - 2); // 3 visible at a time
+  const pageCount = Math.max(1, total - 2);
 
   useEffect(() => {
     const id = setInterval(() => setStart((p) => (p + 1) % pageCount), 5500);
@@ -431,33 +371,27 @@ function TestimonialsSlider() {
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
       <div className="relative mx-auto max-w-7xl px-4">
         <div className="text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-primary">آراء عملائنا</span>
-          <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">
-            ما يقوله من عملوا معنا
-          </h2>
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("aboutPage.testimonials.kicker")}</span>
+          <h2 className="mt-3 text-3xl font-extrabold text-foreground md:text-4xl">{t("aboutPage.testimonials.title")}</h2>
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3" key={start}>
-          {visible.map((t, i) => (
-            <div
-              key={`${start}-${i}`}
-              className="card-hover relative rounded-3xl border border-border bg-background p-7 shadow-sm animate-fade-up"
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <Quote className="absolute right-6 top-6 h-9 w-9 text-primary/15" />
+          {visible.map((tt, i) => (
+            <div key={`${start}-${i}`} className="card-hover relative rounded-3xl border border-border bg-background p-7 shadow-sm animate-fade-up" style={{ animationDelay: `${i * 80}ms` }}>
+              <Quote className={`absolute top-6 h-9 w-9 text-primary/15 ${dir === "rtl" ? "right-6" : "left-6"}`} />
               <div className="flex gap-1">
                 {Array.from({ length: 5 }).map((_, k) => (
                   <Star key={k} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <p className="mt-4 text-sm leading-7 text-foreground">"{t.quote}"</p>
+              <p className="mt-4 text-sm leading-7 text-foreground">"{tt.quote}"</p>
               <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-sm font-extrabold text-white">
-                  {t.name.charAt(0)}
+                  {tt.name.charAt(0)}
                 </div>
                 <div>
-                  <div className="text-sm font-extrabold text-foreground">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                  <div className="text-sm font-extrabold text-foreground">{tt.name}</div>
+                  <div className="text-xs text-muted-foreground">{tt.role}</div>
                 </div>
               </div>
             </div>
@@ -465,28 +399,15 @@ function TestimonialsSlider() {
         </div>
 
         <div className="mt-10 flex items-center justify-center gap-5">
-          <button
-            onClick={prev}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
-            aria-label="السابق"
-          >
+          <button onClick={prev} className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md" aria-label="prev">
             <ChevronRight className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2">
             {Array.from({ length: pageCount }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setStart(i)}
-                className={`h-2 rounded-full transition-all ${i === start ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`}
-                aria-label={`صفحة ${i + 1}`}
-              />
+              <button key={i} onClick={() => setStart(i)} className={`h-2 rounded-full transition-all ${i === start ? "w-8 bg-primary" : "w-2 bg-border hover:bg-primary/40"}`} aria-label={`${i + 1}`} />
             ))}
           </div>
-          <button
-            onClick={next}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md"
-            aria-label="التالي"
-          >
+          <button onClick={next} className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-md" aria-label="next">
             <ChevronLeft className="h-5 w-5" />
           </button>
         </div>
