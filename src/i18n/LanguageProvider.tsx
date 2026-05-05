@@ -13,17 +13,16 @@ const LanguageContext = createContext<Ctx | null>(null);
 
 const STORAGE_KEY = "saba_lang";
 
-function readInitial(): Lang {
-  if (typeof window === "undefined") return "ar";
-  try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (v === "ar" || v === "en") return v;
-  } catch {}
-  return "ar";
-}
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(readInitial);
+  // Always start with "ar" to match SSR, then sync with localStorage after mount
+  const [lang, setLangState] = useState<Lang>("ar");
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY);
+      if (v === "ar" || v === "en") setLangState(v);
+    } catch {}
+  }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
