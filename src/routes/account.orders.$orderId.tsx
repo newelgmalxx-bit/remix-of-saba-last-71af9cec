@@ -193,7 +193,7 @@ function OrderDetail() {
               <div className="my-2 h-px bg-border" />
               <div className="flex justify-between text-base font-bold">
                 <span>الإجمالي</span>
-                <span className="text-primary">{formatCurrency(order.total)}</span>
+                <span className="text-primary" data-ltr-number>{formatCurrency(order.total)}</span>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ function OrderDetail() {
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
-              <span>{order.createdAt}</span>
+              <span data-ltr-number>{order.createdAt}</span>
             </div>
           </div>
           {order.paid && (
@@ -232,7 +232,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="font-medium" data-ltr-number>{value}</span>
     </div>
   );
 }
