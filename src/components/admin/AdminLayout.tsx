@@ -15,7 +15,7 @@ type NavItem = { to: string; label: string; icon: any; children?: { to: string; 
 const navGroups: (NavItem | "sep")[] = [
   { to: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { to: "/admin/services", label: "الخدمات", icon: Package },
-  { to: "/admin/bookings", label: "الحجوزات", icon: CalendarCheck },
+  { to: "/admin/bookings", label: "الطلبات", icon: CalendarCheck },
   { to: "/admin/invoices", label: "الفواتير", icon: FileText },
   { to: "/admin/clients", label: "العملاء", icon: Users },
   { to: "/admin/portfolio", label: "أعمالنا", icon: ImageIcon },

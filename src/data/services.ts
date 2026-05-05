@@ -11,6 +11,7 @@ export type ServiceContent = {
   title: string;
   subtitle: string;
   heroHighlights: string[];
+  bannerImage?: string;
   overview: { icon: LucideIcon; title: string; desc: string }[];
   benefits: { icon: LucideIcon; title: string; desc: string }[];
   plans: { name: string; price: string; featured: boolean; feats: string[] }[];

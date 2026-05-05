@@ -19,7 +19,7 @@ const roles = [
 const matrix = [
   { feature: "لوحة التحكم", owner: true, admin: true, manager: true, support: true },
   { feature: "إدارة الخدمات", owner: true, admin: true, manager: true, support: false },
-  { feature: "إدارة الحجوزات", owner: true, admin: true, manager: true, support: true },
+  { feature: "إدارة الطلبات", owner: true, admin: true, manager: true, support: true },
   { feature: "إدارة الفواتير", owner: true, admin: true, manager: true, support: false },
   { feature: "إدارة العملاء", owner: true, admin: true, manager: true, support: true },
   { feature: "إدارة المستخدمين", owner: true, admin: true, manager: false, support: false },

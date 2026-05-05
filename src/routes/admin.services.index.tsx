@@ -20,7 +20,7 @@ function ServicesPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
-    subtitle: "", breadcrumb: "",
+    subtitle: "", breadcrumb: "", bannerImage: "",
     heroHighlights: ["", "", ""],
     overview: [
       { title: "لمن هذه الخدمة", desc: "" },
@@ -88,6 +88,7 @@ function ServicesPage() {
         subtitle: form.subtitle,
         category: newSvc.category,
         breadcrumb: form.breadcrumb || newSvc.titleAr,
+        bannerImage: form.bannerImage,
         heroHighlights: form.heroHighlights.filter(h => h.trim()),
         overview: form.overview.filter(o => o.title.trim()),
         benefits: form.benefits.filter(b => b.title.trim()),
@@ -152,7 +153,7 @@ function ServicesPage() {
                 <th className="px-3 py-3 font-medium">SKU</th>
                 <th className="px-3 py-3 font-medium">التصنيف</th>
                 <th className="px-3 py-3 font-medium">السعر</th>
-                <th className="px-3 py-3 font-medium">الحجوزات</th>
+                <th className="px-3 py-3 font-medium">الطلبات</th>
                 <th className="px-3 py-3 font-medium">الحالة</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
@@ -225,6 +226,14 @@ function ServicesPage() {
               </label>
               <label className="text-xs font-bold space-y-1.5 col-span-2">الوصف المختصر
                 <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">صورة البنر (رابط الصورة)
+                <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
+                <input type="file" accept="image/*" className="w-full text-[11px]" onChange={(e) => {
+                  const f = e.target.files?.[0]; if (!f) return;
+                  const r = new FileReader(); r.onload = () => setForm({ ...form, bannerImage: String(r.result) }); r.readAsDataURL(f);
+                }} />
+                {form.bannerImage && <img src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
               </label>
             </div>
             </section>

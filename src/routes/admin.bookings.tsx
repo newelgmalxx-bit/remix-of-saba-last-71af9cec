@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({
-  head: () => ({ meta: [{ title: "الحجوزات | لوحة التحكم" }] }),
+  head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
   component: BookingsPage,
 });
 
@@ -40,7 +40,7 @@ function BookingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "bookings.csv"; a.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تصدير الحجوزات");
+    toast.success("تم تصدير الطلبات");
   };
 
   const openEdit = (b: AdminBooking) => { setEditing(b); setEditForm({ ...b }); };
@@ -53,7 +53,7 @@ function BookingsPage() {
   const remove = (id: string) => { setBookings(bookings.filter(b => b.id !== id)); toast.success("تم الحذف"); };
 
   return (
-    <AdminLayout title="الحجوزات" subtitle="تتبع وإدارة دورة حياة الطلبات" action={
+    <AdminLayout title="الطلبات" subtitle="تتبع وإدارة دورة حياة الطلبات" action={
       <div className="hidden sm:flex gap-2">
         <select value={source} onChange={(e) => setSource(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
           <option value="all">كل المصادر</option>
@@ -70,7 +70,7 @@ function BookingsPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي الحجوزات" value={bookings.length} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
+        <StatCard label="إجمالي الطلبات" value={bookings.length} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
         <StatCard label="بانتظار التأكيد" value={bookings.filter(b => b.status === "pending").length} icon={Clock} accent="amber" />
         <StatCard label="قيد التنفيذ" value={bookings.filter(b => b.status === "in_progress").length} icon={Loader2} accent="violet" />
         <StatCard label="مكتملة" value={bookings.filter(b => b.status === "completed").length} hint="↑ +12.5%" icon={CheckCircle2} accent="emerald" />

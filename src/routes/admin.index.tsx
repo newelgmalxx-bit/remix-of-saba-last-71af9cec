@@ -67,7 +67,7 @@ function AdminDashboard() {
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard label="إجمالي الإيرادات" value={fmtSAR(adminStats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
-        <StatCard label="إجمالي الحجوزات" value={adminStats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
+        <StatCard label="إجمالي الطلبات" value={adminStats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
         <StatCard label="إجمالي العملاء" value={adminStats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
         <StatCard label="الخدمات النشطة" value={adminStats.activeServices} hint="من أصل 12" icon={Package} accent="amber" />
       </div>
@@ -120,7 +120,7 @@ function AdminDashboard() {
 
       {/* Recent bookings + activity */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <PanelCard title="أحدث الحجوزات" className="lg:col-span-2" action={<a href="/admin/bookings" className="text-xs font-bold text-primary hover:underline">عرض الكل ←</a>}>
+        <PanelCard title="أحدث الطلبات" className="lg:col-span-2" action={<a href="/admin/bookings" className="text-xs font-bold text-primary hover:underline">عرض الكل ←</a>}>
           <div className="overflow-x-auto -mx-2">
             <table className="w-full text-sm">
               <thead>
