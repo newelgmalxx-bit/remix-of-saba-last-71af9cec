@@ -7,38 +7,40 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Languages } from "lucide-react";
 import logoImg from "@/assets/logo.png";
+import { useLang } from "@/i18n/LanguageProvider";
+import flagSa from "@/assets/flag-sa.jpg";
+import flagUs from "@/assets/flag-us.jpg";
 
-type NavItem = { to: string; label: string; icon: any; children?: { to: string; label: string; icon: any }[] };
+type NavItem = { to: string; ar: string; en: string; icon: any; children?: { to: string; ar: string; en: string; icon: any }[] };
 
 const navGroups: (NavItem | "sep")[] = [
-  { to: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
-  { to: "/admin/services", label: "الخدمات", icon: Package },
-  { to: "/admin/plans", label: "الباقات", icon: Tag },
-  { to: "/admin/bookings", label: "الطلبات", icon: CalendarCheck },
-  { to: "/admin/invoices", label: "الفواتير", icon: FileText },
-  { to: "/admin/clients", label: "العملاء", icon: Users },
-  { to: "/admin/portfolio", label: "أعمالنا", icon: ImageIcon },
-  { to: "/admin/analytics", label: "التحليلات", icon: BarChart3 },
-  { to: "/admin/reports", label: "التقارير", icon: FileSpreadsheet },
+  { to: "/admin", ar: "لوحة التحكم", en: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/services", ar: "الخدمات", en: "Services", icon: Package },
+  { to: "/admin/plans", ar: "الباقات", en: "Plans", icon: Tag },
+  { to: "/admin/bookings", ar: "الطلبات", en: "Orders", icon: CalendarCheck },
+  { to: "/admin/invoices", ar: "الفواتير", en: "Invoices", icon: FileText },
+  { to: "/admin/clients", ar: "العملاء", en: "Clients", icon: Users },
+  { to: "/admin/portfolio", ar: "أعمالنا", en: "Portfolio", icon: ImageIcon },
+  { to: "/admin/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
+  { to: "/admin/reports", ar: "التقارير", en: "Reports", icon: FileSpreadsheet },
   "sep",
-  { to: "/admin/site", label: "إعدادات الموقع", icon: Building2 },
-  { to: "/admin/seo", label: "إعدادات SEO", icon: Search },
-  { to: "/admin/tracking", label: "التتبع والبكسلات", icon: Target },
-  { to: "/admin/payment", label: "إعدادات الدفع", icon: CreditCard },
-  { to: "/admin/partner", label: "إعدادات API الشريك", icon: Link2 },
+  { to: "/admin/site", ar: "إعدادات الموقع", en: "Site settings", icon: Building2 },
+  { to: "/admin/seo", ar: "إعدادات SEO", en: "SEO settings", icon: Search },
+  { to: "/admin/tracking", ar: "التتبع والبكسلات", en: "Tracking & pixels", icon: Target },
+  { to: "/admin/payment", ar: "إعدادات الدفع", en: "Payment settings", icon: CreditCard },
+  { to: "/admin/partner", ar: "إعدادات API الشريك", en: "Partner API", icon: Link2 },
   "sep",
-  { to: "/admin/users", label: "إدارة المستخدمين", icon: UserCheck },
+  { to: "/admin/users", ar: "إدارة المستخدمين", en: "Users", icon: UserCheck },
   "sep",
   {
-    to: "/admin/settings", label: "الإعدادات", icon: Settings,
+    to: "/admin/settings", ar: "الإعدادات", en: "Settings", icon: Settings,
     children: [
-      { to: "/admin/settings/profile", label: "الملف الشخصي", icon: User },
-      { to: "/admin/settings/appearance", label: "المظهر", icon: Palette },
-      { to: "/admin/settings/integrations", label: "التكاملات", icon: Plug },
-      { to: "/admin/settings/team", label: "الفريق والصلاحيات", icon: Users2 },
-      { to: "/admin/settings/notifications", label: "الإشعارات", icon: BellRing },
+      { to: "/admin/settings/profile", ar: "الملف الشخصي", en: "Profile", icon: User },
+      { to: "/admin/settings/appearance", ar: "المظهر", en: "Appearance", icon: Palette },
+      { to: "/admin/settings/integrations", ar: "التكاملات", en: "Integrations", icon: Plug },
+      { to: "/admin/settings/team", ar: "الفريق والصلاحيات", en: "Team & roles", icon: Users2 },
+      { to: "/admin/settings/notifications", ar: "الإشعارات", en: "Notifications", icon: BellRing },
     ],
   },
 ];
@@ -51,16 +53,18 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [openSettings, setOpenSettings] = useState(path.startsWith("/admin/settings"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
 
   const isActive = (to: string, exact = false) => exact ? path === to : path === to || path.startsWith(to + "/");
 
   return (
-    <div className="min-h-screen bg-muted/40 flex" dir="rtl">
+    <div className="min-h-screen bg-muted/40 flex" dir={dir}>
       {/* Sidebar */}
-      <aside className={`${mobileOpen ? "translate-x-0" : "translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 right-0 z-40 h-screen w-72 shrink-0 border-l border-border bg-card transition-transform overflow-y-auto`}>
+      <aside className={`${mobileOpen ? "translate-x-0" : (dir === "rtl" ? "translate-x-full" : "-translate-x-full")} lg:translate-x-0 fixed lg:sticky top-0 ${dir === "rtl" ? "right-0 border-l" : "left-0 border-r"} z-40 h-screen w-72 shrink-0 border-border bg-card transition-transform overflow-y-auto`}>
         <div className="flex h-16 items-center gap-2 border-b border-border px-5">
           <img src={logoImg} alt="سابا ديزاين" className="h-9 w-auto object-contain" />
-          <div className="text-[11px] text-muted-foreground">لوحة التحكم</div>
+          <div className="text-[11px] text-muted-foreground">{L("لوحة التحكم", "Admin panel")}</div>
         </div>
         <nav className="p-3 space-y-1 pb-10">
           {navGroups.map((g, i) => {
@@ -78,12 +82,12 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                   >
                     <span className="flex items-center gap-3">
                       <Icon className="h-4 w-4" />
-                      {g.label}
+                      {L(g.ar, g.en)}
                     </span>
                     <ChevronDown className={`h-4 w-4 transition ${openSettings ? "rotate-180" : ""}`} />
                   </button>
                   {openSettings && (
-                    <div className="mt-1 mr-4 space-y-1 border-r border-border pr-3">
+                    <div className={`mt-1 ${dir === "rtl" ? "mr-4 border-r pr-3" : "ml-4 border-l pl-3"} space-y-1 border-border`}>
                       {g.children.map((c) => {
                         const CIcon = c.icon;
                         const cActive = isActive(c.to);
@@ -91,7 +95,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                           <Link key={c.to} to={c.to as any} onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition ${cActive ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted"}`}>
                             <CIcon className="h-3.5 w-3.5" />
-                            {c.label}
+                            {L(c.ar, c.en)}
                           </Link>
                         );
                       })}
@@ -104,14 +108,14 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
               <Link key={g.to} to={g.to as any} onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/75 hover:bg-muted"}`}>
                 <Icon className="h-4 w-4" />
-                {g.label}
+                {L(g.ar, g.en)}
               </Link>
             );
           })}
           <div className="my-3 h-px bg-border" />
           <Link to={"/" as any} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50">
             <LogOut className="h-4 w-4" />
-            تسجيل الخروج
+            {L("تسجيل الخروج", "Sign out")}
           </Link>
         </nav>
       </aside>
@@ -142,8 +146,8 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
               </PopoverTrigger>
               <PopoverContent align="end" className="w-80 p-0" dir="rtl">
                 <div className="border-b border-border px-4 py-3 flex items-center justify-between">
-                  <div className="font-bold text-sm">الإشعارات</div>
-                  <span className="text-[11px] text-primary font-bold">3 جديدة</span>
+                  <div className="font-bold text-sm">{L("الإشعارات", "Notifications")}</div>
+                  <span className="text-[11px] text-primary font-bold">{L("3 جديدة", "3 new")}</span>
                 </div>
                 <div className="max-h-80 overflow-y-auto divide-y divide-border">
                   {[
@@ -165,10 +169,10 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                     );
                   })}
                 </div>
-                <button className="block w-full border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">عرض كل الإشعارات</button>
+                <button className="block w-full border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">{L("عرض كل الإشعارات", "View all notifications")}</button>
               </PopoverContent>
             </Popover>
-            <Link to={"/admin/settings/profile" as any} title="الملف الشخصي" className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 hover:bg-muted transition">
+            <Link to={"/admin/settings/profile" as any} title={L("الملف الشخصي", "Profile")} className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 hover:bg-muted transition">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">JD</div>
               <span className="hidden sm:block text-xs font-bold">John Doe</span>
             </Link>
@@ -253,19 +257,13 @@ export function GhostButton({ children, onClick }: { children: React.ReactNode; 
 }
 
 function LangToggle() {
-  const [lang, setLang] = useState<"ar" | "en">("ar");
-  useEffect(() => {
-    try { const v = localStorage.getItem("saba_admin_lang") as "ar" | "en" | null; if (v) setLang(v); } catch {}
-  }, []);
-  const toggle = () => {
-    const next = lang === "ar" ? "en" : "ar";
-    setLang(next);
-    try { localStorage.setItem("saba_admin_lang", next); } catch {}
-  };
+  const { lang, toggle } = useLang();
+  const flag = lang === "ar" ? flagSa : flagUs;
+  const code = lang === "ar" ? "AR" : "EN";
   return (
-    <button onClick={toggle} title="تبديل اللغة / Toggle language" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border px-2.5 hover:bg-muted">
-      <Languages className="h-4 w-4 text-primary" />
-      <span className="text-[11px] font-bold">{lang === "ar" ? "EN" : "AR"}</span>
+    <button onClick={toggle} title="تبديل اللغة / Toggle language" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-2 hover:bg-muted">
+      <img src={flag} alt={code} className="h-4 w-6 object-cover rounded-sm" />
+      <span className="text-[11px] font-bold">{code}</span>
     </button>
   );
 }
