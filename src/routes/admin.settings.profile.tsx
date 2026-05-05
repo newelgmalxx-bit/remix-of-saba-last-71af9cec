@@ -64,7 +64,7 @@ function ProfilePage() {
           <L label="الاسم الكامل"><input className={ic} value={p.name} onChange={e => setP({ ...p, name: e.target.value })} /></L>
           <L label="المسمى الوظيفي"><input className={ic} value={p.title} onChange={e => setP({ ...p, title: e.target.value })} /></L>
           <L label="البريد الإلكتروني"><div className="relative"><Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input className={ic + " pr-9"} value={p.email} onChange={e => setP({ ...p, email: e.target.value })} /></div></L>
-          <L label="رقم الجوال"><div className="relative"><Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input className={ic + " pr-9"} dir="ltr" value={p.phone} onChange={e => setP({ ...p, phone: e.target.value })} /></div></L>
+          <L label="رقم الجوال"><div className="relative"><Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="tel" inputMode="tel" className={ic + " pr-9"} dir="ltr" value={p.phone} onChange={e => setP({ ...p, phone: e.target.value })} /></div></L>
           <L label="اللغة">
             <select className={ic} value={p.language} onChange={e => setP({ ...p, language: e.target.value })}>
               <option value="ar">العربية</option><option value="en">English</option>
