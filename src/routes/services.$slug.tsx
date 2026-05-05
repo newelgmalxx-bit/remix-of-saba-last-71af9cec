@@ -148,14 +148,14 @@ function ServiceDetailPage() {
                 <Award className="h-3 w-3" /> خدمة احترافية
               </div>
               <h1 className="mt-3 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">{title}</h1>
-              <div className="mt-2 flex items-center justify-end gap-2 text-xs text-muted-foreground">
-                <span>(+180 تقييم)</span>
-                <span className="font-bold text-foreground" data-ltr-number>4.9</span>
+              <div className="mt-2 flex items-center justify-start gap-2 text-xs text-muted-foreground">
                 <div className="flex gap-0.5 text-amber-400">
                   {Array.from({ length: 5 }).map((_, k) => (
                     <Star key={k} className="h-3.5 w-3.5 fill-current" />
                   ))}
                 </div>
+                <span className="font-bold text-foreground" data-ltr-number>4.9</span>
+                <span>(+180 تقييم)</span>
               </div>
               <p className="mt-4 text-sm leading-7 text-muted-foreground">{subtitle}</p>
 
