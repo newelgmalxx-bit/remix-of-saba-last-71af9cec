@@ -1,11 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
-  Package, Download, MessageSquarePlus, ChevronLeft, Calendar, CreditCard,
+  Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
   CheckCircle2, Circle, FileText, Receipt,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
 import { mockOrders, statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, mockUser, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -14,38 +16,50 @@ export const Route = createFileRoute("/account/orders/$orderId")({
     if (!order) throw notFound();
     return { order };
   },
-  notFoundComponent: () => (
-    <AccountLayout title="الطلب غير موجود">
-      <div className="rounded-2xl border border-border bg-card p-10 text-center">
-        <p className="text-sm text-muted-foreground">لم نعثر على هذا الطلب.</p>
-        <Link to={"/account/orders" as any} className="mt-4 inline-flex items-center text-sm text-primary hover:underline">
-          العودة لقائمة الطلبات
-        </Link>
-      </div>
-    </AccountLayout>
-  ),
-  errorComponent: ({ error }) => (
-    <AccountLayout title="حدث خطأ">
-      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">{error.message}</div>
-    </AccountLayout>
-  ),
+  notFoundComponent: NotFoundOrder,
+  errorComponent: ({ error }) => <ErrorOrder message={error.message} />,
   component: OrderDetail,
 });
 
+function NotFoundOrder() {
+  const { t } = useLang();
+  return (
+    <AccountLayout title={t("account.order.notFound.title")}>
+      <div className="rounded-2xl border border-border bg-card p-10 text-center">
+        <p className="text-sm text-muted-foreground">{t("account.order.notFound.desc")}</p>
+        <Link to={"/account/orders" as any} className="mt-4 inline-flex items-center text-sm text-primary hover:underline">
+          {t("account.order.backToList")}
+        </Link>
+      </div>
+    </AccountLayout>
+  );
+}
+
+function ErrorOrder({ message }: { message: string }) {
+  const { t } = useLang();
+  return (
+    <AccountLayout title={t("account.order.error")}>
+      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">{message}</div>
+    </AccountLayout>
+  );
+}
+
 function OrderDetail() {
+  const { t, lang, dir } = useLang();
   const { order } = Route.useLoaderData() as { order: Order };
   const s = statusLabels[order.status];
   const PayIcon = paymentIcon(order.payment);
   const currentIdx = statusFlow.indexOf(order.status);
+  const Chev = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   return (
-    <AccountLayout title={`الطلب ${order.number}`} subtitle={`أُنشئ بتاريخ ${order.createdAt}`}>
+    <AccountLayout title={`${t("account.order.titleTpl")} ${order.number}`} subtitle={`${t("account.order.createdAt")} ${order.createdAt}`}>
       <Link
         to={"/account/orders" as any}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
       >
-        <ChevronLeft className="h-4 w-4" />
-        العودة لقائمة الطلبات
+        <ChevronLeft className={`h-4 w-4 ${dir === "ltr" ? "rotate-180" : ""}`} />
+        {t("account.order.backToList")}
       </Link>
 
       {/* Header card */}
@@ -58,11 +72,11 @@ function OrderDetail() {
             <div>
               <h2 className="text-xl font-bold" dir="ltr">{order.number}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <StatusBadge label={s.label} color={s.color} />
+                <StatusBadge label={t(`order.status.${order.status}` as TKey)} color={s.color} />
                 {order.paid ? (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">مدفوع</span>
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">{t("account.orders.paid")}</span>
                 ) : (
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">غير مدفوع</span>
+                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">{t("account.orders.unpaid")}</span>
                 )}
               </div>
             </div>
@@ -74,7 +88,7 @@ function OrderDetail() {
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
               >
                 <Download className="h-4 w-4" />
-                تنزيل الفاتورة PDF
+                {t("account.orders.downloadInvoice")}
               </button>
             )}
             <Link
@@ -83,7 +97,7 @@ function OrderDetail() {
               className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-bold hover:bg-muted"
             >
               <MessageSquarePlus className="h-4 w-4" />
-              فتح تذكرة دعم
+              {t("account.order.openTicket")}
             </Link>
           </div>
         </div>
@@ -92,17 +106,17 @@ function OrderDetail() {
       {/* Progress */}
       {order.status !== "cancelled" && (
         <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-          <h3 className="mb-5 text-base font-bold">مراحل الطلب</h3>
+          <h3 className="mb-5 text-base font-bold">{t("account.order.stages")}</h3>
           <div className="relative grid grid-cols-5 gap-2">
             <div className="absolute right-[10%] left-[10%] top-4 h-1 rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-l from-primary to-primary-dark transition-all"
+                className={`h-full rounded-full bg-gradient-to-${dir === "rtl" ? "l" : "r"} from-primary to-primary-dark transition-all`}
                 style={{ width: `${(currentIdx / (statusFlow.length - 1)) * 100}%` }}
               />
             </div>
             {statusFlow.map((st, i) => {
               const done = i <= currentIdx;
-              const label = statusLabels[st].label;
+              const label = t(`order.status.${st}` as TKey);
               return (
                 <div key={st} className="relative flex flex-col items-center gap-2">
                   <div
@@ -128,7 +142,7 @@ function OrderDetail() {
         {/* Items + timeline */}
         <div className="space-y-6">
           <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-            <h3 className="mb-4 text-base font-bold">عناصر الطلب</h3>
+            <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
             <div className="space-y-3">
               {order.items.map((it) => (
                 <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
@@ -144,35 +158,36 @@ function OrderDetail() {
                       >
                         {it.serviceTitle}
                       </Link>
-                      <p className="text-xs text-muted-foreground">باقة {it.planName} • الكمية: <span data-ltr-number>{it.qty}</span></p>
+                      <p className="text-xs text-muted-foreground">{t("account.order.plan")} {it.planName} • {t("account.order.qty")} <span data-ltr-number>{it.qty}</span></p>
                     </div>
                   </div>
-                  <div className="text-left shrink-0">
-                    <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
-                    <div className="text-[11px] text-muted-foreground" data-ltr-number>{formatCurrency(it.price)} / للوحدة</div>
+                  <div className={`shrink-0 ${dir === "rtl" ? "text-left" : "text-right"}`}>
+                    <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty, lang)}</div>
+                    <div className="text-[11px] text-muted-foreground" data-ltr-number>{formatCurrency(it.price, lang)} {t("account.order.perUnit")}</div>
                   </div>
                 </div>
               ))}
             </div>
 
             {order.notes && (
-              <div className="mt-5 rounded-xl border-r-4 border-primary bg-primary-light/40 p-4">
-                <h4 className="text-xs font-bold text-primary">ملاحظات العميل</h4>
+              <div className={`mt-5 rounded-xl ${dir === "rtl" ? "border-r-4" : "border-l-4"} border-primary bg-primary-light/40 p-4`}>
+                <h4 className="text-xs font-bold text-primary">{t("account.order.clientNotes")}</h4>
                 <p className="mt-1 text-sm text-foreground/80">{order.notes}</p>
               </div>
             )}
           </section>
 
           <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-            <h3 className="mb-4 text-base font-bold">سجل الطلب</h3>
-            <ol className="relative space-y-5 border-r-2 border-border pr-5">
+            <h3 className="mb-4 text-base font-bold">{t("account.order.history")}</h3>
+            <ol className={`relative space-y-5 ${dir === "rtl" ? "border-r-2 pr-5" : "border-l-2 pl-5"} border-border`}>
               {[...order.timeline].reverse().map((t, i) => {
                 const ts = statusLabels[t.status];
+                const stLabel = translateStatus(t.status, lang);
                 return (
                   <li key={i} className="relative">
-                    <div className="absolute -right-[27px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary ring-4 ring-background" />
+                    <div className={`absolute ${dir === "rtl" ? "-right-[27px]" : "-left-[27px]"} top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary ring-4 ring-background`} />
                     <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge label={ts.label} color={ts.color} />
+                      <StatusBadge label={stLabel} color={ts.color} />
                       <span className="text-xs text-muted-foreground">{t.at}</span>
                     </div>
                     {t.note && <p className="mt-1 text-sm text-foreground/80">{t.note}</p>}
@@ -186,26 +201,26 @@ function OrderDetail() {
         {/* Summary */}
         <aside className="space-y-4">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <h3 className="text-base font-bold">ملخّص الفاتورة</h3>
+            <h3 className="text-base font-bold">{t("account.order.summary")}</h3>
             <div className="mt-4 space-y-2 text-sm">
-              <Row label="المجموع" value={formatCurrency(order.subtotal)} />
-              <Row label="ض. القيمة المضافة" value={formatCurrency(order.vat)} />
+              <Row label={t("account.order.subtotal")} value={formatCurrency(order.subtotal, lang)} />
+              <Row label={t("account.order.vat")} value={formatCurrency(order.vat, lang)} />
               <div className="my-2 h-px bg-border" />
               <div className="flex justify-between text-base font-bold">
-                <span>الإجمالي</span>
-                <span className="text-primary" data-ltr-number>{formatCurrency(order.total)}</span>
+                <span>{t("account.order.total")}</span>
+                <span className="text-primary" data-ltr-number>{formatCurrency(order.total, lang)}</span>
               </div>
             </div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <h3 className="text-base font-bold">معلومات الدفع</h3>
+            <h3 className="text-base font-bold">{t("account.order.paymentInfo")}</h3>
             <div className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-background p-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-light text-primary">
                 <PayIcon className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-sm font-bold">{paymentName(order.payment)}</div>
-                <div className="text-xs text-muted-foreground">{order.paid ? "الدفع مكتمل" : "بانتظار الدفع"}</div>
+                <div className="text-sm font-bold">{paymentName(order.payment, lang)}</div>
+                <div className="text-xs text-muted-foreground">{order.paid ? t("account.order.paid") : t("account.order.awaitingPayment")}</div>
               </div>
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -219,13 +234,25 @@ function OrderDetail() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-light/30 p-4 text-sm font-bold text-primary hover:bg-primary-light/60 transition"
             >
               <Receipt className="h-4 w-4" />
-              تنزيل الفاتورة الضريبية (PDF)
+              {t("account.order.taxInvoice")}
             </button>
           )}
         </aside>
       </div>
     </AccountLayout>
   );
+}
+
+function translateStatus(status: string, lang: "ar" | "en") {
+  const map: Record<string, { ar: string; en: string }> = {
+    pending: { ar: "بانتظار التأكيد", en: "Pending" },
+    confirmed: { ar: "تم التأكيد", en: "Confirmed" },
+    in_progress: { ar: "قيد التنفيذ", en: "In progress" },
+    review: { ar: "قيد المراجعة", en: "Under review" },
+    completed: { ar: "مكتمل", en: "Completed" },
+    cancelled: { ar: "ملغي", en: "Cancelled" },
+  };
+  return map[status]?.[lang] ?? status;
 }
 
 function Row({ label, value }: { label: string; value: string }) {
