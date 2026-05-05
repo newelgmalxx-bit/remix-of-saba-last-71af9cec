@@ -6,15 +6,22 @@ import { adminServices as initialServices, fmtSAR, type AdminService } from "@/d
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { fileToWebp } from "@/lib/image";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/services/")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
   component: ServicesPage,
 });
 
-const statusMap = { active: { l: "نشطة", t: "emerald" as const }, draft: { l: "مسودة", t: "amber" as const }, archived: { l: "مؤرشفة", t: "muted" as const } };
-
 function ServicesPage() {
+  const { dir } = useLang();
+  const isAr = dir === "rtl";
+  const L = (ar: string, en: string) => (isAr ? ar : en);
+  const statusMap = {
+    active: { l: L("نشطة", "Active"), t: "emerald" as const },
+    draft: { l: L("مسودة", "Draft"), t: "amber" as const },
+    archived: { l: L("مؤرشفة", "Archived"), t: "muted" as const },
+  };
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
   const [items, setItems] = useState<AdminService[]>(initialServices);
@@ -69,7 +76,7 @@ function ServicesPage() {
   );
 
   const handleAdd = () => {
-    if (!form.titleAr || !form.sku) { toast.error("الاسم والـ SKU مطلوبان"); return; }
+    if (!form.titleAr || !form.sku) { toast.error(L("الاسم والـ SKU مطلوبان", "Name and SKU are required")); return; }
     const slug = (form.slug || form.titleEn || form.titleAr).trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "service-" + Date.now();
     const newSvc: AdminService = {
       id: "s" + (items.length + 1),
@@ -112,11 +119,11 @@ function ServicesPage() {
       };
       localStorage.setItem(KEY, JSON.stringify(store));
     } catch {}
-    toast.success("تم إضافة الخدمة — أكمل التفاصيل");
+    toast.success(L("تم إضافة الخدمة — أكمل التفاصيل", "Service added — complete the details"));
     navigate({ to: "/admin/services/$slug", params: { slug } });
   };
 
-  const handleDelete = (id: string) => { setItems(items.filter(s => s.id !== id)); toast.success("تم حذف الخدمة"); };
+  const handleDelete = (id: string) => { setItems(items.filter(s => s.id !== id)); toast.success(L("تم حذف الخدمة", "Service deleted")); };
 
   const handleExport = () => {
     const csv = ["SKU,Title,Category,Price,Bookings,Status", ...items.map(s => `${s.sku},${s.titleAr},${s.category},${s.price},${s.bookings},${s.status}`)].join("\n");
@@ -125,31 +132,31 @@ function ServicesPage() {
     const a = document.createElement("a");
     a.href = url; a.download = "services.csv"; a.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تصدير الخدمات");
+    toast.success(L("تم تصدير الخدمات", "Services exported"));
   };
 
   return (
-    <AdminLayout title="الخدمات" subtitle="إدارة كتالوج الخدمات والباقات" action={
+    <AdminLayout title={L("الخدمات", "Services")} subtitle={L("إدارة كتالوج الخدمات والباقات", "Manage services catalog and packages")} action={
       <div className="hidden sm:flex gap-2">
-        <GhostButton onClick={handleExport}><Download className="h-4 w-4" /> تصدير</GhostButton>
-        <PrimaryButton onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> إضافة خدمة</PrimaryButton>
+        <GhostButton onClick={handleExport}><Download className="h-4 w-4" /> {L("تصدير", "Export")}</GhostButton>
+        <PrimaryButton onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> {L("إضافة خدمة", "Add Service")}</PrimaryButton>
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي الخدمات" value={12} icon={Package} accent="primary" />
-        <StatCard label="نشطة" value={9} icon={CheckCircle2} accent="emerald" />
-        <StatCard label="مسودات" value={2} icon={FileEdit} accent="amber" />
-        <StatCard label="مؤرشفة" value={1} icon={Archive} accent="muted" />
+        <StatCard label={L("إجمالي الخدمات", "Total Services")} value={12} icon={Package} accent="primary" />
+        <StatCard label={L("نشطة", "Active")} value={9} icon={CheckCircle2} accent="emerald" />
+        <StatCard label={L("مسودات", "Drafts")} value={2} icon={FileEdit} accent="amber" />
+        <StatCard label={L("مؤرشفة", "Archived")} value={1} icon={Archive} accent="muted" />
       </div>
 
       <PanelCard>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث في الخدمات..." className="w-full rounded-xl border border-border bg-background pr-10 pl-3 py-2.5 text-sm" />
+            <Search className={`absolute ${isAr ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L("ابحث في الخدمات...", "Search services...")} className={`w-full rounded-xl border border-border bg-background ${isAr ? "pr-10 pl-3" : "pl-10 pr-3"} py-2.5 text-sm`} />
           </div>
           <div className="inline-flex rounded-xl border border-border bg-background p-1">
-            {[["all", "الكل"], ["active", "نشطة"], ["draft", "مسودات"]].map(([k, l]) => (
+            {[["all", L("الكل", "All")], ["active", L("نشطة", "Active")], ["draft", L("مسودات", "Drafts")]].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k as any)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
             ))}
           </div>
@@ -158,13 +165,13 @@ function ServicesPage() {
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                <th className="px-3 py-3 font-medium">الخدمة</th>
+              <tr className={`${isAr ? "text-right" : "text-left"} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("الخدمة", "Service")}</th>
                 <th className="px-3 py-3 font-medium">SKU</th>
-                <th className="px-3 py-3 font-medium">التصنيف</th>
-                <th className="px-3 py-3 font-medium">السعر</th>
-                <th className="px-3 py-3 font-medium">الطلبات</th>
-                <th className="px-3 py-3 font-medium">الحالة</th>
+                <th className="px-3 py-3 font-medium">{L("التصنيف", "Category")}</th>
+                <th className="px-3 py-3 font-medium">{L("السعر", "Price")}</th>
+                <th className="px-3 py-3 font-medium">{L("الطلبات", "Orders")}</th>
+                <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -177,8 +184,8 @@ function ServicesPage() {
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Package className="h-5 w-5" /></div>
                         <div>
-                          <div className="font-bold">{s.titleAr}</div>
-                          <div className="text-[11px] text-muted-foreground">{s.titleEn}</div>
+                          <div className="font-bold">{isAr ? s.titleAr : s.titleEn}</div>
+                          <div className="text-[11px] text-muted-foreground">{isAr ? s.titleEn : s.titleAr}</div>
                         </div>
                       </div>
                     </td>
@@ -189,10 +196,10 @@ function ServicesPage() {
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
-                        <Link to="/admin/services/$slug" params={{ slug: s.slug }} title="تعديل التفاصيل" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary">
+                        <Link to="/admin/services/$slug" params={{ slug: s.slug }} title={L("تعديل التفاصيل", "Edit details")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary">
                           <Pencil className="h-4 w-4" />
                         </Link>
-                        <button onClick={() => handleDelete(s.id)} title="حذف" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500">
+                        <button onClick={() => handleDelete(s.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -206,41 +213,41 @@ function ServicesPage() {
       </PanelCard>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent dir="rtl" className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>إضافة خدمة جديدة</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground -mt-2">املأ كل تفاصيل الخدمة. يمكنك التعديل لاحقًا من محرر التفاصيل.</p>
+        <DialogContent dir={dir} className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{L("إضافة خدمة جديدة", "Add New Service")}</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground -mt-2">{L("املأ كل تفاصيل الخدمة. يمكنك التعديل لاحقًا من محرر التفاصيل.", "Fill in all service details. You can edit later from the details editor.")}</p>
           <div className="grid gap-5">
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">المعلومات الأساسية</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("المعلومات الأساسية", "Basic Information")}</div>
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-xs font-bold space-y-1.5">الاسم (عربي)
+              <label className="text-xs font-bold space-y-1.5">{L("الاسم (عربي)", "Name (Arabic)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">الاسم (English)
+              <label className="text-xs font-bold space-y-1.5">{L("الاسم (English)", "Name (English)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5">SKU
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">التصنيف
+              <label className="text-xs font-bold space-y-1.5">{L("التصنيف", "Category")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">السعر (ر.س)
+              <label className="text-xs font-bold space-y-1.5">{L("السعر (ر.س)", "Price (SAR)")}
                 <input type="number" dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">المعرّف (slug — اختياري)
+              <label className="text-xs font-bold space-y-1.5">{L("المعرّف (slug — اختياري)", "Identifier (slug — optional)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">المسار (Breadcrumb)
+              <label className="text-xs font-bold space-y-1.5">{L("المسار (Breadcrumb)", "Path (Breadcrumb)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.breadcrumb} onChange={(e) => setForm({ ...form, breadcrumb: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">الوصف المختصر
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("الوصف المختصر", "Short Description")}
                 <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">نظرة عامة عن الخدمة (وصف تفصيلي)
-                <textarea rows={4} placeholder="وصف تفصيلي يظهر في قسم نظرة عامة بصفحة الخدمة" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescription} onChange={(e) => setForm({ ...form, overviewDescription: e.target.value })} />
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("نظرة عامة عن الخدمة (وصف تفصيلي)", "Service Overview (detailed description)")}
+                <textarea rows={4} placeholder={L("وصف تفصيلي يظهر في قسم نظرة عامة بصفحة الخدمة", "Detailed description shown in the overview section on the service page")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescription} onChange={(e) => setForm({ ...form, overviewDescription: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">صورة البنر (رابط الصورة)
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("صورة البنر (رابط الصورة)", "Banner Image (URL)")}
                 <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
                 <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
                   const f = e.target.files?.[0]; if (!f) return;
@@ -252,18 +259,18 @@ function ServicesPage() {
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">إعدادات SEO</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("إعدادات SEO", "SEO Settings")}</div>
               <div className="grid grid-cols-2 gap-3">
-                <label className="text-xs font-bold space-y-1.5">عنوان الصفحة (SEO Title)
+                <label className="text-xs font-bold space-y-1.5">{L("عنوان الصفحة (SEO Title)", "Page Title (SEO Title)")}
                   <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
                 </label>
-                <label className="text-xs font-bold space-y-1.5">الكلمات المفتاحية
-                  <input placeholder="كلمة، كلمة، ..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoKeywords} onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })} />
+                <label className="text-xs font-bold space-y-1.5">{L("الكلمات المفتاحية", "Keywords")}
+                  <input placeholder={L("كلمة، كلمة، ...", "word, word, ...")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoKeywords} onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })} />
                 </label>
-                <label className="text-xs font-bold space-y-1.5 col-span-2">وصف الميتا (Meta Description)
+                <label className="text-xs font-bold space-y-1.5 col-span-2">{L("وصف الميتا (Meta Description)", "Meta Description")}
                   <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
                 </label>
-                <label className="text-xs font-bold space-y-1.5 col-span-2">صورة المشاركة (OG Image)
+                <label className="text-xs font-bold space-y-1.5 col-span-2">{L("صورة المشاركة (OG Image)", "Share Image (OG Image)")}
                   <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
                   <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
                     const f = e.target.files?.[0]; if (!f) return;
@@ -274,56 +281,56 @@ function ServicesPage() {
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">نقاط الـ Hero (3 نقاط)</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("نقاط الـ Hero (3 نقاط)", "Hero Highlights (3 points)")}</div>
               <div className="space-y-2">
                 {form.heroHighlights.map((h, i) => (
-                  <input key={i} placeholder={`نقطة ${i + 1}`} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={h} onChange={(e) => { const n = [...form.heroHighlights]; n[i] = e.target.value; setForm({ ...form, heroHighlights: n }); }} />
+                  <input key={i} placeholder={L(`نقطة ${i + 1}`, `Point ${i + 1}`)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={h} onChange={(e) => { const n = [...form.heroHighlights]; n[i] = e.target.value; setForm({ ...form, heroHighlights: n }); }} />
                 ))}
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">نظرة عامة (3 بطاقات)</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("نظرة عامة (3 بطاقات)", "Overview (3 cards)")}</div>
               <div className="grid gap-3 md:grid-cols-3">
                 {form.overview.map((o, i) => (
                   <div key={i} className="rounded-lg border border-border p-3 space-y-2">
-                    <input placeholder="العنوان" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.title} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, overview: n }); }} />
-                    <textarea rows={2} placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.desc} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, overview: n }); }} />
+                    <input placeholder={L("العنوان", "Title")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.title} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, overview: n }); }} />
+                    <textarea rows={2} placeholder={L("الوصف", "Description")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={o.desc} onChange={(e) => { const n = [...form.overview]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, overview: n }); }} />
                   </div>
                 ))}
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">المميزات</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("المميزات", "Benefits")}</div>
               <div className="grid gap-3 md:grid-cols-2">
                 {form.benefits.map((b, i) => (
                   <div key={i} className="rounded-lg border border-border p-3 space-y-2">
-                    <input placeholder="عنوان الميزة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.title} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, benefits: n }); }} />
-                    <textarea rows={2} placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.desc} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, benefits: n }); }} />
+                    <input placeholder={L("عنوان الميزة", "Benefit title")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.title} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], title: e.target.value }; setForm({ ...form, benefits: n }); }} />
+                    <textarea rows={2} placeholder={L("الوصف", "Description")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={b.desc} onChange={(e) => { const n = [...form.benefits]; n[i] = { ...n[i], desc: e.target.value }; setForm({ ...form, benefits: n }); }} />
                   </div>
                 ))}
-                <button onClick={() => setForm({ ...form, benefits: [...form.benefits, { title: "", desc: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة ميزة</button>
+                <button onClick={() => setForm({ ...form, benefits: [...form.benefits, { title: "", desc: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ {L("إضافة ميزة", "Add Benefit")}</button>
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">الباقات والأسعار</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("الباقات والأسعار", "Packages & Pricing")}</div>
               <div className="grid gap-3 md:grid-cols-3">
                 {form.plans.map((p, pi) => (
                   <div key={pi} className={`rounded-lg border p-3 space-y-2 ${p.featured ? "border-primary bg-primary/5" : "border-border"}`}>
                     <div className="flex items-center justify-between">
-                      <input placeholder="اسم الباقة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={p.name} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], name: e.target.value }; setForm({ ...form, plans: n }); }} />
+                      <input placeholder={L("اسم الباقة", "Package name")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={p.name} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], name: e.target.value }; setForm({ ...form, plans: n }); }} />
                     </div>
-                    <input placeholder="السعر" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.price} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], price: e.target.value }; setForm({ ...form, plans: n }); }} />
+                    <input placeholder={L("السعر", "Price")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.price} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], price: e.target.value }; setForm({ ...form, plans: n }); }} />
                     <label className="flex items-center gap-1 text-[11px] font-bold">
-                      <input type="checkbox" checked={p.featured} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], featured: e.target.checked }; setForm({ ...form, plans: n }); }} /> مميزة
+                      <input type="checkbox" checked={p.featured} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], featured: e.target.checked }; setForm({ ...form, plans: n }); }} /> {L("مميزة", "Featured")}
                     </label>
                     <div className="space-y-1">
                       {p.feats.map((f, fi) => (
-                        <input key={fi} placeholder={`ميزة ${fi + 1}`} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-[11px]" value={f} onChange={(e) => { const n = [...form.plans]; const feats = [...n[pi].feats]; feats[fi] = e.target.value; n[pi] = { ...n[pi], feats }; setForm({ ...form, plans: n }); }} />
+                        <input key={fi} placeholder={L(`ميزة ${fi + 1}`, `Feature ${fi + 1}`)} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-[11px]" value={f} onChange={(e) => { const n = [...form.plans]; const feats = [...n[pi].feats]; feats[fi] = e.target.value; n[pi] = { ...n[pi], feats }; setForm({ ...form, plans: n }); }} />
                       ))}
-                      <button onClick={() => { const n = [...form.plans]; n[pi] = { ...n[pi], feats: [...n[pi].feats, ""] }; setForm({ ...form, plans: n }); }} className="text-[11px] text-primary font-bold">+ إضافة بند</button>
+                      <button onClick={() => { const n = [...form.plans]; n[pi] = { ...n[pi], feats: [...n[pi].feats, ""] }; setForm({ ...form, plans: n }); }} className="text-[11px] text-primary font-bold">+ {L("إضافة بند", "Add item")}</button>
                     </div>
                   </div>
                 ))}
@@ -331,67 +338,67 @@ function ServicesPage() {
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">خطوات العمل</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("خطوات العمل", "Workflow Steps")}</div>
               <div className="grid gap-2 md:grid-cols-2">
                 {form.steps.map((s, i) => (
                   <div key={i} className="flex gap-2 items-center">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs font-bold">{i + 1}</span>
-                    <input placeholder="الخطوة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.title} onChange={(e) => { const n = [...form.steps]; n[i] = { title: e.target.value }; setForm({ ...form, steps: n }); }} />
+                    <input placeholder={L("الخطوة", "Step")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.title} onChange={(e) => { const n = [...form.steps]; n[i] = { title: e.target.value }; setForm({ ...form, steps: n }); }} />
                     <button onClick={() => setForm({ ...form, steps: form.steps.filter((_, x) => x !== i) })} className="text-rose-500"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 ))}
-                <button onClick={() => setForm({ ...form, steps: [...form.steps, { title: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة خطوة</button>
+                <button onClick={() => setForm({ ...form, steps: [...form.steps, { title: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ {L("إضافة خطوة", "Add Step")}</button>
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">الأرقام (إحصائيات)</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("الأرقام (إحصائيات)", "Numbers (Stats)")}</div>
               <div className="grid gap-2 md:grid-cols-2">
                 {form.stats.map((s, i) => (
                   <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-center">
-                    <input placeholder="القيمة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.v} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], v: e.target.value }; setForm({ ...form, stats: n }); }} />
-                    <input placeholder="الوصف" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.l} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], l: e.target.value }; setForm({ ...form, stats: n }); }} />
+                    <input placeholder={L("القيمة", "Value")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.v} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], v: e.target.value }; setForm({ ...form, stats: n }); }} />
+                    <input placeholder={L("الوصف", "Description")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={s.l} onChange={(e) => { const n = [...form.stats]; n[i] = { ...n[i], l: e.target.value }; setForm({ ...form, stats: n }); }} />
                     <button onClick={() => setForm({ ...form, stats: form.stats.filter((_, x) => x !== i) })} className="text-rose-500"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 ))}
-                <button onClick={() => setForm({ ...form, stats: [...form.stats, { v: "", l: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5 md:col-span-2">+ إضافة رقم</button>
+                <button onClick={() => setForm({ ...form, stats: [...form.stats, { v: "", l: "" }] })} className="rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5 md:col-span-2">+ {L("إضافة رقم", "Add Number")}</button>
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">آراء العملاء</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("آراء العملاء", "Testimonials")}</div>
               <div className="grid gap-3 md:grid-cols-2">
                 {form.testimonials.map((t, i) => (
                   <div key={i} className="rounded-lg border border-border p-3 space-y-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <input placeholder="الاسم" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.name} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], name: e.target.value }; setForm({ ...form, testimonials: n }); }} />
-                      <input placeholder="المسمى" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.role} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], role: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                      <input placeholder={L("الاسم", "Name")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.name} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], name: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                      <input placeholder={L("المسمى", "Role")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.role} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], role: e.target.value }; setForm({ ...form, testimonials: n }); }} />
                     </div>
-                    <textarea rows={2} placeholder="النص" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.text} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], text: e.target.value }; setForm({ ...form, testimonials: n }); }} />
-                    <button onClick={() => setForm({ ...form, testimonials: form.testimonials.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+                    <textarea rows={2} placeholder={L("النص", "Text")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={t.text} onChange={(e) => { const n = [...form.testimonials]; n[i] = { ...n[i], text: e.target.value }; setForm({ ...form, testimonials: n }); }} />
+                    <button onClick={() => setForm({ ...form, testimonials: form.testimonials.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> {L("حذف", "Delete")}</button>
                   </div>
                 ))}
-                <button onClick={() => setForm({ ...form, testimonials: [...form.testimonials, { name: "", role: "", text: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة رأي</button>
+                <button onClick={() => setForm({ ...form, testimonials: [...form.testimonials, { name: "", role: "", text: "" }] })} className="rounded-lg border border-dashed border-border py-3 text-xs font-bold text-primary hover:bg-primary/5">+ {L("إضافة رأي", "Add Testimonial")}</button>
               </div>
             </section>
 
             <section>
-              <div className="text-xs font-extrabold mb-2 text-primary">الأسئلة الشائعة</div>
+              <div className="text-xs font-extrabold mb-2 text-primary">{L("الأسئلة الشائعة", "FAQs")}</div>
               <div className="space-y-2">
                 {form.faqs.map((f, i) => (
                   <div key={i} className="rounded-lg border border-border p-3 space-y-2">
-                    <input placeholder="السؤال" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={f.q} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], q: e.target.value }; setForm({ ...form, faqs: n }); }} />
-                    <textarea rows={2} placeholder="الإجابة" className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={f.a} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], a: e.target.value }; setForm({ ...form, faqs: n }); }} />
-                    <button onClick={() => setForm({ ...form, faqs: form.faqs.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
+                    <input placeholder={L("السؤال", "Question")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={f.q} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], q: e.target.value }; setForm({ ...form, faqs: n }); }} />
+                    <textarea rows={2} placeholder={L("الإجابة", "Answer")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={f.a} onChange={(e) => { const n = [...form.faqs]; n[i] = { ...n[i], a: e.target.value }; setForm({ ...form, faqs: n }); }} />
+                    <button onClick={() => setForm({ ...form, faqs: form.faqs.filter((_, x) => x !== i) })} className="text-[11px] text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> {L("حذف", "Delete")}</button>
                   </div>
                 ))}
-                <button onClick={() => setForm({ ...form, faqs: [...form.faqs, { q: "", a: "" }] })} className="w-full rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ إضافة سؤال</button>
+                <button onClick={() => setForm({ ...form, faqs: [...form.faqs, { q: "", a: "" }] })} className="w-full rounded-lg border border-dashed border-border py-2 text-xs font-bold text-primary hover:bg-primary/5">+ {L("إضافة سؤال", "Add Question")}</button>
               </div>
             </section>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
-            <GhostButton onClick={() => setOpen(false)}>إلغاء</GhostButton>
-            <PrimaryButton onClick={handleAdd}>إضافة</PrimaryButton>
+            <GhostButton onClick={() => setOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
+            <PrimaryButton onClick={handleAdd}>{L("إضافة", "Add")}</PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
