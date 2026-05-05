@@ -221,37 +221,14 @@ function ServiceEditorPage() {
           </div>
         </PanelCard>
 
-        {/* Plans */}
-        <PanelCard title="الباقات والأسعار" action={
-          <button onClick={() => setPlans([...plans, { name: "باقة جديدة", price: "0", featured: false, feats: [""] }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة باقة</button>
-        }>
-          <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((p, pi) => (
-              <div key={pi} className={`rounded-2xl border p-4 space-y-3 ${p.featured ? "border-primary bg-primary/5" : "border-border"}`}>
-                <div className="flex items-center justify-between">
-                  <button onClick={() => { const n = [...plans]; n[pi] = { ...n[pi], featured: !n[pi].featured }; setPlans(n); }} className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold ${p.featured ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/60"}`}>
-                    <Star className="h-3 w-3" /> {p.featured ? "مميزة" : "عادية"}
-                  </button>
-                  <button onClick={() => setPlans(plans.filter((_, x) => x !== pi))} className="text-rose-500 hover:bg-rose-50 rounded-lg p-1.5"><Trash2 className="h-3.5 w-3.5" /></button>
-                </div>
-                <Field label="اسم الباقة"><input className={inputCls} value={p.name} onChange={(e) => { const n = [...plans]; n[pi] = { ...n[pi], name: e.target.value }; setPlans(n); }} /></Field>
-                <Field label="السعر (ر.س)"><input className={inputCls} value={p.price} onChange={(e) => { const n = [...plans]; n[pi] = { ...n[pi], price: e.target.value }; setPlans(n); }} /></Field>
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-xs font-bold text-foreground/80">المميزات</span>
-                    <button onClick={() => { const n = [...plans]; n[pi] = { ...n[pi], feats: [...n[pi].feats, ""] }; setPlans(n); }} className="text-[11px] text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة</button>
-                  </div>
-                  <div className="space-y-2">
-                    {p.feats.map((f, fi) => (
-                      <div key={fi} className="flex gap-1.5">
-                        <input className={inputCls + " text-xs"} value={f} onChange={(e) => { const n = [...plans]; const feats = [...n[pi].feats]; feats[fi] = e.target.value; n[pi] = { ...n[pi], feats }; setPlans(n); }} />
-                        <button onClick={() => { const n = [...plans]; n[pi] = { ...n[pi], feats: n[pi].feats.filter((_, x) => x !== fi) }; setPlans(n); }} className="shrink-0 text-rose-500 hover:bg-rose-50 rounded-lg p-2"><Trash2 className="h-3 w-3" /></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+        <PanelCard title="الباقات والأسعار">
+          <p className="text-sm text-muted-foreground">
+            إدارة الباقات أصبحت في صفحة منفصلة. يمكنك التحكم بكل الباقات والأسعار من هناك.
+          </p>
+          <div className="mt-3">
+            <Link to={"/admin/plans" as any}>
+              <GhostButton><Eye className="h-4 w-4" /> فتح إدارة الباقات</GhostButton>
+            </Link>
           </div>
         </PanelCard>
 
