@@ -18,7 +18,7 @@ function TicketsList() {
   return (
     <AccountLayout title="تذاكر الدعم" subtitle="تواصل مع فريقنا الفني وتابع تذاكرك في مكان واحد.">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{mockTickets.length} تذكرة إجمالاً</p>
+        <p className="text-sm text-muted-foreground"><span data-ltr-number>{mockTickets.length}</span> تذكرة إجمالاً</p>
         <Link
           to={"/account/tickets/new" as any}
           className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
@@ -54,15 +54,15 @@ function TicketsList() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-base font-bold line-clamp-1">{t.subject}</h3>
-                        <span className="text-xs text-muted-foreground">#{t.number}</span>
+                        <span className="text-xs text-muted-foreground" dir="ltr">#{t.number}</span>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
                         <span className="font-bold">{last.author}:</span> {last.text}
                       </p>
                       <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
-                        <span>أُنشئت {t.createdAt}</span>
+                        <span>أُنشئت <span data-ltr-number>{t.createdAt}</span></span>
                         <span>•</span>
-                        <span>{t.messages.length} رسالة</span>
+                        <span><span data-ltr-number>{t.messages.length}</span> رسالة</span>
                         {t.orderId && (
                           <>
                             <span>•</span>
