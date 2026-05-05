@@ -161,10 +161,10 @@ function InvoicesPage() {
           <div className="grid grid-cols-2 gap-3">
             <L label="اسم العميل"><input className={ic} value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></L>
             <L label="البريد"><input className={ic} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></L>
-            <L label="رقم الجوال"><input className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
+            <L label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
             <L label="المدينة"><input className={ic} value={form.city ?? ""} onChange={e => setForm({ ...form, city: e.target.value })} /></L>
             <L label="رقم الطلب"><input className={ic} value={form.orderNumber} onChange={e => setForm({ ...form, orderNumber: e.target.value })} /></L>
-            <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
+            <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
             <L label="طريقة الدفع">
               <select className={ic} value={form.payment} onChange={e => setForm({ ...form, payment: e.target.value })}>
                 {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
