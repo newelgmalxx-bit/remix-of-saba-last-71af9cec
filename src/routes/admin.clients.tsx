@@ -7,6 +7,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "العملاء | لوحة التحكم" }] }),
