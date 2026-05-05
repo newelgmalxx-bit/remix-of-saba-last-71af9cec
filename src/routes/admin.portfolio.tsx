@@ -122,7 +122,7 @@ function PortfolioPage() {
                   </td>
                   <td className="px-3 py-3"><Pill tone="primary">{i.category}</Pill></td>
                   <td className="px-3 py-3 text-[11px] text-muted-foreground">{(i.tech ?? []).slice(0, 3).join("، ")}</td>
-                  <td className="px-3 py-3 text-xs">{i.year ?? "—"}</td>
+                  <td className="px-3 py-3 text-xs" data-ltr-number>{i.year ?? "—"}</td>
                   <td className="px-3 py-3">
                     <button onClick={() => toggle(i.id)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${i.visible ? "bg-primary" : "bg-muted"}`}>
                       <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${i.visible ? "right-0.5" : "right-5"}`} />
@@ -158,7 +158,7 @@ function PortfolioPage() {
                 </select>
               </label>
               <label className="text-xs font-bold space-y-1.5 block">السنة
-                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
+                <input dir="ltr" inputMode="numeric" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
               </label>
               <div className="col-span-2 space-y-2">
                 <div className="text-xs font-bold">صورة الغلاف</div>
