@@ -329,8 +329,6 @@ export const dict = {
 } as const;
 
 /* (closing line continues from original file) */
-} as const;
-
 export type TKey = keyof typeof dict;
 
 export function translate(key: TKey, lang: Lang): string {
