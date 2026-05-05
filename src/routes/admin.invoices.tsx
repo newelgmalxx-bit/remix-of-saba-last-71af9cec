@@ -98,8 +98,8 @@ function InvoicesPage() {
                 const s = map[i.status];
                 return (
                   <tr key={i.id} className="border-b border-border hover:bg-muted/40">
-                    <td className="px-3 py-3 font-bold text-primary">{i.number}</td>
-                    <td className="px-3 py-3 text-muted-foreground">#{i.orderNumber}</td>
+                    <td className="px-3 py-3 font-bold text-primary" dir="ltr">{i.number}</td>
+                    <td className="px-3 py-3 text-muted-foreground" dir="ltr">#{i.orderNumber}</td>
                     <td className="px-3 py-3"><div className="font-medium">{i.client}</div><div className="text-[11px] text-muted-foreground">{i.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
@@ -108,9 +108,9 @@ function InvoicesPage() {
                         {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(i.amount)}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(i.amount)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
-                    <td className="px-3 py-3 text-muted-foreground text-xs">{i.issued}</td>
+                    <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{i.issued}</td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => setViewing(i)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button>
@@ -134,8 +134,8 @@ function InvoicesPage() {
             return (
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><div className="text-[11px] text-muted-foreground">رقم الطلب</div><div className="font-bold">#{viewing.orderNumber}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">التاريخ</div><div className="font-bold">{viewing.issued}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">رقم الطلب</div><div className="font-bold" dir="ltr">#{viewing.orderNumber}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">التاريخ</div><div className="font-bold" data-ltr-number>{viewing.issued}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">البريد</div><div className="font-bold">{viewing.email}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">الجوال</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
@@ -143,9 +143,9 @@ function InvoicesPage() {
                   <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
                 </div>
                 <div className="border-t border-border pt-3 space-y-1.5">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span>{fmtSAR(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة 15%</span><span>{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>الإجمالي</span><span>{fmtSAR(viewing.amount)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span data-ltr-number>{fmtSAR(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة 15%</span><span data-ltr-number>{fmtSAR(vat)}</span></div>
+                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>الإجمالي</span><span data-ltr-number>{fmtSAR(viewing.amount)}</span></div>
                 </div>
                 <Pill tone={map[viewing.status].t}>{map[viewing.status].l}</Pill>
               </div>
@@ -161,10 +161,10 @@ function InvoicesPage() {
           <div className="grid grid-cols-2 gap-3">
             <L label="اسم العميل"><input className={ic} value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></L>
             <L label="البريد"><input className={ic} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></L>
-            <L label="رقم الجوال"><input className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
+            <L label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
             <L label="المدينة"><input className={ic} value={form.city ?? ""} onChange={e => setForm({ ...form, city: e.target.value })} /></L>
             <L label="رقم الطلب"><input className={ic} value={form.orderNumber} onChange={e => setForm({ ...form, orderNumber: e.target.value })} /></L>
-            <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
+            <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
             <L label="طريقة الدفع">
               <select className={ic} value={form.payment} onChange={e => setForm({ ...form, payment: e.target.value })}>
                 {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}

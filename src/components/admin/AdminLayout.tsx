@@ -197,9 +197,9 @@ export function StatCard({ label, value, hint, icon: Icon, accent = "primary" }:
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tones[accent]}`}>
           <Icon className="h-5 w-5" />
         </div>
-        {hint && <div className="text-[11px] font-bold text-emerald-600">{hint}</div>}
+        {hint && <div data-ltr-number className="text-[11px] font-bold text-emerald-600">{hint}</div>}
       </div>
-      <div className="mt-4 text-2xl font-bold">{value}</div>
+      <div data-ltr-number className="mt-4 text-2xl font-bold">{value}</div>
       <div className="mt-1 text-xs text-muted-foreground">{label}</div>
     </div>
   );

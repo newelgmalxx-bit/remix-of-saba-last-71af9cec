@@ -113,17 +113,17 @@ function ClientsPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{initials}</div>
                         <div>
                           <div className="font-bold">{c.name}</div>
-                          <div className="text-[11px] text-muted-foreground">{c.phone}</div>
+                          <div className="text-[11px] text-muted-foreground" dir="ltr">{c.phone}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-muted-foreground">{c.email}</td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{c.phone}</td>
                     <td className="px-3 py-3 text-xs">{c.city ?? "—"}</td>
-                    <td className="px-3 py-3">{c.orders}</td>
-                    <td className="px-3 py-3 font-bold">{fmtSAR(c.totalSpent)}</td>
+                    <td className="px-3 py-3" data-ltr-number>{c.orders}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(c.totalSpent)}</td>
                     <td className="px-3 py-3"><Pill tone={s.t}>{s.l}</Pill></td>
-                    <td className="px-3 py-3 text-xs text-muted-foreground">{c.joinedAt}</td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{c.joinedAt}</td>
                     <td className="px-3 py-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted">
@@ -151,7 +151,7 @@ function ClientsPage() {
           <DialogHeader><DialogTitle>إضافة عميل جديد</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <Lbl label="الاسم الكامل"><input className={ic} value={add.name} onChange={e => setAdd({ ...add, name: e.target.value })} /></Lbl>
-            <Lbl label="رقم الجوال"><input className={ic} value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
+            <Lbl label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={add.phone} onChange={e => setAdd({ ...add, phone: e.target.value })} /></Lbl>
             <Lbl label="البريد الإلكتروني"><input type="email" className={ic} value={add.email} onChange={e => setAdd({ ...add, email: e.target.value })} /></Lbl>
             <Lbl label="المدينة"><input className={ic} value={add.city} onChange={e => setAdd({ ...add, city: e.target.value })} /></Lbl>
             <Lbl label="المنطقة / الدولة"><input className={ic} value={add.region} onChange={e => setAdd({ ...add, region: e.target.value })} /></Lbl>
@@ -219,12 +219,14 @@ function Lbl({ label, children, full }: { label: string; children: React.ReactNo
   return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
 }
 function Info({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const ltr = label.includes("الجوال") || label.includes("عدد") || label.includes("إجمالي");
+
   return (
     <div className="flex items-start gap-2">
       <Icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
       <div className="min-w-0">
         <div className="text-[11px] text-muted-foreground">{label}</div>
-        <div className="font-medium truncate">{value}</div>
+        <div dir={ltr ? "ltr" : undefined} className="font-medium truncate">{value}</div>
       </div>
     </div>
   );

@@ -76,7 +76,7 @@ function TicketDetail() {
               </div>
               <div>
                 <h3 className="text-sm font-bold">المحادثة</h3>
-                <p className="text-xs text-muted-foreground">{messages.length} رسالة</p>
+                <p className="text-xs text-muted-foreground"><span data-ltr-number>{messages.length}</span> رسالة</p>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@ function TicketDetail() {
                     <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
                       <span className="font-bold text-foreground">{m.author}</span>
                       <span>•</span>
-                      <span>{m.at}</span>
+                      <span data-ltr-number>{m.at}</span>
                     </div>
                     <div
                       className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
@@ -175,7 +175,7 @@ function TicketDetail() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">طلب مرتبط</div>
-                <div className="text-sm font-bold">{order.number}</div>
+                <div className="text-sm font-bold" dir="ltr">{order.number}</div>
               </div>
               <ChevronLeft className="h-4 w-4 text-muted-foreground" />
             </Link>
@@ -187,10 +187,12 @@ function TicketDetail() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const ltr = label.includes("رقم") || label.includes("تاريخ");
+
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{value}</dd>
+      <dd dir={ltr ? "ltr" : undefined} className="font-medium">{value}</dd>
     </div>
   );
 }

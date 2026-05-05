@@ -56,7 +56,7 @@ function OrderDetail() {
               <Package className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">{order.number}</h2>
+              <h2 className="text-xl font-bold" dir="ltr">{order.number}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <StatusBadge label={s.label} color={s.color} />
                 {order.paid ? (
@@ -144,12 +144,12 @@ function OrderDetail() {
                       >
                         {it.serviceTitle}
                       </Link>
-                      <p className="text-xs text-muted-foreground">باقة {it.planName} • الكمية: {it.qty}</p>
+                      <p className="text-xs text-muted-foreground">باقة {it.planName} • الكمية: <span data-ltr-number>{it.qty}</span></p>
                     </div>
                   </div>
                   <div className="text-left shrink-0">
-                    <div className="text-sm font-bold text-primary">{formatCurrency(it.price * it.qty)}</div>
-                    <div className="text-[11px] text-muted-foreground">{formatCurrency(it.price)} / للوحدة</div>
+                    <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
+                    <div className="text-[11px] text-muted-foreground" data-ltr-number>{formatCurrency(it.price)} / للوحدة</div>
                   </div>
                 </div>
               ))}
@@ -193,7 +193,7 @@ function OrderDetail() {
               <div className="my-2 h-px bg-border" />
               <div className="flex justify-between text-base font-bold">
                 <span>الإجمالي</span>
-                <span className="text-primary">{formatCurrency(order.total)}</span>
+                <span className="text-primary" data-ltr-number>{formatCurrency(order.total)}</span>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ function OrderDetail() {
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
-              <span>{order.createdAt}</span>
+              <span data-ltr-number>{order.createdAt}</span>
             </div>
           </div>
           {order.paid && (
@@ -232,7 +232,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="font-medium" data-ltr-number>{value}</span>
     </div>
   );
 }

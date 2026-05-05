@@ -38,7 +38,7 @@ function SiteSettingsPage() {
             <Lbl label="اسم الموقع"><input className={ic} value={s.name} onChange={e => setS({ ...s, name: e.target.value })} /></Lbl>
             <Lbl label="الشعار النصي (Tagline)"><input className={ic} value={s.tagline} onChange={e => setS({ ...s, tagline: e.target.value })} /></Lbl>
             <Lbl label="البريد الإلكتروني"><input className={ic} value={s.email} onChange={e => setS({ ...s, email: e.target.value })} /></Lbl>
-            <Lbl label="رقم الجوال"><input className={ic} dir="ltr" value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })} /></Lbl>
+            <Lbl label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })} /></Lbl>
             <Lbl label="العنوان" full><input className={ic} value={s.address} onChange={e => setS({ ...s, address: e.target.value })} /></Lbl>
             <Lbl label="ساعات العمل" full><input className={ic} value={s.workHours} onChange={e => setS({ ...s, workHours: e.target.value })} /></Lbl>
             <Lbl label="اللغة الافتراضية">
