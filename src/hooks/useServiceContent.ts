@@ -6,25 +6,31 @@ const KEY = "saba_service_overrides_v1";
 
 export type ServiceOverride = {
   title?: string;
+  titleEn?: string;
   subtitle?: string;
+  subtitleEn?: string;
   category?: string;
+  categoryEn?: string;
   breadcrumb?: string;
+  breadcrumbEn?: string;
   heroHighlights?: string[];
+  heroHighlightsEn?: string[];
   bannerImage?: string;
   overviewDescription?: string;
+  overviewDescriptionEn?: string;
   seo?: {
     title?: string;
     description?: string;
     keywords?: string;
     ogImage?: string;
   };
-  overview?: { title: string; desc: string }[];
-  benefits?: { title: string; desc: string }[];
-  plans?: { name: string; price: string; featured: boolean; feats: string[] }[];
-  steps?: { title: string }[];
-  stats?: { v: string; l: string }[];
-  testimonials?: { name: string; role: string; text: string }[];
-  faqs?: { q: string; a: string }[];
+  overview?: { title: string; titleEn?: string; desc: string; descEn?: string }[];
+  benefits?: { title: string; titleEn?: string; desc: string; descEn?: string }[];
+  plans?: { name: string; nameEn?: string; price: string; originalPrice?: string; featured: boolean; feats: string[]; featsEn?: string[] }[];
+  steps?: { title: string; titleEn?: string }[];
+  stats?: { v: string; l: string; lEn?: string }[];
+  testimonials?: { name: string; role: string; text: string; nameEn?: string; roleEn?: string; textEn?: string }[];
+  faqs?: { q: string; a: string; qEn?: string; aEn?: string }[];
   isCustom?: boolean;
 };
 
