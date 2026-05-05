@@ -13,7 +13,7 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
-        <AuthHero />
+        <AuthHero variant="signup" />
 
         <div className="flex items-center px-6 py-10 sm:px-12 lg:py-14">
           <div className="mx-auto w-full max-w-md">
