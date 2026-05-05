@@ -1,0 +1,122 @@
+export type Lang = "ar" | "en";
+
+// All UI strings live here. Add new keys with both languages.
+export const dict = {
+  // ===== Navigation =====
+  "nav.home": { ar: "الرئيسية", en: "Home" },
+  "nav.services": { ar: "خدماتنا", en: "Services" },
+  "nav.plans": { ar: "الباقات", en: "Plans" },
+  "nav.portfolio": { ar: "أعمالنا", en: "Portfolio" },
+  "nav.about": { ar: "من نحن", en: "About" },
+  "nav.contact": { ar: "تواصل", en: "Contact" },
+  "nav.login": { ar: "تسجيل الدخول", en: "Sign In" },
+  "nav.account": { ar: "حسابي", en: "Account" },
+  "nav.cart": { ar: "السلة", en: "Cart" },
+  "nav.toggleLang": { ar: "تغيير اللغة", en: "Change language" },
+  "nav.menu": { ar: "القائمة", en: "Menu" },
+
+  // ===== Footer =====
+  "footer.tagline": {
+    ar: "وكالة رقمية متخصصة في تصميم وتطوير الحلول الرقمية المبتكرة لتحويل أفكارك إلى واقع.",
+    en: "A digital agency specialized in designing and building innovative digital solutions that turn your ideas into reality.",
+  },
+  "footer.quickLinks": { ar: "روابط سريعة", en: "Quick Links" },
+  "footer.ourServices": { ar: "خدماتنا", en: "Our Services" },
+  "footer.contactUs": { ar: "تواصل معنا", en: "Contact Us" },
+  "footer.location": { ar: "المملكة العربية السعودية", en: "Kingdom of Saudi Arabia" },
+  "footer.requestQuote": { ar: "اطلب عرض سعر", en: "Request a Quote" },
+  "footer.rights": { ar: "جميع الحقوق محفوظة.", en: "All rights reserved." },
+  "footer.privacy": { ar: "سياسة الخصوصية", en: "Privacy Policy" },
+  "footer.terms": { ar: "الشروط والأحكام", en: "Terms & Conditions" },
+  "footer.brand": { ar: "سابا ديزاين", en: "SABA DESIGN" },
+
+  "footer.svc.web": { ar: "تصميم مواقع الكترونية", en: "Web Design" },
+  "footer.svc.ui": { ar: "تصميم واجهات مستخدم", en: "UI/UX Design" },
+  "footer.svc.ads": { ar: "إطلاق حملات إعلانية", en: "Ad Campaigns" },
+  "footer.svc.seo": { ar: "تحسين محركات البحث SEO", en: "SEO" },
+  "footer.svc.social": { ar: "تصميم سوشيال ميديا", en: "Social Media Design" },
+
+  // ===== Hero =====
+  "hero.badge": { ar: "وكالة برمجة وتصميم رقمية", en: "Digital Design & Development Agency" },
+  "hero.title.l1": { ar: "نصمم تجارب رقمية", en: "We craft digital experiences" },
+  "hero.title.l2": { ar: "تترك أثراً يدوم", en: "that leave a lasting impact" },
+  "hero.desc": {
+    ar: "في سابا ديزاين نحوّل أفكارك إلى منتجات رقمية احترافية: مواقع، تطبيقات، وحلول ذكية تعزز نجاح أعمالك وتضعك في المقدمة.",
+    en: "At SABA Design, we turn your ideas into professional digital products: websites, apps, and smart solutions that drive your business forward.",
+  },
+  "hero.cta.start": { ar: "ابدأ مشروعك الآن", en: "Start Your Project" },
+  "hero.cta.browse": { ar: "تصفح خدماتنا", en: "Browse Services" },
+
+  "hero.feat.quality.t": { ar: "جودة مضمونة", en: "Guaranteed Quality" },
+  "hero.feat.quality.d": { ar: "تسليم احترافي بتوازن بين الشكل والوظيفة", en: "Professional delivery balancing form and function" },
+  "hero.feat.support.t": { ar: "دعم مستمر", en: "Continuous Support" },
+  "hero.feat.support.d": { ar: "فريق جاهز لمساعدتك بعد الإطلاق وخلال التطوير", en: "A team ready to help during and after launch" },
+  "hero.feat.perf.t": { ar: "أداء عالي", en: "High Performance" },
+  "hero.feat.perf.d": { ar: "سرعة وفعالية بأداء يحقق نتائج ملموسة", en: "Speed and efficiency that deliver real results" },
+  "hero.feat.security.t": { ar: "أمان وموثوقية", en: "Security & Reliability" },
+  "hero.feat.security.d": { ar: "حماية بياناتك ضمن أعلى المعايير في كل خطوة", en: "Protecting your data with top standards at every step" },
+
+  "hero.partner.title": { ar: "شريكك في التحول الرقمي", en: "Your partner in digital transformation" },
+  "hero.partner.desc": {
+    ar: "نساعدك على بناء مستقبل رقمي أفضل بتجربة واضحة ونتيجة فائقة الجودة تليق بالنمو.",
+    en: "We help you build a better digital future with a clear experience and high-quality results worthy of growth.",
+  },
+  "hero.stat.experts": { ar: "خبير ومختص", en: "Experts" },
+  "hero.stat.projects": { ar: "مشروع مكتمل", en: "Completed Projects" },
+  "hero.stat.clients": { ar: "عميل سعيد", en: "Happy Clients" },
+  "hero.stat.years": { ar: "سنوات خبرة", en: "Years of Experience" },
+
+  // ===== Services Grid =====
+  "services.kicker": { ar: "خدماتنا", en: "Our Services" },
+  "services.title": { ar: "حلول متكاملة لجميع احتياجاتك الرقمية", en: "Complete solutions for all your digital needs" },
+  "services.details": { ar: "التفاصيل", en: "Details" },
+  "services.order": { ar: "اطلب الخدمة", en: "Order Now" },
+
+  // ===== Portfolio Section =====
+  "portfolio.kicker": { ar: "نماذج الأعمال", en: "Portfolio" },
+  "portfolio.title": { ar: "مشاريع نفخر بها وعملاء يثقون بنا", en: "Projects we are proud of and clients who trust us" },
+  "portfolio.tab.all": { ar: "كل الأعمال", en: "All Work" },
+  "portfolio.tab.web": { ar: "تطوير ويب", en: "Web Development" },
+  "portfolio.tab.apps": { ar: "تطبيقات", en: "Apps" },
+  "portfolio.tab.brand": { ar: "هوية بصرية", en: "Branding" },
+  "portfolio.tab.ui": { ar: "واجهات UI/UX", en: "UI/UX" },
+  "portfolio.cta.title.lead": { ar: "لديك فكرة مشروع؟", en: "Have a project in mind?" },
+  "portfolio.cta.title.tail": { ar: "نحوّلها لواقع.", en: "We bring it to life." },
+  "portfolio.cta.desc": { ar: "تواصل معنا اليوم واحصل على استشارة مجانية لمشروعك القادم.", en: "Contact us today for a free consultation on your next project." },
+  "portfolio.cta.start": { ar: "ابدأ مشروعك", en: "Start Your Project" },
+  "portfolio.cta.more": { ar: "عرض المزيد", en: "View More" },
+
+  // ===== Stats Banner =====
+  "stats.support": { ar: "دعم فني", en: "Support" },
+  "stats.years": { ar: "سنوات خبرة", en: "Years of Experience" },
+  "stats.clients": { ar: "عميل سعيد", en: "Happy Clients" },
+  "stats.projects": { ar: "مشروع مكتمل", en: "Completed Projects" },
+
+  // ===== Why Us =====
+  "why.title": { ar: "لماذا تختار ديزاين؟", en: "Why choose us?" },
+  "why.expertise.t": { ar: "خبرة واحترافية", en: "Expertise & Professionalism" },
+  "why.expertise.d": { ar: "فريق محترف بخبرة طويلة في المجال", en: "A professional team with long industry experience" },
+  "why.price.t": { ar: "أسعار تنافسية", en: "Competitive Pricing" },
+  "why.price.d": { ar: "أفضل قيمة مقابل السعر تناسب جميع الميزانيات", en: "Best value for money for every budget" },
+  "why.support.t": { ar: "دعم مستمر", en: "Continuous Support" },
+  "why.support.d": { ar: "دعم فني متواصل قبل وبعد تسليم المشروع", en: "Ongoing technical support before and after delivery" },
+  "why.time.t": { ar: "الالتزام بالمواعيد", en: "On-time Delivery" },
+  "why.time.d": { ar: "نلتزم بتسليم المشاريع في الوقت المحدد", en: "We deliver projects on schedule" },
+  "why.creative.t": { ar: "تصاميم إبداعية", en: "Creative Designs" },
+  "why.creative.d": { ar: "أفكار مبتكرة وتصاميم تجذب الانتباه", en: "Innovative ideas and eye-catching designs" },
+  "why.quality.t": { ar: "جودة عالية", en: "High Quality" },
+  "why.quality.d": { ar: "نحرص على تقديم أعلى جودة في كل ما نقدمه", en: "We deliver the highest quality in everything we do" },
+
+  // ===== CTA Banner =====
+  "cta.title": { ar: "جاهز للانطلاق نحو النجاح؟", en: "Ready to launch toward success?" },
+  "cta.desc": { ar: "دعنا نساعدك في تحقيق أهدافك الرقمية وبناء حضور مميز.", en: "Let us help you achieve your digital goals and build a standout presence." },
+  "cta.btn": { ar: "اطلب عرض سعر", en: "Request a Quote" },
+} as const;
+
+export type TKey = keyof typeof dict;
+
+export function translate(key: TKey, lang: Lang): string {
+  const entry = dict[key];
+  if (!entry) return key;
+  return entry[lang] ?? entry.ar;
+}
