@@ -2,41 +2,43 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
+import { useLang } from "@/i18n/LanguageProvider";
 
 function SignupPage() {
   const [show1, setShow1] = useState(false);
   const [show2, setShow2] = useState(false);
   const [agree, setAgree] = useState(false);
+  const { t, dir } = useLang();
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
         <AuthHero />
 
         <div className="flex items-center px-6 py-10 sm:px-12 lg:py-14">
           <div className="mx-auto w-full max-w-md">
-            <div className="text-right">
-              <h1 className="text-3xl font-extrabold text-foreground">إنشاء حساب جديد</h1>
-              <p className="mt-2 text-sm text-muted-foreground">أدخل بياناتك لإنشاء حسابك في دقائق</p>
-              <div className="mt-3 h-0.5 w-16 rounded-full bg-primary mr-0 ml-auto" />
+            <div className="text-start">
+              <h1 className="text-3xl font-extrabold text-foreground">{t("auth.signup.title")}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{t("auth.signup.subtitleAlt")}</p>
+              <div className={`mt-3 h-0.5 w-16 rounded-full bg-primary ${dir === "rtl" ? "mr-0 ml-auto" : "ml-0 mr-auto"}`} />
             </div>
 
             <form className="mt-7 space-y-5" onSubmit={(e) => e.preventDefault()}>
-              <Field label="الاسم الكامل" type="text" placeholder="أدخل اسمك الكامل" icon={<User className="h-4 w-4" />} />
+              <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="رقم الجوال" type="tel" placeholder="05XXXXXXXX" icon={<Phone className="h-4 w-4" />} />
-                <Field label="البريد الإلكتروني" type="email" placeholder="example@email.com" icon={<Mail className="h-4 w-4" />} />
+                <Field label={t("auth.tab.phone")} type="tel" placeholder={t("auth.phonePh")} icon={<Phone className="h-4 w-4" />} dirCtx={dir} />
+                <Field label={t("auth.tab.email")} type="email" placeholder={t("auth.emailPh")} icon={<Mail className="h-4 w-4" />} dirCtx={dir} />
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <SelectField label="المنطقة / الدولة" placeholder="اختر منطقتك" icon={<MapPin className="h-4 w-4" />} />
-                <SelectField label="اللغة المفضلة" placeholder="العربية" icon={<Globe className="h-4 w-4" />} />
+                <SelectField label={t("auth.region")} placeholder={t("auth.regionPh")} icon={<MapPin className="h-4 w-4" />} kind="region" dirCtx={dir} t={t} />
+                <SelectField label={t("auth.preferredLang")} placeholder={t("auth.preferredLangPh")} icon={<Globe className="h-4 w-4" />} kind="lang" dirCtx={dir} t={t} />
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <PasswordField label="كلمة المرور" show={show1} onToggle={() => setShow1(!show1)} />
-                <PasswordField label="تأكيد كلمة المرور" show={show2} onToggle={() => setShow2(!show2)} />
+                <PasswordField label={t("auth.password")} show={show1} onToggle={() => setShow1(!show1)} dirCtx={dir} ph={t("auth.passwordPh")} />
+                <PasswordField label={t("auth.confirmPassword")} show={show2} onToggle={() => setShow2(!show2)} dirCtx={dir} ph={t("auth.passwordPh")} />
               </div>
 
               <label className="flex cursor-pointer items-center justify-start gap-2 text-xs">
@@ -50,21 +52,21 @@ function SignupPage() {
                   {agree && <Check className="h-3 w-3" />}
                 </button>
                 <span className="text-muted-foreground">
-                  أوافق على{" "}
-                  <a href="#" className="font-bold text-primary hover:underline">سياسة الخصوصية</a>
-                  {" و "}
-                  <a href="#" className="font-bold text-primary hover:underline">شروط الاستخدام</a>
+                  {t("auth.agree.lead")}{" "}
+                  <Link to={"/privacy" as any} className="font-bold text-primary hover:underline">{t("auth.agree.privacy")}</Link>
+                  {" "}{t("auth.agree.and")}{" "}
+                  <Link to={"/terms" as any} className="font-bold text-primary hover:underline">{t("auth.agree.terms")}</Link>
                 </span>
               </label>
 
               <button type="submit" className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
-                إنشاء الحساب
+                {t("auth.signupBtn")}
               </button>
             </form>
 
             <div className="my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-[11px] text-muted-foreground">أو سجّل دخولك باستخدام</span>
+              <span className="text-[11px] text-muted-foreground">{t("auth.orSocial")}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
@@ -75,8 +77,8 @@ function SignupPage() {
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">
-              لديك حساب بالفعل؟{" "}
-              <Link to="/login" className="font-bold text-primary hover:underline">تسجيل الدخول</Link>
+              {t("auth.haveAccount")}{" "}
+              <Link to="/login" className="font-bold text-primary hover:underline">{t("auth.login.cta")}</Link>
             </p>
           </div>
         </div>
@@ -85,40 +87,42 @@ function SignupPage() {
   );
 }
 
-function Field({ label, type, placeholder, icon }: { label: string; type: string; placeholder: string; icon: React.ReactNode }) {
+function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr" }) {
   const isPhone = type === "tel";
+  const d = dirCtx || "rtl";
 
   return (
-    <div className="text-right">
+    <div className="text-start">
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">{icon}</span>
-        <input type={type} dir={isPhone ? "ltr" : undefined} inputMode={isPhone ? "tel" : undefined} placeholder={placeholder} className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-right"}`} />
+        <span className={`pointer-events-none absolute inset-y-0 ${d === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>{icon}</span>
+        <input type={type} dir={isPhone ? "ltr" : undefined} inputMode={isPhone ? "tel" : undefined} placeholder={placeholder} className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-start"}`} />
       </div>
     </div>
   );
 }
 
-function SelectField({ label, placeholder, icon }: { label: string; placeholder: string; icon: React.ReactNode }) {
+function SelectField({ label, placeholder, icon, kind, dirCtx, t }: { label: string; placeholder: string; icon: React.ReactNode; kind: "region" | "lang"; dirCtx: "rtl" | "ltr"; t: (k: any) => string }) {
   return (
-    <div className="text-right">
+    <div className="text-start">
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">{icon}</span>
-        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground">
+        <span className={`pointer-events-none absolute inset-y-0 ${dirCtx === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>{icon}</span>
+        <span className={`pointer-events-none absolute inset-y-0 ${dirCtx === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground`}>
           <ChevronDown className="h-4 w-4" />
         </span>
-        <SelectOptions placeholder={placeholder} label={label} />
+        <SelectOptions placeholder={placeholder} kind={kind} t={t} />
       </div>
     </div>
   );
 }
 
-function SelectOptions({ placeholder, label }: { placeholder: string; label: string }) {
-  const isLang = label.includes("اللغة");
-  const opts = isLang ? ["العربية", "English"] : ["السعودية", "الإمارات", "مصر", "الكويت", "قطر", "البحرين", "عُمان", "الأردن"];
+function SelectOptions({ placeholder, kind, t }: { placeholder: string; kind: "region" | "lang"; t: (k: any) => string }) {
+  const opts = kind === "lang"
+    ? [t("auth.lang.ar"), t("auth.lang.en")]
+    : [t("auth.region.sa"), t("auth.region.ae"), t("auth.region.eg"), t("auth.region.kw"), t("auth.region.qa"), t("auth.region.bh"), t("auth.region.om"), t("auth.region.jo")];
   return (
-    <select className="w-full appearance-none rounded-xl border border-border bg-white px-10 py-3 text-right text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+    <select className="w-full appearance-none rounded-xl border border-border bg-white px-10 py-3 text-start text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
       <option value="">{placeholder}</option>
       {opts.map((o) => (
         <option key={o}>{o}</option>
@@ -127,18 +131,18 @@ function SelectOptions({ placeholder, label }: { placeholder: string; label: str
   );
 }
 
-function PasswordField({ label, show, onToggle }: { label: string; show: boolean; onToggle: () => void }) {
+function PasswordField({ label, show, onToggle, dirCtx, ph }: { label: string; show: boolean; onToggle: () => void; dirCtx: "rtl" | "ltr"; ph: string }) {
   return (
-    <div className="text-right">
+    <div className="text-start">
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+        <span className={`pointer-events-none absolute inset-y-0 ${dirCtx === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>
           <Lock className="h-4 w-4" />
         </span>
-        <button type="button" onClick={onToggle} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition hover:text-primary">
+        <button type="button" onClick={onToggle} className={`absolute inset-y-0 ${dirCtx === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground transition hover:text-primary`}>
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
-        <input type={show ? "text" : "password"} placeholder="••••••••" className="w-full rounded-xl border border-border bg-white px-10 py-3 text-right text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+        <input type={show ? "text" : "password"} placeholder={ph} className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
       </div>
     </div>
   );
