@@ -7,7 +7,7 @@ import applePayLogo from "@/assets/pay-applepay.png";
 import visaLogo from "@/assets/pay-visa.webp";
 import mastercardLogo from "@/assets/pay-mastercard.png";
 
-export type PaymentMethod = "tabby" | "tamara" | "mada" | "mayfatoorah" | "cod";
+export type PaymentMethod = "tabby" | "tamara" | "mayfatoorah" | "cod";
 
 export const paymentMethods: {
   id: PaymentMethod;
@@ -20,7 +20,6 @@ export const paymentMethods: {
 }[] = [
   { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, badge: "الأكثر استخداماً" },
   { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
-  { id: "mada", name: "مدى", desc: "بطاقة مدى البنكية السعودية", icon: CreditCard, logo: madaLogo },
   {
     id: "mayfatoorah",
     name: "ماي فاتورة",
