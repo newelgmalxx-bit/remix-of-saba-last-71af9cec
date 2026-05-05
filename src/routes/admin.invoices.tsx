@@ -5,15 +5,22 @@ import { useState } from "react";
 import { adminInvoices as initialInvoices, paymentMethods, fmtSAR, type AdminInvoice } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "الفواتير | لوحة التحكم" }] }),
   component: InvoicesPage,
 });
 
-const map = { paid: { l: "مدفوعة", t: "emerald" as const }, pending: { l: "معلقة", t: "amber" as const }, void: { l: "ملغاة", t: "rose" as const } };
-
 function InvoicesPage() {
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const map = {
+    paid: { l: L("مدفوعة", "Paid"), t: "emerald" as const },
+    pending: { l: L("معلقة", "Pending"), t: "amber" as const },
+    void: { l: L("ملغاة", "Void"), t: "rose" as const },
+  };
+
   const [invoices, setInvoices] = useState<AdminInvoice[]>(initialInvoices);
   const [tab, setTab] = useState<"all" | "paid" | "pending" | "void">("all");
   const [q, setQ] = useState("");
@@ -21,7 +28,7 @@ function InvoicesPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
     orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0],
-    amount: 0, status: "pending", issued: new Date().toLocaleDateString("ar-SA"),
+    amount: 0, status: "pending", issued: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"),
   });
   const filtered = invoices.filter(i =>
     (tab === "all" || i.status === tab) &&
@@ -38,40 +45,44 @@ function InvoicesPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "invoices.csv"; a.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تصدير الفواتير");
+    toast.success(L("تم تصدير الفواتير", "Invoices exported"));
   };
 
   const handleAdd = () => {
-    if (!form.client || !form.amount) { toast.error("الاسم والمبلغ مطلوبان"); return; }
+    if (!form.client || !form.amount) { toast.error(L("الاسم والمبلغ مطلوبان", "Name and amount are required")); return; }
     const num = "INV-" + (7822 + invoices.length);
     setInvoices([{ id: "i" + Date.now(), number: num, ...form }, ...invoices]);
     setAddOpen(false);
-    toast.success("تم إنشاء الفاتورة");
+    toast.success(L("تم إنشاء الفاتورة", "Invoice created"));
   };
-  const remove = (id: string) => { setInvoices(invoices.filter(i => i.id !== id)); toast.success("تم الحذف"); };
+  const remove = (id: string) => { setInvoices(invoices.filter(i => i.id !== id)); toast.success(L("تم الحذف", "Deleted")); };
+
+  const startSide = dir === "rtl" ? "right-3" : "left-3";
+  const padStart = dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3";
+  const textAlign = dir === "rtl" ? "text-right" : "text-left";
 
   return (
-    <AdminLayout title="الفواتير" subtitle="تتبع وإدارة فواتير العملاء" action={
+    <AdminLayout title={L("الفواتير", "Invoices")} subtitle={L("تتبع وإدارة فواتير العملاء", "Track and manage client invoices")} action={
       <div className="flex gap-2">
-        <GhostButton onClick={exportCsv}><Download className="h-4 w-4" /> تصدير</GhostButton>
-        <PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> فاتورة يدوية</PrimaryButton>
+        <GhostButton onClick={exportCsv}><Download className="h-4 w-4" /> {L("تصدير", "Export")}</GhostButton>
+        <PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> {L("فاتورة يدوية", "Manual Invoice")}</PrimaryButton>
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="إجمالي الفواتير" value={invoices.length} icon={FileText} accent="primary" />
-        <StatCard label="مدفوعة" value={invoices.filter(i => i.status === "paid").length} icon={CheckCircle2} accent="emerald" />
-        <StatCard label="معلقة" value={invoices.filter(i => i.status === "pending").length} icon={Clock} accent="amber" />
-        <StatCard label="إجمالي المبالغ" value={fmtSAR(total)} icon={XCircle} accent="violet" />
+        <StatCard label={L("إجمالي الفواتير", "Total Invoices")} value={invoices.length} icon={FileText} accent="primary" />
+        <StatCard label={L("مدفوعة", "Paid")} value={invoices.filter(i => i.status === "paid").length} icon={CheckCircle2} accent="emerald" />
+        <StatCard label={L("معلقة", "Pending")} value={invoices.filter(i => i.status === "pending").length} icon={Clock} accent="amber" />
+        <StatCard label={L("إجمالي المبالغ", "Total Amount")} value={fmtSAR(total)} icon={XCircle} accent="violet" />
       </div>
 
       <PanelCard>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث عن فاتورة، طلب أو عميل..." className="w-full rounded-xl border border-border bg-background pr-10 pl-3 py-2.5 text-sm" />
+            <Search className={`absolute ${startSide} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L("ابحث عن فاتورة، طلب أو عميل...", "Search invoice, order or client...")} className={`w-full rounded-xl border border-border bg-background ${padStart} py-2.5 text-sm`} />
           </div>
           <div className="inline-flex rounded-xl border border-border bg-background p-1">
-            {[["all", "الكل"], ["paid", "مدفوعة"], ["pending", "معلقة"], ["void", "ملغاة"]].map(([k, l]) => (
+            {[["all", L("الكل", "All")], ["paid", L("مدفوعة", "Paid")], ["pending", L("معلقة", "Pending")], ["void", L("ملغاة", "Void")]].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k as any)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
             ))}
           </div>
@@ -80,16 +91,16 @@ function InvoicesPage() {
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-right text-xs text-muted-foreground border-b border-border">
-                <th className="px-3 py-3 font-medium">الفاتورة</th>
-                <th className="px-3 py-3 font-medium">الطلب</th>
-                <th className="px-3 py-3 font-medium">العميل</th>
-                <th className="px-3 py-3 font-medium">الجوال</th>
-                <th className="px-3 py-3 font-medium">المدينة</th>
-                <th className="px-3 py-3 font-medium">الدفع</th>
-                <th className="px-3 py-3 font-medium">المبلغ</th>
-                <th className="px-3 py-3 font-medium">الحالة</th>
-                <th className="px-3 py-3 font-medium">التاريخ</th>
+              <tr className={`${textAlign} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("الفاتورة", "Invoice")}</th>
+                <th className="px-3 py-3 font-medium">{L("الطلب", "Order")}</th>
+                <th className="px-3 py-3 font-medium">{L("العميل", "Client")}</th>
+                <th className="px-3 py-3 font-medium">{L("الجوال", "Phone")}</th>
+                <th className="px-3 py-3 font-medium">{L("المدينة", "City")}</th>
+                <th className="px-3 py-3 font-medium">{L("الدفع", "Payment")}</th>
+                <th className="px-3 py-3 font-medium">{L("المبلغ", "Amount")}</th>
+                <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
+                <th className="px-3 py-3 font-medium">{L("التاريخ", "Date")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -126,60 +137,60 @@ function InvoicesPage() {
       </PanelCard>
 
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent dir="rtl" className="max-w-lg">
-          <DialogHeader><DialogTitle>الفاتورة {viewing?.number}</DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-lg">
+          <DialogHeader><DialogTitle>{L("الفاتورة", "Invoice")} {viewing?.number}</DialogTitle></DialogHeader>
           {viewing && (() => {
             const subtotal = Math.round(viewing.amount / 1.15);
             const vat = viewing.amount - subtotal;
             return (
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><div className="text-[11px] text-muted-foreground">رقم الطلب</div><div className="font-bold" dir="ltr">#{viewing.orderNumber}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">التاريخ</div><div className="font-bold" data-ltr-number>{viewing.issued}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">العميل</div><div className="font-bold">{viewing.client}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">البريد</div><div className="font-bold">{viewing.email}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">الجوال</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">المدينة</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">طريقة الدفع</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("رقم الطلب", "Order #")}</div><div className="font-bold" dir="ltr">#{viewing.orderNumber}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("التاريخ", "Date")}</div><div className="font-bold" data-ltr-number>{viewing.issued}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("العميل", "Client")}</div><div className="font-bold">{viewing.client}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("البريد", "Email")}</div><div className="font-bold">{viewing.email}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("الجوال", "Phone")}</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("المدينة", "City")}</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("طريقة الدفع", "Payment Method")}</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
                 </div>
                 <div className="border-t border-border pt-3 space-y-1.5">
-                  <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span data-ltr-number>{fmtSAR(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">ضريبة 15%</span><span data-ltr-number>{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>الإجمالي</span><span data-ltr-number>{fmtSAR(viewing.amount)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{L("المجموع الفرعي", "Subtotal")}</span><span data-ltr-number>{fmtSAR(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{L("ضريبة 15%", "VAT 15%")}</span><span data-ltr-number>{fmtSAR(vat)}</span></div>
+                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>{L("الإجمالي", "Total")}</span><span data-ltr-number>{fmtSAR(viewing.amount)}</span></div>
                 </div>
                 <Pill tone={map[viewing.status].t}>{map[viewing.status].l}</Pill>
               </div>
             );
           })()}
-          <DialogFooter><GhostButton onClick={() => setViewing(null)}>إغلاق</GhostButton></DialogFooter>
+          <DialogFooter><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent dir="rtl" className="max-w-xl">
-          <DialogHeader><DialogTitle>فاتورة يدوية جديدة</DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-xl">
+          <DialogHeader><DialogTitle>{L("فاتورة يدوية جديدة", "New Manual Invoice")}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
-            <L label="اسم العميل"><input className={ic} value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></L>
-            <L label="البريد"><input className={ic} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></L>
-            <L label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></L>
-            <L label="المدينة"><input className={ic} value={form.city ?? ""} onChange={e => setForm({ ...form, city: e.target.value })} /></L>
-            <L label="رقم الطلب"><input className={ic} value={form.orderNumber} onChange={e => setForm({ ...form, orderNumber: e.target.value })} /></L>
-            <L label="المبلغ (شامل الضريبة)"><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></L>
-            <L label="طريقة الدفع">
+            <Lb label={L("اسم العميل", "Client Name")}><input className={ic} value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></Lb>
+            <Lb label={L("البريد", "Email")}><input className={ic} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></Lb>
+            <Lb label={L("رقم الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={form.phone ?? ""} onChange={e => setForm({ ...form, phone: e.target.value })} /></Lb>
+            <Lb label={L("المدينة", "City")}><input className={ic} value={form.city ?? ""} onChange={e => setForm({ ...form, city: e.target.value })} /></Lb>
+            <Lb label={L("رقم الطلب", "Order #")}><input className={ic} value={form.orderNumber} onChange={e => setForm({ ...form, orderNumber: e.target.value })} /></Lb>
+            <Lb label={L("المبلغ (شامل الضريبة)", "Amount (incl. VAT)")}><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></Lb>
+            <Lb label={L("طريقة الدفع", "Payment Method")}>
               <select className={ic} value={form.payment} onChange={e => setForm({ ...form, payment: e.target.value })}>
                 {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
-            </L>
-            <L label="الحالة">
+            </Lb>
+            <Lb label={L("الحالة", "Status")}>
               <select className={ic} value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })}>
-                <option value="pending">معلقة</option><option value="paid">مدفوعة</option><option value="void">ملغاة</option>
+                <option value="pending">{L("معلقة", "Pending")}</option><option value="paid">{L("مدفوعة", "Paid")}</option><option value="void">{L("ملغاة", "Void")}</option>
               </select>
-            </L>
-            <L label="تاريخ الإصدار"><input className={ic} value={form.issued} onChange={e => setForm({ ...form, issued: e.target.value })} /></L>
+            </Lb>
+            <Lb label={L("تاريخ الإصدار", "Issue Date")}><input className={ic} value={form.issued} onChange={e => setForm({ ...form, issued: e.target.value })} /></Lb>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
-            <GhostButton onClick={() => setAddOpen(false)}>إلغاء</GhostButton>
-            <PrimaryButton onClick={handleAdd}>إنشاء الفاتورة</PrimaryButton>
+            <GhostButton onClick={() => setAddOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
+            <PrimaryButton onClick={handleAdd}>{L("إنشاء الفاتورة", "Create Invoice")}</PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -188,6 +199,6 @@ function InvoicesPage() {
 }
 
 const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
-function L({ label, children }: { label: string; children: React.ReactNode }) {
+function Lb({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="text-xs font-bold space-y-1.5 block">{label}{children}</label>;
 }
