@@ -35,6 +35,7 @@ function ServiceEditorPage() {
   const [category, setCategory] = useState(initial?.category ?? "");
   const [breadcrumb, setBreadcrumb] = useState(initial?.breadcrumb ?? "");
   const [heroHighlights, setHeroHighlights] = useState<string[]>(initial?.heroHighlights ?? []);
+  const [bannerImage, setBannerImage] = useState<string>(initial?.bannerImage ?? "");
   const [overview, setOverview] = useState(initial?.overview.map(o => ({ title: o.title, desc: o.desc })) ?? []);
   const [benefits, setBenefits] = useState(initial?.benefits.map(b => ({ title: b.title, desc: b.desc })) ?? []);
   const [plans, setPlans] = useState(initial?.plans.map(p => ({ ...p, feats: [...p.feats] })) ?? []);
@@ -70,7 +71,7 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -83,6 +84,7 @@ function ServiceEditorPage() {
     setCategory(base.category);
     setBreadcrumb(base.breadcrumb);
     setHeroHighlights(base.heroHighlights);
+    setBannerImage(base.bannerImage ?? "");
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
     setPlans(base.plans.map(p => ({ ...p, feats: [...p.feats] })));
@@ -127,6 +129,18 @@ function ServiceEditorPage() {
             <Field label="المعرّف (slug)"><input className={inputCls} value={slug} disabled /></Field>
             <div className="md:col-span-2">
               <Field label="الوصف المختصر"><textarea rows={3} className={inputCls} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} /></Field>
+            </div>
+            <div className="md:col-span-2">
+              <Field label="صورة البنر (Hero)">
+                <div className="space-y-2">
+                  <input type="url" placeholder="https://..." className={inputCls} value={bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
+                  <input type="file" accept="image/*" className="text-xs" onChange={(e) => {
+                    const f = e.target.files?.[0]; if (!f) return;
+                    const r = new FileReader(); r.onload = () => setBannerImage(String(r.result)); r.readAsDataURL(f);
+                  }} />
+                  {bannerImage && <img src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
+                </div>
+              </Field>
             </div>
           </div>
         </PanelCard>
