@@ -202,11 +202,22 @@ export const mockTickets: Ticket[] = [
   },
 ];
 
-export const formatCurrency = (n: number) =>
-  new Intl.NumberFormat("ar-SA", { style: "decimal", maximumFractionDigits: 0 }).format(n) + " ر.س";
+export const formatCurrency = (n: number, lang: "ar" | "en" = "ar") => {
+  const locale = lang === "en" ? "en-US" : "ar-SA";
+  const suffix = lang === "en" ? " SAR" : " ر.س";
+  return new Intl.NumberFormat(locale, { style: "decimal", maximumFractionDigits: 0 }).format(n) + suffix;
+};
 
-export const paymentName = (p: PaymentMethod) =>
-  paymentMethods.find((m) => m.id === p)?.name ?? p;
+export const paymentName = (p: PaymentMethod, lang: "ar" | "en" = "ar") => {
+  const en: Record<PaymentMethod, string> = {
+    tabby: "Tabby",
+    tamara: "Tamara",
+    mayfatoorah: "MyFatoorah",
+    cod: "Cash on delivery",
+  };
+  if (lang === "en") return en[p] ?? p;
+  return paymentMethods.find((m) => m.id === p)?.name ?? p;
+};
 
 export const paymentIcon = (p: PaymentMethod): LucideIcon =>
   paymentMethods.find((m) => m.id === p)?.icon ?? Smartphone;

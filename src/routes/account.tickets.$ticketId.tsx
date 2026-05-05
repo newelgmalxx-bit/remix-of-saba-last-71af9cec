@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, Send, Paperclip, LifeBuoy, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Paperclip, LifeBuoy, Package } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { mockTickets, mockOrders, mockUser, type Ticket, type TicketMessage } from "@/data/account";
+import { useLang } from "@/i18n/LanguageProvider";
 
 export const Route = createFileRoute("/account/tickets/$ticketId")({
   head: () => ({ meta: [{ title: "تذكرة دعم | سابا ديزاين" }] }),
@@ -11,22 +12,33 @@ export const Route = createFileRoute("/account/tickets/$ticketId")({
     if (!ticket) throw notFound();
     return { ticket };
   },
-  notFoundComponent: () => (
-    <AccountLayout title="تذكرة غير موجودة">
-      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-        لم نعثر على هذه التذكرة.
-      </div>
-    </AccountLayout>
-  ),
-  errorComponent: ({ error }) => (
-    <AccountLayout title="حدث خطأ">
-      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">{error.message}</div>
-    </AccountLayout>
-  ),
+  notFoundComponent: NotFoundTicket,
+  errorComponent: ({ error }) => <ErrorTicket message={error.message} />,
   component: TicketDetail,
 });
 
+function NotFoundTicket() {
+  const { t } = useLang();
+  return (
+    <AccountLayout title={t("account.ticket.notFound.title")}>
+      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+        {t("account.ticket.notFound.desc")}
+      </div>
+    </AccountLayout>
+  );
+}
+
+function ErrorTicket({ message }: { message: string }) {
+  const { t } = useLang();
+  return (
+    <AccountLayout title={t("account.order.error")}>
+      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">{message}</div>
+    </AccountLayout>
+  );
+}
+
 function TicketDetail() {
+  const { t, lang, dir } = useLang();
   const { ticket: initial } = Route.useLoaderData() as { ticket: Ticket };
   const [messages, setMessages] = useState<TicketMessage[]>(initial.messages);
   const [text, setText] = useState("");
@@ -40,7 +52,7 @@ function TicketDetail() {
       from: "client",
       author: mockUser.name.split(" ")[0],
       text: text.trim(),
-      at: new Date().toLocaleString("ar-SA"),
+      at: new Date().toLocaleString(lang === "en" ? "en-US" : "ar-SA"),
     };
     setMessages((m) => [...m, newMsg]);
     setText("");
@@ -51,19 +63,24 @@ function TicketDetail() {
         {
           id: `m_${Date.now()}`,
           from: "support",
-          author: "فريق سابا",
-          text: "شكراً لتواصلك، تم استلام رسالتك وسيرد عليك أحد المختصين قريباً.",
-          at: new Date().toLocaleString("ar-SA"),
+          author: t("account.ticket.supportTeam"),
+          text: t("account.ticket.supportReply"),
+          at: new Date().toLocaleString(lang === "en" ? "en-US" : "ar-SA"),
         },
       ]);
     }, 1400);
   };
 
+  const ChevBack = dir === "rtl" ? ChevronLeft : ChevronRight;
+  const ChevFwd = dir === "rtl" ? ChevronLeft : ChevronRight;
+  const priorityLabel = initial.priority === "high" ? t("account.ticket.priority.high") : initial.priority === "low" ? t("account.ticket.priority.low") : t("account.ticket.priority.normal");
+  const statusLabel = initial.status === "open" ? t("ticket.status.open") : initial.status === "answered" ? t("ticket.status.answered") : t("ticket.status.closed");
+
   return (
-    <AccountLayout title={initial.subject} subtitle={`تذكرة رقم #${initial.number}`}>
+    <AccountLayout title={initial.subject} subtitle={`${t("account.ticket.subtitleTpl")}${initial.number}`}>
       <Link to={"/account/tickets" as any} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
-        <ChevronLeft className="h-4 w-4" />
-        العودة لكل التذاكر
+        <ChevronLeft className={`h-4 w-4 ${dir === "ltr" ? "rotate-180" : ""}`} />
+        {t("account.ticket.backAll")}
       </Link>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -75,8 +92,8 @@ function TicketDetail() {
                 <LifeBuoy className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold">المحادثة</h3>
-                <p className="text-xs text-muted-foreground"><span data-ltr-number>{messages.length}</span> رسالة</p>
+                <h3 className="text-sm font-bold">{t("account.ticket.conversation")}</h3>
+                <p className="text-xs text-muted-foreground"><span data-ltr-number>{messages.length}</span> {t("account.tickets.messages")}</p>
               </div>
             </div>
           </div>
@@ -122,13 +139,13 @@ function TicketDetail() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={2}
-                  placeholder="اكتب رسالتك هنا..."
+                  placeholder={t("account.ticket.placeholder")}
                   className="flex-1 rounded-xl border border-border bg-background p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                 />
                 <button
                   type="button"
                   className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground"
-                  title="إرفاق ملف"
+                  title={t("account.ticket.attach")}
                 >
                   <Paperclip className="h-4 w-4" />
                 </button>
@@ -138,15 +155,15 @@ function TicketDetail() {
                   className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-40"
                 >
                   <Send className="h-4 w-4" />
-                  إرسال
+                  {t("account.ticket.send")}
                 </button>
               </div>
             </div>
           ) : (
             <div className="border-t border-border bg-muted/40 p-4 text-center text-xs text-muted-foreground">
-              هذه التذكرة مغلقة. لفتح موضوع جديد،{" "}
+              {t("account.ticket.closedNote.1")}{" "}
               <Link to={"/account/tickets/new" as any} className="text-primary font-bold hover:underline">
-                أنشئ تذكرة جديدة
+                {t("account.ticket.closedNote.link")}
               </Link>.
             </div>
           )}
@@ -155,12 +172,12 @@ function TicketDetail() {
         {/* Sidebar */}
         <aside className="space-y-4">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <h3 className="text-sm font-bold">معلومات التذكرة</h3>
+            <h3 className="text-sm font-bold">{t("account.ticket.info")}</h3>
             <dl className="mt-3 space-y-2 text-sm">
-              <Row label="رقم التذكرة" value={`#${initial.number}`} />
-              <Row label="تاريخ الإنشاء" value={initial.createdAt} />
-              <Row label="الأولوية" value={initial.priority === "high" ? "عالية" : initial.priority === "low" ? "منخفضة" : "عادية"} />
-              <Row label="الحالة" value={initial.status === "open" ? "مفتوحة" : initial.status === "answered" ? "تم الرد" : "مغلقة"} />
+              <Row label={t("account.ticket.number")} value={`#${initial.number}`} ltr />
+              <Row label={t("account.ticket.date")} value={initial.createdAt} ltr />
+              <Row label={t("account.ticket.priority")} value={priorityLabel} />
+              <Row label={t("account.ticket.status")} value={statusLabel} />
             </dl>
           </div>
 
@@ -174,10 +191,10 @@ function TicketDetail() {
                 <Package className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground">طلب مرتبط</div>
+                <div className="text-xs text-muted-foreground">{t("account.ticket.linkedOrder")}</div>
                 <div className="text-sm font-bold" dir="ltr">{order.number}</div>
               </div>
-              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+              <ChevronLeft className={`h-4 w-4 text-muted-foreground ${dir === "ltr" ? "rotate-180" : ""}`} />
             </Link>
           )}
         </aside>
@@ -186,9 +203,7 @@ function TicketDetail() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  const ltr = label.includes("رقم") || label.includes("تاريخ");
-
+function Row({ label, value, ltr = false }: { label: string; value: string; ltr?: boolean }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
