@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/useCart";
 const navLinks: { to: any; label: string }[] = [
   { to: "/", label: "الرئيسية" },
   { to: "/services", label: "خدماتنا" },
+  { to: "/plans", label: "الباقات" },
   { to: "/portfolio", label: "أعمالنا" },
   { to: "/about", label: "من نحن" },
   { to: "/contact", label: "تواصل" },

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as PlansRouteImport } from './routes/plans'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -31,6 +32,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
+import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminPaymentRouteImport } from './routes/admin.payment'
 import { Route as AdminPartnerRouteImport } from './routes/admin.partner'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
@@ -59,6 +61,11 @@ const SignupRoute = SignupRouteImport.update({
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -159,6 +166,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
 const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlansRoute = AdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPaymentRoute = AdminPaymentRouteImport.update({
@@ -267,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -276,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/seo': typeof AdminSeoRoute
@@ -309,6 +323,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -318,6 +333,7 @@ export interface FileRoutesByTo {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/seo': typeof AdminSeoRoute
@@ -352,6 +368,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
   '/portfolio': typeof PortfolioRoute
   '/signup': typeof SignupRoute
   '/account/profile': typeof AccountProfileRoute
@@ -361,6 +378,7 @@ export interface FileRoutesById {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/seo': typeof AdminSeoRoute
@@ -397,6 +415,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/partner'
     | '/admin/payment'
+    | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
     | '/admin/seo'
@@ -439,6 +459,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -448,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/partner'
     | '/admin/payment'
+    | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
     | '/admin/seo'
@@ -481,6 +503,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/plans'
     | '/portfolio'
     | '/signup'
     | '/account/profile'
@@ -490,6 +513,7 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/partner'
     | '/admin/payment'
+    | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
     | '/admin/seo'
@@ -525,6 +549,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PlansRoute: typeof PlansRoute
   PortfolioRoute: typeof PortfolioRoute
   SignupRoute: typeof SignupRoute
   AccountProfileRoute: typeof AccountProfileRoute
@@ -552,6 +577,13 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/portfolio'
       preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -692,6 +724,13 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/admin/portfolio'
       preLoaderRoute: typeof AdminPortfolioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/plans': {
+      id: '/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/payment': {
@@ -871,6 +910,7 @@ interface AdminRouteChildren {
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminPartnerRoute: typeof AdminPartnerRoute
   AdminPaymentRoute: typeof AdminPaymentRoute
+  AdminPlansRoute: typeof AdminPlansRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSeoRoute: typeof AdminSeoRoute
@@ -889,6 +929,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminPartnerRoute: AdminPartnerRoute,
   AdminPaymentRoute: AdminPaymentRoute,
+  AdminPlansRoute: AdminPlansRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSeoRoute: AdminSeoRoute,
@@ -922,6 +963,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PlansRoute: PlansRoute,
   PortfolioRoute: PortfolioRoute,
   SignupRoute: SignupRoute,
   AccountProfileRoute: AccountProfileRoute,

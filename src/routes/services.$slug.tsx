@@ -1,10 +1,9 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, ShoppingCart, Zap,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
 } from "lucide-react";
-import { useCart } from "@/hooks/useCart";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
@@ -59,9 +58,6 @@ function ServiceDetailPage() {
   const [tab, setTab] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
-  const { add } = useCart();
-  const navigate = useNavigate();
-  const [heroAdded, setHeroAdded] = useState(false);
 
   if (!service) {
     return (
@@ -81,7 +77,7 @@ function ServiceDetailPage() {
     );
   }
 
-  const { overview, benefits, plans, title, subtitle, breadcrumb, heroHighlights } = service;
+  const { overview, benefits, title, subtitle, breadcrumb, heroHighlights } = service;
   const stepIcons = [MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck];
   const steps = (service.steps && service.steps.length
     ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
@@ -116,26 +112,18 @@ function ServiceDetailPage() {
                 {subtitle}
               </p>
               <div className="mt-6 flex flex-wrap justify-end gap-3">
-                <button
-                  onClick={() => {
-                    const featured = plans.find((p) => p.featured) ?? plans[0];
-                    if (!featured) return;
-                    const priceNum = Number(String(featured.price).replace(/[^\d]/g, "")) || 0;
-                    add({ serviceSlug: service.slug, serviceTitle: title, planName: featured.name, price: priceNum });
-                    setHeroAdded(true);
-                    setTimeout(() => navigate({ to: "/cart" as any }), 600);
-                  }}
+                <Link
+                  to={"/plans" as any}
                   className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5"
                 >
-                  <ShoppingCart className="h-4 w-4" />
-                  {heroAdded ? "✓ تمت الإضافة..." : "اطلب الخدمة الآن"}
-                </button>
-                <a
-                  href="#plans"
+                  استعراض الباقات
+                </Link>
+                <Link
+                  to={"/contact" as any}
                   className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
                 >
-                  استعراض الباقات
-                </a>
+                  اطلب عرض سعر
+                </Link>
               </div>
             </div>
 
@@ -304,23 +292,6 @@ function ServiceDetailPage() {
           </div>
         </section>
 
-        {/* Plans */}
-        <section id="plans" className="scroll-mt-24 pb-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
-                <div className="text-right">
-                <h2 className="text-2xl font-extrabold text-foreground">الباقات والأسعار</h2>
-                <p className="mt-1 text-xs text-muted-foreground">اختر الباقة المناسبة لمشروعك.</p>
-              </div>
-              <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
-                {plans.map((p) => (
-                  <PlanCard key={p.name} plan={p} serviceSlug={service.slug} serviceTitle={title} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Testimonials */}
         <section className="pb-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -473,79 +444,3 @@ export const Route = createFileRoute("/services/$slug")({
   },
   component: ServiceDetailPage,
 });
-
-function PlanCard({
-  plan,
-  serviceSlug,
-  serviceTitle,
-}: {
-  plan: { name: string; price: string; featured: boolean; feats: string[] };
-  serviceSlug: string;
-  serviceTitle: string;
-}) {
-  const { add } = useCart();
-  const navigate = useNavigate();
-  const [added, setAdded] = useState(false);
-  const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
-
-  const handleAdd = () => {
-    add({ serviceSlug, serviceTitle, planName: plan.name, price: priceNum });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
-  };
-
-  const handleBuyNow = () => {
-    add({ serviceSlug, serviceTitle, planName: plan.name, price: priceNum });
-    navigate({ to: "/checkout" as any });
-  };
-
-  return (
-    <div
-      className={`relative rounded-2xl border bg-white p-6 text-right shadow-sm transition ${
-        plan.featured
-          ? "border-2 border-primary md:-translate-y-3 shadow-md"
-          : "border-border hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-      }`}
-    >
-      {plan.featured && (
-        <span className="absolute -top-3 right-6 rounded-full bg-primary-light px-3 py-1 text-[10px] font-bold text-primary">
-          موصى بها
-        </span>
-      )}
-      <div className="text-sm font-bold text-foreground">{plan.name}</div>
-      <div className="mt-2 text-3xl font-extrabold text-primary">
-        {plan.price} <span className="text-sm font-bold">ر.س</span>
-      </div>
-      <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
-        {plan.feats.map((f) => (
-          <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-              <Check className="h-3 w-3" />
-            </span>
-            <span>{f}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-5 flex flex-col gap-2">
-        <button
-          onClick={handleBuyNow}
-          className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition ${
-            plan.featured
-              ? "bg-primary text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
-              : "bg-primary-dark text-white hover:opacity-90"
-          }`}
-        >
-          <Zap className="h-4 w-4" />
-          اطلب الآن
-        </button>
-        <button
-          onClick={handleAdd}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white text-sm font-bold text-foreground/80 hover:border-primary hover:text-primary transition"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {added ? "✓ تمت الإضافة للسلة" : "أضف للسلة"}
-        </button>
-      </div>
-    </div>
-  );
-}

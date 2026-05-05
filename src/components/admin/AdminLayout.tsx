@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
-  UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug,
+  UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug, Tag,
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -15,6 +15,7 @@ type NavItem = { to: string; label: string; icon: any; children?: { to: string; 
 const navGroups: (NavItem | "sep")[] = [
   { to: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { to: "/admin/services", label: "الخدمات", icon: Package },
+  { to: "/admin/plans", label: "الباقات", icon: Tag },
   { to: "/admin/bookings", label: "الطلبات", icon: CalendarCheck },
   { to: "/admin/invoices", label: "الفواتير", icon: FileText },
   { to: "/admin/clients", label: "العملاء", icon: Users },
