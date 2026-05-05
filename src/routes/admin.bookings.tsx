@@ -194,15 +194,15 @@ function BookingsPage() {
       {/* Edit booking */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent dir="rtl" className="max-w-lg">
-          <DialogHeader><DialogTitle>تعديل الطلب #{editing?.number}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>تعديل الطلب <span dir="ltr">#{editing?.number}</span></DialogTitle></DialogHeader>
           {editing && (
             <div className="grid grid-cols-2 gap-3">
               <Lbl label="العميل"><input className={ic} value={editForm.client ?? ""} onChange={e => setEditForm({ ...editForm, client: e.target.value })} /></Lbl>
               <Lbl label="البريد"><input className={ic} value={editForm.email ?? ""} onChange={e => setEditForm({ ...editForm, email: e.target.value })} /></Lbl>
-              <Lbl label="رقم الجوال"><input className={ic} dir="ltr" value={editForm.phone ?? ""} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} /></Lbl>
+              <Lbl label="رقم الجوال"><input type="tel" inputMode="tel" className={ic} dir="ltr" value={editForm.phone ?? ""} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} /></Lbl>
               <Lbl label="المدينة"><input className={ic} value={editForm.city ?? ""} onChange={e => setEditForm({ ...editForm, city: e.target.value })} /></Lbl>
               <Lbl label="الخدمة" full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
-              <Lbl label="الإجمالي (ر.س)"><input type="number" className={ic} value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
+              <Lbl label="الإجمالي (ر.س)"><input type="number" className={ic} dir="ltr" value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
               <Lbl label="طريقة الدفع">
                 <select className={ic} value={editForm.payment ?? paymentMethods[0]} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
                   {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
