@@ -8,29 +8,38 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
 import { useAllServices } from "@/hooks/useServiceContent";
 import { ServiceCard } from "@/components/sections/ServicesGrid";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
-const tabs = ["الكل", "تصميم", "برمجة", "تسويق", "سوشيال ميديا"];
-
-const steps = [
-  { n: 1, icon: MessageSquare, title: "تواصل واستشارة" },
-  { n: 2, icon: ScanSearch, title: "تحليل وتخطيط" },
-  { n: 3, icon: Wrench, title: "تنفيذ وتطوير" },
-  { n: 4, icon: RefreshCw, title: "مراجعة وتعديل" },
-  { n: 5, icon: ShieldCheck, title: "تسليم ودعم" },
+const tabs: { key: TKey; cat: string }[] = [
+  { key: "servicesPage.tab.all", cat: "الكل" },
+  { key: "servicesPage.tab.design", cat: "تصميم" },
+  { key: "servicesPage.tab.dev", cat: "برمجة" },
+  { key: "servicesPage.tab.marketing", cat: "تسويق" },
+  { key: "servicesPage.tab.social", cat: "سوشيال ميديا" },
 ];
 
-const faqs = [
-  { q: "كم يستغرق تنفيذ المشروع؟", a: "تختلف المدة حسب نوع المشروع، وتتراوح غالبًا بين 2 إلى 8 أسابيع." },
-  { q: "هل يوجد دعم بعد التسليم؟", a: "نعم، نوفر دعمًا فنيًا وضمانًا لمدة محددة بعد التسليم." },
-  { q: "هل يمكن تعديل التصميم؟", a: "بكل تأكيد، نوفر جولات مراجعة ضمن باقة المشروع." },
-  { q: "ما طرق الدفع المتاحة؟", a: "تحويل بنكي، مدى، فيزا/ماستركارد، وApple Pay." },
+const steps: { n: number; icon: typeof MessageSquare; key: TKey }[] = [
+  { n: 1, icon: MessageSquare, key: "servicesPage.step.1" },
+  { n: 2, icon: ScanSearch, key: "servicesPage.step.2" },
+  { n: 3, icon: Wrench, key: "servicesPage.step.3" },
+  { n: 4, icon: RefreshCw, key: "servicesPage.step.4" },
+  { n: 5, icon: ShieldCheck, key: "servicesPage.step.5" },
+];
+
+const faqs: { q: TKey; a: TKey }[] = [
+  { q: "servicesPage.faq1.q", a: "servicesPage.faq1.a" },
+  { q: "servicesPage.faq2.q", a: "servicesPage.faq2.a" },
+  { q: "servicesPage.faq3.q", a: "servicesPage.faq3.a" },
+  { q: "servicesPage.faq4.q", a: "servicesPage.faq4.a" },
 ];
 
 function ServicesPage() {
-  const [active, setActive] = useState("الكل");
+  const { t, dir } = useLang();
+  const [activeCat, setActiveCat] = useState<string>("الكل");
   const [open, setOpen] = useState<number | null>(0);
   const services = useAllServices();
-  const filtered = active === "الكل" ? services : services.filter((s) => s.category === active);
+  const filtered = activeCat === "الكل" ? services : services.filter((s) => s.category === activeCat);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -44,14 +53,14 @@ function ServicesPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-dark/70 to-primary-dark/95" />
           <div className="relative mx-auto flex max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8">
-            <div className="ml-auto max-w-md text-right">
+            <div className={`max-w-md ${dir === "rtl" ? "ml-auto text-right" : "mr-auto text-left"}`}>
               <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
-                <Link to="/" className="hover:underline">الرئيسية</Link>
-                <ChevronLeft className="h-3 w-3" />
-                <span>خدماتنا</span>
+                <Link to="/" className="hover:underline">{t("common.home")}</Link>
+                <ChevronLeft className={`h-3 w-3 ${dir === "ltr" ? "rotate-180" : ""}`} />
+                <span>{t("servicesPage.breadcrumb")}</span>
               </div>
-              <h1 className="text-5xl font-extrabold sm:text-6xl">خدماتنا</h1>
-              <p className="mt-3 text-sm text-white/80 sm:text-base">حلول متكاملة لنمو أعمالك الرقمية</p>
+              <h1 className="text-5xl font-extrabold sm:text-6xl">{t("servicesPage.title")}</h1>
+              <p className="mt-3 text-sm text-white/80 sm:text-base">{t("servicesPage.subtitle")}</p>
             </div>
           </div>
         </section>
@@ -61,17 +70,17 @@ function ServicesPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-center justify-start gap-2">
-                {tabs.map((t) => (
+                {tabs.map((tab) => (
                   <button
-                    key={t}
-                    onClick={() => setActive(t)}
+                    key={tab.key}
+                    onClick={() => setActiveCat(tab.cat)}
                     className={`rounded-full px-4 py-2 text-xs font-bold transition ${
-                      active === t
+                      activeCat === tab.cat
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "bg-secondary/50 text-foreground/70 hover:text-primary"
                     }`}
                   >
-                    {t}
+                    {t(tab.key)}
                   </button>
                 ))}
               </div>
@@ -97,7 +106,7 @@ function ServicesPage() {
         <section className="bg-background py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
-              <h2 className="text-center text-2xl font-extrabold text-foreground">كيف نعمل</h2>
+              <h2 className="text-center text-2xl font-extrabold text-foreground">{t("servicesPage.howWeWork")}</h2>
               <div className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-5">
                 {steps.map((s) => (
                   <div
@@ -112,7 +121,7 @@ function ServicesPage() {
                         {s.n}
                       </span>
                     </div>
-                    <div className="mt-4 text-sm font-bold text-foreground">{s.title}</div>
+                    <div className="mt-4 text-sm font-bold text-foreground">{t(s.key)}</div>
                   </div>
                 ))}
               </div>
@@ -126,14 +135,14 @@ function ServicesPage() {
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary to-primary-dark px-8 py-12 text-center shadow-lg">
               <div className="pointer-events-none absolute -top-20 -right-10 h-60 w-60 rounded-full bg-white/5 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 -left-10 h-60 w-60 rounded-full bg-white/5 blur-3xl" />
-              <h2 className="text-2xl font-extrabold text-white sm:text-3xl">جاهز للبدء في مشروعك القادم؟</h2>
-              <p className="mt-3 text-sm text-white/80">دعنا نحوّل فكرتك إلى واقع رقمي ناجح.</p>
+              <h2 className="text-2xl font-extrabold text-white sm:text-3xl">{t("servicesPage.cta.title")}</h2>
+              <p className="mt-3 text-sm text-white/80">{t("servicesPage.cta.desc")}</p>
               <Link
                 to={"/contact" as any}
                 className="group mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-primary shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
-                اطلب عرض سعر
-                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                {t("common.requestQuote")}
+                <ArrowLeft className={`h-4 w-4 transition-transform group-hover:-translate-x-1 ${dir === "ltr" ? "rotate-180" : ""}`} />
               </Link>
             </div>
           </div>
@@ -143,20 +152,20 @@ function ServicesPage() {
         <section className="bg-background pb-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="text-right text-2xl font-extrabold text-foreground">الأسئلة الشائعة</h2>
+              <h2 className="text-start text-2xl font-extrabold text-foreground">{t("servicesPage.faqs")}</h2>
               <div className="mt-6 space-y-3">
                 {faqs.map((f, i) => (
                   <div key={f.q} className="rounded-xl border border-border bg-secondary/30 transition hover:border-primary/30">
                     <button
                       onClick={() => setOpen(open === i ? null : i)}
-                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-right"
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-start"
                     >
                       <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open === i ? "rotate-180" : ""}`} />
-                      <span className="text-sm font-bold text-foreground">{f.q}</span>
+                      <span className="text-sm font-bold text-foreground">{t(f.q)}</span>
                     </button>
                     {open === i && (
-                      <div className="border-t border-border/60 bg-white px-5 py-4 text-right text-xs leading-6 text-muted-foreground">
-                        {f.a}
+                      <div className="border-t border-border/60 bg-white px-5 py-4 text-start text-xs leading-6 text-muted-foreground">
+                        {t(f.a)}
                       </div>
                     )}
                   </div>
