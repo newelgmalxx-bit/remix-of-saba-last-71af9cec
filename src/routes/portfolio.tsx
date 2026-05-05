@@ -8,6 +8,8 @@ import {
   Megaphone, Palette, Search, Star, Award, Briefcase,
   Users, Globe2, Eye,
 } from "lucide-react";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -19,73 +21,78 @@ export const Route = createFileRoute("/portfolio")({
   }),
 });
 
-type Category =
-  | "الكل"
-  | "مواقع"
-  | "تطبيقات"
-  | "هوية"
-  | "سوشيال"
-  | "تسويق";
+type CatKey = "all" | "web" | "apps" | "brand" | "social" | "marketing";
 
-const categories: Category[] = ["الكل", "مواقع", "تطبيقات", "هوية", "سوشيال", "تسويق"];
+const categories: { key: CatKey; tKey: TKey }[] = [
+  { key: "all", tKey: "portfolioPage.cat.all" },
+  { key: "web", tKey: "portfolioPage.cat.web" },
+  { key: "apps", tKey: "portfolioPage.cat.apps" },
+  { key: "brand", tKey: "portfolioPage.cat.brand" },
+  { key: "social", tKey: "portfolioPage.cat.social" },
+  { key: "marketing", tKey: "portfolioPage.cat.marketing" },
+];
 
 const projects: {
   id: string;
-  title: string;
-  client: string;
-  category: Exclude<Category, "الكل">;
+  titleKey: TKey;
+  clientKey: TKey;
+  category: Exclude<CatKey, "all">;
   tag: string;
   img: string;
   year: string;
   featured?: boolean;
 }[] = [
-  { id: "p1", title: "منصة متجر إلكتروني متكامل", client: "نور ستور", category: "مواقع", tag: "E-commerce", year: "2025", featured: true,
+  { id: "p1", titleKey: "portfolioPage.p1.t", clientKey: "portfolioPage.p1.c", category: "web", tag: "E-commerce", year: "2025", featured: true,
     img: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p2", title: "تطبيق حجز خدمات الموبايل", client: "كويك سيرف", category: "تطبيقات", tag: "Mobile App", year: "2025", featured: true,
+  { id: "p2", titleKey: "portfolioPage.p2.t", clientKey: "portfolioPage.p2.c", category: "apps", tag: "Mobile App", year: "2025", featured: true,
     img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p3", title: "هوية بصرية متكاملة لمطعم", client: "بيت اللوز", category: "هوية", tag: "Branding", year: "2024",
+  { id: "p3", titleKey: "portfolioPage.p3.t", clientKey: "portfolioPage.p3.c", category: "brand", tag: "Branding", year: "2024",
     img: "https://images.unsplash.com/photo-1561070791-2526d30994b8?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p4", title: "حملة سوشيال ميديا موسمية", client: "علامة نمط", category: "سوشيال", tag: "Social Media", year: "2025",
+  { id: "p4", titleKey: "portfolioPage.p4.t", clientKey: "portfolioPage.p4.c", category: "social", tag: "Social Media", year: "2025",
     img: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p5", title: "نظام إدارة مشاريع داخلي", client: "تك ستارت", category: "مواقع", tag: "SaaS", year: "2024",
+  { id: "p5", titleKey: "portfolioPage.p5.t", clientKey: "portfolioPage.p5.c", category: "web", tag: "SaaS", year: "2024",
     img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p6", title: "حملة إعلانية مدفوعة Google Ads", client: "مجموعة الأفق", category: "تسويق", tag: "Performance", year: "2025",
+  { id: "p6", titleKey: "portfolioPage.p6.t", clientKey: "portfolioPage.p6.c", category: "marketing", tag: "Performance", year: "2025",
     img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p7", title: "تطبيق توصيل طلبات للمطاعم", client: "ذوق", category: "تطبيقات", tag: "Mobile App", year: "2024",
+  { id: "p7", titleKey: "portfolioPage.p7.t", clientKey: "portfolioPage.p7.c", category: "apps", tag: "Mobile App", year: "2024",
     img: "https://images.unsplash.com/photo-1517292987719-0369a794ec0f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p8", title: "هوية بصرية لشركة عقارية", client: "دار العمارة", category: "هوية", tag: "Branding", year: "2024",
+  { id: "p8", titleKey: "portfolioPage.p8.t", clientKey: "portfolioPage.p8.c", category: "brand", tag: "Branding", year: "2024",
     img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p9", title: "تصميم محتوى انستقرام شهري", client: "متجر بلوم", category: "سوشيال", tag: "Content", year: "2025",
+  { id: "p9", titleKey: "portfolioPage.p9.t", clientKey: "portfolioPage.p9.c", category: "social", tag: "Content", year: "2025",
     img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p10", title: "موقع تعليمي للمساقات الإلكترونية", client: "أكاديمية رواق", category: "مواقع", tag: "EdTech", year: "2024",
+  { id: "p10", titleKey: "portfolioPage.p10.t", clientKey: "portfolioPage.p10.c", category: "web", tag: "EdTech", year: "2024",
     img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p11", title: "حملة تسويق رقمي لإطلاق منتج", client: "براند جلوب", category: "تسويق", tag: "Launch", year: "2025",
+  { id: "p11", titleKey: "portfolioPage.p11.t", clientKey: "portfolioPage.p11.c", category: "marketing", tag: "Launch", year: "2025",
     img: "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p12", title: "تطبيق إدارة لياقة شخصية", client: "فِت بلس", category: "تطبيقات", tag: "Health", year: "2024",
+  { id: "p12", titleKey: "portfolioPage.p12.t", clientKey: "portfolioPage.p12.c", category: "apps", tag: "Health", year: "2024",
     img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=1200&auto=format&fit=crop&q=80" },
 ];
 
-const stats = [
-  { icon: Briefcase, value: "+260", label: "مشروع منجز" },
-  { icon: Users, value: "+180", label: "عميل سعيد" },
-  { icon: Globe2, value: "+15", label: "دولة حول العالم" },
-  { icon: Award, value: "+12", label: "جائزة وتكريم" },
-];
-
-const categoryIcons: Record<Exclude<Category, "الكل">, typeof Layout> = {
-  مواقع: Layout,
-  تطبيقات: Smartphone,
-  هوية: Palette,
-  سوشيال: Sparkles,
-  تسويق: Megaphone,
+const categoryIcons: Record<Exclude<CatKey, "all">, typeof Layout> = {
+  web: Layout,
+  apps: Smartphone,
+  brand: Palette,
+  social: Sparkles,
+  marketing: Megaphone,
 };
 
 function PortfolioPage() {
-  const [activeCat, setActiveCat] = useState<Category>("الكل");
+  const { t, dir } = useLang();
+  const [activeCat, setActiveCat] = useState<CatKey>("all");
   const filtered = useMemo(
-    () => (activeCat === "الكل" ? projects : projects.filter((p) => p.category === activeCat)),
+    () => (activeCat === "all" ? projects : projects.filter((p) => p.category === activeCat)),
     [activeCat],
   );
+
+  const stats = [
+    { icon: Briefcase, value: "+260", label: t("portfolioPage.stat.projects") },
+    { icon: Users, value: "+180", label: t("portfolioPage.stat.clients") },
+    { icon: Globe2, value: "+15", label: t("portfolioPage.stat.countries") },
+    { icon: Award, value: "+12", label: t("portfolioPage.stat.awards") },
+  ];
+
+  const ChevronInline = dir === "rtl" ? ChevronLeft : ChevronLeft;
+  const ArrowInline = ArrowLeft;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -101,29 +108,28 @@ function PortfolioPage() {
           <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[11px] font-bold backdrop-blur">
-                <Link to="/" className="hover:underline">الرئيسية</Link>
-                <ChevronLeft className="h-3 w-3" />
-                <span>أعمالنا</span>
+                <Link to="/" className="hover:underline">{t("portfolioPage.crumb.home")}</Link>
+                <ChevronInline className={`h-3 w-3 ${dir === "ltr" ? "rotate-180" : ""}`} />
+                <span>{t("portfolioPage.crumb.work")}</span>
               </div>
               <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-                مشاريع تتحدث عن نفسها
+                {t("portfolioPage.hero.title")}
               </h1>
               <p className="mt-5 text-base text-white/85 sm:text-lg">
-                مجموعة مختارة من أعمالنا في التصميم والتطوير والتسويق الرقمي،
-                صنعناها بشغف لعملاء يؤمنون بالجودة والتميّز.
+                {t("portfolioPage.hero.desc")}
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   to={"/contact" as any}
                   className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-primary shadow-md transition hover:-translate-y-0.5"
                 >
-                  ابدأ مشروعك معنا
+                  {t("portfolioPage.hero.start")}
                 </Link>
                 <a
                   href="#works"
                   className="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
                 >
-                  استعرض الأعمال
+                  {t("portfolioPage.hero.browse")}
                 </a>
               </div>
             </div>
@@ -148,31 +154,31 @@ function PortfolioPage() {
         <section id="works" className="scroll-mt-24 py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">المعرض</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">{t("portfolioPage.gallery.kicker")}</span>
               <h2 className="mt-3 text-3xl font-extrabold text-foreground sm:text-4xl">
-                مختارات من مشاريعنا
+                {t("portfolioPage.gallery.title")}
               </h2>
               <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-primary/70" />
               <p className="mx-auto mt-4 max-w-2xl text-sm text-muted-foreground">
-                صنّفنا الأعمال حسب التخصص لتسهّل عليك تصفّح ما يهمّك.
+                {t("portfolioPage.gallery.desc")}
               </p>
             </div>
 
             {/* Tabs */}
             <div className="mt-10 flex flex-wrap justify-center gap-2">
               {categories.map((c) => {
-                const active = activeCat === c;
+                const active = activeCat === c.key;
                 return (
                   <button
-                    key={c}
-                    onClick={() => setActiveCat(c)}
+                    key={c.key}
+                    onClick={() => setActiveCat(c.key)}
                     className={`rounded-full px-4 py-2 text-xs font-bold transition ${
                       active
                         ? "bg-primary text-white shadow-md"
                         : "bg-secondary/60 text-foreground/70 hover:bg-primary/10 hover:text-primary"
                     }`}
                   >
-                    {c}
+                    {t(c.tKey)}
                   </button>
                 );
               })}
@@ -182,6 +188,8 @@ function PortfolioPage() {
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
                 const CatIcon = categoryIcons[p.category];
+                const projectTitle = t(p.titleKey);
+                const catLabel = t(`portfolioPage.cat.${p.category}` as TKey);
                 return (
                   <article
                     key={p.id}
@@ -190,43 +198,43 @@ function PortfolioPage() {
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <img
                         src={p.img}
-                        alt={p.title}
+                        alt={projectTitle}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                      <div className="absolute right-3 top-3 flex gap-2">
+                      <div className={`absolute top-3 flex gap-2 ${dir === "rtl" ? "right-3" : "left-3"}`}>
                         <span className="rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary backdrop-blur">
                           {p.tag}
                         </span>
                         {p.featured && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-bold text-amber-950">
-                            <Star className="h-3 w-3 fill-current" /> مميّز
+                            <Star className="h-3 w-3 fill-current" /> {t("portfolioPage.featured")}
                           </span>
                         )}
                       </div>
                       <div className="absolute inset-x-4 bottom-4 flex translate-y-4 items-center justify-between opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
                         <button className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[11px] font-bold text-primary shadow-md">
                           <Eye className="h-3.5 w-3.5" />
-                          عرض المشروع
+                          {t("portfolioPage.viewProject")}
                         </button>
                         <button className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-primary shadow-md">
                           <ExternalLink className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="p-5 text-right">
+                    <div className={`p-5 ${dir === "rtl" ? "text-right" : "text-left"}`}>
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                         <span>{p.year}</span>
                         <span className="inline-flex items-center gap-1.5">
                           <CatIcon className="h-3.5 w-3.5 text-primary" />
-                          {p.category}
+                          {catLabel}
                         </span>
                       </div>
                       <h3 className="mt-2 text-base font-bold text-foreground transition group-hover:text-primary">
-                        {p.title}
+                        {projectTitle}
                       </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">العميل: {p.client}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {t(p.clientKey)}</p>
                     </div>
                   </article>
                 );
@@ -235,7 +243,7 @@ function PortfolioPage() {
 
             {filtered.length === 0 && (
               <div className="mt-10 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-                لا توجد مشاريع في هذا التصنيف حالياً.
+                {t("portfolioPage.empty")}
               </div>
             )}
           </div>
@@ -246,11 +254,11 @@ function PortfolioPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
               {[
-                { icon: Layout, label: "تصميم مواقع" },
-                { icon: Smartphone, label: "تطبيقات الموبايل" },
-                { icon: Palette, label: "هوية بصرية" },
-                { icon: Megaphone, label: "إعلانات وحملات" },
-                { icon: Search, label: "تحسين SEO" },
+                { icon: Layout, label: t("portfolioPage.cap.web") },
+                { icon: Smartphone, label: t("portfolioPage.cap.apps") },
+                { icon: Palette, label: t("portfolioPage.cap.brand") },
+                { icon: Megaphone, label: t("portfolioPage.cap.ads") },
+                { icon: Search, label: t("portfolioPage.cap.seo") },
               ].map((c) => (
                 <div
                   key={c.label}
@@ -276,23 +284,23 @@ function PortfolioPage() {
           <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
             <Sparkles className="mx-auto h-8 w-8 text-white/80" />
             <h2 className="mt-4 text-3xl font-extrabold sm:text-4xl">
-              مشروعك القادم يستحق نفس الاحترافية
+              {t("portfolioPage.cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/85 sm:text-base">
-              تواصل معنا اليوم واحصل على استشارة مجانية لتحويل فكرتك إلى منتج رقمي ناجح.
+              {t("portfolioPage.cta.desc")}
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to={"/contact" as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-primary shadow-lg transition hover:-translate-y-0.5"
               >
-                ابدأ مشروعك الآن <ArrowLeft className="h-4 w-4" />
+                {t("portfolioPage.cta.start")} <ArrowInline className={`h-4 w-4 ${dir === "ltr" ? "rotate-180" : ""}`} />
               </Link>
               <Link
                 to={"/services" as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-white/40 bg-white/10 px-8 text-sm font-bold backdrop-blur transition hover:bg-white/20"
               >
-                استعرض خدماتنا
+                {t("portfolioPage.cta.services")}
               </Link>
             </div>
           </div>
