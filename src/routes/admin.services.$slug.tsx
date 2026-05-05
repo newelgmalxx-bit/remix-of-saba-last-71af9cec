@@ -37,6 +37,7 @@ function ServiceEditorPage() {
   const [breadcrumb, setBreadcrumb] = useState(initial?.breadcrumb ?? "");
   const [heroHighlights, setHeroHighlights] = useState<string[]>(initial?.heroHighlights ?? []);
   const [bannerImage, setBannerImage] = useState<string>(initial?.bannerImage ?? "");
+  const [overviewDescription, setOverviewDescription] = useState<string>(initial?.overviewDescription ?? "");
   const [seo, setSeo] = useState({
     title: initial?.seo?.title ?? "",
     description: initial?.seo?.description ?? "",
@@ -78,7 +79,7 @@ function ServiceEditorPage() {
   }
 
   const handleSave = () => {
-    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, seo, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
+    const next: ServiceOverride = { title, subtitle, category, breadcrumb, heroHighlights, bannerImage, overviewDescription, seo, overview, benefits, plans, steps, stats, testimonials, faqs, isCustom: isCustom || override?.isCustom };
     save(next);
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
@@ -92,6 +93,7 @@ function ServiceEditorPage() {
     setBreadcrumb(base.breadcrumb);
     setHeroHighlights(base.heroHighlights);
     setBannerImage(base.bannerImage ?? "");
+    setOverviewDescription(base.overviewDescription ?? "");
     setSeo({ title: base.seo?.title ?? "", description: base.seo?.description ?? "", keywords: base.seo?.keywords ?? "", ogImage: base.seo?.ogImage ?? "" });
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
@@ -191,7 +193,12 @@ function ServiceEditorPage() {
         </PanelCard>
 
         {/* Overview */}
-        <PanelCard title="نظرة عامة (3 بطاقات)">
+        <PanelCard title="نظرة عامة عن الخدمة">
+          <div className="mb-4">
+            <Field label="وصف عام للخدمة (يظهر أعلى البطاقات)">
+              <textarea rows={5} className={inputCls} placeholder="اكتب وصفًا تفصيليًا واضحًا عن الخدمة..." value={overviewDescription} onChange={(e) => setOverviewDescription(e.target.value)} />
+            </Field>
+          </div>
           <div className="grid gap-4 md:grid-cols-3">
             {overview.map((o, i) => (
               <div key={i} className="rounded-xl border border-border p-4 space-y-3">
