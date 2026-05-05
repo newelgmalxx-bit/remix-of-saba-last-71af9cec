@@ -1,17 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import logo from "@/assets/logo-white.png";
+import { useLang } from "@/i18n/LanguageProvider";
+import type { TKey } from "@/i18n/translations";
 
 export function SiteFooter() {
+  const { t } = useLang();
   return (
     <footer className="bg-primary-dark text-white">
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <img src={logo} alt="سابا ديزاين" width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
-          <p className="text-base leading-8 text-white/80">
-            وكالة رقمية متخصصة في تصميم وتطوير الحلول الرقمية المبتكرة لتحويل أفكارك إلى واقع.
-          </p>
+          <img src={logo} alt={t("footer.brand")} width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
+          <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
             {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
               <a
@@ -26,39 +27,39 @@ export function SiteFooter() {
         </div>
 
         <FooterCol
-          title="روابط سريعة"
+          titleKey="footer.quickLinks"
           links={[
-            { label: "الرئيسية", to: "/" },
-            { label: "من نحن", to: "/about" },
-            { label: "خدماتنا", to: "/services" },
-            { label: "أعمالنا", to: "/portfolio" },
-            { label: "تواصل معنا", to: "/contact" },
+            { key: "nav.home", to: "/" },
+            { key: "nav.about", to: "/about" },
+            { key: "nav.services", to: "/services" },
+            { key: "nav.portfolio", to: "/portfolio" },
+            { key: "footer.contactUs", to: "/contact" },
           ]}
         />
         <FooterCol
-          title="خدماتنا"
+          titleKey="footer.ourServices"
           links={[
-            { label: "تصميم مواقع الكترونية", to: "/services" },
-            { label: "تصميم واجهات مستخدم", to: "/services" },
-            { label: "إطلاق حملات إعلانية", to: "/services" },
-            { label: "تحسين محركات البحث SEO", to: "/services" },
-            { label: "تصميم سوشيال ميديا", to: "/services" },
+            { key: "footer.svc.web", to: "/services" },
+            { key: "footer.svc.ui", to: "/services" },
+            { key: "footer.svc.ads", to: "/services" },
+            { key: "footer.svc.seo", to: "/services" },
+            { key: "footer.svc.social", to: "/services" },
           ]}
         />
 
         <div>
-          <h4 className="mb-5 text-lg font-bold">تواصل معنا</h4>
+          <h4 className="mb-5 text-lg font-bold">{t("footer.contactUs")}</h4>
           <ul className="space-y-3">
             {[
               { Icon: Phone, text: "+966 50 123 4567" },
               { Icon: Mail, text: "info@sabadesign.com" },
-              { Icon: MapPin, text: "المملكة العربية السعودية" },
+              { Icon: MapPin, text: t("footer.location") },
             ].map(({ Icon, text }, i) => (
               <li key={i} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                   <Icon className="h-4 w-4" />
                 </span>
-                <span dir="ltr" className="flex-1 text-right text-sm text-white/85">{text}</span>
+                <span dir="ltr" className="flex-1 text-start text-sm text-white/85">{text}</span>
               </li>
             ))}
           </ul>
@@ -66,17 +67,17 @@ export function SiteFooter() {
             to={"/contact" as any}
             className="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-white text-sm font-bold text-primary-dark shadow-md transition hover:-translate-y-0.5"
           >
-            اطلب عرض سعر
+            {t("footer.requestQuote")}
           </Link>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} سابا ديزاين. جميع الحقوق محفوظة.</p>
+          <p>© {new Date().getFullYear()} {t("footer.brand")}. {t("footer.rights")}</p>
           <div className="flex items-center gap-5">
-            <Link to={"/privacy" as any} className="hover:text-white">سياسة الخصوصية</Link>
-            <Link to={"/terms" as any} className="hover:text-white">الشروط والأحكام</Link>
+            <Link to={"/privacy" as any} className="hover:text-white">{t("footer.privacy")}</Link>
+            <Link to={"/terms" as any} className="hover:text-white">{t("footer.terms")}</Link>
           </div>
         </div>
       </div>
@@ -84,15 +85,16 @@ export function SiteFooter() {
   );
 }
 
-function FooterCol({ title, links }: { title: string; links: { label: string; to: string }[] }) {
+function FooterCol({ titleKey, links }: { titleKey: TKey; links: { key: TKey; to: string }[] }) {
+  const { t } = useLang();
   return (
     <div>
-      <h4 className="mb-5 text-lg font-bold">{title}</h4>
+      <h4 className="mb-5 text-lg font-bold">{t(titleKey)}</h4>
       <ul className="space-y-3 text-base text-white/85">
         {links.map((l) => (
-          <li key={l.label}>
+          <li key={l.key}>
             <Link to={l.to as any} className="transition hover:text-white">
-              {l.label}
+              {t(l.key)}
             </Link>
           </li>
         ))}
