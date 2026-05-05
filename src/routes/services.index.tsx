@@ -1,27 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Layout, MonitorSmartphone, Megaphone, Sparkles, Users2, Video, TrendingUp, Code2, Search,
   ArrowLeft, ChevronLeft, MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, ChevronDown,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
+import { useAllServices } from "@/hooks/useServiceContent";
+import { ServiceCard } from "@/components/sections/ServicesGrid";
 
 const tabs = ["الكل", "تصميم", "برمجة", "تسويق", "سوشيال ميديا"];
-
-const services = [
-  { slug: "web-design", icon: Layout, title: "تصميم مواقع إلكترونية", desc: "مواقع سريعة ومتجاوبة تعكس هوية البراند.", cat: "برمجة" },
-  { slug: "ui-design", icon: MonitorSmartphone, title: "تصميم واجهات مستخدم", desc: "واجهة سهلة وتركّز على التحويل.", cat: "تصميم" },
-  { slug: "ad-banners", icon: Megaphone, title: "تصميم بنرات إعلانية", desc: "أصول بصرية جذابة لحملاتك الرقمية.", cat: "تصميم" },
-  { slug: "social-media-design", icon: Sparkles, title: "تصميم سوشيال ميديا", desc: "منشورات احترافية متناسقة مع الهوية.", cat: "سوشيال ميديا" },
-  { slug: "social-media-setup", icon: Users2, title: "إنشاء حسابات سوشيال ميديا", desc: "تهيئة الحسابات وبناء حضور قوي.", cat: "سوشيال ميديا" },
-  { slug: "ad-videos", icon: Video, title: "تصميم فيديوهات إعلانية", desc: "فيديوهات مختصرة عالية التأثير.", cat: "تصميم" },
-  { slug: "ad-campaigns", icon: Megaphone, title: "إطلاق حملات إعلانية", desc: "حملات ممولة مدروسة وموجهة.", cat: "تسويق" },
-  { slug: "digital-marketing", icon: TrendingUp, title: "تسويق إلكتروني", desc: "استراتيجية نمو تجمع المحتوى والتحول.", cat: "تسويق" },
-  { slug: "debugging", icon: Code2, title: "تصحيح أخطاء برمجية", desc: "حل الأعطال وتحسين الاستقرار والأداء.", cat: "برمجة" },
-  { slug: "seo", icon: Search, title: "SEO", desc: "رفع الظهور العضوي وتحسين البنية.", cat: "تسويق" },
-];
 
 const steps = [
   { n: 1, icon: MessageSquare, title: "تواصل واستشارة" },
@@ -41,7 +29,8 @@ const faqs = [
 function ServicesPage() {
   const [active, setActive] = useState("الكل");
   const [open, setOpen] = useState<number | null>(0);
-  const filtered = active === "الكل" ? services : services.filter((s) => s.cat === active);
+  const services = useAllServices();
+  const filtered = active === "الكل" ? services : services.filter((s) => s.category === active);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -91,23 +80,14 @@ function ServicesPage() {
             {/* Services grid */}
             <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {filtered.map((s) => (
-                <div
-                  key={s.title}
-                  className="group rounded-2xl border border-border bg-white p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-                >
-                  <div className="mx-auto mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary transition group-hover:bg-primary group-hover:text-white">
-                    <s.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-sm font-bold text-foreground">{s.title}</h3>
-                  <p className="mt-2 text-xs leading-6 text-muted-foreground">{s.desc}</p>
-                  <Link
-                    to="/services/$slug"
-                    params={{ slug: s.slug }}
-                    className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-secondary/60 px-4 py-2 text-[11px] font-bold text-primary transition hover:bg-primary hover:text-white"
-                  >
-                    عرض التفاصيل <ArrowLeft className="h-3 w-3" />
-                  </Link>
-                </div>
+                <ServiceCard
+                  key={s.slug}
+                  slug={s.slug}
+                  title={s.title}
+                  desc={s.subtitle}
+                  banner={s.bannerImage || servicesHero}
+                  category={s.category}
+                />
               ))}
             </div>
           </div>
