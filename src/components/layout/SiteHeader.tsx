@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X, Globe, LogIn, ShoppingCart, User } from "lucide-react";
+import { Menu, X, LogIn, ShoppingCart, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -54,9 +54,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <button onClick={toggleLang} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-medium text-foreground/70 transition hover:border-primary hover:text-primary">
-            <Globe className="h-3.5 w-3.5" /> {lang === "ar" ? "EN" : "AR"}
-          </button>
+          <LangSwitch lang={lang} onClick={toggleLang} />
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
@@ -87,9 +85,7 @@ export function SiteHeader() {
 
         {/* Mobile/Tablet quick actions */}
         <div className="flex items-center gap-1.5 lg:hidden">
-          <button onClick={toggleLang} aria-label={t("nav.toggleLang")} className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-white px-2.5 text-[11px] font-bold text-foreground/70 hover:border-primary hover:text-primary">
-            <Globe className="h-3.5 w-3.5" /> {lang === "ar" ? "EN" : "AR"}
-          </button>
+          <LangSwitch lang={lang} onClick={toggleLang} compact label={t("nav.toggleLang")} />
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground/70"
@@ -145,5 +141,32 @@ export function SiteHeader() {
         </nav>
       </div>
     </header>
+  );
+}
+
+function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en"; onClick: () => void; compact?: boolean; label?: string }) {
+  // Show the flag of the language we will switch TO (next language)
+  const next = lang === "ar" ? "en" : "ar";
+  const flag = next === "en" ? "🇺🇸" : "🇸🇦";
+  const code = next === "en" ? "EN" : "AR";
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label || "Toggle language"}
+      className={
+        compact
+          ? "group inline-flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-border bg-white px-2.5 text-[11px] font-bold text-foreground/70 transition hover:border-primary hover:text-primary"
+          : "group inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-border bg-white px-3 py-1.5 text-xs font-bold text-foreground/70 transition hover:border-primary hover:text-primary"
+      }
+    >
+      <span
+        key={flag}
+        className="text-base leading-none transition-transform duration-300 group-hover:scale-110"
+        aria-hidden
+      >
+        {flag}
+      </span>
+      <span className="tracking-wide">{code}</span>
+    </button>
   );
 }
