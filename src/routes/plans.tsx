@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, ShoppingCart, Zap, ArrowLeft, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
@@ -73,6 +74,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
   const handleAdd = () => {
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `باقة ${plan.name}`, planName: plan.name, price: priceNum });
+    toast.success("تمت الإضافة للسلة", { description: `باقة ${plan.name}` });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
