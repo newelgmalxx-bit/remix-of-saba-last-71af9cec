@@ -116,7 +116,7 @@ function CheckoutPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="الاسم الكامل" value={info.name} onChange={(v) => setInfo({ ...info, name: v })} />
                     <Field label="البريد الإلكتروني" type="email" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} />
-                    <Field label="رقم الجوال" value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} />
+                    <Field label="رقم الجوال" value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} dir="ltr" type="tel" />
                     <Field label="اسم الشركة (اختياري)" value={info.company} onChange={(v) => setInfo({ ...info, company: v })} />
                   </div>
                   <div>
@@ -222,7 +222,7 @@ function CheckoutPage() {
                   <ReviewBlock title="معلومات العميل">
                     <ReviewRow label="الاسم" value={info.name} />
                     <ReviewRow label="البريد" value={info.email} />
-                    <ReviewRow label="الجوال" value={info.phone} />
+                    <ReviewRow label="الجوال" value={info.phone} ltr />
                     {info.company && <ReviewRow label="الشركة" value={info.company} />}
                     {info.notes && <ReviewRow label="ملاحظات" value={info.notes} />}
                   </ReviewBlock>
@@ -312,15 +312,16 @@ function CheckoutPage() {
   );
 }
 
-function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+function Field({ label, value, onChange, type = "text", dir }: { label: string; value: string; onChange: (v: string) => void; type?: string; dir?: "ltr" | "rtl" }) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-bold">{label}</label>
       <input
         type={type}
         value={value}
+        dir={dir}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        className={`w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 ${dir === "ltr" ? "text-left" : ""}`}
       />
     </div>
   );
@@ -335,11 +336,11 @@ function ReviewBlock({ title, children }: { title: string; children: React.React
   );
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({ label, value, ltr }: { label: string; value: string; ltr?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{label}:</span>
-      <span className="font-medium text-foreground text-left">{value}</span>
+      <span dir={ltr ? "ltr" : undefined} className="font-medium text-foreground text-left">{value}</span>
     </div>
   );
 }

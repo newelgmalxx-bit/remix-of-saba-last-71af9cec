@@ -73,7 +73,7 @@ export function ContactSection() {
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Field label="الاسم الكامل" placeholder="مثال: محمد العتيبي" required />
-              <Field label="رقم الجوال" placeholder="+966 5x xxx xxxx" required />
+              <Field label="رقم الجوال" placeholder="+966 5x xxx xxxx" required type="tel" dir="ltr" />
               <div className="sm:col-span-2">
                 <Field label="البريد الإلكتروني" type="email" placeholder="name@example.com" required />
               </div>
@@ -111,7 +111,7 @@ export function ContactSection() {
   );
 }
 
-function Field({ label, type = "text", placeholder, required }: { label: string; type?: string; placeholder?: string; required?: boolean }) {
+function Field({ label, type = "text", placeholder, required, dir }: { label: string; type?: string; placeholder?: string; required?: boolean; dir?: "ltr" | "rtl" }) {
   return (
     <div>
       <label className="mb-2 block text-xs font-semibold text-foreground">
@@ -120,7 +120,8 @@ function Field({ label, type = "text", placeholder, required }: { label: string;
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15"
+        dir={dir}
+        className={`w-full rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 ${dir === "ltr" ? "text-left placeholder:text-left" : ""}`}
       />
     </div>
   );

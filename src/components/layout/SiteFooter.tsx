@@ -58,7 +58,7 @@ export function SiteFooter() {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                   <Icon className="h-4 w-4" />
                 </span>
-                <span className="flex-1 text-right text-sm text-white/85">{text}</span>
+                <span dir="ltr" className="flex-1 text-right text-sm text-white/85">{text}</span>
               </li>
             ))}
           </ul>
