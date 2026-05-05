@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, LogIn, ShoppingCart, User } from "lucide-react";
 import logo from "@/assets/logo.png";
+import flagSA from "@/assets/flag-sa.jpg";
+import flagUS from "@/assets/flag-us.jpg";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
@@ -147,7 +149,7 @@ export function SiteHeader() {
 function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en"; onClick: () => void; compact?: boolean; label?: string }) {
   // Show the flag of the language we will switch TO (next language)
   const next = lang === "ar" ? "en" : "ar";
-  const flag = next === "en" ? "🇺🇸" : "🇸🇦";
+  const flagSrc = next === "en" ? flagUS : flagSA;
   const code = next === "en" ? "EN" : "AR";
   return (
     <button
@@ -159,13 +161,13 @@ function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en"; onCl
           : "group inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-border bg-white px-3 py-1.5 text-xs font-bold text-foreground/70 transition hover:border-primary hover:text-primary"
       }
     >
-      <span
-        key={flag}
-        className="text-base leading-none transition-transform duration-300 group-hover:scale-110"
+      <img
+        key={code}
+        src={flagSrc}
+        alt=""
         aria-hidden
-      >
-        {flag}
-      </span>
+        className="h-4 w-6 rounded-[2px] object-cover ring-1 ring-border/60 transition-transform duration-300 group-hover:scale-110"
+      />
       <span className="tracking-wide">{code}</span>
     </button>
   );
