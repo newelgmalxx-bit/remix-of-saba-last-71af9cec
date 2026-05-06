@@ -5,6 +5,7 @@ import logo from "@/assets/logo.png";
 import flagSA from "@/assets/flag-sa.jpg";
 import flagUS from "@/assets/flag-us.jpg";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 
@@ -20,6 +21,7 @@ const navLinks: { to: any; key: TKey }[] = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
+  const { isAuthenticated, isAdmin } = useAuth();
   const { lang, toggle: toggleLang, t } = useLang();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -71,20 +73,32 @@ export function SiteHeader() {
               </span>
             )}
           </Link>
-          <Link
-            to={"/account" as any}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
-            aria-label={t("nav.account")}
-          >
-            <User className="h-4 w-4" />
-          </Link>
-          <Link
-            to={"/login" as any}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
-          >
-            <LogIn className="h-4 w-4" />
-            {t("nav.login")}
-          </Link>
+          {mounted && isAuthenticated ? (
+            <Link
+              to={(isAdmin ? "/admin" : "/account") as any}
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
+            >
+              <User className="h-4 w-4" />
+              {t("nav.account")}
+            </Link>
+          ) : (
+            <>
+              <Link
+                to={"/account" as any}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
+                aria-label={t("nav.account")}
+              >
+                <User className="h-4 w-4" />
+              </Link>
+              <Link
+                to={"/login" as any}
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
+              >
+                <LogIn className="h-4 w-4" />
+                {t("nav.login")}
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile/Tablet quick actions */}
@@ -127,20 +141,32 @@ export function SiteHeader() {
             </Link>
           ))}
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <Link
-              to={"/account" as any}
-              onClick={() => setOpen(false)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-white text-sm font-bold text-foreground/80"
-            >
-              <User className="h-4 w-4" /> {t("nav.account")}
-            </Link>
-            <Link
-              to={"/login" as any}
-              onClick={() => setOpen(false)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-primary-foreground"
-            >
-              <LogIn className="h-4 w-4" /> {t("nav.login")}
-            </Link>
+            {mounted && isAuthenticated ? (
+              <Link
+                to={(isAdmin ? "/admin" : "/account") as any}
+                onClick={() => setOpen(false)}
+                className="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-primary-foreground"
+              >
+                <User className="h-4 w-4" /> {t("nav.account")}
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to={"/account" as any}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-white text-sm font-bold text-foreground/80"
+                >
+                  <User className="h-4 w-4" /> {t("nav.account")}
+                </Link>
+                <Link
+                  to={"/login" as any}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-primary-foreground"
+                >
+                  <LogIn className="h-4 w-4" /> {t("nav.login")}
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       </div>
