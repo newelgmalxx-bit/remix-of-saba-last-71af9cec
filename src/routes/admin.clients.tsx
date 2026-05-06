@@ -56,13 +56,16 @@ function ClientsPage() {
     };
     Promise.all([
       adminApi.clients.list({ limit: 200 }).catch(() => ({ items: [] })),
-      adminApi.invoices.list({ limit: 500 }).catch(() => ({ items: [] })),
-      adminApi.orders.list({ limit: 500 }).catch(() => ({ items: [] })),
-    ]).then(([cp, ip, op]: any) => {
+      adminApi.invoices.list({ limit: 1000, status: "all" }).catch(() => ({ items: [] })),
+      adminApi.orders.list({ limit: 1000, status: "all" }).catch(() => ({ items: [] })),
+      adminApi.consultations?.list?.({ limit: 1000, status: "all" }).catch(() => ({ items: [] })) ?? Promise.resolve({ items: [] }),
+    ]).then(([cp, ip, op, bp]: any) => {
       const invoices: any[] = ip?.items || [];
       const orders: any[] = op?.items || [];
+      const bookings: any[] = bp?.items || [];
       const byEmail = new Map<string, { orders: number; spent: number }>();
       const byName = new Map<string, { orders: number; spent: number }>();
+      const byUserId = new Map<string, { orders: number; spent: number }>();
       const bump = (m: Map<string, any>, key: string, amount: number) => {
         if (!key) return;
         const cur = m.get(key) || { orders: 0, spent: 0 };
@@ -71,22 +74,41 @@ function ClientsPage() {
         m.set(key, cur);
       };
       const sources = [
-        ...orders.map((o) => ({ email: o.contact_email ?? o.client_email ?? o.email ?? o.user_email, name: o.contact_name ?? o.client_name ?? o.client, total: o.total ?? o.amount })),
-        ...invoices.map((i) => ({ email: i.client_email, name: i.client_name, total: i.total })),
+        ...orders.map((o) => ({
+          userId: o.user_id ?? o.userId ?? o.client_id ?? o.clientId,
+          email: o.contact_email ?? o.client_email ?? o.email ?? o.user_email,
+          name: o.contact_name ?? o.client_name ?? o.client ?? o.user_name,
+          total: o.total ?? o.amount ?? o.subtotal ?? 0,
+        })),
+        ...invoices.map((i) => ({
+          userId: i.user_id ?? i.userId ?? i.client_id ?? i.clientId,
+          email: i.client_email ?? i.email,
+          name: i.client_name ?? i.client,
+          total: i.total ?? i.amount ?? 0,
+        })),
+        ...bookings.map((b) => ({
+          userId: b.user_id ?? b.userId ?? b.client_id ?? b.clientId,
+          email: b.contact_email ?? b.client_email ?? b.email,
+          name: b.contact_name ?? b.client_name ?? b.name,
+          total: b.total ?? b.amount ?? 0,
+        })),
       ];
       sources.forEach((s) => {
+        if (s.userId) bump(byUserId, String(s.userId), Number(s.total) || 0);
         bump(byEmail, normEmail(s.email), Number(s.total) || 0);
         bump(byName, normName(s.name), Number(s.total) || 0);
       });
       const items: AdminClient[] = (cp.items || []).map((c: any) => {
         const a =
+          (c.id && byUserId.get(String(c.id))) ||
+          (c.userId && byUserId.get(String(c.userId))) ||
           byEmail.get(normEmail(c.email)) ||
           byName.get(normName(c.name)) ||
           { orders: 0, spent: 0 };
         return {
           id: c.id, name: c.name, email: c.email, phone: c.phone ?? "",
-          orders: Number(c.orders) || a.orders,
-          totalSpent: Number(c.totalSpent) || a.spent,
+          orders: a.orders || Number(c.orders) || 0,
+          totalSpent: a.spent || Number(c.totalSpent) || 0,
           segment: (c.segment as any) || "new",
           joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
           city: c.city ?? undefined,
