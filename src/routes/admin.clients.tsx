@@ -38,6 +38,22 @@ function ClientsPage() {
   const [viewing, setViewing] = useState<AdminClient | null>(null);
 
   useEffect(() => {
+    // Normalize email/name to reduce mismatch (case, spaces, arabic diacritics, dots in gmail)
+    const normEmail = (v: any) => {
+      const s = String(v ?? "").trim().toLowerCase();
+      if (!s || !s.includes("@")) return "";
+      const [local, domain] = s.split("@");
+      const d = domain.replace(/^googlemail\.com$/, "gmail.com");
+      const l = d === "gmail.com" ? local.replace(/\./g, "").split("+")[0] : local.split("+")[0];
+      return `${l}@${d}`;
+    };
+    const normName = (v: any) => {
+      let s = String(v ?? "").trim().toLowerCase();
+      if (!s) return "";
+      s = s.normalize("NFKD").replace(/[\u0300-\u036f\u064B-\u0652\u0670]/g, ""); // strip diacritics + arabic tashkeel
+      s = s.replace(/[إأآا]/g, "ا").replace(/ى/g, "ي").replace(/ؤ/g, "و").replace(/ئ/g, "ي").replace(/ة/g, "ه");
+      return s.replace(/\s+/g, " ");
+    };
     Promise.all([
       adminApi.clients.list({ limit: 200 }).catch(() => ({ items: [] })),
       adminApi.invoices.list({ limit: 500 }).catch(() => ({ items: [] })),
@@ -45,30 +61,27 @@ function ClientsPage() {
     ]).then(([cp, ip, op]: any) => {
       const invoices: any[] = ip?.items || [];
       const orders: any[] = op?.items || [];
-      // Aggregate per-client from orders + invoices, matching by email OR name
       const byEmail = new Map<string, { orders: number; spent: number }>();
       const byName = new Map<string, { orders: number; spent: number }>();
       const bump = (m: Map<string, any>, key: string, amount: number) => {
         if (!key) return;
-        const k = key.trim().toLowerCase();
-        if (!k) return;
-        const cur = m.get(k) || { orders: 0, spent: 0 };
+        const cur = m.get(key) || { orders: 0, spent: 0 };
         cur.orders += 1;
         cur.spent += Number(amount) || 0;
-        m.set(k, cur);
+        m.set(key, cur);
       };
       const sources = [
-        ...orders.map((o) => ({ email: o.client_email || o.email || o.user_email, name: o.client_name || o.client, total: o.total ?? o.amount, paid: true })),
-        ...invoices.map((i) => ({ email: i.client_email, name: i.client_name, total: i.total, paid: i.status === "paid" })),
+        ...orders.map((o) => ({ email: o.client_email ?? o.email ?? o.user_email, name: o.client_name ?? o.client, total: o.total ?? o.amount })),
+        ...invoices.map((i) => ({ email: i.client_email, name: i.client_name, total: i.total })),
       ];
       sources.forEach((s) => {
-        bump(byEmail, String(s.email || ""), Number(s.total) || 0);
-        bump(byName, String(s.name || ""), Number(s.total) || 0);
+        bump(byEmail, normEmail(s.email), Number(s.total) || 0);
+        bump(byName, normName(s.name), Number(s.total) || 0);
       });
       const items: AdminClient[] = (cp.items || []).map((c: any) => {
         const a =
-          byEmail.get((c.email || "").trim().toLowerCase()) ||
-          byName.get((c.name || "").trim().toLowerCase()) ||
+          byEmail.get(normEmail(c.email)) ||
+          byName.get(normName(c.name)) ||
           { orders: 0, spent: 0 };
         return {
           id: c.id, name: c.name, email: c.email, phone: c.phone ?? "",
@@ -80,15 +93,37 @@ function ClientsPage() {
         };
       });
       setClients(items);
-      // Build client-growth series from joinedAt months if backend didn't supply it
+      // Build client-growth series — fill gaps between months so the chart is continuous
+      const list: any[] = cp.items || [];
       const monthMap = new Map<string, number>();
-      (cp.items || []).forEach((c: any) => {
-        const m = (c.joinedAt || "").slice(0, 7);
-        if (m) monthMap.set(m, (monthMap.get(m) || 0) + 1);
+      let unknown = 0;
+      list.forEach((c) => {
+        const raw = (c.joinedAt || c.created_at || c.createdAt || "").toString().slice(0, 7);
+        if (/^\d{4}-\d{2}$/.test(raw)) monthMap.set(raw, (monthMap.get(raw) || 0) + 1);
+        else unknown += 1;
       });
-      const series = Array.from(monthMap.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([m, n]) => ({ m, n, r: 0 }));
+      let series: { m: string; n: number; r: number }[] = [];
+      if (monthMap.size) {
+        const keys = Array.from(monthMap.keys()).sort();
+        const [sy, sm] = keys[0].split("-").map(Number);
+        const [ey, em] = keys[keys.length - 1].split("-").map(Number);
+        const cur = new Date(sy, sm - 1, 1);
+        const end = new Date(ey, em - 1, 1);
+        let cumulative = 0;
+        while (cur <= end) {
+          const k = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`;
+          const n = monthMap.get(k) || 0;
+          cumulative += n;
+          series.push({ m: k, n, r: cumulative - n });
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        if (unknown) series[0] = { ...series[0], n: series[0].n + unknown };
+      } else if (list.length) {
+        // No joinedAt at all — show a single bucket for "current month" so chart isn't empty
+        const now = new Date();
+        const k = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        series = [{ m: k, n: list.length, r: 0 }];
+      }
       if (series.length) setGrowthSeries((prev) => (prev.length ? prev : series));
     });
     adminApi.analytics().then((a: any) => {
