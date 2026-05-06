@@ -1,15 +1,45 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { ApiError } from "@/lib/api";
+import { toast } from "sonner";
 
 function LoginPage() {
-  const [tab, setTab] = useState<"email" | "phone">("email");
+  const [tab, setTab] = useState<"email" | "phone">("phone");
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
   const { t, dir, lang, toggle } = useLang();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!identifier || !password) {
+      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const user = await login(
+        tab === "email" ? { email: identifier, password } : { phone: identifier, password },
+      );
+      toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
+      const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
+      navigate({ to: isAdmin ? "/admin" : "/account" });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول" : "Login failed");
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8" dir={dir}>
@@ -50,13 +80,15 @@ function LoginPage() {
               </button>
             </div>
 
-            <form className="mt-6 space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="mt-6 space-y-5" onSubmit={onSubmit}>
               <Field
                 label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
                 type={tab === "email" ? "email" : "tel"}
                 placeholder={tab === "email" ? t("auth.emailPh") : t("auth.phonePh")}
                 icon={tab === "email" ? <Mail className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
                 dirCtx={dir}
+                value={identifier}
+                onChange={setIdentifier}
               />
 
               <div className="text-start">
@@ -76,6 +108,8 @@ function LoginPage() {
                   <input
                     type={showPwd ? "text" : "password"}
                     placeholder={t("auth.passwordPh")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -99,9 +133,10 @@ function LoginPage() {
 
               <button
                 type="submit"
+                disabled={submitting}
                 className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
               >
-                {t("auth.signIn")}
+                {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
               </button>
             </form>
 
@@ -130,7 +165,7 @@ function LoginPage() {
   );
 }
 
-function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr" }) {
+function Field({ label, type, placeholder, icon, dirCtx, value, onChange }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr"; value?: string; onChange?: (v: string) => void }) {
   const isPhone = type === "tel";
   const d = dirCtx || "rtl";
 
@@ -144,6 +179,8 @@ function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type
           dir={isPhone ? "ltr" : undefined}
           inputMode={isPhone ? "tel" : undefined}
           placeholder={placeholder}
+          value={value}
+          onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-start"}`}
         />
       </div>
