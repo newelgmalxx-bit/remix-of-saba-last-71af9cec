@@ -255,8 +255,21 @@ function ServiceEditorPage() {
         </PanelCard>
 
         <PanelCard title="الباقات والأسعار">
+          <div className="mb-5 grid gap-4 md:grid-cols-2">
+            <Field label="السعر الحالي للخدمة (ر.س)">
+              <input className={inputCls} dir="ltr" type="number" placeholder="3500" value={price} onChange={(e) => setPrice(e.target.value)} />
+            </Field>
+            <Field label="السعر قبل الخصم (ر.س — اختياري)">
+              <input className={inputCls} dir="ltr" type="number" placeholder="اتركه فارغ لو مفيش خصم" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} />
+            </Field>
+            {originalPrice && price && Number(originalPrice) > Number(price) && (
+              <div className="md:col-span-2 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                نسبة الخصم: {Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)}% — توفير {(Number(originalPrice) - Number(price)).toLocaleString()} ر.س
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
-            إدارة الباقات أصبحت في صفحة منفصلة. يمكنك التحكم بكل الباقات والأسعار من هناك.
+            تفاصيل باقات الاشتراك العامة (Plans) تتم إدارتها من صفحة منفصلة.
           </p>
           <div className="mt-3">
             <Link to={"/admin/plans" as any}>
