@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2 } from "lucide-react";
+import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2, BadgeCheck, BadgeDollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
 import { bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -52,6 +52,7 @@ function BookingsPage() {
           status: b.status,
           date: (b.createdAt || "").slice(0, 10),
           source: b.source ?? "direct",
+          paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
         })) as AdminBooking[];
         setBookings(items);
       })
@@ -95,9 +96,28 @@ function BookingsPage() {
   };
 
   const updateStatus = (id: string, status: string) => {
-    setBookings(bookings.map(x => x.id === id ? { ...x, status: status as any } : x));
+    setBookings(bookings.map(x => x.id === id ? {
+      ...x,
+      status: status as any,
+      // Auto-mark as paid when order completes
+      paymentStatus: status === "completed" ? "paid" : x.paymentStatus,
+    } : x));
     adminApi.orders.setStatus(id, { status }).catch(() => { /* offline-tolerant */ });
+    if (status === "completed") {
+      adminApi.orders.setPaymentStatus?.(id, "paid").catch(() => { /* offline-tolerant */ });
+    }
     toast.success(L("تم تحديث الحالة", "Status updated"));
+  };
+
+  const isCod = (p: string) => {
+    const s = (p || "").toLowerCase();
+    return s === "cod" || s.includes("كاش") || s.includes("استلام") || s.includes("cash");
+  };
+
+  const updatePaymentStatus = (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
+    setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
+    adminApi.orders.setPaymentStatus?.(id, paymentStatus as string).catch(() => { /* offline-tolerant */ });
+    toast.success(paymentStatus === "paid" ? L("تم تأكيد الدفع وإصدار الفاتورة", "Payment confirmed — invoice issued") : L("تم تحديث حالة الدفع", "Payment status updated"));
   };
 
   return (
@@ -148,6 +168,7 @@ function BookingsPage() {
                 <th className="px-3 py-3 font-medium">{L("الخدمة", "Service")}</th>
                 <th className="px-3 py-3 font-medium">{L("الإجمالي", "Total")}</th>
                 <th className="px-3 py-3 font-medium">{L("الدفع", "Payment")}</th>
+                <th className="px-3 py-3 font-medium">{L("حالة الدفع", "Pay status")}</th>
                 <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium">{L("التاريخ", "Date")}</th>
                 <th className="px-3 py-3 font-medium"></th>
@@ -169,6 +190,28 @@ function BookingsPage() {
                       </select>
                     </td>
                     <td className="px-3 py-3">
+                      {isCod(b.payment) && b.status !== "completed" && b.paymentStatus !== "paid" ? (
+                        <button
+                          onClick={() => updatePaymentStatus(b.id, "paid")}
+                          className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100"
+                          title={L("تأكيد استلام الدفع وإصدار الفاتورة", "Mark as paid and issue invoice")}
+                        >
+                          <BadgeDollarSign className="h-3.5 w-3.5" />
+                          {L("تأكيد الدفع", "Mark paid")}
+                        </button>
+                      ) : b.paymentStatus === "paid" || b.status === "completed" ? (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
+                          <BadgeCheck className="h-3.5 w-3.5" />
+                          {L("مدفوع", "Paid")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">
+                          <Clock className="h-3.5 w-3.5" />
+                          {L("غير مدفوع", "Unpaid")}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
                       <select value={b.status} onChange={(e) => updateStatus(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
                         {statusKeys.map(k => <option key={k} value={k}>{statusLabels[k]}</option>)}
                       </select>
@@ -176,7 +219,19 @@ function BookingsPage() {
                     <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{b.date}</td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
-                        <button onClick={() => setViewing(b)} title={L("عرض الفاتورة", "View invoice")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Eye className="h-4 w-4" /></button>
+                        <button
+                          onClick={() => {
+                            if (b.paymentStatus !== "paid" && b.status !== "completed") {
+                              toast.error(L("لا يمكن إصدار الفاتورة قبل تأكيد الدفع", "Confirm payment before issuing the invoice"));
+                              return;
+                            }
+                            setViewing(b);
+                          }}
+                          title={L("عرض الفاتورة", "View invoice")}
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted ${b.paymentStatus === "paid" || b.status === "completed" ? "text-primary" : "text-muted-foreground/40"}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
                         <button onClick={() => openEdit(b)} title={L("تعديل", "Edit")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-foreground/70"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(b.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
                       </div>
