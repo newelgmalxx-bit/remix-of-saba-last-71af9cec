@@ -258,6 +258,19 @@ export const admin = {
       apiRequest<{ message: string }>("/admin/notifications", { method: "PATCH", query: { id } }),
   },
 
+  // ----- Tickets -----
+  tickets: {
+    list: (q?: { status?: string; priority?: string; q?: string; page?: number; limit?: number }) =>
+      apiRequest<Paginated<Ticket>>("/admin/tickets", { query: q }),
+    get: (id: string) => apiRequest<Ticket>(`/admin/tickets/${id}`),
+    reply: (id: string, text: string) =>
+      apiRequest<{ message: string }>(`/admin/tickets/${id}/messages`, { method: "POST", body: { text } }),
+    setStatus: (id: string, status: "open" | "answered" | "closed") =>
+      apiRequest<{ message: string }>(`/admin/tickets/${id}/status`, { method: "PATCH", body: { status } }),
+    setPriority: (id: string, priority: "low" | "normal" | "high") =>
+      apiRequest<{ message: string }>(`/admin/tickets/${id}/priority`, { method: "PATCH", body: { priority } }),
+  },
+
   // ----- Public site settings (used in app init) -----
   siteSettings: () => apiRequest<SiteSettings>("/admin/site/settings"),
 };
