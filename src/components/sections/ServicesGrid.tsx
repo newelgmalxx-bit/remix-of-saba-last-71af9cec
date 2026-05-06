@@ -1,8 +1,49 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ImageIcon } from "lucide-react";
+import { ArrowLeft, ImageIcon, Star, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAllServices } from "@/hooks/useServiceContent";
 import servicesHero from "@/assets/services-hero.png";
 import { useLang } from "@/i18n/LanguageProvider";
+
+const FAV_KEY = "saba_service_favorites_v1";
+
+function getRatingFor(slug: string): { rating: number; count: number } {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+  const rating = 4.3 + ((h % 70) / 100); // 4.30 - 4.99
+  const count = 38 + (h % 480); // 38 - 517
+  return { rating: Math.round(rating * 10) / 10, count };
+}
+
+function readFavs(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) || "{}"); } catch { return {}; }
+}
+function writeFavs(f: Record<string, boolean>) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(FAV_KEY, JSON.stringify(f));
+  window.dispatchEvent(new Event("saba:favorites"));
+}
+export function useFavorite(slug: string) {
+  const [fav, setFav] = useState(false);
+  useEffect(() => {
+    const sync = () => setFav(!!readFavs()[slug]);
+    sync();
+    window.addEventListener("saba:favorites", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("saba:favorites", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [slug]);
+  const toggle = () => {
+    const cur = readFavs();
+    cur[slug] = !cur[slug];
+    if (!cur[slug]) delete cur[slug];
+    writeFavs(cur);
+  };
+  return { fav, toggle };
+}
 
 export function ServicesGrid() {
   const services = useAllServices();
@@ -39,6 +80,8 @@ export function ServiceCard({
   slug, title, desc, banner, category,
 }: { slug: string; title: string; desc: string; banner?: string; category?: string }) {
   const { t } = useLang();
+  const { rating, count } = getRatingFor(slug);
+  const { fav, toggle } = useFavorite(slug);
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
@@ -60,9 +103,28 @@ export function ServiceCard({
             {category}
           </span>
         )}
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(); }}
+          aria-label="favorite"
+          className="absolute left-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-foreground shadow-sm transition hover:scale-105"
+        >
+          <Heart className={`h-4 w-4 ${fav ? "fill-red-500 text-red-500" : "text-foreground/70"}`} />
+        </button>
       </div>
       <div className="flex flex-1 flex-col p-5 text-start">
-        <h3 className="text-base font-extrabold text-foreground">{title}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-base font-extrabold text-foreground">{title}</h3>
+        </div>
+        <div className="mt-1 flex items-center gap-1.5 text-xs">
+          <div className="flex items-center gap-0.5 text-amber-500">
+            {[0,1,2,3,4].map((i) => (
+              <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(rating) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
+            ))}
+          </div>
+          <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
+          <span className="text-muted-foreground">({count})</span>
+        </div>
         <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted-foreground">{desc}</p>
         <div className="mt-5 flex flex-1 items-end justify-end gap-2">
           <Link
