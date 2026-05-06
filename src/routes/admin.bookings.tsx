@@ -104,10 +104,10 @@ function BookingsPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الطلبات", "Total orders")} value={bookings.length} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total orders")} value={bookings.length} icon={CalendarCheck} accent="primary" />
         <StatCard label={L("بانتظار التأكيد", "Pending")} value={bookings.filter(b => b.status === "pending").length} icon={Clock} accent="amber" />
         <StatCard label={L("قيد التنفيذ", "In progress")} value={bookings.filter(b => b.status === "in_progress").length} icon={Loader2} accent="violet" />
-        <StatCard label={L("مكتملة", "Completed")} value={bookings.filter(b => b.status === "completed").length} hint="↑ +12.5%" icon={CheckCircle2} accent="emerald" />
+        <StatCard label={L("مكتملة", "Completed")} value={bookings.filter(b => b.status === "completed").length} icon={CheckCircle2} accent="emerald" />
       </div>
 
       <PanelCard>
