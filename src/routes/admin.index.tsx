@@ -29,7 +29,7 @@ function AdminDashboard() {
   const [revenue, setRevenue] = useState<any[]>([]);
   const [byCat, setByCat] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [activity, setActivity] = useState<{ icon: any; text: string; time: string }[]>([]);
+  const [activity, setActivity] = useState<{ icon: any; text: string; time: string; link?: string | null }[]>([]);
 
   useEffect(() => {
     adminApi.analytics()
