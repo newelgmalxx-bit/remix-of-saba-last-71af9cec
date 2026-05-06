@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
+import { SarIcon } from "@/components/ui/SarIcon";
 
 export const Route = createFileRoute("/plans")({
   head: () => ({
@@ -106,7 +107,7 @@ function PlanCard({ plan }: { plan: Plan }) {
       <div className="text-sm font-bold text-foreground">{name}</div>
       <div className="mt-2 flex items-baseline gap-2 flex-wrap" dir="ltr">
         <div className="text-3xl font-extrabold text-primary">
-          {plan.price} <span className="text-sm font-bold">{t("common.sar")}</span>
+          {plan.price} <SarIcon className="h-[0.7em]" />
         </div>
         {discountPct > 0 && (
           <>
