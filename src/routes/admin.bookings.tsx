@@ -35,23 +35,37 @@ function BookingsPage() {
   const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
 
   useEffect(() => {
-    adminApi.bookings.list({ limit: 100 })
+    adminApi.orders.list({ limit: 100 })
       .then((p) => {
         const items = (p.items || []).map((b: any) => ({
-          id: b.id, number: b.number, client: b.client, email: b.email,
-          phone: b.phone ?? undefined, city: b.city ?? undefined, service: b.service,
-          total: Number(b.total) || 0, payment: b.payment, status: b.status,
-          date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
+          id: b.id,
+          number: b.number,
+          client: b.contact_name || b.client || "",
+          email: b.contact_email || b.email || "",
+          phone: b.contact_phone || b.phone || undefined,
+          city: b.contact_city || b.city || undefined,
+          service: Array.isArray(b.items) && b.items.length
+            ? b.items.map((i: any) => i.service_title || i.serviceTitle).filter(Boolean).join(" • ")
+            : (b.service || ""),
+          total: Number(b.total) || 0,
+          payment: b.payment_method || b.payment || "cod",
+          status: b.status,
+          date: (b.createdAt || "").slice(0, 10),
+          source: b.source ?? "direct",
         })) as AdminBooking[];
         setBookings(items);
       })
       .catch(() => setBookings([]));
   }, []);
 
-  // crude period filter using index (mock data shares similar dates)
-  const limit = period === "7" ? 2 : period === "30" ? 4 : period === "90" ? 6 : bookings.length;
-
-  const filtered = bookings.slice(0, limit).filter(b =>
+  const periodDays = period === "all" ? null : Number(period);
+  const filtered = bookings.filter(b => {
+    if (periodDays != null && b.date) {
+      const d = new Date(b.date).getTime();
+      if (Number.isFinite(d) && (Date.now() - d) / 86400000 > periodDays) return false;
+    }
+    return true;
+  }).filter(b =>
     (tab === "all" || b.status === tab) &&
     (source === "all" || b.source === source) &&
     (b.client.includes(q) || b.number.toLowerCase().includes(q.toLowerCase()))
@@ -82,7 +96,7 @@ function BookingsPage() {
 
   const updateStatus = (id: string, status: string) => {
     setBookings(bookings.map(x => x.id === id ? { ...x, status: status as any } : x));
-    adminApi.bookings.setStatus(id, { status }).catch(() => { /* offline-tolerant */ });
+    adminApi.orders.setStatus(id, { status }).catch(() => { /* offline-tolerant */ });
     toast.success(L("تم تحديث الحالة", "Status updated"));
   };
 
