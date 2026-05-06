@@ -34,6 +34,16 @@ function LoginPage() {
       toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
       return;
     }
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRe = /^\+?\d[\d\s-]{6,}$/;
+    if (tab === "email" && !emailRe.test(identifier.trim())) {
+      toast.error(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
+      return;
+    }
+    if (tab === "phone" && !phoneRe.test(identifier.trim())) {
+      toast.error(lang === "ar" ? "أدخل رقم جوال صحيح" : "Enter a valid phone number");
+      return;
+    }
     setSubmitting(true);
     try {
       const user = await login(
