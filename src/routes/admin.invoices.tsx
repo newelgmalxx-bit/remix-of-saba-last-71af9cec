@@ -143,7 +143,7 @@ function InvoicesPage() {
             </thead>
             <tbody>
               {filtered.map((i) => {
-                const s = map[i.status];
+                const s = map[i.status as keyof typeof map] ?? { l: String(i.status ?? "—"), t: "primary" as const };
                 return (
                   <tr key={i.id} className="border-b border-border hover:bg-muted/40">
                     <td className="px-3 py-3 font-bold text-primary" dir="ltr">{i.number}</td>
