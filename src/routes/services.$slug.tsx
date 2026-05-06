@@ -46,7 +46,6 @@ function ServiceDetailPage() {
   const { plans } = usePlans();
   const { add } = useCart();
   const navigate = useNavigate();
-  const [activeImg, setActiveImg] = useState(0);
   const { fav, toggle: toggleFav } = useFavorite(slug);
   const { isAuthenticated } = useAuth();
   const { reviews, summary, addReview } = useServiceReviews(slug);
