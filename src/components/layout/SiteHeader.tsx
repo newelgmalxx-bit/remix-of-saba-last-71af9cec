@@ -21,6 +21,8 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
   const { lang, toggle: toggleLang, t } = useLang();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
