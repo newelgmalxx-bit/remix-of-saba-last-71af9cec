@@ -143,6 +143,8 @@ function CheckoutPage() {
         },
         paymentMethod: payment as any,
         notes: [info.notes, coupon ? `Coupon: ${coupon.code} (-${discount})` : ""].filter(Boolean).join(" | ") || undefined,
+        couponCode: coupon?.code,
+        discount: discount > 0 ? discount : undefined,
       });
       // Mark coupon as used (best-effort)
       await markCouponUsed();
