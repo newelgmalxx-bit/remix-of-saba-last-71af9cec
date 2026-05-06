@@ -140,7 +140,7 @@ function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <a href="#" className="text-xs font-bold text-primary hover:underline">{t("auth.forgot")}</a>
+                <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">{t("auth.forgot")}</Link>
                 <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
                   <span>{t("auth.remember")}</span>
                   <button
