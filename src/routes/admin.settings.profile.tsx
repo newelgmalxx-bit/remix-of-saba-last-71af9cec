@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, GhostButton, Pill } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, Camera, Mail, Phone, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { fileToWebp } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
+import { account as accountApi, admin as adminApi } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/admin/settings/profile")({
   head: () => ({ meta: [{ title: "الملف الشخصي | الإعدادات" }] }),
@@ -14,30 +16,70 @@ export const Route = createFileRoute("/admin/settings/profile")({
 function ProfilePage() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const { user, refresh } = useAuth();
   const [p, setP] = useState({
     avatar: "", name: "John Doe", email: "john@saba.sa", phone: "+966 55 111 0001",
     title: L("مدير عام", "General Manager"), bio: "", language: "ar", timezone: "Asia/Riyadh",
   });
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setP((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+        avatar: user.avatar || prev.avatar,
+        language: user.language || prev.language,
+      }));
+    }
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("profile");
+        if (s) setP((prev) => ({ ...prev, title: s.title || prev.title, bio: s.bio || prev.bio, timezone: s.timezone || prev.timezone }));
+      } catch {}
+    })();
+  }, [user]);
+
+  const saveAll = async () => {
+    setSaving(true);
+    try {
+      await accountApi.updateProfile({ name: p.name, phone: p.phone });
+      await adminApi.settings.update("profile", { title: p.title, bio: p.bio, timezone: p.timezone, language: p.language }).catch(() => {});
+      await refresh();
+      toast.success(L("تم حفظ التغييرات", "Changes saved"));
+    } catch (e: any) {
+      toast.error(e?.message || L("تعذّر الحفظ", "Could not save"));
+    } finally { setSaving(false); }
+  };
 
   const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    setP({ ...p, avatar: await fileToWebp(f) });
+    const dataUrl = await fileToWebp(f);
+    setP({ ...p, avatar: dataUrl });
+    try { await accountApi.updateProfile({ name: p.name, phone: p.phone, avatar: f }); await refresh(); } catch {}
   };
   const initials = p.name.split(" ").map(n => n[0]).slice(0, 2).join("");
 
-  const changePwd = () => {
+  const changePwd = async () => {
     if (!pwd.current || !pwd.next) { toast.error(L("املأ جميع الحقول", "Fill all fields")); return; }
     if (pwd.next !== pwd.confirm) { toast.error(L("كلمتا المرور غير متطابقتين", "Passwords do not match")); return; }
-    toast.success(L("تم تحديث كلمة المرور", "Password updated"));
-    setPwd({ current: "", next: "", confirm: "" });
+    try {
+      await accountApi.changePassword(pwd.current, pwd.next);
+      toast.success(L("تم تحديث كلمة المرور", "Password updated"));
+      setPwd({ current: "", next: "", confirm: "" });
+    } catch (e: any) {
+      toast.error(e?.message || L("تعذّر التحديث", "Could not update"));
+    }
   };
   const startSide = dir === "rtl" ? "right-3" : "left-3";
   const padStart = dir === "rtl" ? "pr-9" : "pl-9";
   const corner = dir === "rtl" ? "-bottom-1 -left-1" : "-bottom-1 -right-1";
 
   return (
-    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")} action={<PrimaryButton onClick={() => toast.success(L("تم حفظ التغييرات", "Changes saved"))}>{L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")} action={<PrimaryButton onClick={saveAll} disabled={saving}>{saving ? L("جاري الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
       <PanelCard className="mb-6">
         <div className="flex flex-wrap items-center gap-5">
           <div className="relative">
