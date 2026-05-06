@@ -20,8 +20,8 @@ function normalizeFromApi(line: CartLine): CartItem {
     id: String(line.id),
     serviceSlug: line.service_slug,
     serviceTitle: line.service_title,
-    planId: line.plan_id,
-    planName: line.plan_name,
+    planId: line.plan_id ?? "default",
+    planName: line.plan_name ?? "",
     price: Number(line.price) || 0,
     qty: Number(line.qty) || 1,
   };

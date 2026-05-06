@@ -80,26 +80,29 @@ function write(plans: Plan[]) {
 }
 
 function fromApi(p: ApiPlan): Plan {
+  const amount = (p.price as any)?.amount ?? p.price ?? 0;
+  const original = (p.price as any)?.originalAmount ?? null;
   return {
     id: p.id,
     name: p.nameAr || p.nameEn || "",
     nameEn: p.nameEn || p.nameAr || "",
-    price: String(p.price ?? ""),
+    price: String(amount ?? ""),
+    originalPrice: original != null ? String(original) : undefined,
     featured: !!p.highlighted,
-    feats: Array.isArray(p.featuresAr) && p.featuresAr.length ? p.featuresAr : (p.features || []),
-    featsEn: Array.isArray(p.featuresEn) && p.featuresEn.length ? p.featuresEn : (p.features || []),
+    feats: Array.isArray(p.featuresAr) && p.featuresAr.length ? p.featuresAr : [],
+    featsEn: Array.isArray(p.featuresEn) && p.featuresEn.length ? p.featuresEn : [],
   };
 }
 
-function toApi(p: Plan, idx: number): Partial<ApiPlan> {
+function toApi(p: Plan, idx: number): any {
   return {
     id: p.id,
     nameAr: p.name,
     nameEn: p.nameEn || p.name,
     price: parseInt((p.price || "").replace(/[^\d]/g, ""), 10) || 0,
+    originalPrice: p.originalPrice ? parseInt(p.originalPrice.replace(/[^\d]/g, ""), 10) : undefined,
     featuresAr: p.feats,
     featuresEn: p.featsEn ?? p.feats,
-    features: p.feats,
     highlighted: p.featured,
     sortOrder: idx,
     status: "active",
