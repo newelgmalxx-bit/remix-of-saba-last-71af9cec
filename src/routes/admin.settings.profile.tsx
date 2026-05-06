@@ -84,7 +84,7 @@ function ProfilePage() {
         <div className="flex flex-wrap items-center gap-5">
           <div className="relative">
             {p.avatar
-              ? <img src={p.avatar} alt={p.name} className="h-24 w-24 rounded-2xl object-cover" />
+              ? <img loading="lazy" decoding="async" src={p.avatar} alt={p.name} className="h-24 w-24 rounded-2xl object-cover" />
               : <div className="h-24 w-24 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-extrabold">{initials}</div>
             }
             <label className={`absolute ${corner} flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow cursor-pointer`}>

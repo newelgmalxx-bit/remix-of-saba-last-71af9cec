@@ -100,7 +100,7 @@ function Img({ label, value, onChange, onClear, small, t }: { label: string; val
     <div>
       <div className="text-xs font-bold mb-2">{label}</div>
       <div className={`flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 ${small ? "h-20" : "h-32"}`}>
-        {value ? <img src={value} alt={label} className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-muted-foreground">{t("لا توجد صورة", "No image")}</span>}
+        {value ? <img loading="lazy" decoding="async" src={value} alt={label} className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-muted-foreground">{t("لا توجد صورة", "No image")}</span>}
       </div>
       <div className="mt-2 flex gap-2">
         <label className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
