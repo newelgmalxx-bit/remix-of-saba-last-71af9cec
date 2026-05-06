@@ -1,15 +1,53 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { ApiError } from "@/lib/api";
+import { toast } from "sonner";
 
 function SignupPage() {
   const [show1, setShow1] = useState(false);
   const [show2, setShow2] = useState(false);
   const [agree, setAgree] = useState(false);
   const { t, dir, lang, toggle } = useLang();
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [pwd2, setPwd2] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name || !phone || !email || !pwd) {
+      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      return;
+    }
+    if (pwd !== pwd2) {
+      toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      return;
+    }
+    if (!agree) {
+      toast.error(lang === "ar" ? "يجب الموافقة على الشروط" : "You must accept the terms");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await signup({ name, phone, email, password: pwd });
+      toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
+      navigate({ to: "/account" });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إنشاء الحساب" : "Signup failed");
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8" dir={dir}>
@@ -27,12 +65,12 @@ function SignupPage() {
               <div className={`mt-3 h-0.5 w-16 rounded-full bg-primary ${dir === "rtl" ? "mr-0 ml-auto" : "ml-0 mr-auto"}`} />
             </div>
 
-            <form className="mt-7 space-y-5" onSubmit={(e) => e.preventDefault()}>
-              <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} />
+            <form className="mt-7 space-y-5" onSubmit={onSubmit}>
+              <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} value={name} onChange={setName} />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label={t("auth.tab.phone")} type="tel" placeholder={t("auth.phonePh")} icon={<Phone className="h-4 w-4" />} dirCtx={dir} />
-                <Field label={t("auth.tab.email")} type="email" placeholder={t("auth.emailPh")} icon={<Mail className="h-4 w-4" />} dirCtx={dir} />
+                <Field label={t("auth.tab.phone")} type="tel" placeholder={t("auth.phonePh")} icon={<Phone className="h-4 w-4" />} dirCtx={dir} value={phone} onChange={setPhone} />
+                <Field label={t("auth.tab.email")} type="email" placeholder={t("auth.emailPh")} icon={<Mail className="h-4 w-4" />} dirCtx={dir} value={email} onChange={setEmail} />
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -41,8 +79,8 @@ function SignupPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <PasswordField label={t("auth.password")} show={show1} onToggle={() => setShow1(!show1)} dirCtx={dir} ph={t("auth.passwordPh")} />
-                <PasswordField label={t("auth.confirmPassword")} show={show2} onToggle={() => setShow2(!show2)} dirCtx={dir} ph={t("auth.passwordPh")} />
+                <PasswordField label={t("auth.password")} show={show1} onToggle={() => setShow1(!show1)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd} onChange={setPwd} />
+                <PasswordField label={t("auth.confirmPassword")} show={show2} onToggle={() => setShow2(!show2)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd2} onChange={setPwd2} />
               </div>
 
               <label className="flex cursor-pointer items-center justify-start gap-2 text-xs">
@@ -63,8 +101,8 @@ function SignupPage() {
                 </span>
               </label>
 
-              <button type="submit" className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
-                {t("auth.signupBtn")}
+              <button type="submit" disabled={submitting} className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
+                {submitting ? (lang === "ar" ? "جاري الإنشاء..." : "Creating...") : t("auth.signupBtn")}
               </button>
             </form>
 
@@ -91,7 +129,7 @@ function SignupPage() {
   );
 }
 
-function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr" }) {
+function Field({ label, type, placeholder, icon, dirCtx, value, onChange }: { label: string; type: string; placeholder: string; icon: React.ReactNode; dirCtx?: "rtl" | "ltr"; value?: string; onChange?: (v: string) => void }) {
   const isPhone = type === "tel";
   const d = dirCtx || "rtl";
 
@@ -100,7 +138,7 @@ function Field({ label, type, placeholder, icon, dirCtx }: { label: string; type
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
       <div className="relative">
         <span className={`pointer-events-none absolute inset-y-0 ${d === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>{icon}</span>
-        <input type={type} dir={isPhone ? "ltr" : undefined} inputMode={isPhone ? "tel" : undefined} placeholder={placeholder} className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-start"}`} />
+        <input type={type} dir={isPhone ? "ltr" : undefined} inputMode={isPhone ? "tel" : undefined} placeholder={placeholder} value={value} onChange={onChange ? (e) => onChange(e.target.value) : undefined} className={`w-full rounded-xl border border-border bg-white px-10 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isPhone ? "text-left placeholder:text-left" : "text-start"}`} />
       </div>
     </div>
   );
@@ -135,7 +173,7 @@ function SelectOptions({ placeholder, kind, t }: { placeholder: string; kind: "r
   );
 }
 
-function PasswordField({ label, show, onToggle, dirCtx, ph }: { label: string; show: boolean; onToggle: () => void; dirCtx: "rtl" | "ltr"; ph: string }) {
+function PasswordField({ label, show, onToggle, dirCtx, ph, value, onChange }: { label: string; show: boolean; onToggle: () => void; dirCtx: "rtl" | "ltr"; ph: string; value?: string; onChange?: (v: string) => void }) {
   return (
     <div className="text-start">
       <label className="mb-1.5 block text-xs font-bold text-foreground">{label}</label>
@@ -146,7 +184,7 @@ function PasswordField({ label, show, onToggle, dirCtx, ph }: { label: string; s
         <button type="button" onClick={onToggle} className={`absolute inset-y-0 ${dirCtx === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground transition hover:text-primary`}>
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
-        <input type={show ? "text" : "password"} placeholder={ph} className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+        <input type={show ? "text" : "password"} placeholder={ph} value={value} onChange={onChange ? (e) => onChange(e.target.value) : undefined} className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
       </div>
     </div>
   );
