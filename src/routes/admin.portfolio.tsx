@@ -150,7 +150,7 @@ function PortfolioPage() {
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-3">
                       {i.cover ? (
-                        <img src={i.cover} alt={i.titleAr} className="h-12 w-16 rounded-lg object-cover" />
+                        <img loading="lazy" decoding="async" src={i.cover} alt={i.titleAr} className="h-12 w-16 rounded-lg object-cover" />
                       ) : (
                         <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-primary/10 text-2xl">{i.image}</div>
                       )}
@@ -211,7 +211,7 @@ function PortfolioPage() {
                   {form.cover && <button type="button" onClick={() => setForm({ ...form, cover: "" })} className="text-xs text-rose-600 font-bold">{L("حذف", "Delete")}</button>}
                 </div>
               </div>
-              {form.cover && <img src={form.cover} alt={L("معاينة", "Preview")} className="col-span-2 h-40 w-full rounded-lg object-cover border border-border" />}
+              {form.cover && <img loading="lazy" decoding="async" src={form.cover} alt={L("معاينة", "Preview")} className="col-span-2 h-40 w-full rounded-lg object-cover border border-border" />}
               <label className="text-xs font-bold space-y-1.5 block col-span-2">{L("وصف العمل", "Description")}
                 <textarea rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </label>

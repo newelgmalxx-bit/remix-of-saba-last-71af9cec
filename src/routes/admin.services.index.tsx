@@ -323,7 +323,7 @@ function ServicesPage() {
                   <input type="text" placeholder={L("أو ألصق رابط https://...", "Or paste URL https://...")} className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-xs" value={form.bannerImage.startsWith("data:") ? "" : form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
                   {form.bannerImage && <button type="button" onClick={() => setForm({ ...form, bannerImage: "" })} className="text-xs text-rose-600 font-bold">{L("حذف", "Delete")}</button>}
                 </div>
-                {form.bannerImage && <img src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
+                {form.bannerImage && <img loading="lazy" decoding="async" src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
               </div>
             </div>
             </section>
@@ -353,7 +353,7 @@ function ServicesPage() {
                     </label>
                     <input type="text" placeholder={L("أو ألصق رابط https://...", "Or paste URL https://...")} className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-xs" value={form.seoOgImage.startsWith("data:") ? "" : form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
                   </div>
-                  {form.seoOgImage && <img src={form.seoOgImage} alt="og preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
+                  {form.seoOgImage && <img loading="lazy" decoding="async" src={form.seoOgImage} alt="og preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
                 </div>
               </div>
             </section>

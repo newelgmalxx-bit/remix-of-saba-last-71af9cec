@@ -233,7 +233,7 @@ function ServiceEditorPage() {
                     <input type="text" placeholder="أو ألصق رابط https://..." className={`${inputCls} flex-1 min-w-[200px]`} value={bannerImage.startsWith("data:") ? "" : bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
                     {bannerImage && <button type="button" onClick={() => setBannerImage("")} className="text-xs text-rose-600 font-bold">حذف</button>}
                   </div>
-                  {bannerImage && <img src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
+                  {bannerImage && <img loading="lazy" decoding="async" src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
                 </div>
               </Field>
             </div>
@@ -262,7 +262,7 @@ function ServiceEditorPage() {
                     </label>
                     <input type="text" placeholder="أو ألصق رابط https://..." className={`${inputCls} flex-1 min-w-[200px]`} value={(seo.ogImage || "").startsWith("data:") ? "" : (seo.ogImage || "")} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })} />
                   </div>
-                  {seo.ogImage && <img src={seo.ogImage} alt="og preview" className="h-28 w-full object-cover rounded-xl border border-border" />}
+                  {seo.ogImage && <img loading="lazy" decoding="async" src={seo.ogImage} alt="og preview" className="h-28 w-full object-cover rounded-xl border border-border" />}
                 </div>
               </Field>
             </div>
