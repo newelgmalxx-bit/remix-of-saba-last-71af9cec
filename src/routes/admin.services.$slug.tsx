@@ -75,6 +75,7 @@ function ServiceEditorPage() {
     ]
   );
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("active");
 
   // Load fresh data from API
   useEffect(() => {
@@ -97,6 +98,7 @@ function ServiceEditorPage() {
         if (svc.overviewDescriptionEn) setOverviewDescriptionEn(svc.overviewDescriptionEn);
         if (amt != null) setPrice(String(amt));
         if (orig != null) setOriginalPrice(String(orig));
+        if (svc.status) setStatus(svc.status);
       } catch { /* ignore */ }
       finally { if (!cancelled) setRemoteLoaded(true); }
     })();
@@ -138,6 +140,7 @@ function ServiceEditorPage() {
         bannerImage: bannerImage || null,
         overviewDescriptionAr: overviewDescription,
         overviewDescriptionEn,
+        status,
       });
       toast.success("تم الحفظ على السيرفر");
     } catch (e: any) {
