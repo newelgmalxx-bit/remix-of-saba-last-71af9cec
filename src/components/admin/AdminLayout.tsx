@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
   UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug, Tag,
-  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy,
+  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import logoImg from "@/assets/logo.png";
@@ -25,6 +25,7 @@ const navGroups: (NavItem | "sep")[] = [
   { to: "/admin/invoices", ar: "الفواتير", en: "Invoices", icon: FileText },
   { to: "/admin/clients", ar: "العملاء", en: "Clients", icon: Users },
   { to: "/admin/tickets", ar: "التذاكر", en: "Tickets", icon: LifeBuoy },
+  { to: "/admin/coupons", ar: "الكوبونات", en: "Coupons", icon: Ticket },
   { to: "/admin/portfolio", ar: "أعمالنا", en: "Portfolio", icon: ImageIcon },
   { to: "/admin/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
   { to: "/admin/reports", ar: "التقارير", en: "Reports", icon: FileSpreadsheet },
