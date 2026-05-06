@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
+import { SarIcon } from "@/components/ui/SarIcon";
 
 export const Route = createFileRoute("/plans")({
   head: () => ({
