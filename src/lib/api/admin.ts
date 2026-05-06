@@ -20,6 +20,7 @@ export const admin = {
   getOrders: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request<PaginatedResponse<Order>>(`/admin/orders${q ? '?' + q : ''}`); },
   getOrder: (id: string) => request<ApiResponse<{ order: Order }>>(`/admin/orders/${id}`),
   updateOrderStatus: (id: string, body: any) => request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) }),
+  updateOrderPaymentStatus: (id: string, paymentStatus: string) => request(`/admin/orders/${id}/payment-status`, { method: 'PATCH', body: JSON.stringify({ paymentStatus }) }),
   addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}/note`, { method: 'POST', body: JSON.stringify({ text }) }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
