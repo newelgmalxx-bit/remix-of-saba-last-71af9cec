@@ -83,4 +83,10 @@ export const admin = {
 
   getSiteSettings: () => request('/admin/site/settings'),
   updateSiteSettings: (body: any) => request('/admin/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
+
+  getCoupons: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/coupons${q ? '?' + q : ''}`); },
+  createCoupon: (body: any) => request('/admin/coupons', { method: 'POST', body: JSON.stringify(body) }),
+  updateCoupon: (id: string, body: any) => request(`/admin/coupons/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteCoupon: (id: string) => request(`/admin/coupons/${id}`, { method: 'DELETE' }),
+  toggleCouponStatus: (id: string, active: boolean) => request(`/admin/coupons/${id}/status`, { method: 'PATCH', body: JSON.stringify({ active }) }),
 };
