@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
+import { renderInvoiceToPdf } from "@/lib/renderInvoice";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
@@ -284,7 +285,22 @@ function BookingsPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <Pill tone={bookingStatusMap[viewing.status].tone}>{statusLabels[viewing.status]}</Pill>
-                  <button onClick={() => window.print()} className="text-xs font-bold text-primary hover:underline">{L("طباعة", "Print")}</button>
+                  <PrimaryButton
+                    onClick={() => renderInvoiceToPdf({
+                      number: viewing.number,
+                      date: viewing.date,
+                      clientName: viewing.client,
+                      clientEmail: viewing.email,
+                      clientPhone: viewing.phone,
+                      clientCity: viewing.city,
+                      paymentMethod: viewing.payment,
+                      paymentStatus: viewing.paymentStatus ?? "unpaid",
+                      items: [{ title: viewing.service, qty: 1, price: subtotal }],
+                      subtotal, vat, total: viewing.total,
+                    })}
+                  >
+                    <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
+                  </PrimaryButton>
                 </div>
               </div>
             );
