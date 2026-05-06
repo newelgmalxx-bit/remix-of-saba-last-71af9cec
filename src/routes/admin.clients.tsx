@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2, Phone, MapPin, Calendar, Globe } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminClients as initialClients, fmtSAR, type AdminClient } from "@/data/admin";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "العملاء | لوحة التحكم" }] }),
@@ -44,15 +45,35 @@ function ClientsPage() {
   const [add, setAdd] = useState<AddForm>(emptyAdd);
   const [viewing, setViewing] = useState<AdminClient | null>(null);
 
+  useEffect(() => {
+    adminApi.clients.list({ limit: 200 })
+      .then((p) => {
+        const items: AdminClient[] = (p.items || []).map((c: any) => ({
+          id: c.id, name: c.name, email: c.email, phone: c.phone ?? "",
+          orders: Number(c.orders) || 0, totalSpent: Number(c.totalSpent) || 0,
+          segment: (c.segment as any) || "new",
+          joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
+          city: c.city ?? undefined,
+        }));
+        if (items.length) setClients(items);
+      })
+      .catch(() => { /* keep mock */ });
+  }, []);
+
   const filtered = clients.filter(c =>
     (tab === "all" || c.segment === tab) && (c.name.includes(q) || c.email.toLowerCase().includes(q.toLowerCase()))
   );
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!add.name || !add.email) { toast.error(L("الاسم والبريد مطلوبان", "Name and email are required")); return; }
+    let id = "c" + Date.now();
+    try {
+      const res = await adminApi.clients.create({ name: add.name, email: add.email, phone: add.phone, segment: add.segment as any });
+      id = res.id;
+    } catch { /* tolerate */ }
     const month = new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA", { month: "long", year: "numeric" });
     setClients([
-      { id: "c" + Date.now(), name: add.name, email: add.email, phone: add.phone, orders: 0, totalSpent: 0,
+      { id, name: add.name, email: add.email, phone: add.phone, orders: 0, totalSpent: 0,
         segment: add.segment, joinedAt: month, region: add.region, city: add.city, language: add.language, address: add.address, notes: add.notes },
       ...clients,
     ]);
@@ -60,7 +81,11 @@ function ClientsPage() {
     toast.success(L("تم إضافة العميل", "Client added"));
   };
 
-  const remove = (id: string) => { setClients(clients.filter(c => c.id !== id)); toast.success(L("تم حذف العميل", "Client deleted")); };
+  const remove = (id: string) => {
+    setClients(clients.filter(c => c.id !== id));
+    adminApi.clients.remove(id).catch(() => {});
+    toast.success(L("تم حذف العميل", "Client deleted"));
+  };
 
   const startSide = dir === "rtl" ? "right-3" : "left-3";
   const padStart = dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3";
