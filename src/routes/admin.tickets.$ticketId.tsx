@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft, Send, LifeBuoy, Loader2, CheckCircle2 } from "lucide-react";
-import { AdminLayout, PanelCard, Pill, GhostButton, PrimaryButton } from "@/components/admin/AdminLayout";
+import { AdminLayout, PanelCard, Pill, GhostButton } from "@/components/admin/AdminLayout";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin } from "@/lib/api";
 import { normalizeTicket } from "@/lib/api/normalize";
