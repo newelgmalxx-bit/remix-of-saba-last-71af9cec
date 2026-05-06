@@ -284,7 +284,7 @@ function BookingsPage() {
                   <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>{L("الإجمالي", "Total")}</span><span data-ltr-number>{fmtSAR(viewing.total)}</span></div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <Pill tone={bookingStatusMap[viewing.status].tone}>{statusLabels[viewing.status]}</Pill>
+                  <Pill tone={(bookingStatusMap[viewing.status as keyof typeof bookingStatusMap]?.tone) ?? "primary"}>{statusLabels[viewing.status] ?? viewing.status}</Pill>
                   <PrimaryButton
                     onClick={() => renderInvoiceToPdf({
                       number: viewing.number,
