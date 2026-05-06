@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X } from "lucide-react";
 import { useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { items, remove, updateQty, subtotal, vat, total, count } = useCart();
+  const { items, remove, updateQty, subtotal, discount, vat, total, count, coupon, applyCoupon, removeCoupon } = useCart();
   const [coupon, setCoupon] = useState("");
   const [couponMsg, setCouponMsg] = useState<string | null>(null);
   const { t, dir } = useLang();
