@@ -42,6 +42,7 @@ import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as AdminTicketsIndexRouteImport } from './routes/admin.tickets.index'
 import { Route as AdminServicesIndexRouteImport } from './routes/admin.services.index'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
 import { Route as AccountOrdersIndexRouteImport } from './routes/account.orders.index'
@@ -220,6 +221,11 @@ const AccountProfileRoute = AccountProfileRouteImport.update({
   path: '/account/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTicketsIndexRoute = AdminTicketsIndexRouteImport.update({
+  id: '/tickets/',
+  path: '/tickets/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminServicesIndexRoute = AdminServicesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
   '/admin/services/': typeof AdminServicesIndexRoute
+  '/admin/tickets/': typeof AdminTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/account/orders': typeof AccountOrdersIndexRoute
   '/account/tickets': typeof AccountTicketsIndexRoute
   '/admin/services': typeof AdminServicesIndexRoute
+  '/admin/tickets': typeof AdminTicketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/account/orders/': typeof AccountOrdersIndexRoute
   '/account/tickets/': typeof AccountTicketsIndexRoute
   '/admin/services/': typeof AdminServicesIndexRoute
+  '/admin/tickets/': typeof AdminTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/account/orders/'
     | '/account/tickets/'
     | '/admin/services/'
+    | '/admin/tickets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/tickets'
     | '/admin/services'
+    | '/admin/tickets'
   id:
     | '__root__'
     | '/'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/account/orders/'
     | '/account/tickets/'
     | '/admin/services/'
+    | '/admin/tickets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -822,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/tickets/': {
+      id: '/admin/tickets/'
+      path: '/tickets'
+      fullPath: '/admin/tickets/'
+      preLoaderRoute: typeof AdminTicketsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/services/': {
       id: '/admin/services/'
       path: '/'
@@ -960,6 +979,7 @@ interface AdminRouteChildren {
   AdminTrackingRoute: typeof AdminTrackingRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminTicketsIndexRoute: typeof AdminTicketsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -979,6 +999,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTrackingRoute: AdminTrackingRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminTicketsIndexRoute: AdminTicketsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
