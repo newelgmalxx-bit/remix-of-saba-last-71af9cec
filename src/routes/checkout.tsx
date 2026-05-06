@@ -76,6 +76,19 @@ function CheckoutPage() {
       toast.error(lang === "ar" ? "يرجى تعبئة بيانات التواصل" : "Please fill contact info");
       return;
     }
+    // Backend currently accepts only Saudi numbers (05XXXXXXXX or +9665XXXXXXXX).
+    // Validate locally to give a clear message before hitting the API.
+    const phone = info.phone.replace(/[\s-]/g, "");
+    const saudiOk = /^(05\d{8}|\+9665\d{8}|009665\d{8})$/.test(phone);
+    if (!saudiOk) {
+      toast.error(
+        lang === "ar"
+          ? "رقم الجوال يجب أن يبدأ بـ 05 (مثال: 0512345678) أو +9665 — السيرفر لا يقبل أرقام خارج السعودية حالياً."
+          : "Phone must start with 05 (e.g. 0512345678) or +9665. Non-Saudi numbers aren't accepted by the server yet.",
+      );
+      setStep(0);
+      return;
+    }
     setSubmitting(true);
     try {
       // If logged in, persist any newly-entered contact info to the user's profile
