@@ -29,23 +29,33 @@ function AdminDashboard() {
   const [activity, setActivity] = useState<{ icon: any; text: string; time: string }[]>([]);
 
   useEffect(() => {
-    adminApi.stats()
-      .then((d) => {
+    adminApi.analytics()
+      .then((d: any) => {
         setStats((s: any) => ({ ...s, ...d }));
-        if (Array.isArray((d as any).monthlyRevenue) && (d as any).monthlyRevenue.length) setRevenue((d as any).monthlyRevenue);
-        if (Array.isArray((d as any).salesByCategory) && (d as any).salesByCategory.length) {
+        if (Array.isArray(d.monthlyRevenue) && d.monthlyRevenue.length) setRevenue(d.monthlyRevenue);
+        if (Array.isArray(d.salesByCategory) && d.salesByCategory.length) {
           const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
-          setByCat((d as any).salesByCategory.map((s: any, i: number) => ({ ...s, color: palette[i % palette.length] })));
+          setByCat(d.salesByCategory.map((s: any, i: number) => ({ ...s, color: palette[i % palette.length] })));
         }
       })
-      .catch((e) => { if (!(e instanceof ApiError) || e.status !== 401) console.warn("[admin.stats]", e); });
-    adminApi.bookings.list({ limit: 5 })
+      .catch((e) => { if (!(e instanceof ApiError) || e.status !== 401) console.warn("[admin.analytics]", e); });
+    adminApi.orders.list({ limit: 5 })
       .then((p) => {
         const items = (p.items || []).map((b: any) => ({
-          id: b.id, number: b.number, client: b.client, email: b.email,
-          phone: b.phone, city: b.city, service: b.service,
-          total: Number(b.total) || 0, payment: b.payment, status: b.status,
-          date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
+          id: b.id,
+          number: b.number,
+          client: b.contact_name || b.client || "",
+          email: b.contact_email || b.email || "",
+          phone: b.contact_phone || b.phone,
+          city: b.contact_city || b.city,
+          service: Array.isArray(b.items) && b.items.length
+            ? b.items.map((i: any) => i.service_title || i.serviceTitle).filter(Boolean).join(" • ")
+            : (b.service || ""),
+          total: Number(b.total) || 0,
+          payment: b.payment_method || b.payment,
+          status: b.status,
+          date: (b.createdAt || "").slice(0, 10),
+          source: b.source ?? "direct",
         }));
         setBookings(items as any);
       })
