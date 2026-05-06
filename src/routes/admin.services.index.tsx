@@ -53,7 +53,7 @@ function ServicesPage() {
   }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
+    titleAr: "", titleEn: "", sku: "", category: "", price: "", originalPrice: "", slug: "",
     subtitle: "", breadcrumb: "", bannerImage: "",
     overviewDescription: "",
     seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
@@ -69,9 +69,9 @@ function ServicesPage() {
       { title: "", desc: "" },
     ],
     plans: [
-      { name: "Basic", price: "", featured: false, feats: [""] },
-      { name: "Pro", price: "", featured: true, feats: [""] },
-      { name: "Premium", price: "", featured: false, feats: [""] },
+      { name: "Basic", price: "", originalPrice: "", featured: false, feats: [""] },
+      { name: "Pro", price: "", originalPrice: "", featured: true, feats: [""] },
+      { name: "Premium", price: "", originalPrice: "", featured: false, feats: [""] },
     ],
     steps: [
       { title: "فهم المتطلبات" },
