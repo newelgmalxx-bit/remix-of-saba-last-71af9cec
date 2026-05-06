@@ -14,6 +14,7 @@ import flagUs from "@/assets/flag-us.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { toast } from "sonner";
+import { admin } from "@/lib/api/admin";
 
 type NavItem = { to: string; ar: string; en: string; icon: any; children?: { to: string; ar: string; en: string; icon: any }[] };
 
@@ -77,6 +78,70 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     .split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
 
   const isActive = (to: string, exact = false) => exact ? path === to : path === to || path.startsWith(to + "/");
+
+  // Notifications
+  type Notif = { id: string; type?: string; title: string; desc?: string; time?: string; read?: boolean };
+  const [notifs, setNotifs] = useState<Notif[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const loadNotifs = async () => {
+    setNotifLoading(true);
+    try {
+      const res: any = await admin.getNotifications(10);
+      const list: any[] = res?.data?.items ?? res?.items ?? res?.data ?? [];
+      const mapped: Notif[] = (Array.isArray(list) ? list : []).map((n: any, idx: number) => ({
+        id: String(n.id ?? idx),
+        type: n.type ?? "primary",
+        title: n.title ?? n.message ?? L("إشعار", "Notification"),
+        desc: n.description ?? n.body ?? n.desc ?? "",
+        time: n.time ?? n.created_at ?? n.createdAt ?? "",
+        read: !!(n.read ?? n.is_read),
+      }));
+      setNotifs(mapped);
+    } catch {
+      setNotifs([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  useEffect(() => { loadNotifs(); }, []);
+
+  const unread = notifs.filter((n) => !n.read).length;
+
+  const handleMarkAllRead = async () => {
+    if (!notifs.length) return;
+    try {
+      await admin.markNotificationsRead();
+      setNotifs((arr) => arr.map((n) => ({ ...n, read: true })));
+    } catch (e: any) {
+      toast.error(e?.message || L("تعذر التحديث", "Update failed"));
+    }
+  };
+
+  const fmtTime = (t: string) => {
+    if (!t) return "";
+    const d = new Date(t);
+    if (isNaN(d.getTime())) return t;
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 60) return L("الآن", "Just now");
+    if (diff < 3600) return L(`منذ ${Math.floor(diff / 60)} د`, `${Math.floor(diff / 60)}m ago`);
+    if (diff < 86400) return L(`منذ ${Math.floor(diff / 3600)} س`, `${Math.floor(diff / 3600)}h ago`);
+    return d.toLocaleDateString();
+  };
+
+  const iconFor = (type?: string) => {
+    if (type === "order") return ShoppingBag;
+    if (type === "payment" || type === "success") return CheckCircle2;
+    if (type === "warning" || type === "alert") return AlertCircle;
+    return BellRing;
+  };
+  const toneFor = (type?: string) => {
+    if (type === "payment" || type === "success") return "bg-emerald-100 text-emerald-700";
+    if (type === "warning" || type === "alert") return "bg-amber-100 text-amber-700";
+    return "bg-primary/10 text-primary";
+  };
 
   return (
     <div className="min-h-screen bg-muted/40 flex" dir={dir}>
