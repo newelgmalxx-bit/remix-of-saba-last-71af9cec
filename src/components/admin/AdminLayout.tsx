@@ -222,39 +222,58 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
           <div className="flex items-center gap-2">
             {action}
             <LangToggle />
-            <Popover>
+            <Popover open={notifOpen} onOpenChange={(o) => { setNotifOpen(o); if (o) loadNotifs(); }}>
               <PopoverTrigger asChild>
                 <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
                   <Bell className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-rose-500" />
+                  {unread > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {unread > 9 ? "9+" : unread}
+                    </span>
+                  )}
                 </button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-80 p-0" dir={dir}>
                 <div className="border-b border-border px-4 py-3 flex items-center justify-between">
                   <div className="font-bold text-sm">{L("الإشعارات", "Notifications")}</div>
-                  <span className="text-[11px] text-primary font-bold">{L("3 جديدة", "3 new")}</span>
+                  {unread > 0 ? (
+                    <button onClick={handleMarkAllRead} className="text-[11px] text-primary font-bold hover:underline">
+                      {L("تعليم الكل كمقروء", "Mark all read")}
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground">{L("لا جديد", "All read")}</span>
+                  )}
                 </div>
                 <div className="max-h-80 overflow-y-auto divide-y divide-border">
-                  {[
-                    { i: ShoppingBag, t: "primary", title: L("طلب جديد #SD-1024", "New order #SD-1024"), desc: L("أحمد العبدالله — تصميم مواقع", "Ahmed Al-Abdullah — Web Design"), time: L("منذ 5 دقائق", "5 minutes ago") },
-                    { i: CheckCircle2, t: "emerald", title: L("تم استلام دفعة", "Payment received"), desc: L("فاتورة INV-7820 — 4,025 ر.س", "Invoice INV-7820 — SAR 4,025"), time: L("منذ 1 ساعة", "1 hour ago") },
-                    { i: AlertCircle, t: "amber", title: L("تذكرة دعم جديدة", "New support ticket"), desc: L("ريم الشهري بحاجة لمراجعة", "Reem Al-Shehri needs review"), time: L("منذ 3 ساعات", "3 hours ago") },
-                  ].map((n, idx) => {
-                    const Ic = n.i;
-                    const tone = n.t === "primary" ? "bg-primary/10 text-primary" : n.t === "emerald" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700";
-                    return (
-                      <div key={idx} className="flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer">
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone}`}><Ic className="h-4 w-4" /></div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-bold truncate">{n.title}</div>
-                          <div className="text-xs text-muted-foreground truncate">{n.desc}</div>
-                          <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                  {notifLoading ? (
+                    <div className="px-4 py-8 text-center text-xs text-muted-foreground">{L("جارٍ التحميل…", "Loading…")}</div>
+                  ) : notifs.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-xs text-muted-foreground">{L("لا توجد إشعارات", "No notifications")}</div>
+                  ) : (
+                    notifs.map((n) => {
+                      const Ic = iconFor(n.type);
+                      return (
+                        <div key={n.id} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
+                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${toneFor(n.type)}`}>
+                            <Ic className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-bold truncate">{n.title}</div>
+                            {n.desc && <div className="text-xs text-muted-foreground truncate">{n.desc}</div>}
+                            {n.time && <div className="text-[10px] text-muted-foreground mt-1">{fmtTime(n.time)}</div>}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
-                <button className="block w-full border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50">{L("عرض كل الإشعارات", "View all notifications")}</button>
+                <Link
+                  to={"/admin/settings/notifications" as any}
+                  onClick={() => setNotifOpen(false)}
+                  className="block w-full border-t border-border px-4 py-3 text-center text-xs font-bold text-primary hover:bg-muted/50"
+                >
+                  {L("إعدادات الإشعارات", "Notification settings")}
+                </Link>
               </PopoverContent>
             </Popover>
             <Link to={"/admin/settings/profile" as any} title={L("الملف الشخصي", "Profile")} className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 hover:bg-muted transition">
