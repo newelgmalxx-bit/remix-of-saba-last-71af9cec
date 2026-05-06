@@ -13,6 +13,7 @@ import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
 import { useFavorite } from "@/components/sections/ServicesGrid";
+import { SarIcon } from "@/components/ui/SarIcon";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -205,7 +206,7 @@ function ServiceDetailPage() {
                     <div className="text-[11px] font-bold text-muted-foreground">{t("svcDetail.price.from")}</div>
                     <div className="mt-1 flex flex-wrap items-end gap-2" dir="ltr">
                       <div className="text-3xl font-extrabold text-primary">
-                        {displayPrice} <span className="text-sm">{t("common.sar")}</span>
+                        {displayPrice} <SarIcon className="h-[0.7em]" />
                       </div>
                       {startingDiscount > 0 && (
                         <>
