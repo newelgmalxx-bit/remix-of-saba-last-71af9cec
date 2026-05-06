@@ -202,19 +202,15 @@ export function useAllServices(): ServiceContent[] {
       window.removeEventListener("storage", fn);
     };
   }, []);
-  // If we have a remote services list, ONLY show those slugs (DB is source of truth).
-  // Otherwise fall back to local hardcoded services.
-  let remoteSlugs: string[] | null = null;
-  if (mounted && typeof window !== "undefined") {
-    try {
-      const raw = localStorage.getItem(REMOTE_SLUGS_KEY);
-      if (raw) remoteSlugs = JSON.parse(raw);
-    } catch {}
-  }
-  const slugs = remoteSlugs && remoteSlugs.length > 0
-    ? remoteSlugs
-    : Object.keys(serviceMap);
-  return slugs
+  // DB is the only source of truth. Until the remote list arrives we render
+  // nothing (avoids hydration mismatch + flashing old placeholder data).
+  if (!mounted || typeof window === "undefined") return [];
+  let remoteSlugs: string[] = [];
+  try {
+    const raw = localStorage.getItem(REMOTE_SLUGS_KEY);
+    if (raw) remoteSlugs = JSON.parse(raw);
+  } catch {}
+  return remoteSlugs
     .map((s) => mergeService(s, undefined, lang))
     .filter((x): x is ServiceContent => !!x);
 }
