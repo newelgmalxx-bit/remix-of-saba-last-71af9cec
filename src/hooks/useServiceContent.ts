@@ -151,8 +151,10 @@ export function mergeService(slug: string, override?: ServiceOverride, lang: "ar
 
 export function useServiceContent(slug: string): ServiceContent | undefined {
   const [, setTick] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const { lang } = useLang();
   useEffect(() => {
+    setMounted(true);
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
     window.addEventListener("storage", fn);
@@ -161,13 +163,15 @@ export function useServiceContent(slug: string): ServiceContent | undefined {
       window.removeEventListener("storage", fn);
     };
   }, []);
-  return mergeService(slug, undefined, lang);
+  return mergeService(slug, mounted ? undefined : {}, lang);
 }
 
 export function useAllServices(): ServiceContent[] {
   const [, setTick] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const { lang } = useLang();
   useEffect(() => {
+    setMounted(true);
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
     window.addEventListener("storage", fn);
@@ -177,7 +181,7 @@ export function useAllServices(): ServiceContent[] {
       window.removeEventListener("storage", fn);
     };
   }, []);
-  const store = readStore();
+  const store = mounted ? readStore() : {};
   const baseSlugs = Object.keys(serviceMap);
   const customSlugs = Object.keys(store).filter((s) => !serviceMap[s] && store[s]?.isCustom);
   return [...baseSlugs, ...customSlugs]
