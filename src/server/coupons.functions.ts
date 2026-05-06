@@ -93,3 +93,51 @@ export const toggleCouponFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const validateCouponFn = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; subtotal: number }) => input)
+  .handler(async ({ data }) => {
+    const code = (data.code || "").trim().toUpperCase();
+    if (!code) return { valid: false as const, message: "Empty code" };
+    const { data: row, error } = await supabaseAdmin
+      .from("coupons")
+      .select("*")
+      .eq("code", code)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) return { valid: false as const, message: "NOT_FOUND" };
+    if (!row.active) return { valid: false as const, message: "INACTIVE" };
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now())
+      return { valid: false as const, message: "EXPIRED" };
+    if (row.max_uses != null && (row.used_count ?? 0) >= row.max_uses)
+      return { valid: false as const, message: "MAX_USES" };
+    const sub = Number(data.subtotal) || 0;
+    if (row.min_amount != null && sub < Number(row.min_amount))
+      return { valid: false as const, message: "MIN_AMOUNT", minAmount: Number(row.min_amount) };
+    const value = Number(row.value) || 0;
+    const discount =
+      row.type === "percent"
+        ? +(sub * (value / 100)).toFixed(2)
+        : Math.min(value, sub);
+    return {
+      valid: true as const,
+      id: row.id as string,
+      code: row.code as string,
+      type: row.type as "percent" | "fixed",
+      value,
+      discount,
+    };
+  });
+
+export const incrementCouponUsageFn = createServerFn({ method: "POST" })
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data }) => {
+    const { data: row } = await supabaseAdmin
+      .from("coupons")
+      .select("used_count")
+      .eq("id", data.id)
+      .maybeSingle();
+    const next = (row?.used_count ?? 0) + 1;
+    await supabaseAdmin.from("coupons").update({ used_count: next }).eq("id", data.id);
+    return { ok: true };
+  });
