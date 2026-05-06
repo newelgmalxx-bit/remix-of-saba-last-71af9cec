@@ -197,7 +197,6 @@ function LoginPage() {
                 shape="rectangular"
                 text="signin_with"
                 width="400"
-                locale={lang === "ar" ? "ar" : "en"}
               />
             </div>
 
