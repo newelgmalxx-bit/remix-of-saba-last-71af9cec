@@ -3,7 +3,7 @@ import { AdminLayout, PanelCard, PrimaryButton, GhostButton, Pill } from "@/comp
 import { useState, useEffect } from "react";
 import { Upload, Camera, Mail, Phone, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { fileToWebp } from "@/lib/image";
+import { uploadImage } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
 import { account as accountApi, admin as adminApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,7 +57,7 @@ function ProfilePage() {
 
   const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const dataUrl = await fileToWebp(f);
+    const dataUrl = await uploadImage(f);
     setP({ ...p, avatar: dataUrl });
     try { await accountApi.updateProfile({ name: p.name, phone: p.phone, avatar: f }); await refresh(); } catch {}
   };

@@ -3,7 +3,7 @@ import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminL
 import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
-import { fileToWebp } from "@/lib/image";
+import { uploadImage } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
 
@@ -39,7 +39,7 @@ function SiteSettingsPage() {
   };
   const upload = (k: "logo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    setS({ ...s, [k]: await fileToWebp(f) });
+    setS({ ...s, [k]: await uploadImage(f) });
   };
   return (
     <AdminLayout title={L("إعدادات الموقع", "Site Settings")} subtitle={L("معلومات الشركة والهوية والتواصل", "Company info, identity, and contact")} action={<PrimaryButton onClick={save}>{L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>

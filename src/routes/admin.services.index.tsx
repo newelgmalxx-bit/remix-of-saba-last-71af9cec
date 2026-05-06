@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { fileToWebp } from "@/lib/image";
+import { uploadImage } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
 import api from "@/lib/api";
 
@@ -313,7 +313,7 @@ function ServicesPage() {
                 <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
                 <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
                   const f = e.target.files?.[0]; if (!f) return;
-                  setForm({ ...form, bannerImage: await fileToWebp(f) });
+                  setForm({ ...form, bannerImage: await uploadImage(f) });
                 }} />
                 {form.bannerImage && <img src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
               </label>
@@ -336,7 +336,7 @@ function ServicesPage() {
                   <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
                   <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
                     const f = e.target.files?.[0]; if (!f) return;
-                    setForm({ ...form, seoOgImage: await fileToWebp(f) });
+                    setForm({ ...form, seoOgImage: await uploadImage(f) });
                   }} />
                 </label>
               </div>

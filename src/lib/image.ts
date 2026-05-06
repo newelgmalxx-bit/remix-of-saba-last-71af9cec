@@ -41,3 +41,24 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.src = src;
   });
 }
+
+// Upload an image to the API and return a public URL.
+// First converts to webp (for smaller payload), then sends as multipart/form-data.
+// On failure, returns the data URL as a fallback so the UI still works locally.
+import api from "@/lib/api";
+
+export async function uploadImage(file: File): Promise<string> {
+  try {
+    // Convert to webp for size
+    const dataUrl = await fileToWebp(file);
+    // Convert data URL back to a Blob to upload
+    const blob = await (await fetch(dataUrl)).blob();
+    const upFile = new File([blob], (file.name || "image").replace(/\.[^.]+$/, "") + ".webp", { type: blob.type || "image/webp" });
+    const res: any = await api.admin.upload(upFile);
+    const url = res?.data?.url || res?.url || res?.data?.path;
+    if (url && typeof url === "string") return url;
+    return dataUrl;
+  } catch {
+    try { return await fileToWebp(file); } catch { return ""; }
+  }
+}
