@@ -29,8 +29,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { user } = await api.auth.me();
       setUser(user);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) clearToken();
-      setUser(null);
+      // Only treat 401 as a real auth failure. 5xx / network = keep existing session.
+      if (e instanceof ApiError && e.status === 401) {
+        clearToken();
+        setUser(null);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("auth.me failed (non-401), keeping current session", e);
+      }
     } finally {
       setLoading(false);
     }
