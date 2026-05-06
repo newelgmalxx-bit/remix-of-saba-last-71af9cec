@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, Pill } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Users2 } from "lucide-react";
-import { adminUsers } from "@/data/admin";
+import { adminUsers as fallbackUsers } from "@/data/admin";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/settings/team")({
   head: () => ({ meta: [{ title: "الفريق والصلاحيات | الإعدادات" }] }),
@@ -31,6 +32,21 @@ function TeamPage() {
   ];
 
   const [tab, setTab] = useState<"members" | "roles">("members");
+  const [members, setMembers] = useState(fallbackUsers);
+  useEffect(() => {
+    adminApi.users.list()
+      .then((p: any) => {
+        const items = (p?.items || []).map((u: any) => ({
+          id: u.id,
+          name: u.name || u.email || "—",
+          email: u.email || "",
+          role: (u.role || "support") as any,
+          active: u.status ? u.status === "active" : true,
+        }));
+        if (items.length) setMembers(items);
+      })
+      .catch(() => {});
+  }, []);
   const textAlign = dir === "rtl" ? "text-right" : "text-left";
   return (
     <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("الفريق والصلاحيات", "Team & Permissions")} action={<Link to="/admin/users" className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-xs font-bold">{L("إدارة المستخدمين", "Manage Users")}</Link>}>
@@ -41,11 +57,11 @@ function TeamPage() {
       </div>
 
       {tab === "members" && (
-        <PanelCard title={L("أعضاء الفريق", "Team Members")} subtitle={`${adminUsers.length} ${L("مستخدم", "users")}`} action={<Link to="/admin/users" className="text-xs font-bold text-primary hover:underline">{L("إدارة كاملة ←", "Full management →")}</Link>}>
+        <PanelCard title={L("أعضاء الفريق", "Team Members")} subtitle={`${members.length} ${L("مستخدم", "users")}`} action={<Link to="/admin/users" className="text-xs font-bold text-primary hover:underline">{L("إدارة كاملة ←", "Full management →")}</Link>}>
           <div className="space-y-2">
-            {adminUsers.map(u => {
+            {members.map(u => {
               const initials = u.name.split(" ").map(n => n[0]).slice(0, 2).join("");
-              const role = roles.find(r => r.key === u.role)!;
+              const role = roles.find(r => r.key === u.role) ?? roles[roles.length - 1];
               return (
                 <div key={u.id} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
                   <div className="flex items-center gap-3 min-w-0">
