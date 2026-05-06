@@ -407,6 +407,7 @@ export const dict = {
   "auth.signup.cta": { ar: "إنشاء حساب جديد", en: "Create new account" },
   "auth.login.cta": { ar: "تسجيل الدخول", en: "Sign In" },
   "auth.show": { ar: "إظهار كلمة المرور", en: "Show password" },
+  "auth.backHome": { ar: "← العودة إلى الصفحة الرئيسية", en: "← Back to homepage" },
 
   // ===== Privacy & Terms =====
   "legal.lastUpdated": { ar: "آخر تحديث", en: "Last Updated" },
