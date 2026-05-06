@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, ChevronLeft, Lock, ShieldCheck, FileText } from "lucide-react";
+import { Check, ChevronLeft, Lock, ShieldCheck, FileText, Tag, X } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
@@ -19,9 +19,30 @@ export const Route = createFileRoute("/checkout")({
 
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, vat, total, clear } = useCart();
+  const { items, subtotal, discount, vat, total, coupon, applyCoupon, removeCoupon, markCouponUsed, clear } = useCart();
   const [step, setStep] = useState(0);
   const { t, lang } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [couponErr, setCouponErr] = useState<string | null>(null);
+  const couponErrText = (m: string) => {
+    switch (m) {
+      case "NOT_FOUND": return L("الكوبون غير صحيح", "Invalid coupon");
+      case "INACTIVE": return L("الكوبون غير مفعّل", "Coupon is inactive");
+      case "EXPIRED": return L("الكوبون منتهي الصلاحية", "Coupon expired");
+      case "MAX_USES": return L("تم استنفاد الكوبون", "Coupon usage limit reached");
+      case "MIN_AMOUNT": return L("لم تصل إلى الحد الأدنى للطلب", "Order does not meet minimum amount");
+      default: return L("الكوبون غير صحيح", "Invalid coupon");
+    }
+  };
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponApplying(true); setCouponErr(null);
+    try { await applyCoupon(couponInput); setCouponInput(""); }
+    catch (e: any) { setCouponErr(couponErrText(e?.message || "")); }
+    finally { setCouponApplying(false); }
+  };
   const { user } = useAuth();
   const steps = [t("checkout.steps.info"), t("checkout.steps.payment"), t("checkout.steps.review")];
 
@@ -121,8 +142,10 @@ function CheckoutPage() {
           address: undefined,
         },
         paymentMethod: payment as any,
-        notes: info.notes || undefined,
+        notes: [info.notes, coupon ? `Coupon: ${coupon.code} (-${discount})` : ""].filter(Boolean).join(" | ") || undefined,
       });
+      // Mark coupon as used (best-effort)
+      await markCouponUsed();
       try {
         localStorage.setItem(
           "saba_last_order",
