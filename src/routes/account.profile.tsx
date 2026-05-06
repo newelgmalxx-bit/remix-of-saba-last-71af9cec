@@ -65,14 +65,14 @@ function Profile() {
     if (!f) return;
     setUploading(true);
     try {
-      const dataUrl = await uploadImage(f);
-      setAvatarUrl(dataUrl);
-      const fd = new FormData();
-      fd.append("avatar", f);
-      fd.append("name", form.name);
-      if (form.phone) fd.append("phone", form.phone);
-      if (form.city) fd.append("city", form.city);
-      await account.updateProfile(fd);
+      const url = await uploadImage(f);
+      setAvatarUrl(url);
+      await account.updateProfile({
+        name: form.name,
+        phone: form.phone || undefined,
+        city: form.city || undefined,
+        avatar: url,
+      });
       await refresh();
       toast.success(t("account.profile.saved"));
     } catch (err: any) {
