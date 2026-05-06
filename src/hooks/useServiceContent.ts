@@ -135,6 +135,9 @@ export function mergeService(slug: string, override?: ServiceOverride, lang: "ar
     breadcrumb: en ? (o.breadcrumbEn || o.breadcrumb || base.breadcrumb) : (o.breadcrumb ?? base.breadcrumb),
     heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? base.heroHighlights),
     bannerImage: o.bannerImage ?? base.bannerImage,
+    price: o.price ?? base.price,
+    originalPrice: o.originalPrice ?? base.originalPrice,
+    discountPercent: o.discountPercent ?? base.discountPercent,
     overviewDescription: en ? (o.overviewDescriptionEn || o.overviewDescription || base.overviewDescription) : (o.overviewDescription ?? base.overviewDescription),
     seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
     overview: o.overview
