@@ -4,6 +4,7 @@ import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "luci
 import { bookingStatusMap, fmtSAR } from "@/data/admin";
 import { useEffect, useState } from "react";
 import { admin as adminApi, ApiError } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
   PieChart, Pie, Cell,
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminDashboard() {
   const { lang, dir } = useLang();
+  const { user } = useAuth();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const emptyStats = {
     revenue: 0, revenueGrowth: 0, ordersCount: 0, monthlyTarget: 0, remaining: 0,
@@ -60,6 +62,30 @@ function AdminDashboard() {
         setBookings(items as any);
       })
       .catch(() => setBookings([]));
+    // Aggregate from orders endpoint since /admin/analytics returns 0 totals/revenue
+    adminApi.orders.list({ limit: 200 })
+      .then((p: any) => {
+        const all = (p.items || []) as any[];
+        const revenue = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const paid = all.filter((o) => o.paid).reduce((s, o) => s + (Number(o.total) || 0), 0);
+        setStats((s: any) => ({
+          ...s,
+          revenue: paid || revenue,
+          ordersCount: all.length,
+          totalBookings: all.length,
+        }));
+      })
+      .catch(() => {});
+    adminApi.clients.list({ limit: 1 })
+      .then((p: any) => setStats((s: any) => ({ ...s, totalClients: p?.total ?? s.totalClients })))
+      .catch(() => {});
+    adminApi.services.list({ limit: 1 })
+      .then((p: any) => setStats((s: any) => ({
+        ...s,
+        totalServices: p?.total ?? s.totalServices,
+        activeServices: p?.total ?? s.activeServices,
+      })))
+      .catch(() => {});
     adminApi.notifications.list(5)
       .then((d: any) => {
         const list = d?.items ?? d ?? [];
@@ -103,7 +129,7 @@ function AdminDashboard() {
         <div className="absolute -right-12 -bottom-12 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
         <div className="relative grid gap-6 md:grid-cols-2 items-center">
           <div>
-            <div className="text-sm text-white/75">{L("مرحباً", "Hello")}, John 👋</div>
+            <div className="text-sm text-white/75">{L("مرحباً", "Hello")}, {user?.name || L("المالك", "Owner")} 👋</div>
             <div className="mt-2 text-4xl font-extrabold">{fmtSAR(stats.revenue)}</div>
             <div className="text-sm text-white/80 mt-1">{L("إجمالي إيرادات هذا الشهر", "Total revenue this month")}</div>
             <div className="mt-4 flex flex-wrap gap-2">
