@@ -16,14 +16,37 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { items, remove, updateQty, subtotal, discount, vat, total, count, coupon, applyCoupon, removeCoupon } = useCart();
-  const [coupon, setCoupon] = useState("");
-  const [couponMsg, setCouponMsg] = useState<string | null>(null);
-  const { t, dir } = useLang();
+  const [code, setCode] = useState("");
+  const [couponMsg, setCouponMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [applying, setApplying] = useState(false);
+  const { t, lang, dir } = useLang();
 
-  const applyCoupon = () => {
-    if (!coupon.trim()) return;
-    if (coupon.trim().toUpperCase() === "SABA10") setCouponMsg(t("cart.couponOk"));
-    else setCouponMsg(t("cart.couponBad"));
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+
+  const couponErrorText = (m: string) => {
+    switch (m) {
+      case "NOT_FOUND": return L("الكوبون غير صحيح", "Invalid coupon");
+      case "INACTIVE": return L("الكوبون غير مفعّل", "Coupon is inactive");
+      case "EXPIRED": return L("الكوبون منتهي الصلاحية", "Coupon expired");
+      case "MAX_USES": return L("تم استنفاد الكوبون", "Coupon usage limit reached");
+      case "MIN_AMOUNT": return L("لم تصل إلى الحد الأدنى للطلب", "Order does not meet minimum amount");
+      default: return L("الكوبون غير صحيح", "Invalid coupon");
+    }
+  };
+
+  const handleApply = async () => {
+    if (!code.trim()) return;
+    setApplying(true);
+    setCouponMsg(null);
+    try {
+      const c = await applyCoupon(code);
+      setCouponMsg({ type: "ok", text: L(`تم تطبيق ${c.code}`, `Applied ${c.code}`) });
+      setCode("");
+    } catch (e: any) {
+      setCouponMsg({ type: "err", text: couponErrorText(e?.message || "") });
+    } finally {
+      setApplying(false);
+    }
   };
 
   return (
