@@ -128,10 +128,10 @@ function AdminDashboard() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(stats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
-        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={stats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
-        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} hint={L("من أصل 12", "of 12")} icon={Package} accent="amber" />
+        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(stats.revenue)} icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.totalBookings} icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={stats.totalClients} icon={Users} accent="emerald" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} icon={Package} accent="amber" />
       </div>
 
       {/* Charts */}
