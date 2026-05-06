@@ -6,14 +6,17 @@ import { services as servicesApi } from "@/lib/api";
 
 const KEY = "saba_service_overrides_v1";
 const REMOTE_KEY = "saba_service_remote_v1";
+const REMOTE_SLUGS_KEY = "saba_service_remote_slugs_v1";
 
 async function refreshRemoteServices() {
   try {
     const res = await servicesApi.list();
     const items = res?.items || [];
     const store = readStore();
+    const remoteSlugs: string[] = [];
     for (const s of items) {
       const slug = s.slug;
+      remoteSlugs.push(slug);
       const cur = store[slug] || {};
       store[slug] = {
         ...cur,
@@ -29,6 +32,8 @@ async function refreshRemoteServices() {
     writeStore(store);
     if (typeof window !== "undefined") {
       localStorage.setItem(REMOTE_KEY, "1");
+      localStorage.setItem(REMOTE_SLUGS_KEY, JSON.stringify(remoteSlugs));
+      window.dispatchEvent(new Event("saba:service-overrides"));
     }
   } catch {}
 }
@@ -181,10 +186,19 @@ export function useAllServices(): ServiceContent[] {
       window.removeEventListener("storage", fn);
     };
   }, []);
-  const store = mounted ? readStore() : {};
-  const baseSlugs = Object.keys(serviceMap);
-  const customSlugs = Object.keys(store).filter((s) => !serviceMap[s] && store[s]?.isCustom);
-  return [...baseSlugs, ...customSlugs]
+  // If we have a remote services list, ONLY show those slugs (DB is source of truth).
+  // Otherwise fall back to local hardcoded services.
+  let remoteSlugs: string[] | null = null;
+  if (mounted && typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem(REMOTE_SLUGS_KEY);
+      if (raw) remoteSlugs = JSON.parse(raw);
+    } catch {}
+  }
+  const slugs = remoteSlugs && remoteSlugs.length > 0
+    ? remoteSlugs
+    : Object.keys(serviceMap);
+  return slugs
     .map((s) => mergeService(s, undefined, lang))
     .filter((x): x is ServiceContent => !!x);
 }
