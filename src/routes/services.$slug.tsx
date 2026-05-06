@@ -205,12 +205,12 @@ function ServiceDetailPage() {
                     <div className="text-[11px] font-bold text-muted-foreground">{t("svcDetail.price.from")}</div>
                     <div className="mt-1 flex flex-wrap items-end gap-2" dir="ltr">
                       <div className="text-3xl font-extrabold text-primary">
-                        {startingPlan?.price ?? "—"} <span className="text-sm">{t("common.sar")}</span>
+                        {displayPrice} <span className="text-sm">{t("common.sar")}</span>
                       </div>
                       {startingDiscount > 0 && (
                         <>
                           <div className="text-base font-bold text-muted-foreground line-through">
-                            {startingPlan?.originalPrice}
+                            {displayOriginal}
                           </div>
                           <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600">
                             -{startingDiscount}%
