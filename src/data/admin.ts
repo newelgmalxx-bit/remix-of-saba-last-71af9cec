@@ -48,6 +48,7 @@ export type AdminBooking = {
   total: number; payment: string; status: "pending" | "in_progress" | "review" | "completed" | "cancelled"; date: string;
   source?: "direct" | "partner";
   phone?: string; city?: string;
+  paymentStatus?: "unpaid" | "paid" | "refunded";
 };
 
 export const adminBookings: AdminBooking[] = [
