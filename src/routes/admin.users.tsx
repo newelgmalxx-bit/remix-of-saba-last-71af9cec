@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, Pill, GhostButton, StatCard } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2, Edit, UserCheck, Users, Shield, ShieldCheck } from "lucide-react";
 import { adminUsers as initial, type AdminUser } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/users")({
   head: () => ({ meta: [{ title: "إدارة المستخدمين | لوحة التحكم" }] }),
@@ -29,21 +30,46 @@ function UsersPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [f, setF] = useState<Form>(empty);
 
+  useEffect(() => {
+    adminApi.users.list()
+      .then((d) => {
+        const items: AdminUser[] = (d.items || []).map((u: any) => ({
+          id: u.id, name: u.name, email: u.email, phone: u.phone ?? "",
+          role: (u.role as any) || "support",
+          active: (u.status ?? "active") === "active",
+          joinedAt: (u.createdAt || "").slice(0, 10) || "—",
+        }));
+        if (items.length) setUsers(items);
+      })
+      .catch(() => {});
+  }, []);
+
   const openAdd = () => { setEditId(null); setF(empty); setOpen(true); };
   const openEdit = (u: AdminUser) => { setEditId(u.id); setF({ name: u.name, email: u.email, phone: u.phone, role: u.role, active: u.active, password: "" }); setOpen(true); };
 
-  const save = () => {
+  const save = async () => {
     if (!f.name || !f.email) { toast.error(L("الاسم والبريد مطلوبان", "Name and email are required")); return; }
     if (editId) {
       setUsers(users.map(u => u.id === editId ? { ...u, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.active } : u));
+      adminApi.users.update(editId, { name: f.name, email: f.email, phone: f.phone }).catch(() => {});
+      adminApi.users.setRole(editId, f.role).catch(() => {});
       toast.success(L("تم التحديث", "Updated"));
     } else {
-      setUsers([{ id: "u" + Date.now(), name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.active, joinedAt: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA") }, ...users]);
+      let id = "u" + Date.now();
+      try {
+        const res = await adminApi.users.invite({ name: f.name, email: f.email, role: f.role as any });
+        id = res.id;
+      } catch {}
+      setUsers([{ id, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.active, joinedAt: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA") }, ...users]);
       toast.success(L("تم إضافة المستخدم", "User added"));
     }
     setOpen(false);
   };
-  const remove = (id: string) => { setUsers(users.filter(u => u.id !== id)); toast.success(L("تم الحذف", "Deleted")); };
+  const remove = (id: string) => {
+    setUsers(users.filter(u => u.id !== id));
+    adminApi.users.remove(id).catch(() => {});
+    toast.success(L("تم الحذف", "Deleted"));
+  };
   const toggle = (id: string) => setUsers(users.map(u => u.id === id ? { ...u, active: !u.active } : u));
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";

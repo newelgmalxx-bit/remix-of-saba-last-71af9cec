@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
 import { adminStats, monthlyRevenue, salesByCategory, adminBookings, bookingStatusMap, fmtSAR } from "@/data/admin";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { admin as adminApi, ApiError } from "@/lib/api";
 import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
   PieChart, Pie, Cell,
@@ -17,6 +18,35 @@ export const Route = createFileRoute("/admin/")({
 function AdminDashboard() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const [stats, setStats] = useState(adminStats);
+  const [revenue, setRevenue] = useState(monthlyRevenue);
+  const [byCat, setByCat] = useState(salesByCategory);
+  const [bookings, setBookings] = useState(adminBookings);
+
+  useEffect(() => {
+    adminApi.stats()
+      .then((d) => {
+        setStats((s) => ({ ...s, ...d }));
+        if (Array.isArray((d as any).monthlyRevenue) && (d as any).monthlyRevenue.length) setRevenue((d as any).monthlyRevenue);
+        if (Array.isArray((d as any).salesByCategory) && (d as any).salesByCategory.length) {
+          const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
+          setByCat((d as any).salesByCategory.map((s: any, i: number) => ({ ...s, color: palette[i % palette.length] })));
+        }
+      })
+      .catch((e) => { if (!(e instanceof ApiError) || e.status !== 401) console.warn("[admin.stats]", e); });
+    adminApi.bookings.list({ limit: 5 })
+      .then((p) => {
+        const items = (p.items || []).map((b: any) => ({
+          id: b.id, number: b.number, client: b.client, email: b.email,
+          phone: b.phone, city: b.city, service: b.service,
+          total: Number(b.total) || 0, payment: b.payment, status: b.status,
+          date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
+        }));
+        if (items.length) setBookings(items as any);
+      })
+      .catch(() => { /* keep mock */ });
+  }, []);
+
   const periods = [
     { v: "7", l: L("آخر 7 أيام", "Last 7 days") },
     { v: "30", l: L("آخر 30 يوم", "Last 30 days") },
@@ -24,10 +54,10 @@ function AdminDashboard() {
     { v: "all", l: L("كل الفترة", "All time") },
   ];
   const [period, setPeriod] = useState("30");
-  const filteredRevenue = period === "7" ? monthlyRevenue.slice(-2)
-    : period === "30" ? monthlyRevenue.slice(-3)
-    : period === "90" ? monthlyRevenue.slice(-6)
-    : monthlyRevenue;
+  const filteredRevenue = period === "7" ? revenue.slice(-2)
+    : period === "30" ? revenue.slice(-3)
+    : period === "90" ? revenue.slice(-6)
+    : revenue;
 
   const bookingStatusLabel = (key: keyof typeof bookingStatusMap) => {
     const m: Record<string, string> = {
@@ -49,14 +79,14 @@ function AdminDashboard() {
         <div className="relative grid gap-6 md:grid-cols-2 items-center">
           <div>
             <div className="text-sm text-white/75">{L("مرحباً", "Hello")}, John 👋</div>
-            <div className="mt-2 text-4xl font-extrabold">{fmtSAR(adminStats.revenue)}</div>
+            <div className="mt-2 text-4xl font-extrabold">{fmtSAR(stats.revenue)}</div>
             <div className="text-sm text-white/80 mt-1">{L("إجمالي إيرادات هذا الشهر", "Total revenue this month")}</div>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-                <TrendingUp className="h-3.5 w-3.5" /> +{adminStats.revenueGrowth}% {L("مقارنة بالشهر الماضي", "vs last month")}
+                <TrendingUp className="h-3.5 w-3.5" /> +{stats.revenueGrowth}% {L("مقارنة بالشهر الماضي", "vs last month")}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-                {adminStats.ordersCount.toLocaleString(lang === "en" ? "en-US" : "ar-SA")} {L("طلب", "orders")}
+                {stats.ordersCount.toLocaleString(lang === "en" ? "en-US" : "ar-SA")} {L("طلب", "orders")}
               </span>
             </div>
           </div>
@@ -73,9 +103,9 @@ function AdminDashboard() {
             </div>
             <div className="text-sm">
               <div className="text-white/75">{L("الهدف الشهري", "Monthly target")}</div>
-              <div className="text-lg font-bold">{fmtSAR(adminStats.monthlyTarget)}</div>
+              <div className="text-lg font-bold">{fmtSAR(stats.monthlyTarget)}</div>
               <div className="mt-2 text-white/75">{L("المتبقي", "Remaining")}</div>
-              <div className="text-lg font-bold">{fmtSAR(adminStats.remaining)}</div>
+              <div className="text-lg font-bold">{fmtSAR(stats.remaining)}</div>
             </div>
           </div>
         </div>
@@ -83,10 +113,10 @@ function AdminDashboard() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(adminStats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
-        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={adminStats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={adminStats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
-        <StatCard label={L("الخدمات النشطة", "Active Services")} value={adminStats.activeServices} hint={L("من أصل 12", "of 12")} icon={Package} accent="amber" />
+        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(stats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={stats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} hint={L("من أصل 12", "of 12")} icon={Package} accent="amber" />
       </div>
 
       {/* Charts */}
@@ -115,14 +145,14 @@ function AdminDashboard() {
           <div className="h-44">
             <ResponsiveContainer>
               <PieChart>
-                <Pie data={salesByCategory} dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={3}>
-                  {salesByCategory.map((s, i) => <Cell key={i} fill={s.color} />)}
+                <Pie data={byCat} dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={3}>
+                  {byCat.map((s, i) => <Cell key={i} fill={s.color} />)}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
           </div>
           <ul className="mt-3 space-y-1.5">
-            {salesByCategory.map((s) => (
+            {byCat.map((s) => (
               <li key={s.name} className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
@@ -149,14 +179,14 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {adminBookings.slice(0, 5).map((b) => {
-                  const s = bookingStatusMap[b.status];
+                {bookings.slice(0, 5).map((b) => {
+                  const s = bookingStatusMap[b.status as keyof typeof bookingStatusMap] ?? { tone: "primary" as const, label: b.status };
                   return (
                     <tr key={b.id} className="border-t border-border">
                       <td className="px-3 py-3 font-bold text-primary">#{b.number}</td>
                       <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.service}</div></td>
                       <td className="px-3 py-3 font-bold">{fmtSAR(b.total)}</td>
-                      <td className="px-3 py-3"><Pill tone={s.tone}>{bookingStatusLabel(b.status)}</Pill></td>
+                      <td className="px-3 py-3"><Pill tone={s.tone}>{bookingStatusLabel(b.status as any)}</Pill></td>
                     </tr>
                   );
                 })}

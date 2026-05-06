@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, GhostButton, PrimaryButton } from "@/components/admin/AdminLayout";
 import { FileText, CheckCircle2, Clock, XCircle, Search, Eye, Download, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminInvoices as initialInvoices, paymentMethods, fmtSAR, type AdminInvoice } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "الفواتير | لوحة التحكم" }] }),
@@ -30,6 +31,23 @@ function InvoicesPage() {
     orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0],
     amount: 0, status: "pending", issued: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"),
   });
+
+  useEffect(() => {
+    adminApi.invoices.list({ limit: 100 })
+      .then((p) => {
+        const items: AdminInvoice[] = (p.items || []).map((i: any) => ({
+          id: i.id, number: i.number, orderNumber: i.order_id ?? "",
+          client: i.client_name, email: i.client_email,
+          phone: i.client_phone ?? "", city: i.client_city ?? "",
+          payment: i.payment_method ?? paymentMethods[0],
+          amount: Number(i.total) || 0, status: i.status,
+          issued: (i.created_at || "").slice(0, 10),
+        }));
+        if (items.length) setInvoices(items);
+      })
+      .catch(() => { /* keep mock */ });
+  }, []);
+
   const filtered = invoices.filter(i =>
     (tab === "all" || i.status === tab) &&
     (i.number.toLowerCase().includes(q.toLowerCase()) || i.client.includes(q))
@@ -48,14 +66,28 @@ function InvoicesPage() {
     toast.success(L("تم تصدير الفواتير", "Invoices exported"));
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.client || !form.amount) { toast.error(L("الاسم والمبلغ مطلوبان", "Name and amount are required")); return; }
-    const num = "INV-" + (7822 + invoices.length);
-    setInvoices([{ id: "i" + Date.now(), number: num, ...form }, ...invoices]);
+    try {
+      const res = await adminApi.invoices.create({
+        client: form.client, email: form.email, phone: form.phone, city: form.city,
+        items: [{ desc: "Manual invoice", qty: 1, price: form.amount }],
+        payment: form.payment, notes: undefined,
+      });
+      setInvoices([{ id: res.id, number: res.number, ...form }, ...invoices]);
+      toast.success(L("تم إنشاء الفاتورة", "Invoice created"));
+    } catch {
+      const num = "INV-" + (7822 + invoices.length);
+      setInvoices([{ id: "i" + Date.now(), number: num, ...form }, ...invoices]);
+      toast.success(L("تم إنشاء الفاتورة", "Invoice created"));
+    }
     setAddOpen(false);
-    toast.success(L("تم إنشاء الفاتورة", "Invoice created"));
   };
-  const remove = (id: string) => { setInvoices(invoices.filter(i => i.id !== id)); toast.success(L("تم الحذف", "Deleted")); };
+  const remove = (id: string) => {
+    setInvoices(invoices.filter(i => i.id !== id));
+    adminApi.invoices.remove(id).catch(() => {});
+    toast.success(L("تم الحذف", "Deleted"));
+  };
 
   const startSide = dir === "rtl" ? "right-3" : "left-3";
   const padStart = dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3";

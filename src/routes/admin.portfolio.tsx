@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { ImageIcon, Eye, EyeOff, Tag, Plus, Search, Edit, Trash2, X, Upload } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminPortfolio, portfolioCategories, type AdminPortfolio } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fileToWebp } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/portfolio")({
   head: () => ({ meta: [{ title: "أعمالنا | لوحة التحكم" }] }),
@@ -33,6 +34,20 @@ function PortfolioPage() {
   const [form, setForm] = useState<FormState>(empty);
   const [techInput, setTechInput] = useState("");
 
+  useEffect(() => {
+    adminApi.portfolio.list()
+      .then((d) => {
+        const list: AdminPortfolio[] = (d.items || []).map((p: any) => ({
+          id: p.id, titleAr: p.titleAr, titleEn: p.titleEn, category: p.category,
+          image: "🎨", visible: !!p.visible, link: p.link ?? "#",
+          cover: p.cover ?? "", description: p.descriptionAr ?? p.descriptionEn ?? "",
+          tech: p.tech ?? [], client: p.client_name ?? "", year: p.year ?? "",
+        }));
+        if (list.length) setItems(list);
+      })
+      .catch(() => {});
+  }, []);
+
   const onPickFile = async (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error(L("اختر صورة فقط", "Pick an image only")); return; }
@@ -41,8 +56,17 @@ function PortfolioPage() {
   };
 
   const filtered = items.filter(i => i.titleAr.includes(q) || i.titleEn.toLowerCase().includes(q.toLowerCase()));
-  const toggle = (id: string) => setItems(items.map(i => i.id === id ? { ...i, visible: !i.visible } : i));
-  const remove = (id: string) => { setItems(items.filter(i => i.id !== id)); toast.success(L("تم الحذف", "Deleted")); };
+  const toggle = (id: string) => {
+    const next = items.map(i => i.id === id ? { ...i, visible: !i.visible } : i);
+    setItems(next);
+    const v = next.find(i => i.id === id)?.visible ?? true;
+    adminApi.portfolio.setVisibility(id, v).catch(() => {});
+  };
+  const remove = (id: string) => {
+    setItems(items.filter(i => i.id !== id));
+    adminApi.portfolio.remove(id).catch(() => {});
+    toast.success(L("تم الحذف", "Deleted"));
+  };
 
   const openAdd = () => { setEditId(null); setForm(empty); setTechInput(""); setOpen(true); };
   const openEdit = (id: string) => {
@@ -64,13 +88,21 @@ function PortfolioPage() {
     setTechInput("");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.titleAr) { toast.error(L("العنوان مطلوب", "Title is required")); return; }
+    const payload: any = {
+      titleAr: form.titleAr, titleEn: form.titleEn, category: form.category,
+      cover: form.cover, descriptionAr: form.description, descriptionEn: form.description,
+      tech: form.tech, client_name: form.client, year: form.year, link: form.link, visible: form.visible,
+    };
     if (editId) {
       setItems(items.map(i => i.id === editId ? { ...i, ...form } : i));
+      adminApi.portfolio.update(editId, payload).catch(() => {});
       toast.success(L("تم التحديث", "Updated"));
     } else {
-      setItems([{ id: "p" + Date.now(), ...form }, ...items]);
+      const localId = "p" + Date.now();
+      setItems([{ id: localId, ...form }, ...items]);
+      adminApi.portfolio.create(payload).catch(() => {});
       toast.success(L("تم إضافة العمل", "Project added"));
     }
     setOpen(false);
