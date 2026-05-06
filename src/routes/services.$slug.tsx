@@ -129,10 +129,20 @@ function ServiceDetailPage() {
   const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
   const heroImg = service.bannerImage || servicesHero;
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      toast.info(t("svcDetail.toast.loginRequired"));
+      navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
+      return;
+    }
     add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     toast.success(t("svcDetail.toast.added"), { description: title });
   };
   const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      toast.info(t("svcDetail.toast.loginRequired"));
+      navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
+      return;
+    }
     add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     navigate({ to: "/checkout" as any });
   };
