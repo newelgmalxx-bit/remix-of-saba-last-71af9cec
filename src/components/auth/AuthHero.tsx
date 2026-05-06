@@ -19,26 +19,26 @@ export function AuthHero({ variant = "login" }: { variant?: "login" | "signup" }
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
       <div className="relative flex justify-start">
-        <img src={logoWhite} alt="سابا ديزاين" className="h-20 w-auto opacity-95" />
+        <img src={logoWhite} alt="سابا ديزاين" className="h-14 w-auto opacity-95 sm:h-20" />
       </div>
 
       <div className={`relative mt-6 ${align}`}>
-        <h2 className="text-3xl font-extrabold leading-tight">
+        <h2 className="text-2xl font-extrabold leading-tight sm:text-3xl">
           {t("auth.hero.welcome")} <span className="whitespace-nowrap">SABA DESIGN</span>
         </h2>
         <div className={`my-3 h-0.5 w-16 rounded-full bg-white/60 ${dividerAlign}`} />
-        <p className="text-sm leading-7 text-white/80">
+        <p className="text-xs leading-6 text-white/80 sm:text-sm sm:leading-7">
           {variant === "signup" ? t("auth.hero.tagline.signup") : t("auth.hero.tagline.login")}
         </p>
       </div>
 
       <div className="relative my-6 flex justify-center">
-        <div className="overflow-hidden rounded-3xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
-          <img src={authIllustration} alt="" className="h-96 w-96 object-cover" />
+        <div className="w-full max-w-xs overflow-hidden rounded-3xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] ring-1 ring-white/10 sm:max-w-sm lg:max-w-md">
+          <img src={authIllustration} alt="" className="aspect-square w-full object-cover" />
         </div>
       </div>
 
-      <div className="relative grid grid-cols-4 gap-3">
+      <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
         {features.map((f) => (
           <div key={f.title} className="text-center">
             <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur">
