@@ -525,6 +525,70 @@ function ServiceDetailPage() {
   );
 }
 
+function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean }) {
+  const { t, dir } = useLang();
+  const [rating, setRating] = useState(5);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const startAlign = dir === "rtl" ? "text-right" : "text-left";
+
+  if (!isAuthenticated) {
+    return (
+      <div className={`flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-secondary/20 p-6 text-center ${startAlign}`}>
+        <p className="text-sm text-muted-foreground">{t("svcDetail.reviews.loginRequired")}</p>
+        <Link to={"/login" as any} className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-xs font-bold text-primary-foreground">
+          {t("nav.login")}
+        </Link>
+      </div>
+    );
+  }
+
+  const submit = () => {
+    if (rating < 1) return;
+    const ok = onSubmit(rating, comment.trim());
+    if (ok) {
+      toast.success(t("svcDetail.reviews.thanks"));
+      setComment("");
+      setRating(5);
+    }
+  };
+
+  return (
+    <div className={`rounded-2xl border border-border/60 bg-secondary/20 p-5 ${startAlign}`}>
+      <div className="text-sm font-bold text-foreground">{t("svcDetail.reviews.formTitle")}</div>
+      <div className="mt-3 flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(0)}
+            onClick={() => setRating(n)}
+            aria-label={`${n}`}
+            className="p-0.5"
+          >
+            <Star className={`h-6 w-6 ${(hover || rating) >= n ? "fill-amber-400 text-amber-400" : "fill-none text-amber-300"}`} />
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder={t("svcDetail.reviews.placeholder")}
+        maxLength={1000}
+        rows={4}
+        className="mt-3 w-full resize-none rounded-xl border border-border bg-white px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
+      />
+      <button
+        onClick={submit}
+        className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-xs font-bold text-primary-foreground transition hover:bg-primary-dark"
+      >
+        <Send className="h-4 w-4" /> {t("svcDetail.reviews.submit")}
+      </button>
+    </div>
+  );
+}
+
 function TestimonialsSlider({ testimonials }: { testimonials: { name: string; role: string; text: string }[] }) {
   const { t, dir } = useLang();
   const [i, setI] = useState(0);
