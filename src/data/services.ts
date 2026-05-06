@@ -21,7 +21,7 @@ export type ServiceContent = {
   };
   overview: { icon: LucideIcon; title: string; desc: string }[];
   benefits: { icon: LucideIcon; title: string; desc: string }[];
-  plans: { name: string; price: string; featured: boolean; feats: string[] }[];
+  plans: { name: string; price: string; originalPrice?: string; featured: boolean; feats: string[] }[];
   steps?: { title: string }[];
   stats?: { v: string; l: string }[];
   testimonials?: { name: string; role: string; text: string }[];
@@ -29,9 +29,9 @@ export type ServiceContent = {
 };
 
 const defaultPlans = [
-  { name: "Basic", price: "1,500", featured: false, feats: ["باقة أساسية", "تسليم سريع", "جولة تعديل واحدة", "دعم لمدة أسبوع"] },
-  { name: "Pro", price: "3,500", featured: true, feats: ["مخرجات إضافية", "جولتان تعديل", "ربط مع قنواتك", "دعم لمدة شهر", "أولوية في التنفيذ"] },
-  { name: "Premium", price: "6,500", featured: false, feats: ["كل ما في باقة Pro", "تخصيص متقدم", "تقارير دورية", "دعم أولوية"] },
+  { name: "Basic", price: "1,500", originalPrice: "1,800", featured: false, feats: ["باقة أساسية", "تسليم سريع", "جولة تعديل واحدة", "دعم لمدة أسبوع"] },
+  { name: "Pro", price: "3,500", originalPrice: "4,500", featured: true, feats: ["مخرجات إضافية", "جولتان تعديل", "ربط مع قنواتك", "دعم لمدة شهر", "أولوية في التنفيذ"] },
+  { name: "Premium", price: "6,500", originalPrice: "8,500", featured: false, feats: ["كل ما في باقة Pro", "تخصيص متقدم", "تقارير دورية", "دعم أولوية"] },
 ];
 
 export const services: ServiceContent[] = [
@@ -55,9 +55,9 @@ export const services: ServiceContent[] = [
       { icon: LifeBuoy, title: "دعم بعد التسليم", desc: "متابعة فنية لأكثر من شهر بعد الإطلاق." },
     ],
     plans: [
-      { name: "Basic", price: "3,500", featured: false, feats: ["تصميم 5 صفحات", "متجاوب", "هوية بسيطة", "صياغة محتوى مبدئي"] },
-      { name: "Pro", price: "7,900", featured: true, feats: ["تصميم 10 صفحات", "هوية متكاملة", "ربط نماذج تواصل", "تحسين سرعة", "SEO أساسي"] },
-      { name: "Premium", price: "12,500", featured: false, feats: ["كل ما في باقة Pro", "متجر إلكتروني", "لوحة تحكم", "دعم أولوية"] },
+      { name: "Basic", price: "3,500", originalPrice: "4,200", featured: false, feats: ["تصميم 5 صفحات", "متجاوب", "هوية بسيطة", "صياغة محتوى مبدئي"] },
+      { name: "Pro", price: "7,900", originalPrice: "9,900", featured: true, feats: ["تصميم 10 صفحات", "هوية متكاملة", "ربط نماذج تواصل", "تحسين سرعة", "SEO أساسي"] },
+      { name: "Premium", price: "12,500", originalPrice: "15,900", featured: false, feats: ["كل ما في باقة Pro", "متجر إلكتروني", "لوحة تحكم", "دعم أولوية"] },
     ],
   },
   {
