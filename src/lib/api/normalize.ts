@@ -10,13 +10,19 @@ export function normalizeOrder(o: ApiOrder): UiOrder {
     price: Number(l.price) || 0,
     qty: Number(l.qty) || 1,
   }));
+  const ps = String((o as any).payment_status ?? (o as any).paymentStatus ?? "").toLowerCase();
+  const paid = !!(o as any).paid
+    || ps === "paid"
+    || ps === "completed"
+    || ps === "success"
+    || (o.status as string) === "completed";
   return {
     id: o.id,
     number: o.number,
     createdAt: (o.createdAt || "").slice(0, 10),
     status: (o.status as OrderStatus) || "pending",
     payment: (o.payment_method as PaymentMethod) || "cod",
-    paid: !!o.paid,
+    paid,
     items,
     subtotal: Number(o.subtotal) || 0,
     vat: Number(o.vat) || 0,
