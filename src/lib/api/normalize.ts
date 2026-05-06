@@ -16,6 +16,13 @@ export function normalizeOrder(o: ApiOrder): UiOrder {
     || ps === "completed"
     || ps === "success"
     || (o.status as string) === "completed";
+  const paymentStatus: "unpaid" | "paid" | "refunded" =
+    ps === "paid" || ps === "completed" || ps === "success" || paid
+      ? "paid"
+      : ps === "refunded"
+      ? "refunded"
+      : "unpaid";
+  const inv = (o as any).invoice ?? null;
   return {
     id: o.id,
     number: o.number,
@@ -23,6 +30,15 @@ export function normalizeOrder(o: ApiOrder): UiOrder {
     status: (o.status as OrderStatus) || "pending",
     payment: (o.payment_method as PaymentMethod) || "cod",
     paid,
+    paymentStatus,
+    invoice: inv
+      ? {
+          id: String(inv.id),
+          number: String(inv.number ?? inv.invoice_number ?? ""),
+          status: String(inv.status ?? "pending"),
+          total: Number(inv.total) || 0,
+        }
+      : null,
     items,
     subtotal: Number(o.subtotal) || 0,
     vat: Number(o.vat) || 0,
