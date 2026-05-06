@@ -309,14 +309,22 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5 col-span-2">{L("نظرة عامة عن الخدمة (وصف تفصيلي)", "Service Overview (detailed description)")}
                 <textarea rows={4} placeholder={L("وصف تفصيلي يظهر في قسم نظرة عامة بصفحة الخدمة", "Detailed description shown in the overview section on the service page")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescription} onChange={(e) => setForm({ ...form, overviewDescription: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("صورة البنر (رابط الصورة)", "Banner Image (URL)")}
-                <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
-                <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
-                  const f = e.target.files?.[0]; if (!f) return;
-                  setForm({ ...form, bannerImage: await uploadImage(f) });
-                }} />
+              <div className="text-xs font-bold space-y-1.5 col-span-2">
+                <div>{L("صورة البنر", "Banner Image")}</div>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
+                    {L("رفع من الجهاز", "Upload from device")}
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const f = e.target.files?.[0]; if (!f) return;
+                      const url = await uploadImage(f);
+                      setForm((prev) => ({ ...prev, bannerImage: url }));
+                    }} />
+                  </label>
+                  <input type="text" placeholder={L("أو ألصق رابط https://...", "Or paste URL https://...")} className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-xs" value={form.bannerImage.startsWith("data:") ? "" : form.bannerImage} onChange={(e) => setForm({ ...form, bannerImage: e.target.value })} />
+                  {form.bannerImage && <button type="button" onClick={() => setForm({ ...form, bannerImage: "" })} className="text-xs text-rose-600 font-bold">{L("حذف", "Delete")}</button>}
+                </div>
                 {form.bannerImage && <img src={form.bannerImage} alt="banner preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
-              </label>
+              </div>
             </div>
             </section>
 
@@ -332,13 +340,21 @@ function ServicesPage() {
                 <label className="text-xs font-bold space-y-1.5 col-span-2">{L("وصف الميتا (Meta Description)", "Meta Description")}
                   <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
                 </label>
-                <label className="text-xs font-bold space-y-1.5 col-span-2">{L("صورة المشاركة (OG Image)", "Share Image (OG Image)")}
-                  <input type="url" placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
-                  <input type="file" accept="image/*" className="w-full text-[11px]" onChange={async (e) => {
-                    const f = e.target.files?.[0]; if (!f) return;
-                    setForm({ ...form, seoOgImage: await uploadImage(f) });
-                  }} />
-                </label>
+                <div className="text-xs font-bold space-y-1.5 col-span-2">
+                  <div>{L("صورة المشاركة (OG Image)", "Share Image (OG Image)")}</div>
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
+                      {L("رفع من الجهاز", "Upload from device")}
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const f = e.target.files?.[0]; if (!f) return;
+                        const url = await uploadImage(f);
+                        setForm((prev) => ({ ...prev, seoOgImage: url }));
+                      }} />
+                    </label>
+                    <input type="text" placeholder={L("أو ألصق رابط https://...", "Or paste URL https://...")} className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-xs" value={form.seoOgImage.startsWith("data:") ? "" : form.seoOgImage} onChange={(e) => setForm({ ...form, seoOgImage: e.target.value })} />
+                  </div>
+                  {form.seoOgImage && <img src={form.seoOgImage} alt="og preview" className="mt-1 h-24 w-full object-cover rounded-md border border-border" />}
+                </div>
               </div>
             </section>
 
