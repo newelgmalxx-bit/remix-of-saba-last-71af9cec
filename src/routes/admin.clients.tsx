@@ -38,18 +38,47 @@ function ClientsPage() {
   const [viewing, setViewing] = useState<AdminClient | null>(null);
 
   useEffect(() => {
-    adminApi.clients.list({ limit: 200 })
-      .then((p) => {
-        const items: AdminClient[] = (p.items || []).map((c: any) => ({
+    Promise.all([
+      adminApi.clients.list({ limit: 200 }).catch(() => ({ items: [] })),
+      adminApi.invoices.list({ limit: 500 }).catch(() => ({ items: [] })),
+      adminApi.orders.list({ limit: 500 }).catch(() => ({ items: [] })),
+    ]).then(([cp, ip, op]: any) => {
+      const invoices: any[] = ip?.items || [];
+      const orders: any[] = op?.items || [];
+      // Aggregate by email (fallback to client_name)
+      const agg = new Map<string, { orders: number; spent: number }>();
+      const bump = (key: string, amount: number) => {
+        if (!key) return;
+        const k = key.toLowerCase();
+        const cur = agg.get(k) || { orders: 0, spent: 0 };
+        cur.orders += 1;
+        cur.spent += Number(amount) || 0;
+        agg.set(k, cur);
+      };
+      orders.forEach((o) => {
+        const email = (o.client_email || o.email || o.user_email || "").toString();
+        const total = Number(o.total ?? o.amount ?? 0);
+        bump(email, total);
+      });
+      // If no orders endpoint data, fall back to paid invoices only
+      if (orders.length === 0) {
+        invoices.forEach((i) => {
+          if (i.status === "paid") bump((i.client_email || "").toString(), Number(i.total) || 0);
+        });
+      }
+      const items: AdminClient[] = (cp.items || []).map((c: any) => {
+        const a = agg.get((c.email || "").toLowerCase()) || { orders: 0, spent: 0 };
+        return {
           id: c.id, name: c.name, email: c.email, phone: c.phone ?? "",
-          orders: Number(c.orders) || 0, totalSpent: Number(c.totalSpent) || 0,
+          orders: Number(c.orders) || a.orders,
+          totalSpent: Number(c.totalSpent) || a.spent,
           segment: (c.segment as any) || "new",
           joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
           city: c.city ?? undefined,
-        }));
-        setClients(items);
-      })
-      .catch(() => setClients([]));
+        };
+      });
+      setClients(items);
+    });
     adminApi.analytics().then((a: any) => {
       if (!a) return;
       setGrowthRate(`${a.growthRate ?? 0}%`);
