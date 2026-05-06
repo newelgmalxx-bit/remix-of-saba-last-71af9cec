@@ -5,7 +5,7 @@ import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, CheckCircle2 } from "lu
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
 import { toast } from "sonner";
-import { fileToWebp } from "@/lib/image";
+import { uploadImage } from "@/lib/image";
 import api from "@/lib/api";
 
 export const Route = createFileRoute("/admin/services/$slug")({
@@ -221,7 +221,7 @@ function ServiceEditorPage() {
                   <input type="url" placeholder="https://..." className={inputCls} value={bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
                   <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
                     const f = e.target.files?.[0]; if (!f) return;
-                    setBannerImage(await fileToWebp(f));
+                    setBannerImage(await uploadImage(f));
                   }} />
                   {bannerImage && <img src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
                 </div>
@@ -244,7 +244,7 @@ function ServiceEditorPage() {
                   <input type="url" placeholder="https://..." className={inputCls} value={seo.ogImage} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })} />
                   <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
                     const f = e.target.files?.[0]; if (!f) return;
-                    setSeo({ ...seo, ogImage: await fileToWebp(f) });
+                    setSeo({ ...seo, ogImage: await uploadImage(f) });
                   }} />
                   {seo.ogImage && <img src={seo.ogImage} alt="og preview" className="h-28 w-full object-cover rounded-xl border border-border" />}
                 </div>

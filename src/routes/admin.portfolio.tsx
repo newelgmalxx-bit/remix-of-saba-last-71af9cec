@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { adminPortfolio, portfolioCategories, type AdminPortfolio } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { fileToWebp } from "@/lib/image";
+import { uploadImage } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
 
@@ -51,7 +51,7 @@ function PortfolioPage() {
   const onPickFile = async (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error(L("اختر صورة فقط", "Pick an image only")); return; }
-    const webp = await fileToWebp(file);
+    const webp = await uploadImage(file);
     setForm((f) => ({ ...f, cover: webp }));
   };
 
