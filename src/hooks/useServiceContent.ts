@@ -2,8 +2,36 @@ import { useEffect, useState, useCallback } from "react";
 import { serviceMap, type ServiceContent } from "@/data/services";
 import { Sparkles } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
+import { services as servicesApi } from "@/lib/api";
 
 const KEY = "saba_service_overrides_v1";
+const REMOTE_KEY = "saba_service_remote_v1";
+
+async function refreshRemoteServices() {
+  try {
+    const res = await servicesApi.list();
+    const items = res?.items || [];
+    const store = readStore();
+    for (const s of items) {
+      const slug = s.slug;
+      const cur = store[slug] || {};
+      store[slug] = {
+        ...cur,
+        isCustom: !serviceMap[slug] ? true : cur.isCustom,
+        title: s.titleAr || cur.title,
+        titleEn: s.titleEn || cur.titleEn,
+        subtitle: s.subtitleAr || cur.subtitle,
+        subtitleEn: s.subtitleEn || cur.subtitleEn,
+        category: s.category || cur.category,
+        bannerImage: s.cover || cur.bannerImage,
+      };
+    }
+    writeStore(store);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(REMOTE_KEY, "1");
+    }
+  } catch {}
+}
 
 export type ServiceOverride = {
   title?: string;
@@ -143,6 +171,7 @@ export function useAllServices(): ServiceContent[] {
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
     window.addEventListener("storage", fn);
+    refreshRemoteServices();
     return () => {
       window.removeEventListener("saba:service-overrides", fn);
       window.removeEventListener("storage", fn);
