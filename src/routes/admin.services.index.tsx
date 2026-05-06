@@ -352,6 +352,7 @@ function ServicesPage() {
                       <input placeholder={L("اسم الباقة", "Package name")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={p.name} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], name: e.target.value }; setForm({ ...form, plans: n }); }} />
                     </div>
                     <input placeholder={L("السعر", "Price")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.price} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], price: e.target.value }; setForm({ ...form, plans: n }); }} />
+                    <input placeholder={L("السعر قبل الخصم", "Original price")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.originalPrice ?? ""} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], originalPrice: e.target.value }; setForm({ ...form, plans: n }); }} />
                     <label className="flex items-center gap-1 text-[11px] font-bold">
                       <input type="checkbox" checked={p.featured} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], featured: e.target.checked }; setForm({ ...form, plans: n }); }} /> {L("مميزة", "Featured")}
                     </label>
