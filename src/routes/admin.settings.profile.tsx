@@ -57,9 +57,9 @@ function ProfilePage() {
 
   const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const dataUrl = await uploadImage(f);
-    setP({ ...p, avatar: dataUrl });
-    try { await accountApi.updateProfile({ name: p.name, phone: p.phone, avatar: f }); await refresh(); } catch {}
+    const url = await uploadImage(f);
+    setP({ ...p, avatar: url });
+    try { await accountApi.updateProfile({ name: p.name, phone: p.phone, avatar: url }); await refresh(); } catch {}
   };
   const initials = p.name.split(" ").map(n => n[0]).slice(0, 2).join("");
 
