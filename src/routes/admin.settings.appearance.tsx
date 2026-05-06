@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout, PanelCard } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
+import { useState, useEffect } from "react";
 import { Sun, Moon, Monitor, PanelLeft, PanelTop, PanelRight } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/settings/appearance")({
   head: () => ({ meta: [{ title: "المظهر | الإعدادات" }] }),
@@ -17,10 +19,27 @@ function AppearancePage() {
   const [nav, setNav] = useState("right");
   const [direction, setDirection] = useState("rtl");
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("appearance");
+        if (s?.theme) setTheme(s.theme);
+        if (s?.accent) setAccent(s.accent);
+        if (s?.nav) setNav(s.nav);
+        if (s?.direction) setDirection(s.direction);
+      } catch {}
+    })();
+  }, []);
+
+  const save = async () => {
+    try { await adminApi.settings.update("appearance", { theme, accent, nav, direction }); toast.success("تم الحفظ / Saved"); }
+    catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
+
   const accents = ["#1E5B94", "#3b82f6", "#8b5cf6", "#ec4899", "#f97316", "#eab308"];
 
   return (
-    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")}>
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
       <PanelCard title={L("المظهر", "Appearance")} subtitle={L("تخصيص شكل وأسلوب لوحة التحكم", "Customize the dashboard look and feel")}>
         <div className="space-y-8">
           <div>

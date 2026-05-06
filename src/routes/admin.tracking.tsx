@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, Pill } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/tracking")({
   head: () => ({ meta: [{ title: "التتبع والبكسلات | لوحة التحكم" }] }),
@@ -30,13 +31,27 @@ function TrackingPage() {
   const [pixels, setPixels] = useState<Pixel[]>(initial);
   const [head, setHead] = useState("");
   const [body, setBody] = useState("");
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("tracking");
+        if (Array.isArray(s?.pixels)) setPixels((cur) => cur.map(p => ({ ...p, ...(s.pixels.find((x: any) => x.key === p.key) || {}) })));
+        if (typeof s?.head === "string") setHead(s.head);
+        if (typeof s?.body === "string") setBody(s.body);
+      } catch {}
+    })();
+  }, []);
+  const save = async () => {
+    try { await adminApi.settings.update("tracking", { pixels, head, body }); toast.success(L("تم حفظ البكسلات", "Pixels saved")); }
+    catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
   const update = (k: string, patch: Partial<Pixel>) => setPixels(pixels.map(p => p.key === k ? { ...p, ...patch } : p));
   const active = pixels.filter(p => p.enabled && p.value).length;
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";
   const iconMs = dir === "rtl" ? "ml-1" : "mr-1";
   return (
-    <AdminLayout title={L("التتبع والبكسلات", "Tracking & Pixels")} subtitle={L("ربط أدوات التحليل والإعلانات", "Connect analytics and ad tools")} action={<PrimaryButton onClick={() => toast.success(L("تم حفظ البكسلات", "Pixels saved"))}>{L("حفظ", "Save")}</PrimaryButton>}>
+    <AdminLayout title={L("التتبع والبكسلات", "Tracking & Pixels")} subtitle={L("ربط أدوات التحليل والإعلانات", "Connect analytics and ad tools")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
       <div className="grid gap-4 sm:grid-cols-3 mb-6">
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="text-xs text-muted-foreground">{L("بكسلات نشطة", "Active Pixels")}</div>

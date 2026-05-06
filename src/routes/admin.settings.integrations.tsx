@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { CreditCard, Calendar, BarChart3, Facebook, Tag, Music, Link2, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/settings/integrations")({
   head: () => ({ meta: [{ title: "التكاملات | الإعدادات" }] }),
@@ -80,20 +81,51 @@ function IntegrationsPage() {
   const [items, setItems] = useState<Item[]>(initialItems);
   const [active, setActive] = useState<Item | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [stored, setStored] = useState<Record<string, Record<string, string>>>({});
 
-  const openSetup = (it: Item) => { setActive(it); setValues({}); };
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("integrations");
+        if (s) {
+          setStored(s.values || {});
+          if (s.connected && Array.isArray(s.connected)) {
+            setItems((cur) => cur.map(it => ({ ...it, connected: s.connected.includes(it.id) })));
+          }
+        }
+      } catch {}
+    })();
+  }, []);
 
-  const save = () => {
+  const openSetup = (it: Item) => { setActive(it); setValues(stored[it.id] || {}); };
+
+  const save = async () => {
     if (!active) return;
-    setItems(items.map(x => x.id === active.id ? { ...x, connected: true } : x));
-    toast.success(L(`تم ربط ${active.name}`, `${active.name} connected`));
+    const newItems = items.map(x => x.id === active.id ? { ...x, connected: true } : x);
+    const newStored = { ...stored, [active.id]: values };
+    try {
+      await adminApi.settings.update("integrations", {
+        values: newStored,
+        connected: newItems.filter(x => x.connected).map(x => x.id),
+      });
+      setItems(newItems);
+      setStored(newStored);
+      toast.success(L(`تم ربط ${active.name}`, `${active.name} connected`));
+    } catch (e: any) { toast.error(e?.message || "Save failed"); }
     setActive(null);
   };
 
-  const disconnect = () => {
+  const disconnect = async () => {
     if (!active) return;
-    setItems(items.map(x => x.id === active.id ? { ...x, connected: false } : x));
-    toast.success(L(`تم فصل ${active.name}`, `${active.name} disconnected`));
+    const newItems = items.map(x => x.id === active.id ? { ...x, connected: false } : x);
+    try {
+      await adminApi.settings.update("integrations", {
+        values: stored,
+        connected: newItems.filter(x => x.connected).map(x => x.id),
+      });
+      setItems(newItems);
+      toast.success(L(`تم فصل ${active.name}`, `${active.name} disconnected`));
+    } catch (e: any) { toast.error(e?.message || "Save failed"); }
     setActive(null);
   };
 

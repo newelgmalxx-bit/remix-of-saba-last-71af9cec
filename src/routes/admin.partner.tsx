@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, Pill, GhostButton } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, RefreshCw, Plus, Trash2, Webhook } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/partner")({
   head: () => ({ meta: [{ title: "إعدادات API الشريك | لوحة التحكم" }] }),
@@ -28,20 +29,45 @@ function PartnerApiPage() {
   const [base, setBase] = useState("https://api.saba.sa/v1");
   const [pull, setPull] = useState({ enabled: true, url: "https://partner.example.com/api/services", token: "", interval: 60 });
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("partner");
+        if (s?.base) setBase(s.base);
+        if (Array.isArray(s?.keys)) setKeys(s.keys);
+        if (Array.isArray(s?.hooks)) setHooks(s.hooks);
+        if (s?.pull) setPull((c) => ({ ...c, ...s.pull }));
+      } catch {}
+    })();
+  }, []);
+
+  const persist = async (next?: { keys?: Key[]; hooks?: Hook[]; base?: string; pull?: typeof pull }) => {
+    try {
+      await adminApi.settings.update("partner", {
+        base: next?.base ?? base,
+        keys: next?.keys ?? keys,
+        hooks: next?.hooks ?? hooks,
+        pull: next?.pull ?? pull,
+      });
+    } catch {}
+  };
+
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";
 
   const addKey = () => {
     const name = prompt(L("اسم المفتاح:", "Key name:")); if (!name) return;
-    setKeys([{ id: "k" + Date.now(), name, key: genKey(), created: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"), lastUsed: "—", active: true, scopes: ["bookings.read"] }, ...keys]);
+    const next = [{ id: "k" + Date.now(), name, key: genKey(), created: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"), lastUsed: "—", active: true, scopes: ["bookings.read"] }, ...keys];
+    setKeys(next); persist({ keys: next });
     toast.success(L("تم إنشاء المفتاح", "Key created"));
   };
-  const rotate = (id: string) => { setKeys(keys.map(k => k.id === id ? { ...k, key: genKey() } : k)); toast.success(L("تم تجديد المفتاح", "Key rotated")); };
+  const rotate = (id: string) => { const next = keys.map(k => k.id === id ? { ...k, key: genKey() } : k); setKeys(next); persist({ keys: next }); toast.success(L("تم تجديد المفتاح", "Key rotated")); };
   const copy = (s: string) => { navigator.clipboard.writeText(s); toast.success(L("تم النسخ", "Copied")); };
 
   const addHook = () => {
     const url = prompt("Webhook URL:"); if (!url) return;
-    setHooks([...hooks, { id: "w" + Date.now(), url, events: ["booking.created"], active: true }]);
+    const next = [...hooks, { id: "w" + Date.now(), url, events: ["booking.created"], active: true }];
+    setHooks(next); persist({ hooks: next });
   };
 
   return (
@@ -109,7 +135,7 @@ function PartnerApiPage() {
         </div>
         <div className="mt-4 flex gap-2">
           <PrimaryButton onClick={() => toast.success(L("تم بدء المزامنة", "Sync started"))}>{L("مزامنة الآن", "Sync now")}</PrimaryButton>
-          <GhostButton onClick={() => toast.success(L("تم الحفظ", "Saved"))}>{L("حفظ", "Save")}</GhostButton>
+          <GhostButton onClick={async () => { await persist(); toast.success(L("تم الحفظ", "Saved")); }}>{L("حفظ", "Save")}</GhostButton>
         </div>
       </PanelCard>
     </AdminLayout>

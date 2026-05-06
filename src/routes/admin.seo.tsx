@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/seo")({
   head: () => ({ meta: [{ title: "إعدادات SEO | لوحة التحكم" }] }),
@@ -22,8 +23,22 @@ function SeoPage() {
   const [global, setGlobal] = useState({ siteName: "سابا ديزاين", separator: "|", twitter: "@sabadesign", ogImage: "", canonicalBase: "https://saba.sa" });
   const [pages, setPages] = useState(defaultPages.map(p => ({ ...p, keywords: L("تصميم مواقع، تطبيقات، هوية بصرية", "web design, apps, branding") })));
   const [robots, setRobots] = useState("User-agent: *\nAllow: /\nSitemap: https://saba.sa/sitemap.xml");
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("seo");
+        if (s?.global) setGlobal((c) => ({ ...c, ...s.global }));
+        if (Array.isArray(s?.pages)) setPages(s.pages);
+        if (typeof s?.robots === "string") setRobots(s.robots);
+      } catch {}
+    })();
+  }, []);
+  const save = async () => {
+    try { await adminApi.settings.update("seo", { global, pages, robots }); toast.success(L("تم الحفظ", "Saved")); }
+    catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
   return (
-    <AdminLayout title={L("إعدادات SEO", "SEO Settings")} subtitle={L("تحكم في عناوين الصفحات والوصف والكلمات الدلالية", "Manage page titles, descriptions, and keywords")} action={<PrimaryButton onClick={() => toast.success(L("تم الحفظ", "Saved"))}>{L("حفظ", "Save")}</PrimaryButton>}>
+    <AdminLayout title={L("إعدادات SEO", "SEO Settings")} subtitle={L("تحكم في عناوين الصفحات والوصف والكلمات الدلالية", "Manage page titles, descriptions, and keywords")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
       <PanelCard title={L("إعدادات عامة", "General Settings")} className="mb-6">
         <div className="grid gap-3 sm:grid-cols-2">
           <Lb label={L("اسم الموقع", "Site Name")}><input className={ic} value={global.siteName} onChange={e => setGlobal({ ...global, siteName: e.target.value })} /></Lb>

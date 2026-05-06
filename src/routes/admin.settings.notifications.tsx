@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/settings/notifications")({
   head: () => ({ meta: [{ title: "الإشعارات | الإعدادات" }] }),
@@ -28,6 +29,21 @@ function NotificationsPage() {
   const [items, setItems] = useState<Item[]>(initial);
   const [quiet, setQuiet] = useState({ enabled: false, from: "22:00", to: "07:00" });
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("notifications");
+        if (s?.items?.length) setItems((cur) => cur.map((i) => ({ ...i, ch: s.items.find((x: any) => x.key === i.key)?.ch || i.ch })));
+        if (s?.quiet) setQuiet(s.quiet);
+      } catch {}
+    })();
+  }, []);
+
+  const save = async () => {
+    try { await adminApi.settings.update("notifications", { items: items.map(i => ({ key: i.key, ch: i.ch })), quiet }); toast.success(L("تم حفظ التفضيلات", "Preferences saved")); }
+    catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
+
   const toggle = (key: string, ch: keyof Channel) =>
     setItems(items.map(i => i.key === key ? { ...i, ch: { ...i.ch, [ch]: !i.ch[ch] } } : i));
 
@@ -36,7 +52,7 @@ function NotificationsPage() {
   const textAlign = dir === "rtl" ? "text-right" : "text-left";
 
   return (
-    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("تفضيلات الإشعارات", "Notification preferences")} action={<PrimaryButton onClick={() => toast.success(L("تم حفظ التفضيلات", "Preferences saved"))}>{L("حفظ", "Save")}</PrimaryButton>}>
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("تفضيلات الإشعارات", "Notification preferences")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
       <PanelCard title={L("قنوات الإشعارات", "Notification Channels")} subtitle={L("اختر القنوات لكل نوع تنبيه", "Choose channels for each alert")} className="mb-6">
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
