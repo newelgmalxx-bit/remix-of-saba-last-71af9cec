@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
-import { Search, Filter, Package, Download, Eye } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Filter, Package, Download, Eye, Loader2 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { mockOrders, statusLabels, formatCurrency, paymentName, mockUser, type OrderStatus } from "@/data/account";
+import { statusLabels, formatCurrency, paymentName, type OrderStatus, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { account } from "@/lib/api";
+import { normalizeOrder } from "@/lib/api/normalize";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/account/orders/")({
   head: () => ({ meta: [{ title: "طلباتي | سابا ديزاين" }] }),
@@ -22,16 +25,29 @@ const filters: { id: OrderStatus | "all"; key: TKey }[] = [
 
 function OrdersList() {
   const { t, lang, dir } = useLang();
+  const { user } = useAuth();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    account.listOrders({ status: filter === "all" ? undefined : filter, limit: 50 })
+      .then((res) => { if (alive) setOrders((res.items || []).map(normalizeOrder)); })
+      .catch(() => { if (alive) setOrders([]); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [filter]);
 
   const filtered = useMemo(() => {
-    return mockOrders.filter((o) => {
+    return orders.filter((o) => {
       const matchQ = !q || o.number.toLowerCase().includes(q.toLowerCase()) || o.items.some((i) => i.serviceTitle.includes(q));
       const matchF = filter === "all" || o.status === filter;
       return matchQ && matchF;
     });
-  }, [q, filter]);
+  }, [q, filter, orders]);
 
   const sideClass = dir === "rtl" ? "right-3" : "left-3";
   const padSide = dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3";
@@ -68,7 +84,12 @@ function OrdersList() {
 
       {/* Orders */}
       <div className="space-y-3">
-        {filtered.length === 0 && (
+        {loading && (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {!loading && filtered.length === 0 && (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <Package className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-sm text-muted-foreground">{t("account.orders.empty")}</p>
@@ -105,7 +126,7 @@ function OrdersList() {
                   <div className="flex items-center gap-2">
                     {o.paid && (
                       <button
-                        onClick={() => downloadInvoice(o, mockUser.name)}
+                        onClick={() => downloadInvoice(o, user?.name || "")}
                         title={t("account.orders.downloadInvoice")}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background hover:bg-muted hover:text-primary transition"
                       >

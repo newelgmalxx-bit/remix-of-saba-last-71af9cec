@@ -1,21 +1,20 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
-  CheckCircle2, Circle, FileText, Receipt,
+  CheckCircle2, Circle, FileText, Receipt, Loader2,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { mockOrders, statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, mockUser, type Order } from "@/data/account";
+import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { account } from "@/lib/api";
+import { normalizeOrder } from "@/lib/api/normalize";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
-  loader: ({ params }) => {
-    const order = mockOrders.find((o) => o.id === params.orderId);
-    if (!order) throw notFound();
-    return { order };
-  },
   notFoundComponent: NotFoundOrder,
   errorComponent: ({ error }) => <ErrorOrder message={error.message} />,
   component: OrderDetail,
@@ -46,7 +45,33 @@ function ErrorOrder({ message }: { message: string }) {
 
 function OrderDetail() {
   const { t, lang, dir } = useLang();
-  const { order } = Route.useLoaderData() as { order: Order };
+  const { orderId } = Route.useParams();
+  const { user } = useAuth();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    account.getOrder(orderId)
+      .then((o) => { if (alive) setOrder(normalizeOrder(o)); })
+      .catch((e) => { if (alive) setError(e?.message || "error"); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <AccountLayout title={t("account.order.titleTpl")}>
+        <div className="rounded-2xl border border-border bg-card p-10 text-center">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </AccountLayout>
+    );
+  }
+  if (error || !order) return <NotFoundOrder />;
+
   const s = statusLabels[order.status];
   const PayIcon = paymentIcon(order.payment);
   const currentIdx = statusFlow.indexOf(order.status);
@@ -84,7 +109,7 @@ function OrderDetail() {
           <div className="flex items-center gap-2">
             {order.paid && (
               <button
-                onClick={() => downloadInvoice(order, mockUser.name)}
+                onClick={() => downloadInvoice(order, user?.name || "")}
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
               >
                 <Download className="h-4 w-4" />
@@ -230,7 +255,7 @@ function OrderDetail() {
           </div>
           {order.paid && (
             <button
-              onClick={() => downloadInvoice(order, mockUser.name)}
+              onClick={() => downloadInvoice(order, user?.name || "")}
               className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-light/30 p-4 text-sm font-bold text-primary hover:bg-primary-light/60 transition"
             >
               <Receipt className="h-4 w-4" />

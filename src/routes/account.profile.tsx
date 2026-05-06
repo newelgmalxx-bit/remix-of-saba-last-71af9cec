@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { User, Mail, Phone, MapPin, Save, Lock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Mail, Phone, MapPin, Save, Lock, Loader2 } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
-import { mockUser } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { account } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/account/profile")({
   head: () => ({ meta: [{ title: "ملفي الشخصي | سابا ديزاين" }] }),
@@ -12,13 +14,45 @@ export const Route = createFileRoute("/account/profile")({
 
 function Profile() {
   const { t, dir } = useLang();
-  const [form, setForm] = useState({ ...mockUser });
+  const { user, refresh } = useAuth();
+  const [form, setForm] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    city: user?.city || "",
+    avatar: (user?.name || "?").trim().charAt(0).toUpperCase(),
+    joinedAt: (user?.createdAt || "").slice(0, 10),
+  });
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const save = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        city: user.city || "",
+        avatar: (user.name || "?").trim().charAt(0).toUpperCase(),
+        joinedAt: (user.createdAt || "").slice(0, 10),
+      });
+    }
+  }, [user]);
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2200);
+    setSaving(true);
+    try {
+      await account.updateProfile({ name: form.name, phone: form.phone, city: form.city });
+      await refresh();
+      setSaved(true);
+      toast.success(t("account.profile.saved"));
+      setTimeout(() => setSaved(false), 2200);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -48,8 +82,8 @@ function Profile() {
           {saved ? (
             <span className="text-sm font-bold text-emerald-600">{t("account.profile.saved")}</span>
           ) : <span />}
-          <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark">
-            <Save className="h-4 w-4" />
+          <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {t("account.profile.save")}
           </button>
         </div>

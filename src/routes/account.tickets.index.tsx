@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LifeBuoy, Plus, MessageCircle, Clock, CheckCircle2, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LifeBuoy, Plus, MessageCircle, Clock, CheckCircle2, Eye, Loader2 } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
-import { mockTickets } from "@/data/account";
+import type { Ticket } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { account } from "@/lib/api";
+import { normalizeTicket } from "@/lib/api/normalize";
 
 export const Route = createFileRoute("/account/tickets/")({
   head: () => ({ meta: [{ title: "تذاكر الدعم | سابا ديزاين" }] }),
@@ -18,10 +21,22 @@ const statusMap: Record<string, { color: string; icon: any; key: TKey }> = {
 
 function TicketsList() {
   const { t } = useLang();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    account.listTickets({ limit: 50 })
+      .then((res) => { if (alive) setTickets((res.items || []).map(normalizeTicket)); })
+      .catch(() => { if (alive) setTickets([]); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, []);
+
   return (
     <AccountLayout title={t("account.tickets.title")} subtitle={t("account.tickets.subtitle")}>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground"><span data-ltr-number>{mockTickets.length}</span> {t("account.tickets.totalTpl")}</p>
+        <p className="text-sm text-muted-foreground"><span data-ltr-number>{tickets.length}</span> {t("account.tickets.totalTpl")}</p>
         <Link
           to={"/account/tickets/new" as any}
           className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
@@ -32,16 +47,20 @@ function TicketsList() {
       </div>
 
       <div className="space-y-3">
-        {mockTickets.length === 0 ? (
+        {loading ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : tickets.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <LifeBuoy className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-sm text-muted-foreground">{t("account.tickets.empty")}</p>
           </div>
         ) : (
-          mockTickets.map((tk) => {
+          tickets.map((tk) => {
             const s = statusMap[tk.status];
             const Icon = s.icon;
-            const last = tk.messages[tk.messages.length - 1];
+            const last = tk.messages[tk.messages.length - 1] || { author: "", text: "" };
             return (
               <Link
                 key={tk.id}

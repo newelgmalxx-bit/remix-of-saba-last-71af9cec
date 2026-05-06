@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { ChevronLeft, Send } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
-import { mockOrders } from "@/data/account";
+import type { Order } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
+import { account } from "@/lib/api";
+import { normalizeOrder } from "@/lib/api/normalize";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/account/tickets/new")({
   validateSearch: z.object({ order: z.string().optional() }),
@@ -21,12 +24,31 @@ function NewTicket() {
   const [priority, setPriority] = useState<"low" | "normal" | "high">("normal");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const submit = (e: React.FormEvent) => {
+  useEffect(() => {
+    account.listOrders({ limit: 50 })
+      .then((res) => setOrders((res.items || []).map(normalizeOrder)))
+      .catch(() => setOrders([]));
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim() || !message.trim()) return;
     setSubmitting(true);
-    setTimeout(() => navigate({ to: "/account/tickets" as any }), 800);
+    try {
+      await account.createTicket({
+        subject: subject.trim(),
+        orderId: orderId || undefined,
+        priority,
+        message: message.trim(),
+      });
+      toast.success(t("account.ticket.new.submit"));
+      navigate({ to: "/account/tickets" as any });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +78,7 @@ function NewTicket() {
               className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">{t("account.ticket.new.none")}</option>
-              {mockOrders.map((o) => (
+            {orders.map((o) => (
                 <option key={o.id} value={o.id}>{o.number}</option>
               ))}
             </select>

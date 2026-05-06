@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Package, CheckCircle2, Clock, Wallet, ArrowLeft, ArrowRight } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { mockOrders, mockTickets, statusLabels, formatCurrency, mockUser } from "@/data/account";
+import { statusLabels, formatCurrency, type Order, type Ticket } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { useAuth } from "@/hooks/useAuth";
+import { account } from "@/lib/api";
+import { normalizeOrder, normalizeTicket } from "@/lib/api/normalize";
 
 export const Route = createFileRoute("/account/")({
   head: () => ({ meta: [{ title: "حسابي | سابا ديزاين" }] }),
@@ -12,15 +16,24 @@ export const Route = createFileRoute("/account/")({
 
 function AccountHome() {
   const { t, lang, dir } = useLang();
-  const total = mockOrders.length;
-  const active = mockOrders.filter((o) => ["pending", "confirmed", "in_progress", "review"].includes(o.status)).length;
-  const completed = mockOrders.filter((o) => o.status === "completed").length;
-  const spent = mockOrders.filter((o) => o.paid).reduce((s, o) => s + o.total, 0);
-  const openTickets = mockTickets.filter((t) => t.status !== "closed").length;
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+
+  useEffect(() => {
+    account.listOrders({ limit: 50 }).then((r) => setOrders((r.items || []).map(normalizeOrder))).catch(() => {});
+    account.listTickets({ limit: 50 }).then((r) => setTickets((r.items || []).map(normalizeTicket))).catch(() => {});
+  }, []);
+
+  const total = orders.length;
+  const active = orders.filter((o) => ["pending", "confirmed", "in_progress", "review"].includes(o.status)).length;
+  const completed = orders.filter((o) => o.status === "completed").length;
+  const spent = orders.filter((o) => o.paid).reduce((s, o) => s + o.total, 0);
+  const openTickets = tickets.filter((t) => t.status !== "closed").length;
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
   return (
-    <AccountLayout title={`${t("account.home.title.tpl")} ${mockUser.name.split(" ")[0]} 👋`} subtitle={t("account.home.subtitle")}>
+    <AccountLayout title={`${t("account.home.title.tpl")} ${(user?.name || "").split(" ")[0]} 👋`} subtitle={t("account.home.subtitle")}>
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Stat icon={Package} label={t("account.stat.total")} value={total.toString()} tone="primary" />
@@ -38,7 +51,7 @@ function AccountHome() {
           </Link>
         </div>
         <div className="space-y-2">
-          {mockOrders.slice(0, 3).map((o) => {
+          {orders.slice(0, 3).map((o) => {
             const s = statusLabels[o.status];
             return (
               <Link
