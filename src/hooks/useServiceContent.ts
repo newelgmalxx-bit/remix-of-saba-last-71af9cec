@@ -47,6 +47,8 @@ export type ServiceOverride = {
   categoryEn?: string;
   breadcrumb?: string;
   breadcrumbEn?: string;
+  price?: string;
+  originalPrice?: string;
   heroHighlights?: string[];
   heroHighlightsEn?: string[];
   bannerImage?: string;

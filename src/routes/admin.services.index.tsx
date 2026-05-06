@@ -53,7 +53,7 @@ function ServicesPage() {
   }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
+    titleAr: "", titleEn: "", sku: "", category: "", price: "", originalPrice: "", slug: "",
     subtitle: "", breadcrumb: "", bannerImage: "",
     overviewDescription: "",
     seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
@@ -69,9 +69,9 @@ function ServicesPage() {
       { title: "", desc: "" },
     ],
     plans: [
-      { name: "Basic", price: "", featured: false, feats: [""] },
-      { name: "Pro", price: "", featured: true, feats: [""] },
-      { name: "Premium", price: "", featured: false, feats: [""] },
+      { name: "Basic", price: "", originalPrice: "", featured: false, feats: [""] },
+      { name: "Pro", price: "", originalPrice: "", featured: true, feats: [""] },
+      { name: "Premium", price: "", originalPrice: "", featured: false, feats: [""] },
     ],
     steps: [
       { title: "فهم المتطلبات" },
@@ -261,6 +261,9 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">{L("السعر (ر.س)", "Price (SAR)")}
                 <input type="number" dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </label>
+              <label className="text-xs font-bold space-y-1.5">{L("السعر قبل الخصم (اختياري)", "Original Price (optional)")}
+                <input type="number" dir="ltr" placeholder={L("اتركه فارغ لو مفيش خصم", "Leave empty if no discount")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} />
+              </label>
               <label className="text-xs font-bold space-y-1.5">{L("المعرّف (slug — اختياري)", "Identifier (slug — optional)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
@@ -349,6 +352,7 @@ function ServicesPage() {
                       <input placeholder={L("اسم الباقة", "Package name")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-bold" value={p.name} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], name: e.target.value }; setForm({ ...form, plans: n }); }} />
                     </div>
                     <input placeholder={L("السعر", "Price")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.price} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], price: e.target.value }; setForm({ ...form, plans: n }); }} />
+                    <input placeholder={L("السعر قبل الخصم", "Original price")} className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs" value={p.originalPrice ?? ""} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], originalPrice: e.target.value }; setForm({ ...form, plans: n }); }} />
                     <label className="flex items-center gap-1 text-[11px] font-bold">
                       <input type="checkbox" checked={p.featured} onChange={(e) => { const n = [...form.plans]; n[pi] = { ...n[pi], featured: e.target.checked }; setForm({ ...form, plans: n }); }} /> {L("مميزة", "Featured")}
                     </label>

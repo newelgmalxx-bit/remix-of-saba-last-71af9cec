@@ -83,11 +83,14 @@ async function trySyncFromApi(): Promise<void> {
 }
 
 export function useCart() {
-  const [state, setState] = useState<State>(cache);
+  // Start with empty state to match SSR; hydrate from localStorage after mount.
+  const [state, setState] = useState<State>({ items: [], subtotal: 0, vat: 0, total: 0, loading: false, error: null });
   const mounted = useRef(true);
 
   useEffect(() => {
     mounted.current = true;
+    // Sync from cache (loaded from localStorage) after hydration.
+    setState(cache);
     const fn = (s: State) => mounted.current && setState(s);
     listeners.add(fn);
     trySyncFromApi();
