@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, TrendingUp, Users, Package, Activity, Download } from "lucide-react";
 import { fmtSAR } from "@/data/admin";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/reports")({
   head: () => ({ meta: [{ title: "التقارير | لوحة التحكم" }] }),
@@ -22,15 +23,49 @@ function ReportsPage() {
   const [period, setPeriod] = useState(periodsExt[0]);
   const [format, setFormat] = useState(formats[0]);
   const [topPeriod, setTopPeriod] = useState(periods[1]);
+  const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; conversion: string; profitMargin: string }>({
+    revenue: 284520, orders: 184, clients: 96, activeServices: 9, conversion: "40.0%", profitMargin: "24.8%",
+  });
 
-  const generate = () => {
+  useEffect(() => {
+    (async () => {
+      try {
+        const a = await adminApi.stats();
+        if (a) setStats({
+          revenue: a.revenue ?? 284520,
+          orders: a.ordersCount ?? a.totalBookings ?? 184,
+          clients: a.totalClients ?? 96,
+          activeServices: a.activeServices ?? 9,
+          conversion: `${a.growthRate ?? 40}%`,
+          profitMargin: `${(a as any).profitMargin ?? 24.8}%`,
+        });
+      } catch {}
+    })();
+  }, []);
+
+  const generate = async () => {
+    const typeMap: Record<string, "sales" | "clients" | "services"> = {
+      [L("الملخص المالي", "Financial Summary")]: "sales",
+      [L("تقرير المبيعات", "Sales Report")]: "sales",
+      [L("تقرير العملاء", "Clients Report")]: "clients",
+      [L("تقرير الخدمات", "Services Report")]: "services",
+    };
+    const apiType = typeMap[type] || "sales";
+    const fmt: "csv" | "json" = format.startsWith("JSON") ? "json" : "csv";
+    if (!format.startsWith("PDF")) {
+      try {
+        await adminApi.reports.generate({ type: apiType, format: fmt });
+        toast.success(L(`تم توليد التقرير (${fmt.toUpperCase()})`, `Report generated (${fmt.toUpperCase()})`));
+        return;
+      } catch {/* fallback to local */}
+    }
     const rows: [string, string][] = [
-      [L("إجمالي المبيعات", "Total Sales"), "284520"],
-      [L("إجمالي الطلبات", "Total Orders"), "184"],
-      [L("معدل التحويل", "Conversion Rate"), "40.0%"],
-      [L("العملاء النشطون", "Active Clients"), "96"],
-      [L("الخدمات النشطة", "Active Services"), "9"],
-      [L("هامش الربح", "Profit Margin"), "24.8%"],
+      [L("إجمالي المبيعات", "Total Sales"), String(stats.revenue)],
+      [L("إجمالي الطلبات", "Total Orders"), String(stats.orders)],
+      [L("معدل التحويل", "Conversion Rate"), stats.conversion],
+      [L("العملاء النشطون", "Active Clients"), String(stats.clients)],
+      [L("الخدمات النشطة", "Active Services"), String(stats.activeServices)],
+      [L("هامش الربح", "Profit Margin"), stats.profitMargin],
     ];
     let blob: Blob, ext: string, mime: string;
     if (format.startsWith("JSON")) {
@@ -71,12 +106,12 @@ function ReportsPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-        <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(284520)} hint="↑ +20.1%" icon={DollarSign} accent="primary" />
-        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={184} hint="↑ +15.3%" icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("معدل التحويل", "Conversion Rate")} value="40.0%" hint="↑ +2.4%" icon={TrendingUp} accent="emerald" />
-        <StatCard label={L("العملاء النشطون", "Active Clients")} value={96} hint="↑ +5.2%" icon={Users} accent="amber" />
-        <StatCard label={L("الخدمات النشطة", "Active Services")} value={9} hint="↑ +1.1%" icon={Package} accent="primary" />
-        <StatCard label={L("هامش الربح", "Profit Margin")} value="24.8%" hint="↑ +0.5%" icon={Activity} accent="violet" />
+        <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(stats.revenue)} hint="↑ +20.1%" icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.orders} hint="↑ +15.3%" icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={stats.conversion} hint="↑ +2.4%" icon={TrendingUp} accent="emerald" />
+        <StatCard label={L("العملاء النشطون", "Active Clients")} value={stats.clients} hint="↑ +5.2%" icon={Users} accent="amber" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} hint="↑ +1.1%" icon={Package} accent="primary" />
+        <StatCard label={L("هامش الربح", "Profit Margin")} value={stats.profitMargin} hint="↑ +0.5%" icon={Activity} accent="violet" />
       </div>
 
       <PanelCard title={L("مولد التقارير المخصصة", "Custom Report Generator")} subtitle={L("إنشاء تقارير محددة للمحاسبة والتحليل", "Create reports for accounting and analysis")}>
