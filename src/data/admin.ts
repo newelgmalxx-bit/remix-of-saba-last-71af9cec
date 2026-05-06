@@ -126,5 +126,21 @@ export const adminUsers: AdminUser[] = [
   { id: "u4", name: "Emma Wilson", email: "emma@saba.sa", phone: "+966 55 111 0004", role: "support", active: false, joinedAt: "أبريل 2024" },
 ];
 
-export const fmtSAR = (n: number) =>
-  new Intl.NumberFormat("ar-SA", { maximumFractionDigits: 0 }).format(n) + " ر.س";
+import React from "react";
+import sarLogo from "@/assets/sar.png";
+
+export const fmtSARNumber = (n: number) =>
+  new Intl.NumberFormat("ar-SA", { maximumFractionDigits: 0 }).format(n);
+
+export const fmtSAR = (n: number): React.ReactNode =>
+  React.createElement(
+    "span",
+    { className: "inline-flex items-center gap-1", dir: "ltr" },
+    React.createElement("span", { "data-ltr-number": true }, fmtSARNumber(n)),
+    React.createElement("img", {
+      src: sarLogo,
+      alt: "SAR",
+      className: "inline-block h-[0.85em] w-auto align-[-0.05em] opacity-90",
+      draggable: false,
+    })
+  );

@@ -260,7 +260,7 @@ const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-
 function Lbl({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
   return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
 }
-function Info({ icon: Icon, label, value, ltr }: { icon: any; label: string; value: string; ltr?: boolean }) {
+function Info({ icon: Icon, label, value, ltr }: { icon: any; label: string; value: React.ReactNode; ltr?: boolean }) {
   return (
     <div className="flex items-start gap-2">
       <Icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
