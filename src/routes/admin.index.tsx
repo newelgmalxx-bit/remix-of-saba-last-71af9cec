@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
 import { bookingStatusMap, fmtSAR } from "@/data/admin";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { admin as adminApi, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "@tanstack/react-router";
 import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
   PieChart, Pie, Cell,
@@ -28,7 +29,7 @@ function AdminDashboard() {
   const [revenue, setRevenue] = useState<any[]>([]);
   const [byCat, setByCat] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [activity, setActivity] = useState<{ icon: any; text: string; time: string }[]>([]);
+  const [activity, setActivity] = useState<{ icon: any; text: string; time: string; link?: string | null }[]>([]);
 
   useEffect(() => {
     adminApi.analytics()
@@ -66,13 +67,50 @@ function AdminDashboard() {
     adminApi.orders.list({ limit: 200 })
       .then((p: any) => {
         const all = (p.items || []) as any[];
-        const revenue = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
-        const paid = all.filter((o) => o.paid).reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const totalAll = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const totalPaid = all.filter((o) => o.paid).reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const effectiveRevenue = totalPaid || totalAll;
+
+        // Build last 6 months revenue series
+        const now = new Date();
+        const months: { key: string; m: string; v: number }[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          const m = d.toLocaleString(lang === "en" ? "en-US" : "ar-SA", { month: "short" });
+          months.push({ key, m, v: 0 });
+        }
+        all.forEach((o) => {
+          const dt = new Date((o.createdAt || "").replace(" ", "T"));
+          if (Number.isNaN(dt.getTime())) return;
+          const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+          const row = months.find((r) => r.key === key);
+          if (row) row.v += Number(o.total) || 0;
+        });
+        setRevenue(months);
+
+        // Build sales by category from order items
+        const catTotals: Record<string, number> = {};
+        all.forEach((o) => {
+          (o.items || []).forEach((it: any) => {
+            const k = it.service_title || it.serviceTitle || it.service_slug || "—";
+            catTotals[k] = (catTotals[k] || 0) + (Number(it.price) || 0) * (Number(it.qty) || 1);
+          });
+        });
+        const totalCat = Object.values(catTotals).reduce((s, v) => s + v, 0) || 1;
+        const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
+        const cats = Object.entries(catTotals)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([name, v], i) => ({ name, value: Math.round((v / totalCat) * 100), color: palette[i % palette.length] }));
+        setByCat(cats);
+
         setStats((s: any) => ({
           ...s,
-          revenue: paid || revenue,
+          revenue: effectiveRevenue,
           ordersCount: all.length,
           totalBookings: all.length,
+          remaining: Math.max(0, (s.monthlyTarget || 0) - effectiveRevenue),
         }));
       })
       .catch(() => {});
@@ -91,12 +129,13 @@ function AdminDashboard() {
         const list = d?.items ?? d ?? [];
         setActivity(list.map((n: any) => ({
           icon: Bell,
-          text: n.title || n.message || n.text || "",
+          text: n.title ? `${n.title}${n.body ? " — " + n.body : ""}` : (n.message || n.text || ""),
           time: (n.createdAt || n.created_at || "").slice(0, 16).replace("T", " "),
+          link: n.link || null,
         })));
       })
       .catch(() => setActivity([]));
-  }, []);
+  }, [lang]);
 
   const periods = [
     { v: "7", l: L("آخر 7 أيام", "Last 7 days") },
@@ -264,13 +303,22 @@ function AdminDashboard() {
             )}
             {activity.map((a, i) => {
               const I = a.icon;
-              return (
-                <li key={i} className="flex items-start gap-3">
+              const inner = (
+                <>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary"><I className="h-4 w-4" /></div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{a.text}</div>
                     <div className="text-[11px] text-muted-foreground">{a.time}</div>
                   </div>
+                </>
+              );
+              return (
+                <li key={i}>
+                  {a.link ? (
+                    <Link to={a.link as any} className="flex items-start gap-3 rounded-xl p-2 -m-2 hover:bg-muted/60 transition">{inner}</Link>
+                  ) : (
+                    <div className="flex items-start gap-3">{inner}</div>
+                  )}
                 </li>
               );
             })}
