@@ -127,7 +127,7 @@ export const account = {
 //  Contact (legacy export)
 // ============================================================
 export const contact = {
-  send: (body: { name: string; email: string; phone?: string; subject?: string; message: string }) =>
+  send: (body: { name: string; email: string; phone?: string; service?: string; budget?: string; message: string }) =>
     publicApi.sendContact(body),
 };
 
