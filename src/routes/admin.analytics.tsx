@@ -5,6 +5,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "التحليلات | لوحة التحكم" }] }),
@@ -20,33 +21,61 @@ function AnalyticsPage() {
     let cancelled = false;
     (async () => {
       const days = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : 365;
-      const [an, op, cp] = await Promise.all([
+      const since = new Date(Date.now() - days * 86400000).toISOString();
+      const [an, op, cp, vis] = await Promise.all([
         adminApi.analytics(range).catch(() => null),
         adminApi.orders.list({ limit: 1000 }).catch(() => ({ items: [] })),
         adminApi.clients.list({ limit: 1000 }).catch(() => ({ items: [] })),
+        supabase
+          .from("page_visits")
+          .select("path, source, session_id, created_at")
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .limit(10000)
+          .then((r) => r.data || []),
       ]);
       if (cancelled) return;
       const a: any = an || {};
       const orders: any[] = (op as any)?.items || [];
       const clients: any[] = (cp as any)?.items || [];
+      const visitRows: any[] = (vis as any) || [];
       const now = Date.now();
-      const since = now - days * 86400000;
+      const sinceMs = now - days * 86400000;
       const inRange = (d: any) => {
         const t = new Date(d || 0).getTime();
-        return Number.isFinite(t) && t >= since;
+        return Number.isFinite(t) && t >= sinceMs;
       };
       const recentOrders = orders.filter((o) => inRange(o.created_at || o.createdAt || o.date));
-      // Visits per day
+      // Visits per day from page_visits
       const dayMap = new Map<string, number>();
       for (let i = days - 1; i >= 0; i--) {
         const d = new Date(now - i * 86400000);
         dayMap.set(d.toISOString().slice(0, 10), 0);
       }
-      recentOrders.forEach((o) => {
-        const k = new Date(o.created_at || o.createdAt || o.date || now).toISOString().slice(0, 10);
+      visitRows.forEach((v) => {
+        const k = new Date(v.created_at).toISOString().slice(0, 10);
         if (dayMap.has(k)) dayMap.set(k, (dayMap.get(k) || 0) + 1);
       });
       const visits = Array.from(dayMap.entries()).map(([date, views]) => ({ date, views }));
+      const uniqueSessions = new Set(visitRows.map((v) => v.session_id).filter(Boolean)).size;
+      const sourceCount = new Map<string, number>();
+      visitRows.forEach((v) => {
+        const s = v.source || "direct";
+        sourceCount.set(s, (sourceCount.get(s) || 0) + 1);
+      });
+      const sourceLabel = (s: string) => {
+        const map: Record<string, [string, string]> = {
+          google: ["بحث Google", "Google Search"],
+          search: ["محركات بحث", "Search Engines"],
+          social: ["سوشيال ميديا", "Social Media"],
+          referral: ["إحالات", "Referrals"],
+          internal: ["داخلي", "Internal"],
+          direct: ["مباشر", "Direct"],
+        };
+        const v = map[s] || [s, s];
+        return L(v[0], v[1]);
+      };
+      const computedSources = Array.from(sourceCount.entries()).map(([k, v]) => ({ name: sourceLabel(k), value: v }));
       // Monthly revenue (last 12 months)
       const months: { m: string; v: number }[] = [];
       const monthMap = new Map<string, number>();
@@ -68,9 +97,9 @@ function AnalyticsPage() {
       const totalOrders = orders.length;
       const computed = {
         ...a,
-        pageViews: a.pageViews ?? recentOrders.length * 8,
-        uniqueVisitors: a.uniqueVisitors ?? clients.length,
-        sessions: a.sessions ?? recentOrders.length,
+        pageViews: visitRows.length || a.pageViews || 0,
+        uniqueVisitors: uniqueSessions || a.uniqueVisitors || clients.length,
+        sessions: uniqueSessions || a.sessions || 0,
         avgSession: a.avgSession ?? "—",
         bounceRate: a.bounceRate ?? "—",
         pagesPerSession: a.pagesPerSession ?? "—",
@@ -79,13 +108,8 @@ function AnalyticsPage() {
         checkoutsStarted: a.checkoutsStarted ?? totalOrders,
         completed: a.completed ?? completedCount,
         conversionRate: a.conversionRate ?? (totalOrders ? `${Math.round((completedCount / totalOrders) * 100)}%` : "0%"),
-        visits: a.visits?.length ? a.visits : visits,
-        sources: a.sources?.length ? a.sources : [
-          { name: L("بحث Google", "Google Search"), value: Math.max(1, Math.round(totalOrders * 0.4)) },
-          { name: L("مباشر", "Direct"), value: Math.max(1, Math.round(totalOrders * 0.3)) },
-          { name: L("سوشيال ميديا", "Social Media"), value: Math.max(1, Math.round(totalOrders * 0.2)) },
-          { name: L("إحالات", "Referrals"), value: Math.max(1, Math.round(totalOrders * 0.1)) },
-        ],
+        visits: visits,
+        sources: computedSources.length ? computedSources : (a.sources || []),
         monthlyRevenue: a.monthlyRevenue?.length ? a.monthlyRevenue : months,
       };
       setData(computed);
