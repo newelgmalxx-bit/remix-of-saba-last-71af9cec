@@ -77,7 +77,6 @@ function ClientsPage() {
           segment: (c.segment as any) || "new",
           joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
           city: c.city ?? undefined,
-          _joinedRaw: c.joinedAt || "",
         };
       });
       setClients(items);
