@@ -25,32 +25,30 @@ function ServicesPage() {
   };
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
-  const [items, setItems] = useState<AdminService[]>(initialServices);
-  // Fetch services from API (DB is source of truth). Falls back to local seed on failure.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await api.services.list();
-        const list = res?.items || [];
-        if (!cancelled && list.length > 0) {
-          const mapped: AdminService[] = list.map((s, i) => ({
-            id: String(s.id ?? `s${i + 1}`),
-            sku: s.sku || s.slug.toUpperCase(),
-            slug: s.slug,
-            titleAr: s.titleAr || s.slug,
-            titleEn: s.titleEn || s.slug,
-            category: s.category || "عام",
-            price: Number(s.price) || 0,
-            bookings: 0,
-            status: (s.status as AdminService["status"]) || "active",
-          }));
-          setItems(mapped);
-        }
-      } catch { /* keep local fallback */ }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  const [items, setItems] = useState<AdminService[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchList = async () => {
+    try {
+      const res: any = await api.services.list();
+      const list = res?.items || [];
+      const mapped: AdminService[] = list.map((s: any, i: number) => ({
+        id: String(s.id ?? `s${i + 1}`),
+        sku: s.sku || s.slug.toUpperCase(),
+        slug: s.slug,
+        titleAr: s.titleAr || s.slug,
+        titleEn: s.titleEn || s.slug,
+        category: s.category || "عام",
+        price: Number(s?.price?.amount ?? s?.price ?? 0),
+        bookings: 0,
+        status: (s.status as AdminService["status"]) || "active",
+      }));
+      setItems(mapped);
+    } catch {
+      setItems(initialServices);
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { fetchList(); }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", originalPrice: "", slug: "",
@@ -101,18 +99,32 @@ function ServicesPage() {
     (s.titleAr.includes(q) || s.titleEn.toLowerCase().includes(q.toLowerCase()) || s.sku.toLowerCase().includes(q.toLowerCase()))
   );
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.titleAr || !form.sku) { toast.error(L("الاسم والـ SKU مطلوبان", "Name and SKU are required")); return; }
     const slug = (form.slug || form.titleEn || form.titleAr).trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "service-" + Date.now();
-    const newSvc: AdminService = {
-      id: "s" + (items.length + 1),
-      sku: form.sku, slug,
-      titleAr: form.titleAr, titleEn: form.titleEn || form.titleAr,
-      category: form.category || "عام",
-      price: Number(form.price) || 0, bookings: 0, status: "draft",
-    };
-    setItems([newSvc, ...items]);
+    try {
+      await api.admin.createService({
+        slug,
+        sku: form.sku,
+        titleAr: form.titleAr,
+        titleEn: form.titleEn || form.titleAr,
+        subtitleAr: form.subtitle || "",
+        subtitleEn: "",
+        category: form.category || "عام",
+        price: Number(form.price) || 0,
+        originalPrice: form.originalPrice ? Number(form.originalPrice) : null,
+        status: "draft",
+        cover: form.bannerImage || null,
+        bannerImage: form.bannerImage || null,
+        overviewDescriptionAr: form.overviewDescription || "",
+        breadcrumbAr: form.breadcrumb || form.titleAr,
+      });
+    } catch (e: any) {
+      toast.error(e?.message || L("فشل إضافة الخدمة", "Failed to add service"));
+      return;
+    }
     setOpen(false);
+    await fetchList();
     // Seed a custom override so the editor & public page can render this new service
     try {
       const KEY = "saba_service_overrides_v1";
@@ -120,11 +132,13 @@ function ServicesPage() {
       const store = raw ? JSON.parse(raw) : {};
       store[slug] = {
         isCustom: true,
-        title: newSvc.titleAr,
+        title: form.titleAr,
         subtitle: form.subtitle,
-        category: newSvc.category,
-        breadcrumb: form.breadcrumb || newSvc.titleAr,
+        category: form.category || "عام",
+        breadcrumb: form.breadcrumb || form.titleAr,
         bannerImage: form.bannerImage,
+        price: form.price,
+        originalPrice: form.originalPrice,
         overviewDescription: form.overviewDescription,
         seo: {
           title: form.seoTitle,
@@ -149,7 +163,14 @@ function ServicesPage() {
     navigate({ to: "/admin/services/$slug", params: { slug } });
   };
 
-  const handleDelete = (id: string) => { setItems(items.filter(s => s.id !== id)); toast.success(L("تم حذف الخدمة", "Service deleted")); };
+  const handleDelete = async (slug: string) => {
+    if (!confirm(L("متأكد من الحذف؟", "Confirm delete?"))) return;
+    try {
+      await api.admin.deleteService(slug);
+      toast.success(L("تم حذف الخدمة", "Service deleted"));
+      await fetchList();
+    } catch (e: any) { toast.error(e?.message || L("فشل الحذف", "Delete failed")); }
+  };
 
   const handleExport = () => {
     const csv = ["SKU,Title,Category,Price,Bookings,Status", ...items.map(s => `${s.sku},${s.titleAr},${s.category},${s.price},${s.bookings},${s.status}`)].join("\n");
@@ -169,10 +190,10 @@ function ServicesPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الخدمات", "Total Services")} value={12} icon={Package} accent="primary" />
-        <StatCard label={L("نشطة", "Active")} value={9} icon={CheckCircle2} accent="emerald" />
-        <StatCard label={L("مسودات", "Drafts")} value={2} icon={FileEdit} accent="amber" />
-        <StatCard label={L("مؤرشفة", "Archived")} value={1} icon={Archive} accent="muted" />
+        <StatCard label={L("إجمالي الخدمات", "Total Services")} value={items.length} icon={Package} accent="primary" />
+        <StatCard label={L("نشطة", "Active")} value={items.filter(s => s.status === "active").length} icon={CheckCircle2} accent="emerald" />
+        <StatCard label={L("مسودات", "Drafts")} value={items.filter(s => s.status === "draft").length} icon={FileEdit} accent="amber" />
+        <StatCard label={L("مؤرشفة", "Archived")} value={items.filter(s => s.status === "archived").length} icon={Archive} accent="muted" />
       </div>
 
       <PanelCard>
@@ -225,7 +246,7 @@ function ServicesPage() {
                         <Link to="/admin/services/$slug" params={{ slug: s.slug }} title={L("تعديل التفاصيل", "Edit details")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary">
                           <Pencil className="h-4 w-4" />
                         </Link>
-                        <button onClick={() => handleDelete(s.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500">
+                        <button onClick={() => handleDelete(s.slug)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

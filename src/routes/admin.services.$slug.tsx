@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AdminLayout, PanelCard, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { ArrowRight, Plus, Trash2, RotateCcw, Save, Eye, CheckCircle2 } from "lucide-react";
 import { serviceMap } from "@/data/services";
 import { mergeService, useServiceOverrideEditor, type ServiceOverride } from "@/hooks/useServiceContent";
 import { toast } from "sonner";
 import { fileToWebp } from "@/lib/image";
+import api from "@/lib/api";
 
 export const Route = createFileRoute("/admin/services/$slug")({
   head: () => ({ meta: [{ title: "تعديل الخدمة | لوحة التحكم" }] }),
@@ -30,6 +31,7 @@ function ServiceEditorPage() {
   const base = serviceMap[slug];
   const initial = useMemo(() => mergeService(slug, override) ?? base, [slug, override, base]);
   const isCustom = !base && !!initial;
+  const [remoteLoaded, setRemoteLoaded] = useState(false);
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [titleEn, setTitleEn] = useState(override?.titleEn ?? "");
@@ -74,6 +76,33 @@ function ServiceEditorPage() {
   );
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
+  // Load fresh data from API
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const svc: any = await api.admin.services.get(slug);
+        if (cancelled || !svc) return;
+        const amt = svc?.price?.amount;
+        const orig = svc?.price?.originalAmount;
+        if (svc.titleAr) setTitle(svc.titleAr);
+        if (svc.titleEn) setTitleEn(svc.titleEn);
+        if (svc.subtitleAr) setSubtitle(svc.subtitleAr);
+        if (svc.subtitleEn) setSubtitleEn(svc.subtitleEn);
+        if (svc.category) setCategory(svc.category);
+        if (svc.breadcrumbAr) setBreadcrumb(svc.breadcrumbAr);
+        if (svc.breadcrumbEn) setBreadcrumbEn(svc.breadcrumbEn);
+        if (svc.cover || svc.bannerImage) setBannerImage(svc.bannerImage || svc.cover);
+        if (svc.overviewDescriptionAr) setOverviewDescription(svc.overviewDescriptionAr);
+        if (svc.overviewDescriptionEn) setOverviewDescriptionEn(svc.overviewDescriptionEn);
+        if (amt != null) setPrice(String(amt));
+        if (orig != null) setOriginalPrice(String(orig));
+      } catch { /* ignore */ }
+      finally { if (!cancelled) setRemoteLoaded(true); }
+    })();
+    return () => { cancelled = true; };
+  }, [slug]);
+
   if (!base && !initial) {
     return (
       <AdminLayout title="خدمة غير موجودة">
@@ -85,7 +114,7 @@ function ServiceEditorPage() {
     );
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const next: ServiceOverride = {
       title, titleEn, subtitle, subtitleEn, category, categoryEn, breadcrumb, breadcrumbEn,
       heroHighlights, heroHighlightsEn, bannerImage, overviewDescription, overviewDescriptionEn,
@@ -93,6 +122,27 @@ function ServiceEditorPage() {
       isCustom: isCustom || override?.isCustom,
     };
     save(next);
+    // Persist to API
+    try {
+      await api.admin.updateService(slug, {
+        titleAr: title,
+        titleEn: titleEn || title,
+        subtitleAr: subtitle,
+        subtitleEn,
+        category,
+        breadcrumbAr: breadcrumb,
+        breadcrumbEn,
+        price: Number(price) || 0,
+        originalPrice: originalPrice ? Number(originalPrice) : null,
+        cover: bannerImage || null,
+        bannerImage: bannerImage || null,
+        overviewDescriptionAr: overviewDescription,
+        overviewDescriptionEn,
+      });
+      toast.success("تم الحفظ على السيرفر");
+    } catch (e: any) {
+      toast.error(e?.message || "تعذّر الحفظ على السيرفر");
+    }
     setSavedAt(new Date().toLocaleTimeString("ar-SA"));
   };
 
