@@ -30,8 +30,8 @@ function ServicesPage() {
 
   const fetchList = async () => {
     try {
-      const res: any = await api.services.list();
-      const list = res?.items || [];
+      const res: any = await api.admin.getServices();
+      const list = res?.items || res?.data?.items || [];
       const mapped: AdminService[] = list.map((s: any, i: number) => ({
         id: String(s.id ?? `s${i + 1}`),
         sku: s.sku || s.slug.toUpperCase(),
