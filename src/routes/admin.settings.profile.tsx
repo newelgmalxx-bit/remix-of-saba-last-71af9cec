@@ -79,7 +79,7 @@ function ProfilePage() {
   const corner = dir === "rtl" ? "-bottom-1 -left-1" : "-bottom-1 -right-1";
 
   return (
-    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")} action={<PrimaryButton onClick={saveAll} disabled={saving}>{saving ? L("جاري الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
+    <AdminLayout title={L("الإعدادات", "Settings")} subtitle={L("إدارة حسابك وتفضيلاتك", "Manage your account and preferences")} action={<PrimaryButton onClick={saveAll}>{saving ? L("جاري الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
       <PanelCard className="mb-6">
         <div className="flex flex-wrap items-center gap-5">
           <div className="relative">
