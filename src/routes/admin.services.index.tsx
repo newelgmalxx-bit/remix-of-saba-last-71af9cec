@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { fileToWebp } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
+import api from "@/lib/api";
 
 export const Route = createFileRoute("/admin/services/")({
   head: () => ({ meta: [{ title: "الخدمات | لوحة التحكم" }] }),
@@ -25,6 +26,31 @@ function ServicesPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | "active" | "draft">("all");
   const [items, setItems] = useState<AdminService[]>(initialServices);
+  // Fetch services from API (DB is source of truth). Falls back to local seed on failure.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.services.list();
+        const list = res?.items || [];
+        if (!cancelled && list.length > 0) {
+          const mapped: AdminService[] = list.map((s, i) => ({
+            id: String(s.id ?? `s${i + 1}`),
+            sku: s.sku || s.slug.toUpperCase(),
+            slug: s.slug,
+            titleAr: s.titleAr || s.slug,
+            titleEn: s.titleEn || s.slug,
+            category: s.category || "عام",
+            price: Number(s.price) || 0,
+            bookings: 0,
+            status: (s.status as AdminService["status"]) || "active",
+          }));
+          setItems(mapped);
+        }
+      } catch { /* keep local fallback */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     titleAr: "", titleEn: "", sku: "", category: "", price: "", slug: "",
