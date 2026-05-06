@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard } from "@/components/admin/AdminLayout";
 import { Eye, MousePointerClick, TrendingUp, Clock } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
-import { monthlyRevenue as mrFallback } from "@/data/admin";
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
@@ -20,25 +19,17 @@ function AnalyticsPage() {
   useEffect(() => {
     adminApi.analytics(range).then(setData).catch(() => setData(null));
   }, [range]);
-  const monthlyRevenue = data?.monthlyRevenue?.length ? data.monthlyRevenue : mrFallback;
+  const monthlyRevenue = data?.monthlyRevenue ?? [];
   const visitsData = data?.visits?.length
     ? data.visits.map((v: any) => ({ d: v.date, v: v.views }))
     : null;
   const sourcesData = data?.sources?.length
     ? data.sources.map((s: any) => ({ name: s.name, v: s.value }))
     : null;
-  const traffic = lang === "en"
-    ? [{ d: "Sun", v: 220 }, { d: "Mon", v: 410 }, { d: "Tue", v: 380 }, { d: "Wed", v: 520 }, { d: "Thu", v: 480 }, { d: "Fri", v: 290 }, { d: "Sat", v: 180 }]
-    : [{ d: "الأحد", v: 220 }, { d: "الإثنين", v: 410 }, { d: "الثلاثاء", v: 380 }, { d: "الأربعاء", v: 520 }, { d: "الخميس", v: 480 }, { d: "الجمعة", v: 290 }, { d: "السبت", v: 180 }];
-  const sourcesFallback = [
-    { name: L("بحث Google", "Google Search"), v: 1840 },
-    { name: L("مباشر", "Direct"), v: 1240 },
-    { name: "Instagram", v: 980 },
-    { name: "Twitter", v: 620 },
-    { name: L("إحالات", "Referrals"), v: 420 },
-  ];
-  const sources = sourcesData ?? sourcesFallback;
-  const trafficSeries = visitsData ?? traffic;
+  const sources = sourcesData ?? [];
+  const trafficSeries = visitsData ?? [];
+  const v = data?.visits ?? {};
+  const fmt = (n: any) => (typeof n === "number" ? n.toLocaleString(lang === "en" ? "en-US" : "ar-SA") : (n ?? "—"));
   const [tab, setTab] = useState<"visits" | "engagement" | "conversions" | "revenue">("visits");
   const tabs: [typeof tab, string][] = [["visits", L("الزيارات", "Visits")], ["engagement", L("التفاعل", "Engagement")], ["conversions", L("التحويلات", "Conversions")], ["revenue", L("الإيرادات", "Revenue")]];
   return (
