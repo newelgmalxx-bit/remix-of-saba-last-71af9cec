@@ -50,9 +50,11 @@ function AdminDashboard() {
         }
       })
       .catch((e) => { if (!(e instanceof ApiError) || e.status !== 401) console.warn("[admin.analytics]", e); });
-    adminApi.orders.list({ limit: 5 })
-      .then((p) => {
-        const items = (p.items || []).map((b: any) => ({
+    // One orders fetch — use it for both the latest-orders table and the aggregates
+    adminApi.orders.list({ limit: 200 })
+      .then((p: any) => {
+        const all = (p.items || []) as any[];
+        const items = all.slice(0, 5).map((b: any) => ({
           id: b.id,
           number: b.number,
           client: b.contact_name || b.client || "",
@@ -69,12 +71,6 @@ function AdminDashboard() {
           source: b.source ?? "direct",
         }));
         setBookings(items as any);
-      })
-      .catch(() => setBookings([]));
-    // Aggregate from orders endpoint since /admin/analytics returns 0 totals/revenue
-    adminApi.orders.list({ limit: 200 })
-      .then((p: any) => {
-        const all = (p.items || []) as any[];
         const totalAll = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
         const totalPaid = all.filter((o) => o.paid).reduce((s, o) => s + (Number(o.total) || 0), 0);
         const effectiveRevenue = totalPaid || totalAll;
@@ -121,7 +117,7 @@ function AdminDashboard() {
           remaining: Math.max(0, (s.monthlyTarget || 0) - effectiveRevenue),
         }));
       })
-      .catch(() => {});
+      .catch(() => setBookings([]));
     adminApi.clients.list({ limit: 1 })
       .then((p: any) => setStats((s: any) => ({ ...s, totalClients: p?.total ?? s.totalClients })))
       .catch(() => {});
