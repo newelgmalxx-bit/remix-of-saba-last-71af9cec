@@ -110,12 +110,12 @@ function ReportsPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-        <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(stats.revenue)} hint="↑ +20.1%" icon={DollarSign} accent="primary" />
-        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.orders} hint="↑ +15.3%" icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={stats.conversion} hint="↑ +2.4%" icon={TrendingUp} accent="emerald" />
-        <StatCard label={L("العملاء النشطون", "Active Clients")} value={stats.clients} hint="↑ +5.2%" icon={Users} accent="amber" />
-        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} hint="↑ +1.1%" icon={Package} accent="primary" />
-        <StatCard label={L("هامش الربح", "Profit Margin")} value={stats.profitMargin} hint="↑ +0.5%" icon={Activity} accent="violet" />
+        <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(stats.revenue)} icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.orders} icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={stats.conversion} icon={TrendingUp} accent="emerald" />
+        <StatCard label={L("العملاء النشطون", "Active Clients")} value={stats.clients} icon={Users} accent="amber" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} icon={Package} accent="primary" />
+        <StatCard label={L("هامش الربح", "Profit Margin")} value={stats.profitMargin} icon={Activity} accent="violet" />
       </div>
 
       <PanelCard title={L("مولد التقارير المخصصة", "Custom Report Generator")} subtitle={L("إنشاء تقارير محددة للمحاسبة والتحليل", "Create reports for accounting and analysis")}>
