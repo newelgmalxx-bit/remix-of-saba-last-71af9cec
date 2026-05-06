@@ -196,7 +196,6 @@ function LoginPage() {
                   toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
                 }}
                 useOneTap={false}
-                locale={lang === "ar" ? "ar" : "en"}
               />
             </div>
 
