@@ -310,6 +310,15 @@ function AdminDashboard() {
                     <div className="text-sm font-medium truncate">{a.text}</div>
                     <div className="text-[11px] text-muted-foreground">{a.time}</div>
                   </div>
+                </>
+              );
+              return (
+                <li key={i}>
+                  {a.link ? (
+                    <Link to={a.link as any} className="flex items-start gap-3 rounded-xl p-2 -m-2 hover:bg-muted/60 transition">{inner}</Link>
+                  ) : (
+                    <div className="flex items-start gap-3">{inner}</div>
+                  )}
                 </li>
               );
             })}
