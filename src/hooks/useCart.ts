@@ -1,69 +1,153 @@
-import { useEffect, useState, useCallback } from "react";
-import type { CartItem } from "@/data/account";
+import { useEffect, useState, useCallback, useRef } from "react";
+import api from "@/lib/api";
+import type { CartLine } from "@/lib/api";
 
-const KEY = "saba_cart_v1";
+// Frontend-friendly shape (camelCase) — matches existing component usage.
+export type CartItem = {
+  id: string;
+  serviceSlug: string;
+  serviceTitle: string;
+  planId: string;
+  planName: string;
+  price: number;
+  qty: number;
+};
 
-function read(): CartItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as CartItem[]) : [];
-  } catch {
-    return [];
-  }
+function normalize(line: CartLine): CartItem {
+  return {
+    id: String(line.id),
+    serviceSlug: line.service_slug,
+    serviceTitle: line.service_title,
+    planId: line.plan_id,
+    planName: line.plan_name,
+    price: Number(line.price) || 0,
+    qty: Number(line.qty) || 1,
+  };
 }
 
-function write(items: CartItem[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(items));
-  window.dispatchEvent(new Event("saba:cart"));
+type State = {
+  items: CartItem[];
+  subtotal: number;
+  vat: number;
+  total: number;
+  loading: boolean;
+  error: string | null;
+};
+
+const initial: State = { items: [], subtotal: 0, vat: 0, total: 0, loading: false, error: null };
+
+// Module-level cache so all components share the same cart state.
+let cache: State = initial;
+const listeners = new Set<(s: State) => void>();
+function setCache(next: State) {
+  cache = next;
+  listeners.forEach((fn) => fn(next));
+}
+
+let inflight: Promise<void> | null = null;
+
+async function refresh(): Promise<void> {
+  if (inflight) return inflight;
+  inflight = (async () => {
+    setCache({ ...cache, loading: true, error: null });
+    try {
+      const res = await api.cart.get();
+      setCache({
+        items: (res.items || []).map(normalize),
+        subtotal: Number(res.subtotal) || 0,
+        vat: Number(res.vat) || 0,
+        total: Number(res.total) || 0,
+        loading: false,
+        error: null,
+      });
+    } catch (e: any) {
+      setCache({ ...cache, loading: false, error: e?.message || "Failed to load cart" });
+    } finally {
+      inflight = null;
+    }
+  })();
+  return inflight;
 }
 
 export function useCart() {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [state, setState] = useState<State>(cache);
+  const mounted = useRef(true);
 
   useEffect(() => {
-    setItems(read());
-    const onChange = () => setItems(read());
-    window.addEventListener("saba:cart", onChange);
-    window.addEventListener("storage", onChange);
+    mounted.current = true;
+    const fn = (s: State) => mounted.current && setState(s);
+    listeners.add(fn);
+    // Initial load: only if we don't already have items cached.
+    if (cache === initial) refresh();
     return () => {
-      window.removeEventListener("saba:cart", onChange);
-      window.removeEventListener("storage", onChange);
+      mounted.current = false;
+      listeners.delete(fn);
     };
   }, []);
 
-  const add = useCallback((item: Omit<CartItem, "id" | "qty"> & { qty?: number }) => {
-    const cur = read();
-    const existing = cur.find(
-      (c) => c.serviceSlug === item.serviceSlug && c.planName === item.planName,
-    );
-    if (existing) {
-      existing.qty += item.qty ?? 1;
-    } else {
-      cur.push({
-        ...item,
-        qty: item.qty ?? 1,
-        id: `ci_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      });
+  const add = useCallback(
+    async (item: { serviceSlug: string; serviceTitle?: string; planId?: string; planName?: string; price?: number; qty?: number }) => {
+      try {
+        await api.cart.addItem({
+          serviceSlug: item.serviceSlug,
+          planId: item.planId,
+          qty: item.qty ?? 1,
+        });
+        await refresh();
+      } catch (e: any) {
+        setCache({ ...cache, error: e?.message || "Failed to add to cart" });
+        throw e;
+      }
+    },
+    [],
+  );
+
+  const remove = useCallback(async (lineId: string) => {
+    try { await api.cart.removeItem(lineId); await refresh(); }
+    catch (e: any) { setCache({ ...cache, error: e?.message || "Failed to remove" }); }
+  }, []);
+
+  const updateQty = useCallback(async (lineId: string, qty: number) => {
+    if (qty < 1) return remove(lineId);
+    try { await api.cart.updateItem(lineId, qty); await refresh(); }
+    catch (e: any) { setCache({ ...cache, error: e?.message || "Failed to update" }); }
+  }, [remove]);
+
+  const clear = useCallback(async () => {
+    // No bulk-clear endpoint; remove items one by one.
+    const ids = cache.items.map((i) => i.id);
+    for (const id of ids) {
+      try { await api.cart.removeItem(id); } catch { /* ignore */ }
     }
-    write(cur);
+    await refresh();
   }, []);
 
-  const remove = useCallback((id: string) => {
-    write(read().filter((c) => c.id !== id));
+  const applyCoupon = useCallback(async (code: string) => {
+    const res = await api.cart.applyCoupon(code);
+    setCache({
+      ...cache,
+      items: (res.items || []).map(normalize),
+      subtotal: Number(res.subtotal) || 0,
+      total: Number(res.total) || 0,
+    });
+    return res;
   }, []);
 
-  const updateQty = useCallback((id: string, qty: number) => {
-    const cur = read().map((c) => (c.id === id ? { ...c, qty: Math.max(1, qty) } : c));
-    write(cur);
-  }, []);
+  const count = state.items.reduce((s, i) => s + i.qty, 0);
 
-  const clear = useCallback(() => write([]), []);
-
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const vat = Math.round(subtotal * 0.15);
-  const total = subtotal + vat;
-
-  return { items, add, remove, updateQty, clear, subtotal, vat, total, count: items.reduce((s, i) => s + i.qty, 0) };
+  return {
+    items: state.items,
+    subtotal: state.subtotal,
+    vat: state.vat,
+    total: state.total,
+    loading: state.loading,
+    error: state.error,
+    count,
+    add,
+    remove,
+    updateQty,
+    clear,
+    applyCoupon,
+    refresh,
+  };
 }
