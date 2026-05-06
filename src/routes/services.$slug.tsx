@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -12,6 +12,9 @@ import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
+import { useFavorite } from "@/components/sections/ServicesGrid";
+import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 
@@ -43,6 +46,9 @@ function ServiceDetailPage() {
   const { add } = useCart();
   const navigate = useNavigate();
   const [activeImg, setActiveImg] = useState(0);
+  const { fav, toggle: toggleFav } = useFavorite(slug);
+  const { isAuthenticated } = useAuth();
+  const { reviews, summary, addReview } = useServiceReviews(slug);
 
   const startAlign = dir === "rtl" ? "text-right" : "text-left";
   const arrowFlip = dir === "ltr" ? "rotate-180" : "";
@@ -164,14 +170,22 @@ function ServiceDetailPage() {
                 <Award className="h-3 w-3" /> {t("svcDetail.badge.pro")}
               </div>
               <h1 className="mt-3 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">{title}</h1>
-              <div className="mt-2 flex items-center justify-start gap-2 text-xs text-muted-foreground">
+              <div className="mt-2 flex items-center justify-start gap-3 text-xs text-muted-foreground">
                 <div className="flex gap-0.5 text-amber-400">
                   {Array.from({ length: 5 }).map((_, k) => (
-                    <Star key={k} className="h-3.5 w-3.5 fill-current" />
+                    <Star key={k} className={`h-3.5 w-3.5 ${k < Math.round(summary.average) ? "fill-current" : "fill-none"}`} />
                   ))}
                 </div>
-                <span className="font-bold text-foreground" data-ltr-number>4.9</span>
-                <span>{t("svcDetail.rating.count")}</span>
+                <span className="font-bold text-foreground" data-ltr-number>{summary.average.toFixed(1)}</span>
+                <span>({summary.count})</span>
+                <button
+                  type="button"
+                  onClick={toggleFav}
+                  className={`ms-auto inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition ${fav ? "border-red-200 bg-red-50 text-red-600" : "border-border bg-white text-foreground/70 hover:border-primary hover:text-primary"}`}
+                >
+                  <Heart className={`h-4 w-4 ${fav ? "fill-red-500 text-red-500" : ""}`} />
+                  {fav ? t("svcDetail.fav.added") : t("svcDetail.fav.add")}
+                </button>
               </div>
               <p className="mt-4 text-sm leading-7 text-muted-foreground">{subtitle}</p>
 
@@ -421,6 +435,70 @@ function ServiceDetailPage() {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Reviews */}
+        <section className="pb-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
+              <div className={startAlign}>
+                <h2 className="text-2xl font-extrabold text-foreground">{t("svcDetail.reviews.title")}</h2>
+                <p className="mt-1 text-xs text-muted-foreground">{t("svcDetail.reviews.desc")}</p>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Summary */}
+                <div className="rounded-2xl border border-border bg-secondary/30 p-6 text-center">
+                  <div className="text-4xl font-extrabold text-primary" data-ltr-number>{summary.average.toFixed(1)}</div>
+                  <div className="mt-2 flex items-center justify-center gap-0.5 text-amber-400">
+                    {Array.from({ length: 5 }).map((_, k) => (
+                      <Star key={k} className={`h-4 w-4 ${k < Math.round(summary.average) ? "fill-current" : "fill-none"}`} />
+                    ))}
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">{summary.count} {t("svcDetail.reviews.count")}</div>
+                </div>
+
+                {/* Review form */}
+                <div className="lg:col-span-2">
+                  <ReviewForm
+                    isAuthenticated={isAuthenticated}
+                    onSubmit={(rating, comment) => addReview(rating, comment)}
+                  />
+                </div>
+              </div>
+
+              {/* Reviews list */}
+              <div className="mt-8 space-y-4">
+                {reviews.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 bg-secondary/20 p-8 text-center text-xs text-muted-foreground">
+                    {t("svcDetail.reviews.empty")}
+                  </div>
+                ) : (
+                  reviews.map((r) => (
+                    <div key={r.id} className={`rounded-2xl border border-border/60 bg-white p-5 shadow-sm ${startAlign}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-light text-xs font-bold text-primary">
+                            {r.userName.slice(0, 1)}
+                          </span>
+                          <div>
+                            <div className="text-sm font-bold text-foreground">{r.userName}</div>
+                            <div className="text-[11px] text-muted-foreground" data-ltr-number>{r.createdAt.slice(0, 10)}</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-0.5 text-amber-400">
+                          {Array.from({ length: 5 }).map((_, k) => (
+                            <Star key={k} className={`h-3.5 w-3.5 ${k < r.rating ? "fill-current" : "fill-none"}`} />
+                          ))}
+                        </div>
+                      </div>
+                      {r.comment && <p className="mt-3 text-sm leading-7 text-foreground/80">{r.comment}</p>}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
