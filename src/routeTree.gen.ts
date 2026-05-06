@@ -26,6 +26,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PaymentResultRouteImport } from './routes/payment.result'
+import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrackingRouteImport } from './routes/admin.tracking'
@@ -142,6 +143,11 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
 const PaymentResultRoute = PaymentResultRouteImport.update({
   id: '/payment/result',
   path: '/payment/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentFailedRoute = PaymentFailedRouteImport.update({
+  id: '/payment/failed',
+  path: '/payment/failed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -387,6 +394,7 @@ export interface FileRoutesByTo {
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account': typeof AccountIndexRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/account/': typeof AccountIndexRoute
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/tracking'
     | '/admin/users'
     | '/checkout/success'
+    | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
     | '/account/'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/admin/tracking'
     | '/admin/users'
     | '/checkout/success'
+    | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
     | '/account'
@@ -592,6 +603,7 @@ export interface FileRouteTypes {
     | '/admin/tracking'
     | '/admin/users'
     | '/checkout/success'
+    | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
     | '/account/'
@@ -628,6 +640,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AccountFavoritesRoute: typeof AccountFavoritesRoute
   AccountProfileRoute: typeof AccountProfileRoute
+  PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentResultRoute: typeof PaymentResultRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   AccountIndexRoute: typeof AccountIndexRoute
@@ -758,6 +771,13 @@ declare module '@tanstack/react-router' {
       path: '/payment/result'
       fullPath: '/payment/result'
       preLoaderRoute: typeof PaymentResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/failed': {
+      id: '/payment/failed'
+      path: '/payment/failed'
+      fullPath: '/payment/failed'
+      preLoaderRoute: typeof PaymentFailedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/success': {
@@ -1092,6 +1112,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AccountFavoritesRoute: AccountFavoritesRoute,
   AccountProfileRoute: AccountProfileRoute,
+  PaymentFailedRoute: PaymentFailedRoute,
   PaymentResultRoute: PaymentResultRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   AccountIndexRoute: AccountIndexRoute,
