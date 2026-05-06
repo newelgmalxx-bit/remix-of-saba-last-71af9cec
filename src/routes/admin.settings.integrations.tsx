@@ -86,18 +86,23 @@ function IntegrationsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const s = await adminApi.settings.get<any>("integrations");
-        if (s) {
-          setStored(s.values || {});
-          if (s.connected && Array.isArray(s.connected)) {
-            setItems((cur) => cur.map(it => ({ ...it, connected: s.connected.includes(it.id) })));
-          }
+        const raw = await adminApi.settings.get<any>("integrations");
+        // Backend may return an array, null, or { values, connected }
+        const s = raw && !Array.isArray(raw) && typeof raw === "object" ? raw : {};
+        const v = s.values && typeof s.values === "object" ? s.values : {};
+        setStored(v);
+        if (Array.isArray(s.connected)) {
+          setItems((cur) => cur.map(it => ({ ...it, connected: s.connected.includes(it.id) })));
         }
       } catch {}
     })();
   }, []);
 
-  const openSetup = (it: Item) => { setActive(it); setValues(stored[it.id] || {}); };
+  const openSetup = (it: Item) => {
+    setActive(it);
+    const v = stored?.[it.id];
+    setValues(v && typeof v === "object" ? v : {});
+  };
 
   const save = async () => {
     if (!active) return;
