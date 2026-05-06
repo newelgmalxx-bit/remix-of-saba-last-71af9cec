@@ -7,10 +7,10 @@ import api, { ApiError } from "@/lib/api";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { AuthHero } from "@/components/auth/AuthHero";
 
-function ResetPasswordPage() {
+function AuthResetPage() {
   const { dir, lang, toggle } = useLang();
   const navigate = useNavigate();
-  const search = useSearch({ from: "/reset-password" }) as { token?: string };
+  const search = useSearch({ from: "/auth/reset" }) as { token?: string };
   const token = search?.token || "";
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -34,7 +34,7 @@ function ResetPasswordPage() {
     setSubmitting(true);
     try {
       await (api as any).auth.reset(token, password);
-      toast.success(lang === "ar" ? "تم تحديث كلمة المرور" : "Password updated");
+      toast.success(lang === "ar" ? "تم تحديث كلمة المرور بنجاح" : "Password updated successfully");
       navigate({ to: "/login" });
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تحديث كلمة المرور" : "Failed to reset password");
@@ -112,7 +112,7 @@ function ResetPasswordPage() {
               >
                 {submitting
                   ? (lang === "ar" ? "جاري الحفظ..." : "Saving...")
-                  : (lang === "ar" ? "حفظ كلمة المرور" : "Save password")}
+                  : (lang === "ar" ? "تأكيد وحفظ كلمة المرور" : "Confirm & save password")}
               </button>
             </form>
 
@@ -128,7 +128,7 @@ function ResetPasswordPage() {
   );
 }
 
-export const Route = createFileRoute("/reset-password")({
+export const Route = createFileRoute("/auth/reset")({
   validateSearch: (s: Record<string, unknown>) => ({
     token: typeof s.token === "string" ? s.token : undefined,
   }),
@@ -138,5 +138,5 @@ export const Route = createFileRoute("/reset-password")({
       { name: "description", content: "إعادة تعيين كلمة المرور لحسابك في سابا ديزاين." },
     ],
   }),
-  component: ResetPasswordPage,
+  component: AuthResetPage,
 });
