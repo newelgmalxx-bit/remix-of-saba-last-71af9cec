@@ -80,7 +80,7 @@ function ResetPasswordPage() {
         <div className="order-2 lg:order-1">
           <AuthHero />
         </div>
-        <div className="order-1 lg:order-2 flex items-center px-6 py-10 sm:px-12 lg:py-14">
+        <div className="order-1 lg:order-2 flex items-center px-4 py-10 sm:px-12 lg:py-14">
           <div className="mx-auto w-full max-w-md">
             <div className="text-start">
               <h1 className="text-3xl font-extrabold text-foreground">
@@ -102,13 +102,13 @@ function ResetPasswordPage() {
               </div>
             )}
 
-            <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+            <form className="mt-6 w-full space-y-5" onSubmit={onSubmit}>
               <PwdField value={password} onChange={setPassword} label={lang === "ar" ? "كلمة المرور الجديدة" : "New password"} />
               <PwdField value={confirm} onChange={setConfirm} label={lang === "ar" ? "تأكيد كلمة المرور" : "Confirm password"} />
               <button
                 type="submit"
                 disabled={submitting || !token}
-                className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-60"
+                className="block w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-60"
               >
                 {submitting
                   ? (lang === "ar" ? "جاري الحفظ..." : "Saving...")
