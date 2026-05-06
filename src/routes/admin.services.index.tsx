@@ -261,6 +261,9 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">{L("السعر (ر.س)", "Price (SAR)")}
                 <input type="number" dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </label>
+              <label className="text-xs font-bold space-y-1.5">{L("السعر قبل الخصم (اختياري)", "Original Price (optional)")}
+                <input type="number" dir="ltr" placeholder={L("اتركه فارغ لو مفيش خصم", "Leave empty if no discount")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} />
+              </label>
               <label className="text-xs font-bold space-y-1.5">{L("المعرّف (slug — اختياري)", "Identifier (slug — optional)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
