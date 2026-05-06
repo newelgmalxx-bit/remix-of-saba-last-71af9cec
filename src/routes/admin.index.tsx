@@ -303,8 +303,8 @@ function AdminDashboard() {
             )}
             {activity.map((a, i) => {
               const I = a.icon;
-              return (
-                <li key={i} className="flex items-start gap-3">
+              const inner = (
+                <>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary"><I className="h-4 w-4" /></div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{a.text}</div>
