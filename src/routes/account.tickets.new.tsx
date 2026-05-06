@@ -56,7 +56,7 @@ function NewTicket() {
               className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">{t("account.ticket.new.none")}</option>
-              {mockOrders.map((o) => (
+            {orders.map((o) => (
                 <option key={o.id} value={o.id}>{o.number}</option>
               ))}
             </select>
