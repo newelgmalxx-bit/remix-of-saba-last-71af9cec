@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { publicApi } from "@/lib/api/public";
 
 const tabs: { key: TKey; cats: string[] }[] = [
   { key: "portfolio.tab.all", cats: [] },
-  { key: "portfolio.tab.web", cats: ["تطوير ويب"] },
+  { key: "portfolio.tab.web", cats: ["تطوير ويب", "ويب"] },
   { key: "portfolio.tab.apps", cats: ["تطبيقات موبايل"] },
   { key: "portfolio.tab.brand", cats: ["هوية بصرية"] },
   { key: "portfolio.tab.ui", cats: ["تصميم واجهات"] },
@@ -23,72 +24,59 @@ type Project = {
   span: string;
 };
 
-const projects: Project[] = [
-  {
-    title: { ar: "تطبيق توصيل ذكي", en: "Smart Delivery App" },
-    cat: "تطبيقات موبايل",
-    catLabel: { ar: "تطبيقات موبايل", en: "Mobile Apps" },
-    brand: "SHIFT GO",
-    year: "2025",
-    tags: ["Maps", "React Native"],
-    img: "https://images.unsplash.com/photo-1601972602288-3be527b4f18c?w=900&auto=format&fit=crop&q=80",
-    span: "md:col-span-1 md:row-span-1",
-  },
-  {
-    title: { ar: "منصة متجر إلكتروني متكاملة", en: "Full E-commerce Platform" },
-    cat: "تطوير ويب",
-    catLabel: { ar: "تطوير ويب", en: "Web Development" },
-    brand: "NOVA STORE",
-    year: "2025",
-    tags: ["Tailwind", "Stripe", "Next.js"],
-    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&auto=format&fit=crop&q=80",
-    span: "md:col-span-2 md:row-span-2",
-  },
-  {
-    title: { ar: "هوية بصرية لعلامة تقنية", en: "Tech Brand Identity" },
-    cat: "هوية بصرية",
-    catLabel: { ar: "هوية بصرية", en: "Branding" },
-    brand: "PULSE LABS",
-    year: "2024",
-    tags: ["Brand Book", "Logo"],
-    dark: true,
-    span: "md:col-span-1 md:row-span-1",
-  },
-  {
-    title: { ar: "تطبيق لياقة بدنية", en: "Fitness App" },
-    cat: "تطبيقات موبايل",
-    catLabel: { ar: "تطبيقات موبايل", en: "Mobile Apps" },
-    brand: "FITMOVE",
-    year: "2025",
-    tags: ["Android", "iOS"],
-    img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&auto=format&fit=crop&q=80",
-    span: "md:col-span-1",
-  },
-  {
-    title: { ar: "موقع شركة عقارات فاخرة", en: "Luxury Real Estate Site" },
-    cat: "تطوير ويب",
-    catLabel: { ar: "تطوير ويب", en: "Web Development" },
-    brand: "MARKET ESTATES",
-    year: "2024",
-    tags: ["SEO", "CMS"],
-    img: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=900&auto=format&fit=crop&q=80",
-    span: "md:col-span-1",
-  },
-  {
-    title: { ar: "لوحة تحكم تحليلات", en: "Analytics Dashboard" },
-    cat: "تصميم واجهات",
-    catLabel: { ar: "تصميم واجهات", en: "UI/UX Design" },
-    brand: "INSIGHT.CRM",
-    year: "2025",
-    tags: ["UX", "Dashboard"],
-    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&auto=format&fit=crop&q=80",
-    span: "md:col-span-1",
-  },
+const SPANS = [
+  "md:col-span-2 md:row-span-2",
+  "md:col-span-1 md:row-span-1",
+  "md:col-span-1 md:row-span-1",
+  "md:col-span-1",
+  "md:col-span-1",
+  "md:col-span-1",
 ];
+
+const catLabelsEn: Record<string, string> = {
+  "ويب": "Web Development",
+  "تطوير ويب": "Web Development",
+  "تطبيقات موبايل": "Mobile Apps",
+  "هوية بصرية": "Branding",
+  "تصميم واجهات": "UI/UX Design",
+  "سوشيال ميديا": "Social Media",
+  "تسويق": "Marketing",
+  "فيديو": "Video",
+};
 
 export function PortfolioSection() {
   const { t, lang, dir } = useLang();
   const [active, setActive] = useState(tabs[0]);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    publicApi.getPortfolio()
+      .then((res: any) => {
+        if (cancelled) return;
+        const items = res?.data?.items ?? res?.items ?? [];
+        const mapped: Project[] = items.map((it: any, idx: number) => {
+          const ar = it.titleAr || it.titleEn || "";
+          const en = it.titleEn || it.titleAr || "";
+          const cat = it.category || "";
+          return {
+            title: { ar, en },
+            cat,
+            catLabel: { ar: cat, en: catLabelsEn[cat] || cat },
+            brand: (it.client || en || ar).toString().toUpperCase(),
+            year: it.year || String(new Date().getFullYear()),
+            tags: Array.isArray(it.tech) ? it.tech.slice(0, 3) : [],
+            img: it.cover || it.image || undefined,
+            dark: !it.cover && !it.image,
+            span: SPANS[idx % SPANS.length],
+          };
+        });
+        setProjects(mapped);
+      })
+      .catch(() => { if (!cancelled) setProjects([]); });
+    return () => { cancelled = true; };
+  }, []);
+
   const filtered = active.cats.length === 0
     ? projects
     : projects.filter((p) => active.cats.includes(p.cat));
