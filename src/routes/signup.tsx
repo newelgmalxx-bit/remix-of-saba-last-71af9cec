@@ -14,8 +14,7 @@ function SignupPage() {
   const [show2, setShow2] = useState(false);
   const [agree, setAgree] = useState(false);
   const { t, dir, lang, toggle } = useLang();
-  const { signup } = useAuth();
-  const { refresh } = useAuth();
+  const { signup, refresh } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
