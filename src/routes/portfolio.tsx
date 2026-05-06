@@ -207,7 +207,7 @@ function PortfolioPage() {
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
                 const CatIcon = categoryIcons[p.category];
-                const projectTitle = t(p.titleKey);
+                const projectTitle = p.title;
                 const catLabel = t(`portfolioPage.cat.${p.category}` as TKey);
                 return (
                   <article
@@ -253,7 +253,7 @@ function PortfolioPage() {
                       <h3 className="mt-2 text-base font-bold text-foreground transition group-hover:text-primary">
                         {projectTitle}
                       </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {t(p.clientKey)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {p.client}</p>
                     </div>
                   </article>
                 );
