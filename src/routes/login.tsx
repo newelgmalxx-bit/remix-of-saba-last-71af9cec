@@ -198,7 +198,7 @@ function LoginPage() {
                 size="large"
                 shape="rectangular"
                 text="signin_with"
-                width="100%"
+                width="320"
               />
             </div>
 
