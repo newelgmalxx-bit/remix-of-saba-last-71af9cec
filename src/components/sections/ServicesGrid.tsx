@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAllServices } from "@/hooks/useServiceContent";
 import servicesHero from "@/assets/services-hero.png";
 import { useLang } from "@/i18n/LanguageProvider";
+import { SarIcon } from "@/components/ui/SarIcon";
 
 const FAV_KEY = "saba_service_favorites_v1";
 
@@ -147,7 +148,7 @@ export function ServiceCard({
               </span>
             )}
             <span className="text-base font-extrabold text-primary">
-              {price} <span className="text-[10px] font-bold">{t("common.sar")}</span>
+              {price} <SarIcon className="h-[0.8em]" />
             </span>
           </div>
         )}
