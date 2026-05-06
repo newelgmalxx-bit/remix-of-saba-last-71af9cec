@@ -112,7 +112,7 @@ function AdminDashboard() {
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="white" strokeWidth="3" strokeDasharray="78,100" strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold">78%</div>
+                <div className="text-2xl font-bold">{stats.monthlyTarget ? Math.min(100, Math.round((stats.revenue / stats.monthlyTarget) * 100)) : 0}%</div>
                 <div className="text-[10px] text-white/75">{L("من الهدف", "of target")}</div>
               </div>
             </div>
@@ -138,6 +138,9 @@ function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
         <PanelCard title={L("نظرة عامة على الإيرادات", "Revenue Overview")} subtitle={L("الأداء الشهري", "Monthly performance")} className="lg:col-span-2">
           <div className="h-72">
+            {filteredRevenue.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
+            ) : (
             <ResponsiveContainer>
               <AreaChart data={filteredRevenue}>
                 <defs>
@@ -153,11 +156,15 @@ function AdminDashboard() {
                 <Area type="monotone" dataKey="v" stroke="#1E5B94" strokeWidth={2.5} fill="url(#rev)" />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
         </PanelCard>
 
         <PanelCard title={L("المبيعات حسب التصنيف", "Sales by Category")} subtitle={L("توزيع الخدمات", "Service distribution")}>
           <div className="h-44">
+            {byCat.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">{L("لا توجد بيانات", "No data")}</div>
+            ) : (
             <ResponsiveContainer>
               <PieChart>
                 <Pie data={byCat} dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={3}>
@@ -165,6 +172,7 @@ function AdminDashboard() {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
+            )}
           </div>
           <ul className="mt-3 space-y-1.5">
             {byCat.map((s) => (
@@ -194,6 +202,9 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
+                {bookings.length === 0 && (
+                  <tr><td colSpan={4} className="px-3 py-6 text-center text-xs text-muted-foreground">{L("لا توجد طلبات بعد", "No orders yet")}</td></tr>
+                )}
                 {bookings.slice(0, 5).map((b) => {
                   const s = bookingStatusMap[b.status as keyof typeof bookingStatusMap] ?? { tone: "primary" as const, label: b.status };
                   return (
@@ -212,13 +223,10 @@ function AdminDashboard() {
 
         <PanelCard title={L("آخر الأنشطة", "Recent Activity")}>
           <ul className="space-y-3 text-sm">
-            {[
-              { icon: ShoppingCart, text: L("حجز جديد #SD-1024", "New booking #SD-1024"), time: L("قبل 2 د", "2m ago") },
-              { icon: DollarSign, text: L("تأكيد دفع 4,025 ر.س", "Payment confirmed 4,025 SAR"), time: L("قبل 15 د", "15m ago") },
-              { icon: Users, text: L("تسجيل عميل جديد: ريم الشهري", "New client signup: Reem Al Shehri"), time: L("قبل ساعة", "1h ago") },
-              { icon: Package, text: L("تحديث خدمة تصميم المواقع", "Web design service updated"), time: L("قبل 3 س", "3h ago") },
-              { icon: Bell, text: L("تنبيه: فاتورة معلقة", "Alert: pending invoice"), time: L("قبل 5 س", "5h ago") },
-            ].map((a, i) => {
+            {activity.length === 0 && (
+              <li className="text-xs text-muted-foreground text-center py-4">{L("لا توجد أنشطة بعد", "No activity yet")}</li>
+            )}
+            {activity.map((a, i) => {
               const I = a.icon;
               return (
                 <li key={i} className="flex items-start gap-3">
