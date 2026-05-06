@@ -158,19 +158,19 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
+                className="relative z-20 w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
               >
                 {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
               </button>
             </form>
 
-            <div className="my-7 flex items-center gap-3">
+            <div className="relative z-0 my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
               <span className="text-[11px] text-muted-foreground">{t("auth.orSocial")}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="flex w-full justify-center overflow-hidden [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!min-w-0">
+            <div className="relative z-0 flex w-full justify-center overflow-hidden [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!min-w-0">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const idToken = credentialResponse.credential;
