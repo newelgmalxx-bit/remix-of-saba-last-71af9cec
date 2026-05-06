@@ -71,16 +71,14 @@ async function trySyncFromApi(): Promise<void> {
   try {
     const res = await api.cart.get();
     const remoteItems = (res.items || []).map(normalizeFromApi);
-    if (remoteItems.length > 0) {
-      setCache({
-        items: remoteItems,
-        subtotal: Number(res.subtotal) || computeTotals(remoteItems).subtotal,
-        vat: Number(res.vat) || computeTotals(remoteItems).vat,
-        total: Number(res.total) || computeTotals(remoteItems).total,
-        loading: false,
-        error: null,
-      });
-    }
+    setCache({
+      items: remoteItems,
+      subtotal: Number(res.subtotal) || computeTotals(remoteItems).subtotal,
+      vat: Number(res.vat) || computeTotals(remoteItems).vat,
+      total: Number(res.total) || computeTotals(remoteItems).total,
+      loading: false,
+      error: null,
+    });
   } catch { /* silent — local cart still works */ }
 }
 
@@ -121,8 +119,10 @@ export function useCart() {
         ];
       }
       setCache({ ...cache, items: nextItems, ...computeTotals(nextItems), error: null });
-      // Fire-and-forget API sync
-      api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty }).catch(() => {});
+      try {
+        await api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty });
+        await trySyncFromApi();
+      } catch { /* keep local fallback */ }
     },
     [],
   );
@@ -130,14 +130,14 @@ export function useCart() {
   const remove = useCallback(async (lineId: string) => {
     const nextItems = cache.items.filter((i) => i.id !== lineId);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
-    api.cart.removeItem(lineId).catch(() => {});
+    try { await api.cart.removeItem(lineId); await trySyncFromApi(); } catch {}
   }, []);
 
   const updateQty = useCallback(async (lineId: string, qty: number) => {
     if (qty < 1) return remove(lineId);
     const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
-    api.cart.updateItem(lineId, qty).catch(() => {});
+    try { await api.cart.updateItem(lineId, qty); await trySyncFromApi(); } catch {}
   }, [remove]);
 
   const clear = useCallback(async () => {
