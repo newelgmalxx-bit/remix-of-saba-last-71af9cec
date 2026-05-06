@@ -1,15 +1,13 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
-import api, { ApiError } from "@/lib/api";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { AuthHero } from "@/components/auth/AuthHero";
 
 function AuthResetPage() {
   const { dir, lang, toggle } = useLang();
-  const navigate = useNavigate();
   const search = useSearch({ from: "/auth/reset" }) as { token?: string };
   const token = search?.token || "";
   const [password, setPassword] = useState("");
@@ -19,26 +17,39 @@ function AuthResetPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!token) {
-      toast.error(lang === "ar" ? "رمز الاستعادة غير صالح" : "Invalid reset token");
+    const newPasswordVariable = password;
+    const urlToken = new URL(window.location.href).searchParams.get('token');
+    if (!urlToken) {
+      toast.error(lang === "ar" ? "رابط غير صالح" : "Invalid link");
       return;
     }
-    if (password.length < 8) {
+    if (newPasswordVariable.length < 8) {
       toast.error(lang === "ar" ? "كلمة المرور 8 أحرف على الأقل" : "Password must be at least 8 characters");
       return;
     }
-    if (password !== confirm) {
+    if (newPasswordVariable !== confirm) {
       toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       return;
     }
     setSubmitting(true);
     try {
-      await (api as any).auth.reset(token, password);
-      toast.success(lang === "ar" ? "تم تحديث كلمة المرور بنجاح" : "Password updated successfully");
-      navigate({ to: "/login" });
-    } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تحديث كلمة المرور" : "Failed to reset password");
-      toast.error(msg);
+      const res = await fetch('https://saba-design.com/api/auth/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          token: urlToken,
+          password: newPasswordVariable,
+        }),
+      });
+      const data = await res.json().catch(() => ({} as any));
+      if (data?.success) {
+        toast.success(lang === "ar" ? "تم تحديث كلمة المرور بنجاح" : "Password updated successfully");
+        window.location.href = '/login';
+      } else {
+        toast.error(data?.message || (lang === "ar" ? "فشل تحديث كلمة المرور" : "Failed to reset password"));
+      }
+    } catch {
+      toast.error(lang === "ar" ? "تعذّر الاتصال بالخادم" : "Network error");
     } finally {
       setSubmitting(false);
     }
