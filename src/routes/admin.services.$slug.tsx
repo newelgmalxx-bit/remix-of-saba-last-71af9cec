@@ -44,6 +44,8 @@ function ServiceEditorPage() {
   const [bannerImage, setBannerImage] = useState<string>(initial?.bannerImage ?? "");
   const [overviewDescription, setOverviewDescription] = useState<string>(initial?.overviewDescription ?? "");
   const [overviewDescriptionEn, setOverviewDescriptionEn] = useState<string>(override?.overviewDescriptionEn ?? "");
+  const [price, setPrice] = useState<string>(override?.price ?? "");
+  const [originalPrice, setOriginalPrice] = useState<string>(override?.originalPrice ?? "");
   const [seo, setSeo] = useState({
     title: initial?.seo?.title ?? "",
     description: initial?.seo?.description ?? "",
@@ -87,7 +89,7 @@ function ServiceEditorPage() {
     const next: ServiceOverride = {
       title, titleEn, subtitle, subtitleEn, category, categoryEn, breadcrumb, breadcrumbEn,
       heroHighlights, heroHighlightsEn, bannerImage, overviewDescription, overviewDescriptionEn,
-      seo, overview, benefits, steps, stats, testimonials, faqs,
+      price, originalPrice, seo, overview, benefits, steps, stats, testimonials, faqs,
       isCustom: isCustom || override?.isCustom,
     };
     save(next);
@@ -110,6 +112,8 @@ function ServiceEditorPage() {
     setBannerImage(base.bannerImage ?? "");
     setOverviewDescription(base.overviewDescription ?? "");
     setOverviewDescriptionEn("");
+    setPrice("");
+    setOriginalPrice("");
     setSeo({ title: base.seo?.title ?? "", description: base.seo?.description ?? "", keywords: base.seo?.keywords ?? "", ogImage: base.seo?.ogImage ?? "" });
     setOverview(base.overview.map(o => ({ title: o.title, desc: o.desc })));
     setBenefits(base.benefits.map(b => ({ title: b.title, desc: b.desc })));
