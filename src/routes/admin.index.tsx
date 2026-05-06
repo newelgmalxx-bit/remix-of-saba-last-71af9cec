@@ -34,7 +34,15 @@ function AdminDashboard() {
   useEffect(() => {
     adminApi.analytics()
       .then((d: any) => {
-        setStats((s: any) => ({ ...s, ...d }));
+        // Don't let analytics zeros overwrite values computed from orders below
+        const { totalBookings: _tb, ordersCount: _oc, revenue: _rv, ...rest } = d || {};
+        setStats((s: any) => ({
+          ...s,
+          ...rest,
+          totalBookings: s.totalBookings || _tb || 0,
+          ordersCount: s.ordersCount || _oc || 0,
+          revenue: s.revenue || _rv || 0,
+        }));
         if (Array.isArray(d.monthlyRevenue) && d.monthlyRevenue.length) setRevenue(d.monthlyRevenue);
         if (Array.isArray(d.salesByCategory) && d.salesByCategory.length) {
           const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
