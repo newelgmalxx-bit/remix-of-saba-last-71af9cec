@@ -71,7 +71,7 @@ function ClientsPage() {
         m.set(key, cur);
       };
       const sources = [
-        ...orders.map((o) => ({ email: o.client_email ?? o.email ?? o.user_email, name: o.client_name ?? o.client, total: o.total ?? o.amount })),
+        ...orders.map((o) => ({ email: o.contact_email ?? o.client_email ?? o.email ?? o.user_email, name: o.contact_name ?? o.client_name ?? o.client, total: o.total ?? o.amount })),
         ...invoices.map((i) => ({ email: i.client_email, name: i.client_name, total: i.total })),
       ];
       sources.forEach((s) => {
