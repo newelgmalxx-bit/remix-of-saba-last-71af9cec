@@ -127,33 +127,31 @@ export function ServiceCard({
           <Heart className={`h-4 w-4 ${fav ? "fill-red-500 text-red-500" : "text-foreground/70"}`} />
         </button>
       </div>
-      <div className="flex flex-1 flex-col p-5 text-start">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-extrabold text-foreground">{title}</h3>
-        </div>
-        <div className="mt-1 flex items-center gap-1.5 text-xs">
+      <div className="flex flex-1 flex-col items-center p-5 text-center">
+        <h3 className="text-base font-extrabold text-foreground">{title}</h3>
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-xs">
+          <span className="text-muted-foreground">({count})</span>
+          <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
           <div className="flex items-center gap-0.5 text-amber-500">
             {[0,1,2,3,4].map((i) => (
               <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(rating) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
             ))}
           </div>
-          <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
-          <span className="text-muted-foreground">({count})</span>
         </div>
-        <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted-foreground">{desc}</p>
+        {desc && <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted-foreground">{desc}</p>}
         {price && (
-          <div className="mt-3 flex items-end gap-2" dir="ltr">
-            <span className="text-base font-extrabold text-primary">
-              {price} <span className="text-[10px] font-bold">{t("common.sar")}</span>
-            </span>
+          <div className="mt-3 flex items-baseline justify-center gap-2" dir="ltr">
             {originalPrice && computedDiscount > 0 && (
               <span className="text-xs font-bold text-muted-foreground line-through">
                 {originalPrice}
               </span>
             )}
+            <span className="text-base font-extrabold text-primary">
+              {price} <span className="text-[10px] font-bold">{t("common.sar")}</span>
+            </span>
           </div>
         )}
-        <div className="mt-5 flex flex-1 items-end justify-end gap-2">
+        <div className="mt-5 flex flex-1 w-full items-end justify-center gap-2">
           <Link
             to="/services/$slug"
             params={{ slug }}
