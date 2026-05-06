@@ -106,7 +106,13 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     }
   };
 
-  useEffect(() => { loadNotifs(); }, []);
+  useEffect(() => {
+    loadNotifs();
+    const id = setInterval(loadNotifs, 30000);
+    const onFocus = () => loadNotifs();
+    window.addEventListener("focus", onFocus);
+    return () => { clearInterval(id); window.removeEventListener("focus", onFocus); };
+  }, []);
 
   const unread = notifs.filter((n) => !n.read).length;
 
