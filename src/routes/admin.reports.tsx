@@ -30,16 +30,26 @@ function ReportsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [s, an] = await Promise.all([
+        const [s, an, op, cp, sp] = await Promise.all([
           adminApi.stats().catch(() => null),
           adminApi.analytics().catch(() => null),
+          adminApi.orders.list({ limit: 1000 }).catch(() => ({ items: [] })),
+          adminApi.clients.list({ limit: 1000 }).catch(() => ({ items: [] })),
+          adminApi.services.list({ limit: 1000 }).catch(() => ({ items: [] })),
         ]);
         const a: any = an || s || {};
+        const orders: any[] = (op as any)?.items || [];
+        const clients: any[] = (cp as any)?.items || [];
+        const services: any[] = (sp as any)?.items || [];
+        const ordersTotal = orders.length || Number(a.ordersCount ?? a.totalBookings) || 0;
+        const revenueTotal = orders.reduce((sum, o: any) => sum + (Number(o.total ?? o.amount ?? o.subtotal) || 0), 0) || Number(a.revenue) || 0;
+        const clientsTotal = clients.length || Number(a.totalClients) || 0;
+        const activeSvc = services.filter((s: any) => s.active !== false && s.status !== "inactive").length || Number(a.activeServices) || 0;
         setStats({
-          revenue: Number(a.revenue) || 0,
-          orders: Number(a.ordersCount ?? a.totalBookings) || 0,
-          clients: Number(a.totalClients) || 0,
-          activeServices: Number(a.activeServices) || 0,
+          revenue: revenueTotal,
+          orders: ordersTotal,
+          clients: clientsTotal,
+          activeServices: activeSvc,
           conversion: `${a.conversionRate ?? a.growthRate ?? 0}%`,
           profitMargin: `${a.profitMargin ?? 0}%`,
         });
