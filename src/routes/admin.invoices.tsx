@@ -48,10 +48,13 @@ function InvoicesPage() {
       .catch(() => setInvoices([]));
   }, []);
 
-  const filtered = invoices.filter(i =>
-    (tab === "all" || i.status === tab) &&
-    (i.number.toLowerCase().includes(q.toLowerCase()) || i.client.includes(q))
-  );
+  const filtered = invoices.filter(i => {
+    const num = (i.number ?? "").toString().toLowerCase();
+    const client = (i.client ?? "").toString();
+    const query = (q ?? "").toLowerCase();
+    return (tab === "all" || i.status === tab) &&
+      (num.includes(query) || client.includes(q));
+  });
 
   const total = invoices.reduce((s, i) => s + (i.status === "paid" ? i.amount : 0), 0);
 
