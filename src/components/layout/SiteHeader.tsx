@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X, LogIn, ShoppingCart, User } from "lucide-react";
+import { Menu, X, LogIn, ShoppingCart, User, Heart } from "lucide-react";
 import logo from "@/assets/logo.png";
 import flagSA from "@/assets/flag-sa.jpg";
 import flagUS from "@/assets/flag-us.jpg";
@@ -24,7 +24,24 @@ export function SiteHeader() {
   const { isAuthenticated, isAdmin } = useAuth();
   const { lang, toggle: toggleLang, t } = useLang();
   const [mounted, setMounted] = useState(false);
+  const [favCount, setFavCount] = useState(0);
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem("saba_service_favorites_v1");
+        const obj = raw ? JSON.parse(raw) : {};
+        setFavCount(Object.keys(obj).length);
+      } catch { setFavCount(0); }
+    };
+    sync();
+    window.addEventListener("saba:favorites", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("saba:favorites", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -61,6 +78,18 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <LangSwitch lang={lang} onClick={toggleLang} />
+          <Link
+            to={"/account/favorites" as any}
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
+            aria-label="favorites"
+          >
+            <Heart className="h-4 w-4" />
+            {mounted && favCount > 0 && (
+              <span className="absolute -top-1 -left-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                {favCount}
+              </span>
+            )}
+          </Link>
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground/70 transition hover:border-primary hover:text-primary"
@@ -104,6 +133,18 @@ export function SiteHeader() {
         {/* Mobile/Tablet quick actions */}
         <div className="flex items-center gap-1.5 lg:hidden">
           <LangSwitch lang={lang} onClick={toggleLang} compact label={t("nav.toggleLang")} />
+          <Link
+            to={"/account/favorites" as any}
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground/70"
+            aria-label="favorites"
+          >
+            <Heart className="h-4 w-4" />
+            {mounted && favCount > 0 && (
+              <span className="absolute -top-1 -left-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                {favCount}
+              </span>
+            )}
+          </Link>
           <Link
             to={"/cart" as any}
             className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-foreground/70"
