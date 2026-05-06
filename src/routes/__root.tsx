@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
+import { useInjectTracking } from "@/hooks/useInjectTracking";
 
 const GOOGLE_CLIENT_ID =
   "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
@@ -84,6 +85,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   useTrackVisit();
+  useInjectTracking();
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <LanguageProvider>
