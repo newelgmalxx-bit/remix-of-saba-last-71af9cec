@@ -42,6 +42,7 @@ import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as AccountFavoritesRouteImport } from './routes/account.favorites'
 import { Route as AdminTicketsIndexRouteImport } from './routes/admin.tickets.index'
 import { Route as AdminServicesIndexRouteImport } from './routes/admin.services.index'
 import { Route as AccountTicketsIndexRouteImport } from './routes/account.tickets.index'
@@ -222,6 +223,11 @@ const AccountProfileRoute = AccountProfileRouteImport.update({
   path: '/account/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountFavoritesRoute = AccountFavoritesRouteImport.update({
+  id: '/account/favorites',
+  path: '/account/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTicketsIndexRoute = AdminTicketsIndexRouteImport.update({
   id: '/tickets/',
   path: '/tickets/',
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -405,6 +413,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -456,6 +465,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/account/favorites'
     | '/account/profile'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/account/favorites'
     | '/account/profile'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/account/favorites'
     | '/account/profile'
     | '/admin/analytics'
     | '/admin/bookings'
@@ -602,6 +614,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  AccountFavoritesRoute: typeof AccountFavoritesRoute
   AccountProfileRoute: typeof AccountProfileRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   AccountIndexRoute: typeof AccountIndexRoute
@@ -846,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/favorites': {
+      id: '/account/favorites'
+      path: '/account/favorites'
+      fullPath: '/account/favorites'
+      preLoaderRoute: typeof AccountFavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/tickets/': {
       id: '/admin/tickets/'
       path: '/tickets'
@@ -1050,6 +1070,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  AccountFavoritesRoute: AccountFavoritesRoute,
   AccountProfileRoute: AccountProfileRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   AccountIndexRoute: AccountIndexRoute,
