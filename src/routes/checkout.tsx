@@ -434,7 +434,7 @@ function CheckoutPage() {
                     <span className="text-primary" data-ltr-number>{formatCurrency(total)}</span>
                   </div>
                 </div>
-                <div className="mt-5">
+                <div className="mt-5 hidden">
                   <label className="mb-2 flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                     <Tag className="h-3.5 w-3.5" /> {L("كوبون خصم", "Coupon")}
                   </label>
