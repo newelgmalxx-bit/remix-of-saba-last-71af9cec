@@ -1,4 +1,4 @@
-import { Link, useRouterState, Outlet } from "@tanstack/react-router";
+import { Link, useRouterState, Outlet, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
@@ -11,6 +11,9 @@ import logoImg from "@/assets/logo.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import flagSa from "@/assets/flag-sa.jpg";
 import flagUs from "@/assets/flag-us.jpg";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { toast } from "sonner";
 
 type NavItem = { to: string; ar: string; en: string; icon: any; children?: { to: string; ar: string; en: string; icon: any }[] };
 
@@ -46,7 +49,11 @@ const navGroups: (NavItem | "sep")[] = [
 ];
 
 export function AdminShell() {
-  return <Outlet />;
+  return (
+    <AuthGuard requireAdmin>
+      <Outlet />
+    </AuthGuard>
+  );
 }
 
 export function AdminLayout({ children, title, subtitle, action }: { children: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }) {
@@ -55,6 +62,17 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const [mobileOpen, setMobileOpen] = useState(false);
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    toast.success(L("تم تسجيل الخروج", "Signed out"));
+    navigate({ to: "/login" });
+  }
+
+  const initials = (user?.name || "U")
+    .split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
 
   const isActive = (to: string, exact = false) => exact ? path === to : path === to || path.startsWith(to + "/");
 
@@ -113,10 +131,10 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
             );
           })}
           <div className="my-3 h-px bg-border" />
-          <Link to={"/" as any} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50">
+          <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50">
             <LogOut className="h-4 w-4" />
             {L("تسجيل الخروج", "Sign out")}
-          </Link>
+          </button>
         </nav>
       </aside>
 
@@ -173,8 +191,8 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
               </PopoverContent>
             </Popover>
             <Link to={"/admin/settings/profile" as any} title={L("الملف الشخصي", "Profile")} className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 hover:bg-muted transition">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">JD</div>
-              <span className="hidden sm:block text-xs font-bold">John Doe</span>
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">{initials}</div>
+              <span className="hidden sm:block text-xs font-bold">{user?.name || L("المستخدم", "User")}</span>
             </Link>
           </div>
         </header>
