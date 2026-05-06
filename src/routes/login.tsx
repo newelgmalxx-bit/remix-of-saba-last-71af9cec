@@ -7,6 +7,7 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/lib/api";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 function LoginPage() {
   const [tab, setTab] = useState<"email" | "phone">("phone");
@@ -15,6 +16,14 @@ function LoginPage() {
   const { t, dir, lang, toggle } = useLang();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    if (isAuthenticated) {
+      navigate({ to: isAdmin ? "/admin" : "/account" });
+    }
+  }, [loading, isAuthenticated, isAdmin, navigate]);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);

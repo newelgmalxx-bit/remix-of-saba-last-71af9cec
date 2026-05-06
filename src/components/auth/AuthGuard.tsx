@@ -17,7 +17,8 @@ export function AuthGuard({ children, requireAdmin = false }: Props) {
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated) {
-      navigate({ to: "/login", search: { redirect: path } as any });
+      const safe = path && !path.startsWith("/login") && !path.startsWith("/signup") ? path : "/";
+      navigate({ to: "/login", search: { redirect: safe } as any });
       return;
     }
     if (requireAdmin && !isAdmin) {
