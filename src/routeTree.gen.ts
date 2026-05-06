@@ -30,6 +30,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PaymentResultRouteImport } from './routes/payment.result'
 import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrackingRouteImport } from './routes/admin.tracking'
 import { Route as AdminSiteRouteImport } from './routes/admin.site'
@@ -167,6 +168,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/success',
   path: '/success',
   getParentRoute: () => CheckoutRoute,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/auth/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/admin/site': typeof AdminSiteRoute
   '/admin/tracking': typeof AdminTrackingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
@@ -530,6 +539,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/tracking'
     | '/admin/users'
+    | '/auth/reset'
     | '/checkout/success'
     | '/payment/failed'
     | '/payment/result'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/tracking'
     | '/admin/users'
+    | '/auth/reset'
     | '/checkout/success'
     | '/payment/failed'
     | '/payment/result'
@@ -638,6 +649,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/tracking'
     | '/admin/users'
+    | '/auth/reset'
     | '/checkout/success'
     | '/payment/failed'
     | '/payment/result'
@@ -678,6 +690,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AccountFavoritesRoute: typeof AccountFavoritesRoute
   AccountProfileRoute: typeof AccountProfileRoute
+  AuthResetRoute: typeof AuthResetRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentResultRoute: typeof PaymentResultRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
@@ -838,6 +851,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof CheckoutRoute
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/auth/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -1175,6 +1195,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AccountFavoritesRoute: AccountFavoritesRoute,
   AccountProfileRoute: AccountProfileRoute,
+  AuthResetRoute: AuthResetRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentResultRoute: PaymentResultRoute,
   ServicesSlugRoute: ServicesSlugRoute,
