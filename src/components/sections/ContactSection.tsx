@@ -19,12 +19,12 @@ export function ContactSection() {
     }
     setSubmitting(true);
     try {
-      const subject = [form.service, form.budget].filter(Boolean).join(" • ");
       await contactApi.send({
         name: form.name,
         email: form.email,
         phone: form.phone || undefined,
-        subject: subject || undefined,
+        service: form.service || undefined,
+        budget: form.budget || undefined,
         message: form.message,
       });
       toast.success(t("contactForm.submit"));
