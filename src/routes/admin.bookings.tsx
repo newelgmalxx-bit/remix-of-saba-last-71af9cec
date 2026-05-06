@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
+import { bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -25,7 +25,7 @@ function BookingsPage() {
     completed: L("مكتمل", "Completed"),
     cancelled: L("ملغي", "Cancelled"),
   };
-  const [bookings, setBookings] = useState<AdminBooking[]>(initialBookings);
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<"7" | "30" | "90" | "all">("all");
@@ -43,9 +43,9 @@ function BookingsPage() {
           total: Number(b.total) || 0, payment: b.payment, status: b.status,
           date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
         })) as AdminBooking[];
-        if (items.length) setBookings(items);
+        setBookings(items);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setBookings([]));
   }, []);
 
   // crude period filter using index (mock data shares similar dates)
