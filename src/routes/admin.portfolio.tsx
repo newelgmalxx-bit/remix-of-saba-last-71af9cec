@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { ImageIcon, Eye, EyeOff, Tag, Plus, Search, Edit, Trash2, X, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
-import { adminPortfolio, portfolioCategories, type AdminPortfolio } from "@/data/admin";
+import { portfolioCategories, type AdminPortfolio } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { uploadImage } from "@/lib/image";
@@ -27,7 +27,7 @@ const empty: FormState = {
 function PortfolioPage() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [items, setItems] = useState<AdminPortfolio[]>(adminPortfolio);
+  const [items, setItems] = useState<AdminPortfolio[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -43,9 +43,9 @@ function PortfolioPage() {
           cover: p.cover ?? "", description: p.descriptionAr ?? p.descriptionEn ?? "",
           tech: p.tech ?? [], client: p.client_name ?? "", year: p.year ?? "",
         }));
-        if (list.length) setItems(list);
+        setItems(list);
       })
-      .catch(() => {});
+      .catch(() => setItems([]));
   }, []);
 
   const onPickFile = async (file?: File) => {
