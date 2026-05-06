@@ -5,8 +5,9 @@ import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/lib/api";
+import api, { ApiError, setToken } from "@/lib/api";
 import { toast } from "sonner";
+import { GoogleLogin } from "@react-oauth/google";
 
 function SignupPage() {
   const [show1, setShow1] = useState(false);
@@ -14,6 +15,7 @@ function SignupPage() {
   const [agree, setAgree] = useState(false);
   const { t, dir, lang, toggle } = useLang();
   const { signup } = useAuth();
+  const { refresh } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -114,10 +116,35 @@ function SignupPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <SocialBtn provider="microsoft" />
-              <SocialBtn provider="apple" />
-              <SocialBtn provider="google" />
+            <div className="relative flex w-full justify-center overflow-hidden [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!min-w-0" style={{ zIndex: 100000 }}>
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  const idToken = credentialResponse.credential;
+                  if (!idToken) {
+                    toast.error(lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
+                    return;
+                  }
+                  try {
+                    const { token } = await api.auth.oauthGoogle(idToken);
+                    setToken(token);
+                    await refresh();
+                    toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
+                    navigate({ to: "/account" });
+                  } catch (err) {
+                    const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
+                    toast.error(msg);
+                  }
+                }}
+                onError={() => {
+                  toast.error(lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
+                }}
+                useOneTap={false}
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                text="signup_with"
+                width="320"
+              />
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">
