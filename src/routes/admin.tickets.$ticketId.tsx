@@ -137,9 +137,13 @@ function AdminTicketDetail() {
                   placeholder={L("اكتب ردك...", "Type your reply...")}
                   className="flex-1 rounded-xl border border-border bg-background p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                 />
-                <PrimaryButton onClick={send} disabled={!text.trim() || sending}>
+                <button
+                  onClick={send}
+                  disabled={!text.trim() || sending}
+                  className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-40"
+                >
                   <Send className="h-4 w-4" /> {L("إرسال", "Send")}
-                </PrimaryButton>
+                </button>
               </div>
             </div>
           ) : (
