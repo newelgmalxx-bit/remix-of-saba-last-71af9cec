@@ -45,29 +45,31 @@ function ClientsPage() {
     ]).then(([cp, ip, op]: any) => {
       const invoices: any[] = ip?.items || [];
       const orders: any[] = op?.items || [];
-      // Aggregate by email (fallback to client_name)
-      const agg = new Map<string, { orders: number; spent: number }>();
-      const bump = (key: string, amount: number) => {
+      // Aggregate per-client from orders + invoices, matching by email OR name
+      const byEmail = new Map<string, { orders: number; spent: number }>();
+      const byName = new Map<string, { orders: number; spent: number }>();
+      const bump = (m: Map<string, any>, key: string, amount: number) => {
         if (!key) return;
-        const k = key.toLowerCase();
-        const cur = agg.get(k) || { orders: 0, spent: 0 };
+        const k = key.trim().toLowerCase();
+        if (!k) return;
+        const cur = m.get(k) || { orders: 0, spent: 0 };
         cur.orders += 1;
         cur.spent += Number(amount) || 0;
-        agg.set(k, cur);
+        m.set(k, cur);
       };
-      orders.forEach((o) => {
-        const email = (o.client_email || o.email || o.user_email || "").toString();
-        const total = Number(o.total ?? o.amount ?? 0);
-        bump(email, total);
+      const sources = [
+        ...orders.map((o) => ({ email: o.client_email || o.email || o.user_email, name: o.client_name || o.client, total: o.total ?? o.amount, paid: true })),
+        ...invoices.map((i) => ({ email: i.client_email, name: i.client_name, total: i.total, paid: i.status === "paid" })),
+      ];
+      sources.forEach((s) => {
+        bump(byEmail, String(s.email || ""), Number(s.total) || 0);
+        bump(byName, String(s.name || ""), Number(s.total) || 0);
       });
-      // If no orders endpoint data, fall back to paid invoices only
-      if (orders.length === 0) {
-        invoices.forEach((i) => {
-          if (i.status === "paid") bump((i.client_email || "").toString(), Number(i.total) || 0);
-        });
-      }
       const items: AdminClient[] = (cp.items || []).map((c: any) => {
-        const a = agg.get((c.email || "").toLowerCase()) || { orders: 0, spent: 0 };
+        const a =
+          byEmail.get((c.email || "").trim().toLowerCase()) ||
+          byName.get((c.name || "").trim().toLowerCase()) ||
+          { orders: 0, spent: 0 };
         return {
           id: c.id, name: c.name, email: c.email, phone: c.phone ?? "",
           orders: Number(c.orders) || a.orders,
@@ -75,9 +77,20 @@ function ClientsPage() {
           segment: (c.segment as any) || "new",
           joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
           city: c.city ?? undefined,
+          _joinedRaw: c.joinedAt || "",
         };
       });
       setClients(items);
+      // Build client-growth series from joinedAt months if backend didn't supply it
+      const monthMap = new Map<string, number>();
+      (cp.items || []).forEach((c: any) => {
+        const m = (c.joinedAt || "").slice(0, 7);
+        if (m) monthMap.set(m, (monthMap.get(m) || 0) + 1);
+      });
+      const series = Array.from(monthMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([m, n]) => ({ m, n, r: 0 }));
+      if (series.length) setGrowthSeries((prev) => (prev.length ? prev : series));
     });
     adminApi.analytics().then((a: any) => {
       if (!a) return;
