@@ -56,9 +56,9 @@ function ClientsPage() {
     };
     Promise.all([
       adminApi.clients.list({ limit: 200 }).catch(() => ({ items: [] })),
-      adminApi.invoices.list({ limit: 1000, status: "all" }).catch(() => ({ items: [] })),
-      adminApi.orders.list({ limit: 1000, status: "all" }).catch(() => ({ items: [] })),
-      adminApi.consultations?.list?.({ limit: 1000, status: "all" }).catch(() => ({ items: [] })) ?? Promise.resolve({ items: [] }),
+      adminApi.invoices.list({ limit: 1000 }).catch(() => ({ items: [] })),
+      adminApi.orders.list({ limit: 1000 }).catch(() => ({ items: [] })),
+      adminApi.consultations?.list?.({ limit: 1000 }).catch(() => ({ items: [] })) ?? Promise.resolve({ items: [] }),
     ]).then(([cp, ip, op, bp]: any) => {
       const invoices: any[] = ip?.items || [];
       const orders: any[] = op?.items || [];
