@@ -157,6 +157,26 @@ const adminLegacy = {
   },
   bookings: {
     list: async (q?: any) => {
+      const r: any = await a.getOrders(q);
+      return r.data;
+    },
+    setStatus: (id: string, body: any) => a.updateOrderStatus(id, body),
+    addNote: (id: string, text: string) => a.addOrderNote(id, text),
+  },
+  orders: {
+    list: async (q?: any) => {
+      const r: any = await a.getOrders(q);
+      return r.data;
+    },
+    get: async (id: string) => {
+      const r: any = await a.getOrder(id);
+      return r.data?.order;
+    },
+    setStatus: (id: string, body: any) => a.updateOrderStatus(id, body),
+    addNote: (id: string, text: string) => a.addOrderNote(id, text),
+  },
+  consultations: {
+    list: async (q?: any) => {
       const r: any = await a.getBookings(q);
       return r.data;
     },

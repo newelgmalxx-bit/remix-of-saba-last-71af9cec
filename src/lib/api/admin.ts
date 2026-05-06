@@ -17,7 +17,10 @@ export const admin = {
   updatePlan: (id: string, body: any) => request(`/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deletePlan: (id: string) => request(`/admin/plans/${id}`, { method: 'DELETE' }),
 
-  getOrders: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request<PaginatedResponse<Order>>(`/account/orders${q ? '?' + q : ''}`); },
+  getOrders: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request<PaginatedResponse<Order>>(`/admin/orders${q ? '?' + q : ''}`); },
+  getOrder: (id: string) => request<ApiResponse<{ order: Order }>>(`/admin/orders/${id}`),
+  updateOrderStatus: (id: string, body: any) => request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) }),
+  addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}/note`, { method: 'POST', body: JSON.stringify({ text }) }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
   updateBooking: (id: string, body: any) => request(`/admin/bookings/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) }),
