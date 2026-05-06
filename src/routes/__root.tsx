@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useTrackVisit } from "@/hooks/useTrackVisit";
 
 const GOOGLE_CLIENT_ID =
   "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
@@ -82,6 +83,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useTrackVisit();
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <LanguageProvider>
