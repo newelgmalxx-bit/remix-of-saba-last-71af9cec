@@ -35,6 +35,22 @@ function CheckoutPage() {
   });
   const [payment, setPayment] = useState<PaymentMethod>("tabby");
   const [submitting, setSubmitting] = useState(false);
+  const [useSaved, setUseSaved] = useState<boolean>(true);
+
+  // When the logged-in user toggles between saved data and new data, refill the form.
+  const applyMode = (saved: boolean) => {
+    setUseSaved(saved);
+    if (saved) {
+      setInfo((prev) => ({
+        ...prev,
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: (user as any)?.phone || "",
+      }));
+    } else {
+      setInfo((prev) => ({ ...prev, name: "", email: "", phone: "" }));
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -67,9 +83,15 @@ function CheckoutPage() {
       if (user) {
         try {
           const updates: Record<string, string> = {};
-          if (info.name && info.name !== user.name) updates.name = info.name;
-          if (info.phone && info.phone !== (user as any).phone) updates.phone = info.phone;
-          if (info.email && info.email !== user.email) updates.email = info.email;
+          // Only sync profile when user explicitly chose to enter new data.
+          if (!useSaved) {
+            if (info.name && info.name !== user.name) updates.name = info.name;
+            if (info.phone && info.phone !== (user as any).phone) updates.phone = info.phone;
+            if (info.email && info.email !== user.email) updates.email = info.email;
+          } else if (info.phone && !(user as any).phone) {
+            // If profile was missing phone, save the one used now.
+            updates.phone = info.phone;
+          }
           if (Object.keys(updates).length > 0) {
             await api.account.updateProfile(updates);
           }
@@ -161,6 +183,28 @@ function CheckoutPage() {
               {step === 0 && (
                 <div className="space-y-5">
                   <h2 className="text-lg font-bold">{t("checkout.contact")}</h2>
+                  {user && (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={() => applyMode(true)}
+                        className={`rounded-xl border-2 p-3 text-right text-sm font-bold transition ${
+                          useSaved ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {lang === "ar" ? "استخدم بياناتي المحفوظة" : "Use my saved info"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyMode(false)}
+                        className={`rounded-xl border-2 p-3 text-right text-sm font-bold transition ${
+                          !useSaved ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {lang === "ar" ? "إدخال بيانات جديدة" : "Enter new info"}
+                      </button>
+                    </div>
+                  )}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label={t("checkout.fullName")} value={info.name} onChange={(v) => setInfo({ ...info, name: v })} />
                     <Field label={t("checkout.email")} type="email" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} />
