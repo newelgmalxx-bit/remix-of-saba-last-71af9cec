@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
-import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download, Trash2 } from "lucide-react";
+import { Package, CheckCircle2, FileEdit, Archive, Search, Plus, Pencil, Download, Trash2, Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { adminServices as initialServices, fmtSAR, type AdminService } from "@/data/admin";
 import { toast } from "sonner";
@@ -172,6 +172,15 @@ function ServicesPage() {
     } catch (e: any) { toast.error(e?.message || L("فشل الحذف", "Delete failed")); }
   };
 
+  const handleToggleStatus = async (slug: string, current: AdminService["status"]) => {
+    const next = current === "active" ? "draft" : "active";
+    try {
+      await api.admin.updateService(slug, { status: next });
+      toast.success(next === "active" ? L("تم نشر الخدمة", "Service published") : L("تم تحويلها لمسودة", "Moved to draft"));
+      await fetchList();
+    } catch (e: any) { toast.error(e?.message || L("فشل التحديث", "Update failed")); }
+  };
+
   const handleExport = () => {
     const csv = ["SKU,Title,Category,Price,Bookings,Status", ...items.map(s => `${s.sku},${s.titleAr},${s.category},${s.price},${s.bookings},${s.status}`)].join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
@@ -243,6 +252,9 @@ function ServicesPage() {
                     <td className="px-3 py-3"><Pill tone={st.t}>{st.l}</Pill></td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
+                        <button onClick={() => handleToggleStatus(s.slug, s.status)} title={s.status === "active" ? L("تحويل لمسودة", "Move to draft") : L("نشر", "Publish")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-emerald-600">
+                          {s.status === "active" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
                         <Link to="/admin/services/$slug" params={{ slug: s.slug }} title={L("تعديل التفاصيل", "Edit details")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary">
                           <Pencil className="h-4 w-4" />
                         </Link>
