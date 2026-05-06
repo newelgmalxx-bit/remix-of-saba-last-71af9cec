@@ -74,6 +74,8 @@ export type Order = {
   status: OrderStatus;
   payment: PaymentMethod;
   paid: boolean;
+  paymentStatus?: "unpaid" | "paid" | "refunded";
+  invoice?: { id: string; number: string; status: string; total: number } | null;
   items: CartItem[];
   subtotal: number;
   vat: number;
