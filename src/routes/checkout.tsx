@@ -4,8 +4,11 @@ import { Check, ChevronLeft, Lock, ShieldCheck, FileText } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
-import { paymentMethods, type PaymentMethod, formatCurrency, mockUser } from "@/data/account";
+import { paymentMethods, type PaymentMethod, formatCurrency } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useAuth } from "@/hooks/useAuth";
+import api, { ApiError } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -18,13 +21,14 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { items, subtotal, vat, total, clear } = useCart();
   const [step, setStep] = useState(0);
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const { user } = useAuth();
   const steps = [t("checkout.steps.info"), t("checkout.steps.payment"), t("checkout.steps.review")];
 
   const [info, setInfo] = useState({
-    name: mockUser.name,
-    email: mockUser.email,
-    phone: mockUser.phone,
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     company: "",
     notes: "",
     agree: true,
@@ -51,20 +55,44 @@ function CheckoutPage() {
   const next = () => setStep((s) => Math.min(steps.length - 1, s + 1));
   const prev = () => setStep((s) => Math.max(0, s - 1));
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
+    if (!info.name || !info.email || !info.phone) {
+      toast.error(lang === "ar" ? "يرجى تعبئة بيانات التواصل" : "Please fill contact info");
+      return;
+    }
     setSubmitting(true);
-    setTimeout(() => {
-      const orderNumber = `SD-${Math.floor(1000 + Math.random() * 9000)}`;
-      // Save mock pending order summary in localStorage for the success view
+    try {
+      const res = await api.checkout.submit({
+        contact: {
+          name: info.name,
+          email: info.email,
+          phone: info.phone,
+          city: undefined,
+          address: undefined,
+        },
+        paymentMethod: payment as any,
+        notes: info.notes || undefined,
+      });
       try {
         localStorage.setItem(
           "saba_last_order",
-          JSON.stringify({ number: orderNumber, total, payment, items, info }),
+          JSON.stringify({ number: res.orderNumber, total, payment, items, info }),
         );
       } catch {}
-      clear();
-      navigate({ to: "/checkout/success" as any, search: { o: orderNumber } as any });
-    }, 900);
+      // If hosted gateway URL is provided, redirect there.
+      if (res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+        return;
+      }
+      // Otherwise success page (COD or already-handled gateway).
+      await clear();
+      navigate({ to: "/checkout/success" as any, search: { o: res.orderNumber } as any });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed");
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
