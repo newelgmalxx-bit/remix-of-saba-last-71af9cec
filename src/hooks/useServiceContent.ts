@@ -18,6 +18,10 @@ async function refreshRemoteServices() {
       const slug = s.slug;
       remoteSlugs.push(slug);
       const cur = store[slug] || {};
+      const priceObj: any = (s as any).price || {};
+      const amount = priceObj.amount;
+      const originalAmount = priceObj.originalAmount;
+      const discountPercent = priceObj.discountPercent;
       store[slug] = {
         ...cur,
         isCustom: !serviceMap[slug] ? true : cur.isCustom,
@@ -27,6 +31,9 @@ async function refreshRemoteServices() {
         subtitleEn: s.subtitleEn || cur.subtitleEn,
         category: s.category || cur.category,
         bannerImage: s.cover || cur.bannerImage,
+        price: amount != null ? String(amount) : cur.price,
+        originalPrice: originalAmount != null ? String(originalAmount) : cur.originalPrice,
+        discountPercent: discountPercent != null ? Number(discountPercent) : cur.discountPercent,
       };
     }
     writeStore(store);
@@ -49,6 +56,7 @@ export type ServiceOverride = {
   breadcrumbEn?: string;
   price?: string;
   originalPrice?: string;
+  discountPercent?: number;
   heroHighlights?: string[];
   heroHighlightsEn?: string[];
   bannerImage?: string;
