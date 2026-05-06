@@ -76,6 +76,37 @@ function AnalyticsPage() {
         return L(v[0], v[1]);
       };
       const computedSources = Array.from(sourceCount.entries()).map(([k, v]) => ({ name: sourceLabel(k), value: v }));
+      // Engagement: group visits by session
+      const sessionsMap = new Map<string, { times: number[]; paths: string[] }>();
+      visitRows.forEach((v) => {
+        const sid = v.session_id || `anon-${v.created_at}`;
+        const t = new Date(v.created_at).getTime();
+        const s = sessionsMap.get(sid) || { times: [], paths: [] };
+        s.times.push(t);
+        s.paths.push(v.path || "/");
+        sessionsMap.set(sid, s);
+      });
+      const sessionList = Array.from(sessionsMap.values());
+      const totalSessions = sessionList.length;
+      const bounceSessions = sessionList.filter((s) => s.paths.length <= 1).length;
+      const engagedSessions = sessionList.filter((s) => {
+        const dur = Math.max(...s.times) - Math.min(...s.times);
+        return s.paths.length > 1 || dur >= 30000;
+      }).length;
+      const totalPages = sessionList.reduce((sum, s) => sum + s.paths.length, 0);
+      const totalDurMs = sessionList.reduce((sum, s) => sum + (Math.max(...s.times) - Math.min(...s.times)), 0);
+      const avgSessionSec = totalSessions ? Math.round(totalDurMs / totalSessions / 1000) : 0;
+      const fmtDuration = (sec: number) => {
+        if (!sec) return "0s";
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return m ? `${m}m ${s}s` : `${s}s`;
+      };
+      const pagesPerSession = totalSessions ? (totalPages / totalSessions).toFixed(1) : "0";
+      const bounceRate = totalSessions ? `${Math.round((bounceSessions / totalSessions) * 100)}%` : "0%";
+      // Conversions from visits
+      const cartVisits = visitRows.filter((v) => String(v.path || "").startsWith("/cart")).length;
+      const checkoutVisits = visitRows.filter((v) => String(v.path || "").startsWith("/checkout")).length;
       // Monthly revenue (last 12 months)
       const months: { m: string; v: number }[] = [];
       const monthMap = new Map<string, number>();
@@ -100,14 +131,16 @@ function AnalyticsPage() {
         pageViews: visitRows.length || a.pageViews || 0,
         uniqueVisitors: uniqueSessions || a.uniqueVisitors || clients.length,
         sessions: uniqueSessions || a.sessions || 0,
-        avgSession: a.avgSession ?? "—",
-        bounceRate: a.bounceRate ?? "—",
-        pagesPerSession: a.pagesPerSession ?? "—",
-        engagedSessions: a.engagedSessions ?? "—",
-        addToCart: a.addToCart ?? totalOrders,
-        checkoutsStarted: a.checkoutsStarted ?? totalOrders,
+        avgSession: totalSessions ? fmtDuration(avgSessionSec) : (a.avgSession ?? "0s"),
+        bounceRate: totalSessions ? bounceRate : (a.bounceRate ?? "0%"),
+        pagesPerSession: totalSessions ? pagesPerSession : (a.pagesPerSession ?? "0"),
+        engagedSessions: totalSessions ? engagedSessions : (a.engagedSessions ?? 0),
+        addToCart: cartVisits || a.addToCart || 0,
+        checkoutsStarted: checkoutVisits || a.checkoutsStarted || 0,
         completed: a.completed ?? completedCount,
-        conversionRate: a.conversionRate ?? (totalOrders ? `${Math.round((completedCount / totalOrders) * 100)}%` : "0%"),
+        conversionRate: totalSessions
+          ? `${((completedCount / totalSessions) * 100).toFixed(1)}%`
+          : (a.conversionRate ?? "0%"),
         visits: visits,
         sources: computedSources.length ? computedSources : (a.sources || []),
         monthlyRevenue: a.monthlyRevenue?.length ? a.monthlyRevenue : months,
