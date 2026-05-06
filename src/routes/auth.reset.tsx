@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { AuthHero } from "@/components/auth/AuthHero";
 
 function AuthResetPage() {
   const { dir, lang, toggle } = useLang();
-  const navigate = useNavigate();
   const search = useSearch({ from: "/auth/reset" }) as { token?: string };
   const token = search?.token || "";
   const [password, setPassword] = useState("");
