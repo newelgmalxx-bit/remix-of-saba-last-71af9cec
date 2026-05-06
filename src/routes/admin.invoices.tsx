@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
+import { renderInvoiceToPdf } from "@/lib/renderInvoice";
+import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "الفواتير | لوحة التحكم" }] }),
@@ -172,28 +174,35 @@ function InvoicesPage() {
       </PanelCard>
 
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent dir={dir} className="max-w-lg">
+        <DialogContent dir={dir} className="max-w-3xl">
           <DialogHeader><DialogTitle>{L("الفاتورة", "Invoice")} {viewing?.number}</DialogTitle></DialogHeader>
           {viewing && (() => {
             const subtotal = Math.round(viewing.amount / 1.15);
             const vat = viewing.amount - subtotal;
+            const data = {
+              number: viewing.number,
+              date: viewing.issued,
+              clientName: viewing.client,
+              clientEmail: viewing.email,
+              clientPhone: viewing.phone,
+              clientCity: viewing.city,
+              paymentMethod: viewing.payment,
+              paymentStatus: viewing.status === "paid" ? "paid" : viewing.status === "void" ? "refunded" : "unpaid",
+              items: [{ title: L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: subtotal }],
+              subtotal, vat, total: viewing.amount,
+            };
             return (
-              <div className="space-y-3 text-sm">
-                <div className="grid grid-cols-2 gap-3">
-                  <div><div className="text-[11px] text-muted-foreground">{L("رقم الطلب", "Order #")}</div><div className="font-bold" dir="ltr">#{viewing.orderNumber}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("التاريخ", "Date")}</div><div className="font-bold" data-ltr-number>{viewing.issued}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("العميل", "Client")}</div><div className="font-bold">{viewing.client}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("البريد", "Email")}</div><div className="font-bold">{viewing.email}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("الجوال", "Phone")}</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("المدينة", "City")}</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("طريقة الدفع", "Payment Method")}</div><div className="font-bold">{viewing.payment ?? "—"}</div></div>
+              <div className="space-y-3">
+                <div className="overflow-auto max-h-[70vh] flex justify-center bg-muted/30 rounded-xl p-4">
+                  <div style={{ transform: "scale(0.7)", transformOrigin: "top center" }}>
+                    <InvoiceDocument data={data as any} />
+                  </div>
                 </div>
-                <div className="border-t border-border pt-3 space-y-1.5">
-                  <div className="flex justify-between"><span className="text-muted-foreground">{L("المجموع الفرعي", "Subtotal")}</span><span data-ltr-number>{fmtSAR(subtotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">{L("ضريبة 15%", "VAT 15%")}</span><span data-ltr-number>{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary border-t border-border pt-2"><span>{L("الإجمالي", "Total")}</span><span data-ltr-number>{fmtSAR(viewing.amount)}</span></div>
+                <div className="flex justify-end">
+                  <PrimaryButton onClick={() => renderInvoiceToPdf(data as any)}>
+                    <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
+                  </PrimaryButton>
                 </div>
-                <Pill tone={map[viewing.status].t}>{map[viewing.status].l}</Pill>
               </div>
             );
           })()}
