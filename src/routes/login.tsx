@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
@@ -18,13 +18,15 @@ function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, loading, refresh } = useAuth();
+  const search = useSearch({ from: "/login" }) as { redirect?: string };
+  const redirectTo = search?.redirect;
 
   useEffect(() => {
     if (loading) return;
     if (isAuthenticated) {
-      navigate({ to: isAdmin ? "/admin" : "/account" });
+      navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
     }
-  }, [loading, isAuthenticated, isAdmin, navigate]);
+  }, [loading, isAuthenticated, isAdmin, navigate, redirectTo]);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +54,7 @@ function LoginPage() {
       );
       toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
       const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
-      navigate({ to: isAdmin ? "/admin" : "/account" });
+      navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول" : "Login failed");
       toast.error(msg);
@@ -187,7 +189,7 @@ function LoginPage() {
                     await refresh();
                     toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
                     const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
-                    navigate({ to: isAdmin ? "/admin" : "/account" });
+                    navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
                   } catch (err) {
                     const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
                     toast.error(msg);
@@ -264,6 +266,9 @@ function SocialBtn({ provider }: { provider: "google" | "apple" | "microsoft" })
 }
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "تسجيل الدخول | سابا ديزاين" },
