@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, Pill } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreditCard, Smartphone, Wallet, Building, Banknote } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/payment")({
   head: () => ({ meta: [{ title: "إعدادات الدفع | لوحة التحكم" }] }),
@@ -30,11 +31,28 @@ function PaymentSettingsPage() {
   const [gateways, setGateways] = useState<Gateway[]>(initial);
   const [vat, setVat] = useState(15);
   const [currency, setCurrency] = useState("SAR");
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await adminApi.settings.get<any>("payment");
+        if (s?.gateways) setGateways((cur) => cur.map(g => ({ ...g, ...(s.gateways[g.key] || {}) })));
+        if (typeof s?.vat === "number") setVat(s.vat);
+        if (s?.currency) setCurrency(s.currency);
+      } catch {}
+    })();
+  }, []);
+  const save = async () => {
+    try {
+      const payload = { vat, currency, gateways: Object.fromEntries(gateways.map(g => [g.key, g])) };
+      await adminApi.settings.update("payment", payload);
+      toast.success(L("تم الحفظ", "Saved"));
+    } catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
   const update = (k: string, patch: Partial<Gateway>) => setGateways(gateways.map(g => g.key === k ? { ...g, ...patch } : g));
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";
   return (
-    <AdminLayout title={L("إعدادات الدفع", "Payment Settings")} subtitle={L("بوابات الدفع والعملة والضريبة", "Payment gateways, currency, and VAT")} action={<PrimaryButton onClick={() => toast.success(L("تم الحفظ", "Saved"))}>{L("حفظ", "Save")}</PrimaryButton>}>
+    <AdminLayout title={L("إعدادات الدفع", "Payment Settings")} subtitle={L("بوابات الدفع والعملة والضريبة", "Payment gateways, currency, and VAT")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
       <PanelCard title={L("إعدادات عامة", "General Settings")} className="mb-6">
         <div className="grid gap-3 sm:grid-cols-3">
           <Lb label={L("العملة", "Currency")}>

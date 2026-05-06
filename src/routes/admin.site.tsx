@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton } from "@/components/admin/AdminLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { fileToWebp } from "@/lib/image";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/site")({
   head: () => ({ meta: [{ title: "إعدادات الموقع | لوحة التحكم" }] }),
@@ -22,12 +23,26 @@ function SiteSettingsPage() {
     workHours: L("الأحد - الخميس · 9 ص - 6 م", "Sun - Thu · 9 AM - 6 PM"),
     maintenance: false, primaryLang: "ar", currency: "SAR",
   });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await adminApi.settings.get<any>("site");
+        if (data && typeof data === "object") setS((cur) => ({ ...cur, ...data }));
+      } catch {}
+    })();
+  }, []);
+
+  const save = async () => {
+    try { await adminApi.settings.update("site", s); toast.success(L("تم حفظ الإعدادات", "Settings saved")); }
+    catch (e: any) { toast.error(e?.message || "Save failed"); }
+  };
   const upload = (k: "logo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     setS({ ...s, [k]: await fileToWebp(f) });
   };
   return (
-    <AdminLayout title={L("إعدادات الموقع", "Site Settings")} subtitle={L("معلومات الشركة والهوية والتواصل", "Company info, identity, and contact")} action={<PrimaryButton onClick={() => toast.success(L("تم حفظ الإعدادات", "Settings saved"))}>{L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
+    <AdminLayout title={L("إعدادات الموقع", "Site Settings")} subtitle={L("معلومات الشركة والهوية والتواصل", "Company info, identity, and contact")} action={<PrimaryButton onClick={save}>{L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}>
       <div className="grid gap-6 lg:grid-cols-3">
         <PanelCard title={L("الهوية والشعار", "Identity & Logo")} className="lg:col-span-1">
           <div className="space-y-4">
