@@ -36,7 +36,7 @@ const works: { tag: string; titleKey: TKey; img: string }[] = [
 ];
 
 function ServiceDetailPage() {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const service = live ?? serviceMap[slug];
@@ -129,10 +129,20 @@ function ServiceDetailPage() {
   const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
   const heroImg = service.bannerImage || servicesHero;
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
+      navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
+      return;
+    }
     add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     toast.success(t("svcDetail.toast.added"), { description: title });
   };
   const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
+      navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
+      return;
+    }
     add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     navigate({ to: "/checkout" as any });
   };
