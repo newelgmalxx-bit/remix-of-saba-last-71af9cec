@@ -170,7 +170,7 @@ function LoginPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="flex w-full justify-center [&>div]:w-full [&>div>div]:!w-full [&_iframe]:!w-full">
+            <div className="flex w-full justify-center overflow-hidden [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!min-w-0">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const idToken = credentialResponse.credential;
@@ -198,7 +198,7 @@ function LoginPage() {
                 size="large"
                 shape="rectangular"
                 text="signin_with"
-                width="400"
+                width="320"
               />
             </div>
 
