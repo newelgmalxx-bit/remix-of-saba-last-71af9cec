@@ -63,7 +63,7 @@ export function SiteHeader() {
             aria-label={t("nav.cart")}
           >
             <ShoppingCart className="h-4 w-4" />
-            {count > 0 && (
+            {mounted && count > 0 && (
               <span className="absolute -top-1 -left-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
                 {count}
               </span>
@@ -94,7 +94,7 @@ export function SiteHeader() {
             aria-label={t("nav.cart")}
           >
             <ShoppingCart className="h-4 w-4" />
-            {count > 0 && (
+            {mounted && count > 0 && (
               <span className="absolute -top-1 -left-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
                 {count}
               </span>
