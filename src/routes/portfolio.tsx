@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import portfolioBg from "@/assets/portfolio-bg.jpg";
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { publicApi } from "@/lib/api/public";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -32,41 +33,42 @@ const categories: { key: CatKey; tKey: TKey }[] = [
   { key: "marketing", tKey: "portfolioPage.cat.marketing" },
 ];
 
-const projects: {
+type Project = {
   id: string;
-  titleKey: TKey;
-  clientKey: TKey;
+  title: string;
+  client: string;
   category: Exclude<CatKey, "all">;
   tag: string;
   img: string;
   year: string;
   featured?: boolean;
-}[] = [
-  { id: "p1", titleKey: "portfolioPage.p1.t", clientKey: "portfolioPage.p1.c", category: "web", tag: "E-commerce", year: "2025", featured: true,
-    img: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p2", titleKey: "portfolioPage.p2.t", clientKey: "portfolioPage.p2.c", category: "apps", tag: "Mobile App", year: "2025", featured: true,
-    img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p3", titleKey: "portfolioPage.p3.t", clientKey: "portfolioPage.p3.c", category: "brand", tag: "Branding", year: "2024",
-    img: "https://images.unsplash.com/photo-1561070791-2526d30994b8?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p4", titleKey: "portfolioPage.p4.t", clientKey: "portfolioPage.p4.c", category: "social", tag: "Social Media", year: "2025",
-    img: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p5", titleKey: "portfolioPage.p5.t", clientKey: "portfolioPage.p5.c", category: "web", tag: "SaaS", year: "2024",
-    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p6", titleKey: "portfolioPage.p6.t", clientKey: "portfolioPage.p6.c", category: "marketing", tag: "Performance", year: "2025",
-    img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p7", titleKey: "portfolioPage.p7.t", clientKey: "portfolioPage.p7.c", category: "apps", tag: "Mobile App", year: "2024",
-    img: "https://images.unsplash.com/photo-1517292987719-0369a794ec0f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p8", titleKey: "portfolioPage.p8.t", clientKey: "portfolioPage.p8.c", category: "brand", tag: "Branding", year: "2024",
-    img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p9", titleKey: "portfolioPage.p9.t", clientKey: "portfolioPage.p9.c", category: "social", tag: "Content", year: "2025",
-    img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p10", titleKey: "portfolioPage.p10.t", clientKey: "portfolioPage.p10.c", category: "web", tag: "EdTech", year: "2024",
-    img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p11", titleKey: "portfolioPage.p11.t", clientKey: "portfolioPage.p11.c", category: "marketing", tag: "Launch", year: "2025",
-    img: "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=1200&auto=format&fit=crop&q=80" },
-  { id: "p12", titleKey: "portfolioPage.p12.t", clientKey: "portfolioPage.p12.c", category: "apps", tag: "Health", year: "2024",
-    img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=1200&auto=format&fit=crop&q=80" },
-];
+};
+
+const arCategoryToKey: Record<string, Exclude<CatKey, "all">> = {
+  "ويب": "web",
+  "تطبيقات موبايل": "apps",
+  "هوية بصرية": "brand",
+  "تصميم واجهات": "brand",
+  "سوشيال ميديا": "social",
+  "تسويق": "marketing",
+  "فيديو": "social",
+  "أخرى": "web",
+};
+
+function mapApiItem(it: any, lang: "ar" | "en"): Project {
+  const rawCat: string = it.category ?? "";
+  const catKey = arCategoryToKey[rawCat] ?? "web";
+  return {
+    id: String(it.id ?? it._id ?? Math.random()),
+    title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
+    client: it.client ?? "",
+    category: catKey,
+    tag: rawCat || "Project",
+    img: it.cover || it.image || "",
+    year: it.year ?? String(new Date().getFullYear()),
+    featured: !!it.featured,
+  };
+}
 
 const categoryIcons: Record<Exclude<CatKey, "all">, typeof Layout> = {
   web: Layout,
@@ -77,11 +79,28 @@ const categoryIcons: Record<Exclude<CatKey, "all">, typeof Layout> = {
 };
 
 function PortfolioPage() {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const [activeCat, setActiveCat] = useState<CatKey>("all");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    publicApi.getPortfolio()
+      .then((res: any) => {
+        if (cancelled) return;
+        const items = res?.data?.items ?? res?.items ?? [];
+        setProjects(items.map((it: any) => mapApiItem(it, lang)));
+      })
+      .catch(() => { if (!cancelled) setProjects([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [lang]);
+
   const filtered = useMemo(
     () => (activeCat === "all" ? projects : projects.filter((p) => p.category === activeCat)),
-    [activeCat],
+    [activeCat, projects],
   );
 
   const stats = [
@@ -188,7 +207,7 @@ function PortfolioPage() {
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
                 const CatIcon = categoryIcons[p.category];
-                const projectTitle = t(p.titleKey);
+                const projectTitle = p.title;
                 const catLabel = t(`portfolioPage.cat.${p.category}` as TKey);
                 return (
                   <article
@@ -234,7 +253,7 @@ function PortfolioPage() {
                       <h3 className="mt-2 text-base font-bold text-foreground transition group-hover:text-primary">
                         {projectTitle}
                       </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {t(p.clientKey)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {p.client}</p>
                     </div>
                   </article>
                 );
