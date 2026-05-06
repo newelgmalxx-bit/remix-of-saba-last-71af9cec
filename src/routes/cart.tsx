@@ -131,6 +131,14 @@ function CartPage() {
                   <h3 className="text-lg font-bold">{t("cart.summaryTitle")}</h3>
                   <div className="mt-4 space-y-3 text-sm">
                     <Row label={t("cart.subtotal")} value={formatCurrency(subtotal)} />
+                    {coupon && discount > 0 && (
+                      <div className="flex items-center justify-between text-emerald-600">
+                        <span className="flex items-center gap-1">
+                          {L("خصم", "Discount")} ({coupon.code})
+                        </span>
+                        <span data-ltr-number>− {formatCurrency(discount)}</span>
+                      </div>
+                    )}
                     <Row label={t("cart.vat")} value={formatCurrency(vat)} />
                     <div className="my-2 h-px bg-border" />
                     <div className="flex items-center justify-between text-base font-bold">
@@ -143,23 +151,41 @@ function CartPage() {
                     <label className="mb-2 flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                       <Tag className="h-3.5 w-3.5" /> {t("cart.coupon")}
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        value={coupon}
-                        onChange={(e) => setCoupon(e.target.value)}
-                        placeholder={t("cart.couponPh")}
-                        className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                      />
-                      <button
-                        onClick={applyCoupon}
-                        className="rounded-lg border border-border bg-secondary px-4 text-sm font-bold hover:bg-accent"
-                      >
-                        {t("cart.apply")}
-                      </button>
-                    </div>
+                    {coupon ? (
+                      <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
+                        <span className="font-bold text-emerald-700" dir="ltr">{coupon.code}</span>
+                        <button
+                          type="button"
+                          onClick={() => { removeCoupon(); setCouponMsg(null); }}
+                          className="rounded-md p-1 text-emerald-700 hover:bg-emerald-100"
+                          aria-label={L("إزالة الكوبون", "Remove coupon")}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          value={code}
+                          onChange={(e) => setCode(e.target.value.toUpperCase())}
+                          onKeyDown={(e) => { if (e.key === "Enter") handleApply(); }}
+                          placeholder={t("cart.couponPh")}
+                          dir="ltr"
+                          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApply}
+                          disabled={applying || !code.trim()}
+                          className="rounded-lg border border-border bg-secondary px-4 text-sm font-bold hover:bg-accent disabled:opacity-50"
+                        >
+                          {applying ? "…" : t("cart.apply")}
+                        </button>
+                      </div>
+                    )}
                     {couponMsg && (
-                      <p className={`mt-2 text-xs ${couponMsg === t("cart.couponOk") ? "text-emerald-600" : "text-rose-500"}`}>
-                        {couponMsg}
+                      <p className={`mt-2 text-xs ${couponMsg.type === "ok" ? "text-emerald-600" : "text-rose-500"}`}>
+                        {couponMsg.text}
                       </p>
                     )}
                   </div>
