@@ -30,7 +30,7 @@ async function refreshRemoteServices() {
         subtitle: s.subtitleAr || cur.subtitle,
         subtitleEn: s.subtitleEn || cur.subtitleEn,
         category: s.category || cur.category,
-        bannerImage: s.cover || cur.bannerImage,
+        bannerImage: (s as any).bannerImage || s.cover || cur.bannerImage,
         price: amount != null ? String(amount) : cur.price,
         originalPrice: originalAmount != null ? String(originalAmount) : cur.originalPrice,
         discountPercent: discountPercent != null ? Number(discountPercent) : cur.discountPercent,
