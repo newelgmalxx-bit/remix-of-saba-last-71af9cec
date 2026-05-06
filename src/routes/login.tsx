@@ -69,7 +69,7 @@ function LoginPage() {
         <LangSwitch lang={lang} onClick={toggle} />
       </div>
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
-        <div className="order-2 lg:order-1 contents lg:block">
+        <div className="order-2 lg:order-1">
           <AuthHero />
         </div>
 
