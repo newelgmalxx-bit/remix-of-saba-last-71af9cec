@@ -5,9 +5,10 @@ import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/lib/api";
+import api, { ApiError, setToken } from "@/lib/api";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 
 function LoginPage() {
   const [tab, setTab] = useState<"email" | "phone">("phone");
@@ -16,7 +17,7 @@ function LoginPage() {
   const { t, dir, lang, toggle } = useLang();
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading, refresh } = useAuth();
 
   useEffect(() => {
     if (loading) return;
@@ -169,6 +170,33 @@ function LoginPage() {
               <SocialBtn provider="microsoft" />
               <SocialBtn provider="apple" />
               <SocialBtn provider="google" />
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  const idToken = credentialResponse.credential;
+                  if (!idToken) {
+                    toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
+                    return;
+                  }
+                  try {
+                    const { user, token } = await api.auth.oauthGoogle(idToken);
+                    setToken(token);
+                    await refresh();
+                    toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
+                    const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
+                    navigate({ to: isAdmin ? "/admin" : "/account" });
+                  } catch (err) {
+                    const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
+                    toast.error(msg);
+                  }
+                }}
+                onError={() => {
+                  toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
+                }}
+                useOneTap={false}
+              />
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">

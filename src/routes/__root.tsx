@@ -4,6 +4,10 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID =
+  "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
 
 function NotFoundComponent() {
   return (
@@ -79,11 +83,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <Outlet />
-        <Toaster position="top-center" richColors closeButton />
-      </AuthProvider>
-    </LanguageProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <LanguageProvider>
+        <AuthProvider>
+          <Outlet />
+          <Toaster position="top-center" richColors closeButton />
+        </AuthProvider>
+      </LanguageProvider>
+    </GoogleOAuthProvider>
   );
 }
