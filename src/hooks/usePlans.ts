@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { admin as adminApi } from "@/lib/api";
+import type { Plan as ApiPlan } from "@/lib/api/types";
 
 export type Plan = {
   id: string;
@@ -73,11 +75,49 @@ function write(plans: Plan[]) {
   window.dispatchEvent(new Event("saba:plans"));
 }
 
+function fromApi(p: ApiPlan): Plan {
+  return {
+    id: p.id,
+    name: p.nameAr || p.nameEn || "",
+    nameEn: p.nameEn || p.nameAr || "",
+    price: String(p.price ?? ""),
+    featured: !!p.highlighted,
+    feats: Array.isArray(p.featuresAr) && p.featuresAr.length ? p.featuresAr : (p.features || []),
+    featsEn: Array.isArray(p.featuresEn) && p.featuresEn.length ? p.featuresEn : (p.features || []),
+  };
+}
+
+function toApi(p: Plan, idx: number): Partial<ApiPlan> {
+  return {
+    id: p.id,
+    nameAr: p.name,
+    nameEn: p.nameEn || p.name,
+    price: parseInt((p.price || "").replace(/[^\d]/g, ""), 10) || 0,
+    featuresAr: p.feats,
+    featuresEn: p.featsEn ?? p.feats,
+    features: p.feats,
+    highlighted: p.featured,
+    sortOrder: idx,
+    status: "active",
+  };
+}
+
 export function usePlans() {
   const [plans, setPlans] = useState<Plan[]>(defaultPlans);
 
   useEffect(() => {
     setPlans(read());
+    // try to refresh from backend
+    (async () => {
+      try {
+        const res = await adminApi.plans.list();
+        if (res?.items?.length) {
+          const mapped = res.items.map(fromApi);
+          write(mapped);
+          setPlans(mapped);
+        }
+      } catch {}
+    })();
     const fn = () => setPlans(read());
     window.addEventListener("saba:plans", fn);
     window.addEventListener("storage", fn);
@@ -90,6 +130,13 @@ export function usePlans() {
   const save = useCallback((next: Plan[]) => {
     write(next);
     setPlans(next);
+    (async () => {
+      try {
+        await Promise.all(next.map((p, i) => adminApi.plans.update(p.id, toApi(p, i) as any).catch(async () => {
+          await adminApi.plans.create(toApi(p, i) as any);
+        })));
+      } catch {}
+    })();
   }, []);
 
   const reset = useCallback(() => {
