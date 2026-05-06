@@ -1,5 +1,12 @@
 import { request, getToken, BASE } from './client';
 import type { ServiceFull, Plan, Order, ApiResponse, PaginatedResponse } from './types';
+import {
+  listCoupons,
+  createCouponFn,
+  updateCouponFn,
+  deleteCouponFn,
+  toggleCouponFn,
+} from '@/server/coupons.functions';
 
 export const admin = {
   getServices: (p?: any) => {
@@ -84,9 +91,12 @@ export const admin = {
   getSiteSettings: () => request('/admin/site/settings'),
   updateSiteSettings: (body: any) => request('/admin/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
 
-  getCoupons: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/coupons${q ? '?' + q : ''}`); },
-  createCoupon: (body: any) => request('/admin/coupons', { method: 'POST', body: JSON.stringify(body) }),
-  updateCoupon: (id: string, body: any) => request(`/admin/coupons/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  deleteCoupon: (id: string) => request(`/admin/coupons/${id}`, { method: 'DELETE' }),
-  toggleCouponStatus: (id: string, active: boolean) => request(`/admin/coupons/${id}/status`, { method: 'PATCH', body: JSON.stringify({ active }) }),
+  getCoupons: async (_p?: any) => {
+    const res = await listCoupons();
+    return { data: { items: res.items } } as any;
+  },
+  createCoupon: (body: any) => createCouponFn({ data: body }) as any,
+  updateCoupon: (id: string, body: any) => updateCouponFn({ data: { id, ...body } }) as any,
+  deleteCoupon: (id: string) => deleteCouponFn({ data: { id } }) as any,
+  toggleCouponStatus: (id: string, active: boolean) => toggleCouponFn({ data: { id, active } }) as any,
 };
