@@ -1,17 +1,16 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Send, Paperclip, LifeBuoy, Package } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Send, Paperclip, LifeBuoy, Package, Loader2 } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
-import { mockTickets, mockOrders, mockUser, type Ticket, type TicketMessage } from "@/data/account";
+import type { Ticket, TicketMessage } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
+import { account } from "@/lib/api";
+import { normalizeTicket } from "@/lib/api/normalize";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/account/tickets/$ticketId")({
   head: () => ({ meta: [{ title: "تذكرة دعم | سابا ديزاين" }] }),
-  loader: ({ params }) => {
-    const ticket = mockTickets.find((t) => t.id === params.ticketId);
-    if (!ticket) throw notFound();
-    return { ticket };
-  },
   notFoundComponent: NotFoundTicket,
   errorComponent: ({ error }) => <ErrorTicket message={error.message} />,
   component: TicketDetail,
@@ -39,37 +38,68 @@ function ErrorTicket({ message }: { message: string }) {
 
 function TicketDetail() {
   const { t, lang, dir } = useLang();
-  const { ticket: initial } = Route.useLoaderData() as { ticket: Ticket };
-  const [messages, setMessages] = useState<TicketMessage[]>(initial.messages);
+  const { ticketId } = Route.useParams();
+  const { user } = useAuth();
+  const [initial, setInitial] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [text, setText] = useState("");
 
-  const order = initial.orderId ? mockOrders.find((o) => o.id === initial.orderId) : null;
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    account.getTicket(ticketId)
+      .then((tk) => {
+        if (!alive) return;
+        const norm = normalizeTicket(tk);
+        setInitial(norm);
+        setMessages(norm.messages);
+      })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [ticketId]);
 
-  const send = () => {
-    if (!text.trim()) return;
-    const newMsg: TicketMessage = {
+  const send = async () => {
+    if (!text.trim() || !initial) return;
+    const body = text.trim();
+    const optimistic: TicketMessage = {
       id: `m_${Date.now()}`,
       from: "client",
-      author: mockUser.name.split(" ")[0],
-      text: text.trim(),
+      author: (user?.name || "You").split(" ")[0],
+      text: body,
       at: new Date().toLocaleString(lang === "en" ? "en-US" : "ar-SA"),
     };
-    setMessages((m) => [...m, newMsg]);
+    setMessages((m) => [...m, optimistic]);
     setText("");
-    // simulate support reply
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: `m_${Date.now()}`,
-          from: "support",
-          author: t("account.ticket.supportTeam"),
-          text: t("account.ticket.supportReply"),
-          at: new Date().toLocaleString(lang === "en" ? "en-US" : "ar-SA"),
-        },
-      ]);
-    }, 1400);
+    setSending(true);
+    try {
+      const fresh = await account.getTicket(initial.id);
+      await account.replyTicket(initial.id, body);
+      const reloaded = await account.getTicket(initial.id);
+      const norm = normalizeTicket(reloaded);
+      setMessages(norm.messages);
+      void fresh;
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to send");
+    } finally {
+      setSending(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <AccountLayout title={t("account.ticket.conversation")}>
+        <div className="rounded-2xl border border-border bg-card p-10 text-center">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </AccountLayout>
+    );
+  }
+  if (!initial) return <NotFoundTicket />;
+
+  const order = initial.orderId ? { id: initial.orderId, number: `#${initial.orderId}` } : null;
 
   const ChevBack = dir === "rtl" ? ChevronLeft : ChevronRight;
   const ChevFwd = dir === "rtl" ? ChevronLeft : ChevronRight;
@@ -151,7 +181,7 @@ function TicketDetail() {
                 </button>
                 <button
                   onClick={send}
-                  disabled={!text.trim()}
+                  disabled={!text.trim() || sending}
                   className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-40"
                 >
                   <Send className="h-4 w-4" />
