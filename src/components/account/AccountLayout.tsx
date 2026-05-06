@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Package,
@@ -9,9 +9,11 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { mockUser } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { toast } from "sonner";
 
 const nav: { to: string; key: TKey; icon: any; exact: boolean }[] = [
   { to: "/account", key: "account.nav.overview", icon: LayoutDashboard, exact: true },
@@ -24,7 +26,16 @@ const nav: { to: string; key: TKey; icon: any; exact: boolean }[] = [
 export function AccountLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle?: string }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { t, dir } = useLang();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const initial = (user?.name || "?").trim().charAt(0).toUpperCase();
+  async function handleLogout() {
+    await logout();
+    toast.success(t("account.nav.logout"));
+    navigate({ to: "/" });
+  }
   return (
+    <AuthGuard>
     <div className="flex min-h-screen flex-col bg-muted/30">
       <SiteHeader />
       <main className="flex-1">
@@ -41,11 +52,11 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
               </div>
               <div className="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur-md px-4 py-3 border border-white/20">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary font-bold text-lg">
-                  {mockUser.avatar}
+                  {initial}
                 </div>
                 <div className={dir === "rtl" ? "text-right" : "text-left"}>
-                  <div className="text-sm font-bold">{mockUser.name}</div>
-                  <div className="text-xs text-white/75">{mockUser.email}</div>
+                  <div className="text-sm font-bold">{user?.name || ""}</div>
+                  <div className="text-xs text-white/75">{user?.email || ""}</div>
                 </div>
               </div>
             </div>
@@ -74,13 +85,13 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
                   );
                 })}
                 <div className="my-2 h-px bg-border" />
-                <Link
-                  to={"/" as any}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition"
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>{t("account.nav.logout")}</span>
-                </Link>
+                </button>
               </nav>
             </aside>
 
@@ -91,6 +102,7 @@ export function AccountLayout({ children, title, subtitle }: { children: React.R
       </main>
       <SiteFooter />
     </div>
+    </AuthGuard>
   );
 }
 
