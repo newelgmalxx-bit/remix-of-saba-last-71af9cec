@@ -46,7 +46,6 @@ function ServiceDetailPage() {
   const { plans } = usePlans();
   const { add } = useCart();
   const navigate = useNavigate();
-  const [activeImg, setActiveImg] = useState(0);
   const { fav, toggle: toggleFav } = useFavorite(slug);
   const { isAuthenticated } = useAuth();
   const { reviews, summary, addReview } = useServiceReviews(slug);
@@ -129,7 +128,6 @@ function ServiceDetailPage() {
   const displayPrice = svcPriceStr ?? startingPlan?.price ?? "—";
   const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
   const heroImg = service.bannerImage || servicesHero;
-  const gallery = [heroImg, servicesHero, heroImg, servicesHero];
   const handleAddToCart = () => {
     add({ serviceSlug: slug, serviceTitle: title, planName: "—", price: startingPrice });
     toast.success(t("svcDetail.toast.added"), { description: title });
@@ -157,22 +155,9 @@ function ServiceDetailPage() {
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:px-8">
             <div className="order-1">
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/60 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)]">
-                <img src={gallery[activeImg]} alt={title} className="h-full w-full object-cover transition duration-500" />
+                <img src={heroImg} alt={title} className="h-full w-full object-cover transition duration-500" />
                 <span className={`absolute top-4 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white shadow ${dir === "rtl" ? "right-4" : "left-4"}`}>{t("svcDetail.badge.available")}</span>
                 <span className={`absolute top-4 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary shadow ${dir === "rtl" ? "left-4" : "right-4"}`}>{breadcrumb}</span>
-              </div>
-              <div className="mt-3 grid grid-cols-4 gap-2.5">
-                {gallery.map((g, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImg(i)}
-                    className={`relative aspect-[4/3] overflow-hidden rounded-xl border bg-white transition ${
-                      activeImg === i ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/40"
-                    }`}
-                  >
-                    <img src={g} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
               </div>
             </div>
 
