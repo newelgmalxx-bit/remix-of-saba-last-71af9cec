@@ -1,8 +1,41 @@
-import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Clock3, Sparkles, Send } from "lucide-react";
+import { useState } from "react";
+import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Clock3, Sparkles, Send, Loader2 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
+import { contact as contactApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export function ContactSection() {
   const { t, dir } = useLang();
+  const [form, setForm] = useState({ name: "", phone: "", email: "", service: "", budget: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  const update = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.message) {
+      toast.error(t("contactForm.field.details"));
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const subject = [form.service, form.budget].filter(Boolean).join(" • ");
+      await contactApi.send({
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        subject: subject || undefined,
+        message: form.message,
+      });
+      toast.success(t("contactForm.submit"));
+      setForm({ name: "", phone: "", email: "", service: "", budget: "", message: "" });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section className="bg-background pb-24 pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -62,7 +95,7 @@ export function ContactSection() {
           </div>
 
           {/* Form — left in RTL */}
-          <form className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8 lg:col-span-3">
+          <form onSubmit={submit} className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8 lg:col-span-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground">{t("contactForm.form.title")}</h3>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary">
@@ -74,13 +107,13 @@ export function ContactSection() {
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Field label={t("contactForm.field.name")} placeholder={t("contactForm.field.namePh")} required />
-              <Field label={t("contactForm.field.phone")} placeholder="+966 5x xxx xxxx" required type="tel" dir="ltr" />
+              <Field label={t("contactForm.field.name")} placeholder={t("contactForm.field.namePh")} required value={form.name} onChange={(v) => update("name", v)} />
+              <Field label={t("contactForm.field.phone")} placeholder="+966 5x xxx xxxx" required type="tel" dir="ltr" value={form.phone} onChange={(v) => update("phone", v)} />
               <div className="sm:col-span-2">
-                <Field label={t("contactForm.field.email")} type="email" placeholder="name@example.com" required />
+                <Field label={t("contactForm.field.email")} type="email" placeholder="name@example.com" required value={form.email} onChange={(v) => update("email", v)} />
               </div>
-              <Select label={t("contactForm.field.service")} placeholder={t("contactForm.field.servicePh")} options={[t("contactForm.opt.web"), t("contactForm.opt.app"), t("contactForm.opt.store"), t("contactForm.opt.brand")]} required />
-              <Select label={t("contactForm.field.budget")} placeholder={t("contactForm.field.budgetPh")} options={[t("contactForm.budget.lt10k"), t("contactForm.budget.10_30k"), t("contactForm.budget.30_80k"), t("contactForm.budget.gt80k")]} required />
+              <Select label={t("contactForm.field.service")} placeholder={t("contactForm.field.servicePh")} options={[t("contactForm.opt.web"), t("contactForm.opt.app"), t("contactForm.opt.store"), t("contactForm.opt.brand")]} required value={form.service} onChange={(v) => update("service", v)} />
+              <Select label={t("contactForm.field.budget")} placeholder={t("contactForm.field.budgetPh")} options={[t("contactForm.budget.lt10k"), t("contactForm.budget.10_30k"), t("contactForm.budget.30_80k"), t("contactForm.budget.gt80k")]} required value={form.budget} onChange={(v) => update("budget", v)} />
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-xs font-semibold text-foreground">
                   {t("contactForm.field.details")} <span className="text-destructive">*</span>
@@ -88,6 +121,8 @@ export function ContactSection() {
                 <textarea
                   rows={5}
                   placeholder={t("contactForm.field.detailsPh")}
+                  value={form.message}
+                  onChange={(e) => update("message", e.target.value)}
                   className="w-full resize-none rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15"
                 />
               </div>
@@ -95,10 +130,11 @@ export function ContactSection() {
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
-                type="button"
+                type="submit"
+                disabled={submitting}
                 className="group inline-flex h-11 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_-10px_rgba(30,91,148,0.6)] transition-all hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-10px_rgba(30,91,148,0.7)]"
               >
-                <Send className={`h-4 w-4 transition-transform group-hover:-translate-x-1 ${dir === "ltr" ? "rotate-180" : ""}`} />
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className={`h-4 w-4 transition-transform group-hover:-translate-x-1 ${dir === "ltr" ? "rotate-180" : ""}`} />}
                 {t("contactForm.submit")}
               </button>
               <span className="text-xs text-muted-foreground">
@@ -113,7 +149,7 @@ export function ContactSection() {
   );
 }
 
-function Field({ label, type = "text", placeholder, required, dir }: { label: string; type?: string; placeholder?: string; required?: boolean; dir?: "ltr" | "rtl" }) {
+function Field({ label, type = "text", placeholder, required, dir, value, onChange }: { label: string; type?: string; placeholder?: string; required?: boolean; dir?: "ltr" | "rtl"; value?: string; onChange?: (v: string) => void }) {
   return (
     <div>
       <label className="mb-2 block text-xs font-semibold text-foreground">
@@ -123,19 +159,21 @@ function Field({ label, type = "text", placeholder, required, dir }: { label: st
         type={type}
         placeholder={placeholder}
         dir={dir}
+        value={value ?? ""}
+        onChange={(e) => onChange?.(e.target.value)}
         className={`w-full rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 ${dir === "ltr" ? "text-left placeholder:text-left" : ""}`}
       />
     </div>
   );
 }
 
-function Select({ label, placeholder, options, required }: { label: string; placeholder: string; options: string[]; required?: boolean }) {
+function Select({ label, placeholder, options, required, value, onChange }: { label: string; placeholder: string; options: string[]; required?: boolean; value?: string; onChange?: (v: string) => void }) {
   return (
     <div>
       <label className="mb-2 block text-xs font-semibold text-foreground">
         {label} {required && <span className="text-destructive">*</span>}
       </label>
-      <select defaultValue="" className="w-full rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15">
+      <select value={value ?? ""} onChange={(e) => onChange?.(e.target.value)} className="w-full rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15">
         <option value="" disabled>{placeholder}</option>
         {options.map((o) => (
           <option key={o}>{o}</option>
