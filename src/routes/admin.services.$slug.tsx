@@ -221,11 +221,18 @@ function ServiceEditorPage() {
             <div className="md:col-span-2">
               <Field label="صورة البنر (Hero)">
                 <div className="space-y-2">
-                  <input type="url" placeholder="https://..." className={inputCls} value={bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
-                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
-                    const f = e.target.files?.[0]; if (!f) return;
-                    setBannerImage(await uploadImage(f));
-                  }} />
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
+                      رفع من الجهاز
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const f = e.target.files?.[0]; if (!f) return;
+                        const url = await uploadImage(f);
+                        setBannerImage(url);
+                      }} />
+                    </label>
+                    <input type="text" placeholder="أو ألصق رابط https://..." className={`${inputCls} flex-1 min-w-[200px]`} value={bannerImage.startsWith("data:") ? "" : bannerImage} onChange={(e) => setBannerImage(e.target.value)} />
+                    {bannerImage && <button type="button" onClick={() => setBannerImage("")} className="text-xs text-rose-600 font-bold">حذف</button>}
+                  </div>
                   {bannerImage && <img src={bannerImage} alt="banner preview" className="h-32 w-full object-cover rounded-xl border border-border" />}
                 </div>
               </Field>
@@ -244,11 +251,17 @@ function ServiceEditorPage() {
             <div className="md:col-span-2">
               <Field label="صورة المشاركة (Open Graph)">
                 <div className="space-y-2">
-                  <input type="url" placeholder="https://..." className={inputCls} value={seo.ogImage} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })} />
-                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
-                    const f = e.target.files?.[0]; if (!f) return;
-                    setSeo({ ...seo, ogImage: await uploadImage(f) });
-                  }} />
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 text-xs font-bold text-primary cursor-pointer hover:bg-primary/10">
+                      رفع من الجهاز
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const f = e.target.files?.[0]; if (!f) return;
+                        const url = await uploadImage(f);
+                        setSeo((prev) => ({ ...prev, ogImage: url }));
+                      }} />
+                    </label>
+                    <input type="text" placeholder="أو ألصق رابط https://..." className={`${inputCls} flex-1 min-w-[200px]`} value={(seo.ogImage || "").startsWith("data:") ? "" : (seo.ogImage || "")} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })} />
+                  </div>
                   {seo.ogImage && <img src={seo.ogImage} alt="og preview" className="h-28 w-full object-cover rounded-xl border border-border" />}
                 </div>
               </Field>
