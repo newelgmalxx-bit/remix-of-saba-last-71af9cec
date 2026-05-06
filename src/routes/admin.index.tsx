@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
-import { adminStats, monthlyRevenue, salesByCategory, adminBookings, bookingStatusMap, fmtSAR } from "@/data/admin";
+import { bookingStatusMap, fmtSAR } from "@/data/admin";
 import { useEffect, useState } from "react";
 import { admin as adminApi, ApiError } from "@/lib/api";
 import {
@@ -18,15 +18,20 @@ export const Route = createFileRoute("/admin/")({
 function AdminDashboard() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [stats, setStats] = useState(adminStats);
-  const [revenue, setRevenue] = useState(monthlyRevenue);
-  const [byCat, setByCat] = useState(salesByCategory);
-  const [bookings, setBookings] = useState(adminBookings);
+  const emptyStats = {
+    revenue: 0, revenueGrowth: 0, ordersCount: 0, monthlyTarget: 0, remaining: 0,
+    totalServices: 0, activeServices: 0, totalBookings: 0, totalClients: 0, vipClients: 0,
+  } as any;
+  const [stats, setStats] = useState<any>(emptyStats);
+  const [revenue, setRevenue] = useState<any[]>([]);
+  const [byCat, setByCat] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [activity, setActivity] = useState<{ icon: any; text: string; time: string }[]>([]);
 
   useEffect(() => {
     adminApi.stats()
       .then((d) => {
-        setStats((s) => ({ ...s, ...d }));
+        setStats((s: any) => ({ ...s, ...d }));
         if (Array.isArray((d as any).monthlyRevenue) && (d as any).monthlyRevenue.length) setRevenue((d as any).monthlyRevenue);
         if (Array.isArray((d as any).salesByCategory) && (d as any).salesByCategory.length) {
           const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
@@ -42,9 +47,19 @@ function AdminDashboard() {
           total: Number(b.total) || 0, payment: b.payment, status: b.status,
           date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
         }));
-        if (items.length) setBookings(items as any);
+        setBookings(items as any);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setBookings([]));
+    adminApi.notifications.list(5)
+      .then((d: any) => {
+        const list = d?.items ?? d ?? [];
+        setActivity(list.map((n: any) => ({
+          icon: Bell,
+          text: n.title || n.message || n.text || "",
+          time: (n.createdAt || n.created_at || "").slice(0, 16).replace("T", " "),
+        })));
+      })
+      .catch(() => setActivity([]));
   }, []);
 
   const periods = [
@@ -97,7 +112,7 @@ function AdminDashboard() {
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="white" strokeWidth="3" strokeDasharray="78,100" strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold">78%</div>
+                <div className="text-2xl font-bold">{stats.monthlyTarget ? Math.min(100, Math.round((stats.revenue / stats.monthlyTarget) * 100)) : 0}%</div>
                 <div className="text-[10px] text-white/75">{L("من الهدف", "of target")}</div>
               </div>
             </div>
@@ -113,16 +128,19 @@ function AdminDashboard() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(stats.revenue)} hint="↑ +12.5%" icon={DollarSign} accent="primary" />
-        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.totalBookings} hint="↑ +8.2%" icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={stats.totalClients} hint="↑ +23.1%" icon={Users} accent="emerald" />
-        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} hint={L("من أصل 12", "of 12")} icon={Package} accent="amber" />
+        <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(stats.revenue)} icon={DollarSign} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.totalBookings} icon={ShoppingCart} accent="violet" />
+        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={stats.totalClients} icon={Users} accent="emerald" />
+        <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} icon={Package} accent="amber" />
       </div>
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
         <PanelCard title={L("نظرة عامة على الإيرادات", "Revenue Overview")} subtitle={L("الأداء الشهري", "Monthly performance")} className="lg:col-span-2">
           <div className="h-72">
+            {filteredRevenue.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
+            ) : (
             <ResponsiveContainer>
               <AreaChart data={filteredRevenue}>
                 <defs>
@@ -138,11 +156,15 @@ function AdminDashboard() {
                 <Area type="monotone" dataKey="v" stroke="#1E5B94" strokeWidth={2.5} fill="url(#rev)" />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
         </PanelCard>
 
         <PanelCard title={L("المبيعات حسب التصنيف", "Sales by Category")} subtitle={L("توزيع الخدمات", "Service distribution")}>
           <div className="h-44">
+            {byCat.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">{L("لا توجد بيانات", "No data")}</div>
+            ) : (
             <ResponsiveContainer>
               <PieChart>
                 <Pie data={byCat} dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={3}>
@@ -150,6 +172,7 @@ function AdminDashboard() {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
+            )}
           </div>
           <ul className="mt-3 space-y-1.5">
             {byCat.map((s) => (
@@ -179,6 +202,9 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
+                {bookings.length === 0 && (
+                  <tr><td colSpan={4} className="px-3 py-6 text-center text-xs text-muted-foreground">{L("لا توجد طلبات بعد", "No orders yet")}</td></tr>
+                )}
                 {bookings.slice(0, 5).map((b) => {
                   const s = bookingStatusMap[b.status as keyof typeof bookingStatusMap] ?? { tone: "primary" as const, label: b.status };
                   return (
@@ -197,13 +223,10 @@ function AdminDashboard() {
 
         <PanelCard title={L("آخر الأنشطة", "Recent Activity")}>
           <ul className="space-y-3 text-sm">
-            {[
-              { icon: ShoppingCart, text: L("حجز جديد #SD-1024", "New booking #SD-1024"), time: L("قبل 2 د", "2m ago") },
-              { icon: DollarSign, text: L("تأكيد دفع 4,025 ر.س", "Payment confirmed 4,025 SAR"), time: L("قبل 15 د", "15m ago") },
-              { icon: Users, text: L("تسجيل عميل جديد: ريم الشهري", "New client signup: Reem Al Shehri"), time: L("قبل ساعة", "1h ago") },
-              { icon: Package, text: L("تحديث خدمة تصميم المواقع", "Web design service updated"), time: L("قبل 3 س", "3h ago") },
-              { icon: Bell, text: L("تنبيه: فاتورة معلقة", "Alert: pending invoice"), time: L("قبل 5 س", "5h ago") },
-            ].map((a, i) => {
+            {activity.length === 0 && (
+              <li className="text-xs text-muted-foreground text-center py-4">{L("لا توجد أنشطة بعد", "No activity yet")}</li>
+            )}
+            {activity.map((a, i) => {
               const I = a.icon;
               return (
                 <li key={i} className="flex items-start gap-3">

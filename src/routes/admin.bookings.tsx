@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
+import { bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -25,7 +25,7 @@ function BookingsPage() {
     completed: L("مكتمل", "Completed"),
     cancelled: L("ملغي", "Cancelled"),
   };
-  const [bookings, setBookings] = useState<AdminBooking[]>(initialBookings);
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<"7" | "30" | "90" | "all">("all");
@@ -43,9 +43,9 @@ function BookingsPage() {
           total: Number(b.total) || 0, payment: b.payment, status: b.status,
           date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
         })) as AdminBooking[];
-        if (items.length) setBookings(items);
+        setBookings(items);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setBookings([]));
   }, []);
 
   // crude period filter using index (mock data shares similar dates)
@@ -104,10 +104,10 @@ function BookingsPage() {
       </div>
     }>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("إجمالي الطلبات", "Total orders")} value={bookings.length} hint="↑ +8.2%" icon={CalendarCheck} accent="primary" />
+        <StatCard label={L("إجمالي الطلبات", "Total orders")} value={bookings.length} icon={CalendarCheck} accent="primary" />
         <StatCard label={L("بانتظار التأكيد", "Pending")} value={bookings.filter(b => b.status === "pending").length} icon={Clock} accent="amber" />
         <StatCard label={L("قيد التنفيذ", "In progress")} value={bookings.filter(b => b.status === "in_progress").length} icon={Loader2} accent="violet" />
-        <StatCard label={L("مكتملة", "Completed")} value={bookings.filter(b => b.status === "completed").length} hint="↑ +12.5%" icon={CheckCircle2} accent="emerald" />
+        <StatCard label={L("مكتملة", "Completed")} value={bookings.filter(b => b.status === "completed").length} icon={CheckCircle2} accent="emerald" />
       </div>
 
       <PanelCard>

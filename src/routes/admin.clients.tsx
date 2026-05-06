@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2, Phone, MapPin, Calendar, Globe } from "lucide-react";
 import { useEffect, useState } from "react";
-import { adminClients as initialClients, fmtSAR, type AdminClient } from "@/data/admin";
+import { fmtSAR, type AdminClient } from "@/data/admin";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -14,17 +14,6 @@ export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "العملاء | لوحة التحكم" }] }),
   component: ClientsPage,
 });
-
-const growthAr = [
-  { m: "يون", n: 4, r: 8 }, { m: "يول", n: 6, r: 10 }, { m: "أغس", n: 7, r: 12 },
-  { m: "سبت", n: 9, r: 15 }, { m: "أكت", n: 11, r: 18 }, { m: "نوف", n: 10, r: 22 },
-  { m: "ديس", n: 14, r: 25 }, { m: "ينا", n: 12, r: 28 }, { m: "فبر", n: 15, r: 32 },
-];
-const growthEn = [
-  { m: "Jun", n: 4, r: 8 }, { m: "Jul", n: 6, r: 10 }, { m: "Aug", n: 7, r: 12 },
-  { m: "Sep", n: 9, r: 15 }, { m: "Oct", n: 11, r: 18 }, { m: "Nov", n: 10, r: 22 },
-  { m: "Dec", n: 14, r: 25 }, { m: "Jan", n: 12, r: 28 }, { m: "Feb", n: 15, r: 32 },
-];
 
 type AddForm = { name: string; email: string; phone: string; city: string; region: string; language: string; address: string; segment: AdminClient["segment"]; notes: string };
 const emptyAdd: AddForm = { name: "", email: "", phone: "", city: "", region: "", language: "العربية", address: "", segment: "new", notes: "" };
@@ -38,7 +27,10 @@ function ClientsPage() {
     new: { l: L("جديد", "New"), t: "emerald" as const },
   };
 
-  const [clients, setClients] = useState<AdminClient[]>(initialClients);
+  const [clients, setClients] = useState<AdminClient[]>([]);
+  const [growthRate, setGrowthRate] = useState<string>("0%");
+  const [avgOrder, setAvgOrder] = useState<number>(0);
+  const [growthSeries, setGrowthSeries] = useState<{ m: string; n: number; r: number }[]>([]);
   const [tab, setTab] = useState<"all" | "vip" | "regular" | "new">("all");
   const [q, setQ] = useState("");
   const [addOpen, setAddOpen] = useState(false);
@@ -55,9 +47,15 @@ function ClientsPage() {
           joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
           city: c.city ?? undefined,
         }));
-        if (items.length) setClients(items);
+        setClients(items);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setClients([]));
+    adminApi.analytics().then((a: any) => {
+      if (!a) return;
+      setGrowthRate(`${a.growthRate ?? 0}%`);
+      setAvgOrder(Number(a.avgOrder) || 0);
+      if (Array.isArray(a.clientGrowth)) setGrowthSeries(a.clientGrowth);
+    }).catch(() => {});
   }, []);
 
   const filtered = clients.filter(c =>
@@ -97,14 +95,17 @@ function ClientsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard label={L("إجمالي العملاء", "Total Clients")} value={clients.length} icon={Users} accent="emerald" />
         <StatCard label={L("عملاء VIP", "VIP Clients")} value={clients.filter(c => c.segment === "vip").length} icon={Star} accent="amber" />
-        <StatCard label={L("معدل النمو", "Growth Rate")} value="+23.1%" icon={TrendingUp} accent="primary" />
-        <StatCard label={L("متوسط الطلب", "Avg. Order")} value={fmtSAR(1420)} icon={ShoppingBag} accent="violet" />
+        <StatCard label={L("معدل النمو", "Growth Rate")} value={growthRate} icon={TrendingUp} accent="primary" />
+        <StatCard label={L("متوسط الطلب", "Avg. Order")} value={fmtSAR(avgOrder)} icon={ShoppingBag} accent="violet" />
       </div>
 
       <PanelCard title={L("نمو العملاء", "Client Growth")} subtitle={L("جدد مقابل عائدين عبر الوقت", "New vs returning over time")} className="mb-6">
         <div className="h-64">
+          {growthSeries.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
+          ) : (
           <ResponsiveContainer>
-            <BarChart data={lang === "en" ? growthEn : growthAr}>
+            <BarChart data={growthSeries}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
               <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
               <YAxis stroke="#7c8aa0" fontSize={12} />
@@ -113,6 +114,7 @@ function ClientsPage() {
               <Bar dataKey="n" name={L("جدد", "New")} fill="#9bc4e8" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          )}
         </div>
       </PanelCard>
 

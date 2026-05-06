@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, GhostButton, PrimaryButton } from "@/components/admin/AdminLayout";
 import { FileText, CheckCircle2, Clock, XCircle, Search, Eye, Download, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { adminInvoices as initialInvoices, paymentMethods, fmtSAR, type AdminInvoice } from "@/data/admin";
+import { paymentMethods, fmtSAR, type AdminInvoice } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -22,7 +22,7 @@ function InvoicesPage() {
     void: { l: L("ملغاة", "Void"), t: "rose" as const },
   };
 
-  const [invoices, setInvoices] = useState<AdminInvoice[]>(initialInvoices);
+  const [invoices, setInvoices] = useState<AdminInvoice[]>([]);
   const [tab, setTab] = useState<"all" | "paid" | "pending" | "void">("all");
   const [q, setQ] = useState("");
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
@@ -43,9 +43,9 @@ function InvoicesPage() {
           amount: Number(i.total) || 0, status: i.status,
           issued: (i.created_at || "").slice(0, 10),
         }));
-        if (items.length) setInvoices(items);
+        setInvoices(items);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setInvoices([]));
   }, []);
 
   const filtered = invoices.filter(i =>
