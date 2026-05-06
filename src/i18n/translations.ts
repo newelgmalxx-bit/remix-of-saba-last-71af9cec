@@ -738,6 +738,7 @@ export const dict = {
   "account.client": { ar: "حساب العميل", en: "Client account" },
   "account.nav.overview": { ar: "نظرة عامة", en: "Overview" },
   "account.nav.orders": { ar: "طلباتي", en: "My Orders" },
+  "account.nav.favorites": { ar: "المفضلة", en: "Favorites" },
   "account.nav.tickets": { ar: "الدعم والتذاكر", en: "Support & Tickets" },
   "account.nav.cart": { ar: "السلة", en: "Cart" },
   "account.nav.profile": { ar: "الملف الشخصي", en: "Profile" },

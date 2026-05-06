@@ -6,6 +6,7 @@ import {
   User,
   ShoppingCart,
   LogOut,
+  Heart,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 const nav: { to: string; key: TKey; icon: any; exact: boolean }[] = [
   { to: "/account", key: "account.nav.overview", icon: LayoutDashboard, exact: true },
   { to: "/account/orders", key: "account.nav.orders", icon: Package, exact: false },
+  { to: "/account/favorites", key: "account.nav.favorites", icon: Heart, exact: false },
   { to: "/account/tickets", key: "account.nav.tickets", icon: LifeBuoy, exact: false },
   { to: "/cart", key: "account.nav.cart", icon: ShoppingCart, exact: false },
   { to: "/account/profile", key: "account.nav.profile", icon: User, exact: false },
