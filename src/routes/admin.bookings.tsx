@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminBookings as initialBookings, bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
@@ -32,6 +33,20 @@ function BookingsPage() {
   const [viewing, setViewing] = useState<AdminBooking | null>(null);
   const [editing, setEditing] = useState<AdminBooking | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
+
+  useEffect(() => {
+    adminApi.bookings.list({ limit: 100 })
+      .then((p) => {
+        const items = (p.items || []).map((b: any) => ({
+          id: b.id, number: b.number, client: b.client, email: b.email,
+          phone: b.phone ?? undefined, city: b.city ?? undefined, service: b.service,
+          total: Number(b.total) || 0, payment: b.payment, status: b.status,
+          date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
+        })) as AdminBooking[];
+        if (items.length) setBookings(items);
+      })
+      .catch(() => { /* keep mock */ });
+  }, []);
 
   // crude period filter using index (mock data shares similar dates)
   const limit = period === "7" ? 2 : period === "30" ? 4 : period === "90" ? 6 : bookings.length;
@@ -60,7 +75,16 @@ function BookingsPage() {
     toast.success(L("تم تحديث الطلب", "Order updated"));
     setEditing(null);
   };
-  const remove = (id: string) => { setBookings(bookings.filter(b => b.id !== id)); toast.success(L("تم الحذف", "Deleted")); };
+  const remove = (id: string) => {
+    setBookings(bookings.filter(b => b.id !== id));
+    toast.success(L("تم الحذف", "Deleted"));
+  };
+
+  const updateStatus = (id: string, status: string) => {
+    setBookings(bookings.map(x => x.id === id ? { ...x, status: status as any } : x));
+    adminApi.bookings.setStatus(id, { status }).catch(() => { /* offline-tolerant */ });
+    toast.success(L("تم تحديث الحالة", "Status updated"));
+  };
 
   return (
     <AdminLayout title={L("الطلبات", "Orders")} subtitle={L("تتبع وإدارة دورة حياة الطلبات", "Track and manage the order lifecycle")} action={
@@ -131,7 +155,7 @@ function BookingsPage() {
                       </select>
                     </td>
                     <td className="px-3 py-3">
-                      <select value={b.status} onChange={(e) => { setBookings(bookings.map(x => x.id === b.id ? { ...x, status: e.target.value as any } : x)); toast.success(L("تم تحديث الحالة", "Status updated")); }} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
+                      <select value={b.status} onChange={(e) => updateStatus(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
                         {statusKeys.map(k => <option key={k} value={k}>{statusLabels[k]}</option>)}
                       </select>
                     </td>
