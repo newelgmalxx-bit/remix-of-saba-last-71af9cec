@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import api from "@/lib/api";
 import type { CartLine } from "@/lib/api";
-import { validateCouponFn, incrementCouponUsageFn } from "@/server/coupons.functions";
+import { validateCouponFn, incrementCouponUsageFn } from "@/functions/coupons.functions";
 
 export type CartItem = {
   id: string;

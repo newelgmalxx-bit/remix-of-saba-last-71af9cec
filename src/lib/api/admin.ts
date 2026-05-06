@@ -6,7 +6,7 @@ import {
   updateCouponFn,
   deleteCouponFn,
   toggleCouponFn,
-} from '@/server/coupons.functions';
+} from '@/functions/coupons.functions';
 
 export const admin = {
   getServices: (p?: any) => {
