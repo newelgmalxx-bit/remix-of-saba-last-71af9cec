@@ -122,6 +122,10 @@ function SignupPage() {
               {t("auth.haveAccount")}{" "}
               <Link to="/login" className="font-bold text-primary hover:underline">{t("auth.login.cta")}</Link>
             </p>
+
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              <Link to="/" className="font-bold text-primary hover:underline">{t("auth.backHome")}</Link>
+            </p>
           </div>
         </div>
       </div>
