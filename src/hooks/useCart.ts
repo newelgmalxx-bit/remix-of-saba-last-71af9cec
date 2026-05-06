@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import api from "@/lib/api";
 import type { CartLine } from "@/lib/api";
 
-// Frontend-friendly shape (camelCase) — matches existing component usage.
 export type CartItem = {
   id: string;
   serviceSlug: string;
@@ -13,7 +12,10 @@ export type CartItem = {
   qty: number;
 };
 
-function normalize(line: CartLine): CartItem {
+const STORAGE_KEY = "saba_cart_v1";
+const VAT_RATE = 0.15;
+
+function normalizeFromApi(line: CartLine): CartItem {
   return {
     id: String(line.id),
     serviceSlug: line.service_slug,
@@ -34,39 +36,52 @@ type State = {
   error: string | null;
 };
 
-const initial: State = { items: [], subtotal: 0, vat: 0, total: 0, loading: false, error: null };
+function computeTotals(items: CartItem[]): Pick<State, "subtotal" | "vat" | "total"> {
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const vat = +(subtotal * VAT_RATE).toFixed(2);
+  const total = +(subtotal + vat).toFixed(2);
+  return { subtotal, vat, total };
+}
 
-// Module-level cache so all components share the same cart state.
-let cache: State = initial;
+function loadLocal(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+
+function saveLocal(items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
+}
+
+const initialItems = loadLocal();
+let cache: State = { items: initialItems, ...computeTotals(initialItems), loading: false, error: null };
 const listeners = new Set<(s: State) => void>();
 function setCache(next: State) {
   cache = next;
+  saveLocal(next.items);
   listeners.forEach((fn) => fn(next));
 }
 
-let inflight: Promise<void> | null = null;
-
-async function refresh(): Promise<void> {
-  if (inflight) return inflight;
-  inflight = (async () => {
-    setCache({ ...cache, loading: true, error: null });
-    try {
-      const res = await api.cart.get();
+async function trySyncFromApi(): Promise<void> {
+  try {
+    const res = await api.cart.get();
+    const remoteItems = (res.items || []).map(normalizeFromApi);
+    if (remoteItems.length > 0) {
       setCache({
-        items: (res.items || []).map(normalize),
-        subtotal: Number(res.subtotal) || 0,
-        vat: Number(res.vat) || 0,
-        total: Number(res.total) || 0,
+        items: remoteItems,
+        subtotal: Number(res.subtotal) || computeTotals(remoteItems).subtotal,
+        vat: Number(res.vat) || computeTotals(remoteItems).vat,
+        total: Number(res.total) || computeTotals(remoteItems).total,
         loading: false,
         error: null,
       });
-    } catch (e: any) {
-      setCache({ ...cache, loading: false, error: e?.message || "Failed to load cart" });
-    } finally {
-      inflight = null;
     }
-  })();
-  return inflight;
+  } catch { /* silent — local cart still works */ }
 }
 
 export function useCart() {
@@ -77,61 +92,82 @@ export function useCart() {
     mounted.current = true;
     const fn = (s: State) => mounted.current && setState(s);
     listeners.add(fn);
-    // Initial load: only if we don't already have items cached.
-    if (cache === initial) refresh();
-    return () => {
-      mounted.current = false;
-      listeners.delete(fn);
-    };
+    trySyncFromApi();
+    return () => { mounted.current = false; listeners.delete(fn); };
   }, []);
 
   const add = useCallback(
     async (item: { serviceSlug: string; serviceTitle?: string; planId?: string; planName?: string; price?: number; qty?: number }) => {
-      try {
-        await api.cart.addItem({
-          serviceSlug: item.serviceSlug,
-          planId: item.planId,
-          qty: item.qty ?? 1,
-        });
-        await refresh();
-      } catch (e: any) {
-        setCache({ ...cache, error: e?.message || "Failed to add to cart" });
-        throw e;
+      const qty = item.qty ?? 1;
+      const planId = item.planId || "default";
+      const existingIdx = cache.items.findIndex(
+        (i) => i.serviceSlug === item.serviceSlug && i.planId === planId,
+      );
+      let nextItems: CartItem[];
+      if (existingIdx >= 0) {
+        nextItems = cache.items.map((i, idx) => idx === existingIdx ? { ...i, qty: i.qty + qty } : i);
+      } else {
+        nextItems = [
+          ...cache.items,
+          {
+            id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            serviceSlug: item.serviceSlug,
+            serviceTitle: item.serviceTitle || item.serviceSlug,
+            planId,
+            planName: item.planName || "أساسي",
+            price: Number(item.price) || 0,
+            qty,
+          },
+        ];
       }
+      setCache({ ...cache, items: nextItems, ...computeTotals(nextItems), error: null });
+      // Fire-and-forget API sync
+      api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty }).catch(() => {});
     },
     [],
   );
 
   const remove = useCallback(async (lineId: string) => {
-    try { await api.cart.removeItem(lineId); await refresh(); }
-    catch (e: any) { setCache({ ...cache, error: e?.message || "Failed to remove" }); }
+    const nextItems = cache.items.filter((i) => i.id !== lineId);
+    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
+    api.cart.removeItem(lineId).catch(() => {});
   }, []);
 
   const updateQty = useCallback(async (lineId: string, qty: number) => {
     if (qty < 1) return remove(lineId);
-    try { await api.cart.updateItem(lineId, qty); await refresh(); }
-    catch (e: any) { setCache({ ...cache, error: e?.message || "Failed to update" }); }
+    const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
+    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
+    api.cart.updateItem(lineId, qty).catch(() => {});
   }, [remove]);
 
   const clear = useCallback(async () => {
-    // No bulk-clear endpoint; remove items one by one.
     const ids = cache.items.map((i) => i.id);
+    setCache({ items: [], subtotal: 0, vat: 0, total: 0, loading: false, error: null });
     for (const id of ids) {
-      try { await api.cart.removeItem(id); } catch { /* ignore */ }
+      api.cart.removeItem(id).catch(() => {});
     }
-    await refresh();
   }, []);
 
   const applyCoupon = useCallback(async (code: string) => {
-    const res = await api.cart.applyCoupon(code);
-    setCache({
-      ...cache,
-      items: (res.items || []).map(normalize),
-      subtotal: Number(res.subtotal) || 0,
-      total: Number(res.total) || 0,
-    });
-    return res;
+    try {
+      const res = await api.cart.applyCoupon(code);
+      const items = (res.items || []).map(normalizeFromApi);
+      if (items.length) {
+        setCache({
+          ...cache,
+          items,
+          subtotal: Number(res.subtotal) || 0,
+          vat: cache.vat,
+          total: Number(res.total) || 0,
+        });
+      }
+      return res;
+    } catch (e) {
+      throw e;
+    }
   }, []);
+
+  const refresh = useCallback(() => trySyncFromApi(), []);
 
   const count = state.items.reduce((s, i) => s + i.qty, 0);
 
