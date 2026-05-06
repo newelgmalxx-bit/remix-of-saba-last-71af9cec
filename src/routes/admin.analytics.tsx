@@ -80,7 +80,7 @@ function AnalyticsPage() {
         </PanelCard>
         <PanelCard title={L("مصادر الزيارات", "Traffic Sources")} subtitle={L("من أين يأتي العملاء", "Where visitors come from")}>
           <ul className="space-y-3">
-            {sources.map(s => (
+            {sources.map((s: { name: string; v: number }) => (
               <li key={s.name}>
                 <div className="flex justify-between text-xs mb-1"><span className="font-medium">{s.name}</span><span className="font-bold">{s.v}</span></div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
