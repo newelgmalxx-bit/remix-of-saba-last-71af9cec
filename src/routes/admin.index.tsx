@@ -153,7 +153,8 @@ function AdminDashboard() {
     const m: Record<string, string> = {
       pending: "Pending", in_progress: "In Progress", review: "Review", completed: "Completed", cancelled: "Cancelled",
     };
-    return lang === "en" ? (m[key] ?? bookingStatusMap[key].label) : bookingStatusMap[key].label;
+    const fallback = bookingStatusMap[key]?.label ?? String(key);
+    return lang === "en" ? (m[key] ?? fallback) : fallback;
   };
 
   return (
