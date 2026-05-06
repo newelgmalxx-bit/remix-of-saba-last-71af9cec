@@ -69,10 +69,12 @@ function LoginPage() {
         <LangSwitch lang={lang} onClick={toggle} />
       </div>
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-2">
-        <AuthHero />
+        <div className="order-2 lg:order-1 contents lg:block">
+          <AuthHero />
+        </div>
 
         {/* Form side */}
-        <div className="flex items-center px-6 py-10 sm:px-12 lg:py-14">
+        <div className="order-1 lg:order-2 flex items-center px-6 py-10 sm:px-12 lg:py-14">
           <div className="mx-auto w-full max-w-md">
             <div className="text-start">
               <h1 className="text-3xl font-extrabold text-foreground">{t("auth.login.title")}</h1>
