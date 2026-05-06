@@ -62,6 +62,21 @@ function CheckoutPage() {
     }
     setSubmitting(true);
     try {
+      // If logged in, persist any newly-entered contact info to the user's profile
+      // so future orders auto-fill correctly (e.g., phone missing from signup).
+      if (user) {
+        try {
+          const updates: Record<string, string> = {};
+          if (info.name && info.name !== user.name) updates.name = info.name;
+          if (info.phone && info.phone !== (user as any).phone) updates.phone = info.phone;
+          if (info.email && info.email !== user.email) updates.email = info.email;
+          if (Object.keys(updates).length > 0) {
+            await api.account.updateProfile(updates);
+          }
+        } catch {
+          // Non-blocking: continue with checkout even if profile update fails.
+        }
+      }
       const res = await api.checkout.submit({
         contact: {
           name: info.name,
@@ -88,7 +103,11 @@ function CheckoutPage() {
       await clear();
       navigate({ to: "/checkout/success" as any, search: { o: res.orderNumber } as any });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed");
+      let msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed");
+      if (err instanceof ApiError && err.errors) {
+        const details = Object.values(err.errors).filter(Boolean).join(" • ");
+        if (details) msg = `${msg} — ${details}`;
+      }
       toast.error(msg);
     } finally {
       setSubmitting(false);
