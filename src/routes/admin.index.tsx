@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
-import { adminStats, monthlyRevenue, salesByCategory, adminBookings, bookingStatusMap, fmtSAR } from "@/data/admin";
+import { bookingStatusMap, fmtSAR } from "@/data/admin";
 import { useEffect, useState } from "react";
 import { admin as adminApi, ApiError } from "@/lib/api";
 import {
@@ -18,15 +18,20 @@ export const Route = createFileRoute("/admin/")({
 function AdminDashboard() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [stats, setStats] = useState(adminStats);
-  const [revenue, setRevenue] = useState(monthlyRevenue);
-  const [byCat, setByCat] = useState(salesByCategory);
-  const [bookings, setBookings] = useState(adminBookings);
+  const emptyStats = {
+    revenue: 0, revenueGrowth: 0, ordersCount: 0, monthlyTarget: 0, remaining: 0,
+    totalServices: 0, activeServices: 0, totalBookings: 0, totalClients: 0, vipClients: 0,
+  } as any;
+  const [stats, setStats] = useState<any>(emptyStats);
+  const [revenue, setRevenue] = useState<any[]>([]);
+  const [byCat, setByCat] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [activity, setActivity] = useState<{ icon: any; text: string; time: string }[]>([]);
 
   useEffect(() => {
     adminApi.stats()
       .then((d) => {
-        setStats((s) => ({ ...s, ...d }));
+        setStats((s: any) => ({ ...s, ...d }));
         if (Array.isArray((d as any).monthlyRevenue) && (d as any).monthlyRevenue.length) setRevenue((d as any).monthlyRevenue);
         if (Array.isArray((d as any).salesByCategory) && (d as any).salesByCategory.length) {
           const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
@@ -42,9 +47,19 @@ function AdminDashboard() {
           total: Number(b.total) || 0, payment: b.payment, status: b.status,
           date: (b.createdAt || "").slice(0, 10), source: b.source ?? "direct",
         }));
-        if (items.length) setBookings(items as any);
+        setBookings(items as any);
       })
-      .catch(() => { /* keep mock */ });
+      .catch(() => setBookings([]));
+    adminApi.notifications.list(5)
+      .then((d: any) => {
+        const list = d?.items ?? d ?? [];
+        setActivity(list.map((n: any) => ({
+          icon: Bell,
+          text: n.title || n.message || n.text || "",
+          time: (n.createdAt || n.created_at || "").slice(0, 16).replace("T", " "),
+        })));
+      })
+      .catch(() => setActivity([]));
   }, []);
 
   const periods = [
