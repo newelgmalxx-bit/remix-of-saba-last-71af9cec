@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User, Mail, Phone, MapPin, Save, Lock, Loader2 } from "lucide-react";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { account } from "@/lib/api";
 import { toast } from "sonner";
+import { uploadImage } from "@/lib/image";
 
 export const Route = createFileRoute("/account/profile")({
   head: () => ({ meta: [{ title: "ملفي الشخصي | سابا ديزاين" }] }),
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/account/profile")({
 function Profile() {
   const { t, dir } = useLang();
   const { user, refresh } = useAuth();
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>(user?.avatar || "");
   const [form, setForm] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -36,6 +40,7 @@ function Profile() {
         avatar: (user.name || "?").trim().charAt(0).toUpperCase(),
         joinedAt: (user.createdAt || "").slice(0, 10),
       });
+      setAvatarUrl(user.avatar || "");
     }
   }, [user]);
 
@@ -55,18 +60,52 @@ function Profile() {
     }
   };
 
+  const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploading(true);
+    try {
+      const dataUrl = await uploadImage(f);
+      setAvatarUrl(dataUrl);
+      const fd = new FormData();
+      fd.append("avatar", f);
+      fd.append("name", form.name);
+      if (form.phone) fd.append("phone", form.phone);
+      if (form.city) fd.append("city", form.city);
+      await account.updateProfile(fd);
+      await refresh();
+      toast.success(t("account.profile.saved"));
+    } catch (err: any) {
+      toast.error(err?.message || "Failed");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   return (
     <AccountLayout title={t("account.profile.title")} subtitle={t("account.profile.subtitle")}>
       <form onSubmit={save} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col items-center gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-3xl font-bold text-white shadow-lg">
-            {form.avatar}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={form.name} className="h-20 w-20 rounded-full object-cover shadow-lg" />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-3xl font-bold text-white shadow-lg">
+              {form.avatar}
+            </div>
+          )}
           <div className={`flex-1 text-center ${dir === "rtl" ? "sm:text-right" : "sm:text-left"}`}>
             <h2 className="text-lg font-bold">{form.name}</h2>
             <p className="text-sm text-muted-foreground">{t("account.profile.memberSince")} {form.joinedAt}</p>
           </div>
-          <button type="button" className="rounded-full border border-border px-4 py-2 text-xs font-bold hover:bg-muted">
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-bold hover:bg-muted disabled:opacity-60"
+          >
+            {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {t("account.profile.changeAvatar")}
           </button>
         </div>
