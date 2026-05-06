@@ -24,20 +24,24 @@ function ReportsPage() {
   const [format, setFormat] = useState(formats[0]);
   const [topPeriod, setTopPeriod] = useState(periods[1]);
   const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; conversion: string; profitMargin: string }>({
-    revenue: 284520, orders: 184, clients: 96, activeServices: 9, conversion: "40.0%", profitMargin: "24.8%",
+    revenue: 0, orders: 0, clients: 0, activeServices: 0, conversion: "0%", profitMargin: "0%",
   });
 
   useEffect(() => {
     (async () => {
       try {
-        const a = await adminApi.stats();
-        if (a) setStats({
-          revenue: a.revenue ?? 284520,
-          orders: a.ordersCount ?? a.totalBookings ?? 184,
-          clients: a.totalClients ?? 96,
-          activeServices: a.activeServices ?? 9,
-          conversion: `${a.growthRate ?? 40}%`,
-          profitMargin: `${(a as any).profitMargin ?? 24.8}%`,
+        const [s, an] = await Promise.all([
+          adminApi.stats().catch(() => null),
+          adminApi.analytics().catch(() => null),
+        ]);
+        const a: any = an || s || {};
+        setStats({
+          revenue: Number(a.revenue) || 0,
+          orders: Number(a.ordersCount ?? a.totalBookings) || 0,
+          clients: Number(a.totalClients) || 0,
+          activeServices: Number(a.activeServices) || 0,
+          conversion: `${a.conversionRate ?? a.growthRate ?? 0}%`,
+          profitMargin: `${a.profitMargin ?? 0}%`,
         });
       } catch {}
     })();
@@ -88,7 +92,7 @@ function ReportsPage() {
   };
 
   const exportTopCsv = () => {
-    const csv = "Metric,Value\nTotal Sales,284520\nTotal Orders,184\nConversion,40%";
+    const csv = `Metric,Value\nTotal Sales,${stats.revenue}\nTotal Orders,${stats.orders}\nConversion,${stats.conversion}`;
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "summary.csv"; a.click();
