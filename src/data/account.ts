@@ -6,7 +6,7 @@ import applePayLogo from "@/assets/pay-applepay.png";
 import visaLogo from "@/assets/pay-visa.webp";
 import mastercardLogo from "@/assets/pay-mastercard.png";
 
-export type PaymentMethod = "tabby" | "tamara" | "myfatoorah" | "cod";
+export type PaymentMethod = "tabby" | "tamara" | "mayfatoorah" | "cod";
 
 export const paymentMethods: {
   id: PaymentMethod;
@@ -20,7 +20,7 @@ export const paymentMethods: {
   { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, badge: "الأكثر استخداماً" },
   { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
   {
-    id: "myfatoorah",
+    id: "mayfatoorah",
     name: "ماي فاتورة",
     desc: "فيزا، ماستر كارد، وApple Pay",
     icon: Banknote,
@@ -137,7 +137,7 @@ export const mockOrders: Order[] = [
     number: "SD-1018",
     createdAt: "2026-03-08",
     status: "completed",
-    payment: "myfatoorah",
+    payment: "mayfatoorah",
     paid: true,
     items: [
       { id: "i1", serviceSlug: "social-media-design", serviceTitle: "تصميم سوشيال ميديا", planName: "Pro", price: 3500, qty: 1 },
@@ -212,7 +212,7 @@ export const paymentName = (p: PaymentMethod, lang: "ar" | "en" = "ar") => {
   const en: Record<PaymentMethod, string> = {
     tabby: "Tabby",
     tamara: "Tamara",
-    myfatoorah: "MyFatoorah",
+    mayfatoorah: "MyFatoorah",
     cod: "Cash on delivery",
   };
   if (lang === "en") return en[p] ?? p;

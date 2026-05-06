@@ -792,7 +792,7 @@ export const dict = {
   // Payment names
   "pay.tabby": { ar: "تابي", en: "Tabby" },
   "pay.tamara": { ar: "تمارا", en: "Tamara" },
-  "pay.myfatoorah": { ar: "ماي فاتورة", en: "MyFatoorah" },
+  "pay.mayfatoorah": { ar: "ماي فاتورة", en: "MyFatoorah" },
   "pay.cod": { ar: "الدفع عند الاستلام", en: "Cash on delivery" },
 
   // Order detail

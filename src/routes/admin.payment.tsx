@@ -22,7 +22,7 @@ function PaymentSettingsPage() {
     { key: "applepay", label: "Apple Pay", icon: Smartphone, enabled: true, mode: "test", publicKey: "", secretKey: "", merchantId: "" },
     { key: "tabby", label: "Tabby", icon: Wallet, enabled: true, mode: "test", publicKey: "", secretKey: "" },
     { key: "tamara", label: "Tamara", icon: Wallet, enabled: false, mode: "test", publicKey: "", secretKey: "" },
-    { key: "myfatoorah", label: "MyFatoorah", icon: Wallet, enabled: false, mode: "test", publicKey: "", secretKey: "" },
+    { key: "mayfatoorah", label: "MyFatoorah", icon: Wallet, enabled: false, mode: "test", publicKey: "", secretKey: "" },
     { key: "stripe", label: "Stripe", icon: CreditCard, enabled: false, mode: "test", publicKey: "", secretKey: "" },
     { key: "paypal", label: "PayPal", icon: CreditCard, enabled: false, mode: "test", publicKey: "", secretKey: "" },
     { key: "bank", label: L("تحويل بنكي", "Bank Transfer"), icon: Building, enabled: true, mode: "live", publicKey: "", secretKey: "" },
