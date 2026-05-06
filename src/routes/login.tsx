@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 
 function LoginPage() {
-  const [tab, setTab] = useState<"email" | "phone">("phone");
+  const [tab, setTab] = useState<"email" | "phone">("email");
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
   const { t, dir, lang, toggle } = useLang();
