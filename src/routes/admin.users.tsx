@@ -100,7 +100,7 @@ function UsersPage() {
             </thead>
             <tbody>
               {users.map(u => {
-                const r = roleMap[u.role];
+                const r = roleMap[u.role] ?? { l: u.role || "—", t: "primary" as const };
                 const initials = u.name.split(" ").map(n => n[0]).slice(0, 2).join("");
                 return (
                   <tr key={u.id} className="border-b border-border hover:bg-muted/40">
