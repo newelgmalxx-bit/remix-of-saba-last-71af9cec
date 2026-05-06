@@ -96,6 +96,9 @@ function ServicesPage() {
                   desc={s.subtitle}
                   banner={s.bannerImage || servicesHero}
                   category={s.category}
+                  price={s.price}
+                  originalPrice={s.originalPrice}
+                  discountPercent={s.discountPercent}
                 />
               ))}
             </div>

@@ -18,6 +18,10 @@ async function refreshRemoteServices() {
       const slug = s.slug;
       remoteSlugs.push(slug);
       const cur = store[slug] || {};
+      const priceObj: any = (s as any).price || {};
+      const amount = priceObj.amount;
+      const originalAmount = priceObj.originalAmount;
+      const discountPercent = priceObj.discountPercent;
       store[slug] = {
         ...cur,
         isCustom: !serviceMap[slug] ? true : cur.isCustom,
@@ -27,6 +31,9 @@ async function refreshRemoteServices() {
         subtitleEn: s.subtitleEn || cur.subtitleEn,
         category: s.category || cur.category,
         bannerImage: s.cover || cur.bannerImage,
+        price: amount != null ? String(amount) : cur.price,
+        originalPrice: originalAmount != null ? String(originalAmount) : cur.originalPrice,
+        discountPercent: discountPercent != null ? Number(discountPercent) : cur.discountPercent,
       };
     }
     writeStore(store);
@@ -49,6 +56,7 @@ export type ServiceOverride = {
   breadcrumbEn?: string;
   price?: string;
   originalPrice?: string;
+  discountPercent?: number;
   heroHighlights?: string[];
   heroHighlightsEn?: string[];
   bannerImage?: string;
@@ -104,6 +112,9 @@ export function mergeService(slug: string, override?: ServiceOverride, lang: "ar
       subtitle: pick(o.subtitle ?? "", o.subtitleEn),
       heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? []),
       bannerImage: o.bannerImage,
+      price: o.price,
+      originalPrice: o.originalPrice,
+      discountPercent: o.discountPercent,
       overviewDescription: pick(o.overviewDescription, o.overviewDescriptionEn),
       seo: o.seo,
       overview: (o.overview ?? []).map((x) => ({ icon: Sparkles, title: pick(x.title, x.titleEn), desc: pick(x.desc, x.descEn) })),
@@ -124,6 +135,9 @@ export function mergeService(slug: string, override?: ServiceOverride, lang: "ar
     breadcrumb: en ? (o.breadcrumbEn || o.breadcrumb || base.breadcrumb) : (o.breadcrumb ?? base.breadcrumb),
     heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? base.heroHighlights),
     bannerImage: o.bannerImage ?? base.bannerImage,
+    price: o.price ?? base.price,
+    originalPrice: o.originalPrice ?? base.originalPrice,
+    discountPercent: o.discountPercent ?? base.discountPercent,
     overviewDescription: en ? (o.overviewDescriptionEn || o.overviewDescription || base.overviewDescription) : (o.overviewDescription ?? base.overviewDescription),
     seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
     overview: o.overview

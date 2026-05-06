@@ -109,14 +109,24 @@ function ServiceDetailPage() {
   const faqs = service.faqs && service.faqs.length ? service.faqs : defaultFaqs;
 
   const startingPlan = plans[0];
-  const startingPrice = startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
-  const startingOriginal = startingPlan?.originalPrice
-    ? parseInt(startingPlan.originalPrice.replace(/[^\d]/g, ""), 10) || 0
-    : 0;
-  const startingDiscount =
-    startingOriginal > 0 && startingOriginal > startingPrice
-      ? Math.round(((startingOriginal - startingPrice) / startingOriginal) * 100)
+  const svcPriceStr = service.price;
+  const svcOriginalStr = service.originalPrice;
+  const startingPrice = svcPriceStr
+    ? parseInt(String(svcPriceStr).replace(/[^\d]/g, ""), 10) || 0
+    : startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
+  const startingOriginal = svcOriginalStr
+    ? parseInt(String(svcOriginalStr).replace(/[^\d]/g, ""), 10) || 0
+    : startingPlan?.originalPrice
+      ? parseInt(startingPlan.originalPrice.replace(/[^\d]/g, ""), 10) || 0
       : 0;
+  const startingDiscount =
+    service.discountPercent != null && service.discountPercent > 0
+      ? service.discountPercent
+      : startingOriginal > 0 && startingOriginal > startingPrice
+        ? Math.round(((startingOriginal - startingPrice) / startingOriginal) * 100)
+        : 0;
+  const displayPrice = svcPriceStr ?? startingPlan?.price ?? "—";
+  const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
   const heroImg = service.bannerImage || servicesHero;
   const gallery = [heroImg, servicesHero, heroImg, servicesHero];
   const handleAddToCart = () => {
@@ -195,12 +205,12 @@ function ServiceDetailPage() {
                     <div className="text-[11px] font-bold text-muted-foreground">{t("svcDetail.price.from")}</div>
                     <div className="mt-1 flex flex-wrap items-end gap-2" dir="ltr">
                       <div className="text-3xl font-extrabold text-primary">
-                        {startingPlan?.price ?? "—"} <span className="text-sm">{t("common.sar")}</span>
+                        {displayPrice} <span className="text-sm">{t("common.sar")}</span>
                       </div>
                       {startingDiscount > 0 && (
                         <>
                           <div className="text-base font-bold text-muted-foreground line-through">
-                            {startingPlan?.originalPrice}
+                            {displayOriginal}
                           </div>
                           <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600">
                             -{startingDiscount}%

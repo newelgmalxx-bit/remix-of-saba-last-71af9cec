@@ -68,6 +68,9 @@ export function ServicesGrid() {
               desc={s.subtitle}
               banner={s.bannerImage || servicesHero}
               category={s.category}
+              price={s.price}
+              originalPrice={s.originalPrice}
+              discountPercent={s.discountPercent}
             />
           ))}
         </div>
@@ -77,11 +80,18 @@ export function ServicesGrid() {
 }
 
 export function ServiceCard({
-  slug, title, desc, banner, category,
-}: { slug: string; title: string; desc: string; banner?: string; category?: string }) {
+  slug, title, desc, banner, category, price, originalPrice, discountPercent,
+}: { slug: string; title: string; desc: string; banner?: string; category?: string; price?: string; originalPrice?: string; discountPercent?: number }) {
   const { t } = useLang();
   const { rating, count } = getRatingFor(slug);
   const { fav, toggle } = useFavorite(slug);
+  const computedDiscount =
+    discountPercent != null
+      ? discountPercent
+      : price && originalPrice
+        ? Math.round(((+originalPrice.replace(/[^\d.]/g, "") - +price.replace(/[^\d.]/g, "")) /
+            (+originalPrice.replace(/[^\d.]/g, "") || 1)) * 100)
+        : 0;
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
@@ -101,6 +111,11 @@ export function ServiceCard({
         {category && (
           <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-primary shadow-sm">
             {category}
+          </span>
+        )}
+        {computedDiscount > 0 && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-white shadow">
+            -{computedDiscount}%
           </span>
         )}
         <button
@@ -126,6 +141,18 @@ export function ServiceCard({
           <span className="text-muted-foreground">({count})</span>
         </div>
         <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted-foreground">{desc}</p>
+        {price && (
+          <div className="mt-3 flex items-end gap-2" dir="ltr">
+            <span className="text-base font-extrabold text-primary">
+              {price} <span className="text-[10px] font-bold">{t("common.sar")}</span>
+            </span>
+            {originalPrice && computedDiscount > 0 && (
+              <span className="text-xs font-bold text-muted-foreground line-through">
+                {originalPrice}
+              </span>
+            )}
+          </div>
+        )}
         <div className="mt-5 flex flex-1 items-end justify-end gap-2">
           <Link
             to="/services/$slug"

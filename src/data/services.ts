@@ -12,6 +12,9 @@ export type ServiceContent = {
   subtitle: string;
   heroHighlights: string[];
   bannerImage?: string;
+  price?: string;
+  originalPrice?: string;
+  discountPercent?: number;
   overviewDescription?: string;
   seo?: {
     title?: string;
