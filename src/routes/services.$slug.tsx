@@ -36,7 +36,7 @@ const works: { tag: string; titleKey: TKey; img: string }[] = [
 ];
 
 function ServiceDetailPage() {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const service = live ?? serviceMap[slug];
@@ -130,7 +130,7 @@ function ServiceDetailPage() {
   const heroImg = service.bannerImage || servicesHero;
   const handleAddToCart = () => {
     if (!isAuthenticated) {
-      toast.info(t("svcDetail.toast.loginRequired"));
+      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
       navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
       return;
     }
@@ -139,7 +139,7 @@ function ServiceDetailPage() {
   };
   const handleBuyNow = () => {
     if (!isAuthenticated) {
-      toast.info(t("svcDetail.toast.loginRequired"));
+      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
       navigate({ to: "/login", search: { redirect: `/services/${slug}` } as any });
       return;
     }
