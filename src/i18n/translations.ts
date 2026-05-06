@@ -722,6 +722,17 @@ export const dict = {
   "svcDetail.cta.btn": { ar: "ابدأ الآن", en: "Start now" },
   "svcDetail.slider.prev": { ar: "السابق", en: "Previous" },
   "svcDetail.slider.next": { ar: "التالي", en: "Next" },
+  "svcDetail.fav.add": { ar: "أضف للمفضلة", en: "Add to favorites" },
+  "svcDetail.fav.added": { ar: "في المفضلة", en: "Favorited" },
+  "svcDetail.reviews.title": { ar: "تقييمات العملاء", en: "Customer Reviews" },
+  "svcDetail.reviews.desc": { ar: "آراء حقيقية من عملاء سابقين.", en: "Real feedback from previous clients." },
+  "svcDetail.reviews.count": { ar: "تقييم", en: "reviews" },
+  "svcDetail.reviews.empty": { ar: "لا توجد تقييمات بعد. كن أول من يقيّم!", en: "No reviews yet. Be the first to review!" },
+  "svcDetail.reviews.formTitle": { ar: "اكتب تقييمك", en: "Write your review" },
+  "svcDetail.reviews.placeholder": { ar: "شاركنا تجربتك...", en: "Share your experience..." },
+  "svcDetail.reviews.submit": { ar: "إرسال التقييم", en: "Submit review" },
+  "svcDetail.reviews.loginRequired": { ar: "سجّل الدخول لكتابة تقييم.", en: "Sign in to write a review." },
+  "svcDetail.reviews.thanks": { ar: "شكراً لتقييمك!", en: "Thanks for your review!" },
 
   // ===== Account =====
   "account.client": { ar: "حساب العميل", en: "Client account" },
