@@ -17,13 +17,12 @@ export const paymentMethods: {
   brands?: { name: string; logo?: string; icon?: LucideIcon }[];
   badge?: string;
 }[] = [
-  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, badge: "الأكثر استخداماً" },
-  { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
   {
     id: "mayfatoorah",
     name: "ماي فاتورة",
     desc: "فيزا، ماستر كارد، وApple Pay",
     icon: Banknote,
+    badge: "الأكثر استخداماً",
     brands: [
       { name: "Visa", logo: visaLogo },
       { name: "Mastercard", logo: mastercardLogo },
@@ -31,6 +30,8 @@ export const paymentMethods: {
     ],
   },
   { id: "cod", name: "الدفع عند الاستلام", desc: "ادفع بعد استلام الخدمة", icon: Truck },
+  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo },
+  { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
 ];
 
 export type OrderStatus =
