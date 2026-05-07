@@ -115,7 +115,7 @@ function SignupPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="relative flex w-full justify-center overflow-hidden [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!min-w-0" style={{ zIndex: 100000 }}>
+            <div className="relative flex w-full justify-center" style={{ zIndex: 100000 }}>
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const idToken = credentialResponse.credential;
