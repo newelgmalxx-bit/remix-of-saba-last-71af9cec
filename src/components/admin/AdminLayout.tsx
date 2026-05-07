@@ -90,13 +90,17 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     try {
       const res: any = await admin.getNotifications(10);
       const list: any[] = res?.data?.items ?? res?.items ?? res?.data ?? [];
+      let readIds = new Set<string>();
+      try {
+        readIds = new Set<string>(JSON.parse(localStorage.getItem("saba_admin_notif_read") || "[]"));
+      } catch { /* ignore */ }
       const mapped: Notif[] = (Array.isArray(list) ? list : []).map((n: any, idx: number) => ({
         id: String(n.id ?? idx),
         type: n.type ?? "primary",
         title: n.title ?? n.message ?? L("إشعار", "Notification"),
         desc: n.description ?? n.body ?? n.desc ?? "",
         time: n.time ?? n.created_at ?? n.createdAt ?? "",
-        read: !!(n.read ?? n.is_read),
+        read: !!(n.read ?? n.is_read) || readIds.has(String(n.id ?? idx)),
         link: n.link ?? n.url ?? n.href ?? n.action_url ?? n.target ?? "",
       }));
       setNotifs(mapped);
@@ -122,6 +126,11 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     try {
       await admin.markNotificationsRead();
       setNotifs((arr) => arr.map((n) => ({ ...n, read: true })));
+      try {
+        const all = notifs.map((n) => n.id);
+        const prev = JSON.parse(localStorage.getItem("saba_admin_notif_read") || "[]");
+        localStorage.setItem("saba_admin_notif_read", JSON.stringify(Array.from(new Set([...prev, ...all]))));
+      } catch { /* ignore */ }
     } catch (e: any) {
       toast.error(e?.message || L("تعذر التحديث", "Update failed"));
     }
