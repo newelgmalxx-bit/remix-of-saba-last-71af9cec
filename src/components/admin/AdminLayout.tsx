@@ -259,8 +259,20 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                   ) : (
                     notifs.map((n) => {
                       const Ic = iconFor(n.type);
+                      const handleClick = async () => {
+                        if (!n.read) {
+                          try { await admin.markNotificationsRead(n.id); } catch { /* ignore */ }
+                          setNotifs((arr) => arr.map((x) => x.id === n.id ? { ...x, read: true } : x));
+                        }
+                        setNotifOpen(false);
+                        const target = n.link || inferLink(n);
+                        if (target) {
+                          if (/^https?:\/\//i.test(target)) window.open(target, "_blank");
+                          else navigate({ to: target as any });
+                        }
+                      };
                       return (
-                        <div key={n.id} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
+                        <div key={n.id} onClick={handleClick} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
                           <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${toneFor(n.type)}`}>
                             <Ic className="h-4 w-4" />
                           </div>
