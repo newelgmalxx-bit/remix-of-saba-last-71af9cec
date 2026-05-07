@@ -79,8 +79,6 @@ export const cart = {
     unwrapCart(cartNew.updateQty(lineId, qty)),
   removeItem: async (lineId: string) =>
     unwrapCart(cartNew.remove(lineId)),
-  applyCoupon: async (code: string) =>
-    unwrapCart(cartNew.coupon(code)),
 };
 
 // ============================================================
