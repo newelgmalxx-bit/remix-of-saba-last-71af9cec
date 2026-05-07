@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import api from "@/lib/api";
 import type { CartLine } from "@/lib/api";
-import { validateCouponFn, incrementCouponUsageFn } from "@/functions/coupons.functions";
 
 export type CartItem = {
   id: string;
@@ -14,7 +13,6 @@ export type CartItem = {
 };
 
 const STORAGE_KEY = "saba_cart_v1";
-const COUPON_KEY = "saba_cart_coupon_v1";
 const VAT_RATE = 0.15;
 
 function normalizeFromApi(line: CartLine): CartItem {
@@ -29,37 +27,21 @@ function normalizeFromApi(line: CartLine): CartItem {
   };
 }
 
-export type AppliedCoupon = {
-  id: string;
-  code: string;
-  type: "percent" | "fixed";
-  value: number;
-  discount: number;
-};
-
 type State = {
   items: CartItem[];
   subtotal: number;
   discount: number;
   vat: number;
   total: number;
-  coupon: AppliedCoupon | null;
   loading: boolean;
   error: string | null;
 };
 
 function computeTotals(
   items: CartItem[],
-  coupon: AppliedCoupon | null = null,
 ): Pick<State, "subtotal" | "discount" | "vat" | "total"> {
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  let discount = 0;
-  if (coupon) {
-    discount =
-      coupon.type === "percent"
-        ? +(subtotal * (coupon.value / 100)).toFixed(2)
-        : Math.min(coupon.value, subtotal);
-  }
+  const discount = 0;
   const taxable = Math.max(0, subtotal - discount);
   const vat = +(taxable * VAT_RATE).toFixed(2);
   const total = +(taxable + vat).toFixed(2);
@@ -81,27 +63,10 @@ function saveLocal(items: CartItem[]) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
 }
 
-function loadCoupon(): AppliedCoupon | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(COUPON_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-function saveCoupon(c: AppliedCoupon | null) {
-  if (typeof window === "undefined") return;
-  try {
-    if (c) localStorage.setItem(COUPON_KEY, JSON.stringify(c));
-    else localStorage.removeItem(COUPON_KEY);
-  } catch {}
-}
-
 const initialItems = loadLocal();
-const initialCoupon = loadCoupon();
 let cache: State = {
   items: initialItems,
-  ...computeTotals(initialItems, initialCoupon),
-  coupon: initialCoupon,
+  ...computeTotals(initialItems),
   loading: false,
   error: null,
 };
@@ -109,7 +74,6 @@ const listeners = new Set<(s: State) => void>();
 function setCache(next: State) {
   cache = next;
   saveLocal(next.items);
-  saveCoupon(next.coupon);
   listeners.forEach((fn) => fn(next));
 }
 
@@ -119,8 +83,7 @@ async function trySyncFromApi(): Promise<void> {
     const remoteItems = (res.items || []).map(normalizeFromApi);
     setCache({
       items: remoteItems,
-      ...computeTotals(remoteItems, cache.coupon),
-      coupon: cache.coupon,
+      ...computeTotals(remoteItems),
       loading: false,
       error: null,
     });
@@ -129,7 +92,7 @@ async function trySyncFromApi(): Promise<void> {
 
 export function useCart() {
   // Start with empty state to match SSR; hydrate from localStorage after mount.
-  const [state, setState] = useState<State>({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, coupon: null, loading: false, error: null });
+  const [state, setState] = useState<State>({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, loading: false, error: null });
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -166,7 +129,7 @@ export function useCart() {
           },
         ];
       }
-      setCache({ ...cache, items: nextItems, ...computeTotals(nextItems, cache.coupon), error: null });
+      setCache({ ...cache, items: nextItems, ...computeTotals(nextItems), error: null });
       try {
         await api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty });
         await trySyncFromApi();
@@ -177,49 +140,22 @@ export function useCart() {
 
   const remove = useCallback(async (lineId: string) => {
     const nextItems = cache.items.filter((i) => i.id !== lineId);
-    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems, cache.coupon) });
+    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     try { await api.cart.removeItem(lineId); await trySyncFromApi(); } catch {}
   }, []);
 
   const updateQty = useCallback(async (lineId: string, qty: number) => {
     if (qty < 1) return remove(lineId);
     const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
-    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems, cache.coupon) });
+    setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     try { await api.cart.updateItem(lineId, qty); await trySyncFromApi(); } catch {}
   }, [remove]);
 
   const clear = useCallback(async () => {
     const ids = cache.items.map((i) => i.id);
-    setCache({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, coupon: null, loading: false, error: null });
+    setCache({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, loading: false, error: null });
     for (const id of ids) {
       api.cart.removeItem(id).catch(() => {});
-    }
-  }, []);
-
-  const applyCoupon = useCallback(async (code: string) => {
-    const subtotal = cache.items.reduce((s, i) => s + i.price * i.qty, 0);
-    const res = await validateCouponFn({ data: { code, subtotal } });
-    if (!res.valid) {
-      throw new Error(res.message || "INVALID");
-    }
-    const coupon: AppliedCoupon = {
-      id: res.id,
-      code: res.code,
-      type: res.type,
-      value: res.value,
-      discount: res.discount,
-    };
-    setCache({ ...cache, coupon, ...computeTotals(cache.items, coupon) });
-    return coupon;
-  }, []);
-
-  const removeCoupon = useCallback(() => {
-    setCache({ ...cache, coupon: null, ...computeTotals(cache.items, null) });
-  }, []);
-
-  const markCouponUsed = useCallback(async () => {
-    if (cache.coupon) {
-      try { await incrementCouponUsageFn({ data: { id: cache.coupon.id } }); } catch {}
     }
   }, []);
 
@@ -233,7 +169,6 @@ export function useCart() {
     discount: state.discount,
     vat: state.vat,
     total: state.total,
-    coupon: state.coupon,
     loading: state.loading,
     error: state.error,
     count,
@@ -241,9 +176,6 @@ export function useCart() {
     remove,
     updateQty,
     clear,
-    applyCoupon,
-    removeCoupon,
-    markCouponUsed,
     refresh,
   };
 }

@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X } from "lucide-react";
-import { useState } from "react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
@@ -15,39 +14,10 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { items, remove, updateQty, subtotal, discount, vat, total, count, coupon, applyCoupon, removeCoupon } = useCart();
-  const [code, setCode] = useState("");
-  const [couponMsg, setCouponMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
-  const [applying, setApplying] = useState(false);
+  const { items, remove, updateQty, subtotal, vat, total, count } = useCart();
   const { t, lang, dir } = useLang();
 
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-
-  const couponErrorText = (m: string) => {
-    switch (m) {
-      case "NOT_FOUND": return L("الكوبون غير صحيح", "Invalid coupon");
-      case "INACTIVE": return L("الكوبون غير مفعّل", "Coupon is inactive");
-      case "EXPIRED": return L("الكوبون منتهي الصلاحية", "Coupon expired");
-      case "MAX_USES": return L("تم استنفاد الكوبون", "Coupon usage limit reached");
-      case "MIN_AMOUNT": return L("لم تصل إلى الحد الأدنى للطلب", "Order does not meet minimum amount");
-      default: return L("الكوبون غير صحيح", "Invalid coupon");
-    }
-  };
-
-  const handleApply = async () => {
-    if (!code.trim()) return;
-    setApplying(true);
-    setCouponMsg(null);
-    try {
-      const c = await applyCoupon(code);
-      setCouponMsg({ type: "ok", text: L(`تم تطبيق ${c.code}`, `Applied ${c.code}`) });
-      setCode("");
-    } catch (e: any) {
-      setCouponMsg({ type: "err", text: couponErrorText(e?.message || "") });
-    } finally {
-      setApplying(false);
-    }
-  };
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -131,63 +101,12 @@ function CartPage() {
                   <h3 className="text-lg font-bold">{t("cart.summaryTitle")}</h3>
                   <div className="mt-4 space-y-3 text-sm">
                     <Row label={t("cart.subtotal")} value={formatCurrency(subtotal)} />
-                    {coupon && discount > 0 && (
-                      <div className="flex items-center justify-between text-emerald-600">
-                        <span className="flex items-center gap-1">
-                          {L("خصم", "Discount")} ({coupon.code})
-                        </span>
-                        <span data-ltr-number>− {formatCurrency(discount)}</span>
-                      </div>
-                    )}
                     <Row label={t("cart.vat")} value={formatCurrency(vat)} />
                     <div className="my-2 h-px bg-border" />
                     <div className="flex items-center justify-between text-base font-bold">
                       <span>{t("cart.total")}</span>
                       <span className="text-primary">{formatCurrency(total)}</span>
                     </div>
-                  </div>
-
-                  <div className="mt-5 hidden">
-                    <label className="mb-2 flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                      <Tag className="h-3.5 w-3.5" /> {t("cart.coupon")}
-                    </label>
-                    {coupon ? (
-                      <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
-                        <span className="font-bold text-emerald-700" dir="ltr">{coupon.code}</span>
-                        <button
-                          type="button"
-                          onClick={() => { removeCoupon(); setCouponMsg(null); }}
-                          className="rounded-md p-1 text-emerald-700 hover:bg-emerald-100"
-                          aria-label={L("إزالة الكوبون", "Remove coupon")}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <input
-                          value={code}
-                          onChange={(e) => setCode(e.target.value.toUpperCase())}
-                          onKeyDown={(e) => { if (e.key === "Enter") handleApply(); }}
-                          placeholder={t("cart.couponPh")}
-                          dir="ltr"
-                          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleApply}
-                          disabled={applying || !code.trim()}
-                          className="rounded-lg border border-border bg-secondary px-4 text-sm font-bold hover:bg-accent disabled:opacity-50"
-                        >
-                          {applying ? "…" : t("cart.apply")}
-                        </button>
-                      </div>
-                    )}
-                    {couponMsg && (
-                      <p className={`mt-2 text-xs ${couponMsg.type === "ok" ? "text-emerald-600" : "text-rose-500"}`}>
-                        {couponMsg.text}
-                      </p>
-                    )}
                   </div>
 
                   <Link
