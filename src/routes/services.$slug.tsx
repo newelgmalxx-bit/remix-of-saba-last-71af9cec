@@ -49,7 +49,9 @@ function ServiceDetailPage() {
 
   const filteredWorks = useMemo(() => {
     const cat = (service?.category || "").trim();
-    const matched = cat ? allWorks.filter((w) => w.tag === cat) : [];
+    const matched = cat
+      ? allWorks.filter((w) => (w.tag || "").includes(cat) || cat.includes(w.tag || ""))
+      : [];
     const list = matched.length > 0 ? matched : allWorks;
     return list.slice(0, 6);
   }, [allWorks, service?.category]);
