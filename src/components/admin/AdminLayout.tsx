@@ -127,10 +127,6 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     }
   };
 
-  const fmtTime = (t: string) => {
-    if (!t) return "";
-    return t;
-  };
   const inferLink = (n: { type?: string; id: string }) => {
     const tp = (n.type || "").toLowerCase();
     if (tp.includes("order")) return "/admin/bookings";
@@ -139,8 +135,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     if (tp.includes("user") || tp.includes("client")) return "/admin/clients";
     return "";
   };
-  // legacy time formatter retained
-  const _fmtTimeUnused = (t: string) => {
+  const fmtTime = (t: string) => {
     if (!t) return "";
     const d = new Date(t);
     if (isNaN(d.getTime())) return t;
