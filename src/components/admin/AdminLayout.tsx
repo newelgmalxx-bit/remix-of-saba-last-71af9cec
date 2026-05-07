@@ -248,7 +248,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
               {subtitle && <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{subtitle}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto overflow-y-visible -mx-3 px-3 py-2 sm:mx-0 sm:px-0 sm:py-0 sm:overflow-visible">
             {action}
             <Link
               to={"/" as any}
@@ -268,10 +268,10 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
             <LangToggle />
             <Popover open={notifOpen} onOpenChange={(o) => { setNotifOpen(o); if (o) loadNotifs(); }}>
               <PopoverTrigger asChild>
-                <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
+                 <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted">
                   <Bell className="h-4 w-4" />
                   {unread > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none flex items-center justify-center ring-2 ring-card">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
