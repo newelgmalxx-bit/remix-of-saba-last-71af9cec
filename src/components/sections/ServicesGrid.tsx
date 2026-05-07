@@ -94,7 +94,11 @@ export function ServiceCard({
             (+originalPrice.replace(/[^\d.]/g, "") || 1)) * 100)
         : 0;
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+    <Link
+      to="/services/$slug"
+      params={{ slug }}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
+    >
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
         {banner ? (
           <img
@@ -156,6 +160,7 @@ export function ServiceCard({
           <Link
             to="/services/$slug"
             params={{ slug }}
+            onClick={(e) => e.stopPropagation()}
             className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-secondary/40 px-3 text-[11px] font-bold text-foreground/80 transition hover:border-primary/40 hover:text-primary"
           >
             {t("services.details")} <ArrowLeft className="h-3 w-3" />
@@ -163,12 +168,13 @@ export function ServiceCard({
           <Link
             to="/services/$slug"
             params={{ slug }}
+            onClick={(e) => e.stopPropagation()}
             className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-4 text-[11px] font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             {t("services.order")}
           </Link>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
