@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
-  CheckCircle2, Circle, FileText, Receipt, Loader2,
+  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
 import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, type Order } from "@/data/account";
@@ -12,6 +12,7 @@ import type { TKey } from "@/i18n/translations";
 import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -50,6 +51,25 @@ function OrderDetail() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
+
+  const handlePayNow = async () => {
+    if (!order) return;
+    setPaying(true);
+    try {
+      const res: any = await account.payOrder(order.id);
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error(lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "حدث خطأ" : "Error"));
+    } finally {
+      setPaying(false);
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -248,6 +268,16 @@ function OrderDetail() {
                 <div className="text-xs text-muted-foreground">{order.paid ? t("account.order.paid") : t("account.order.awaitingPayment")}</div>
               </div>
             </div>
+            {!order.paid && order.status !== "cancelled" && (
+              <button
+                onClick={handlePayNow}
+                disabled={paying}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+              >
+                {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                {lang === "ar" ? "ادفع الآن" : "Pay now"}
+              </button>
+            )}
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span data-ltr-number>{order.createdAt}</span>
