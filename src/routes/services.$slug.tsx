@@ -359,39 +359,30 @@ function ServiceDetailPage() {
                   <h2 className="text-2xl font-extrabold text-foreground">{t("svcDetail.works.title")}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">{t("svcDetail.works.desc")}</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {workTabKeys.map((tk) => (
-                    <button
-                      key={tk}
-                      onClick={() => setTab(tk)}
-                      className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${
-                        tab === tk ? "bg-primary text-white" : "bg-secondary/60 text-foreground/70 hover:text-primary"
-                      }`}
-                    >
-                      {t(tk)}
-                    </button>
-                  ))}
-                </div>
+                <Link to="/portfolio" className="inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
+                  {t("portfolioPage.hero.browse") as string} <ArrowLeft className={`h-3 w-3 ${arrowFlip}`} />
+                </Link>
               </div>
-              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredWorks.map((w) => {
-                  const wTitle = t(w.titleKey);
-                  return (
-                    <article key={w.titleKey} className="group overflow-hidden rounded-2xl border border-border bg-secondary/30 transition hover:-translate-y-1 hover:shadow-md">
+              {filteredWorks.length === 0 ? (
+                <p className="mt-6 text-center text-sm text-muted-foreground">—</p>
+              ) : (
+                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredWorks.map((w) => (
+                    <Link key={w.id} to="/portfolio" className="group overflow-hidden rounded-2xl border border-border bg-secondary/30 transition hover:-translate-y-1 hover:shadow-md">
                       <div className="relative aspect-[4/3] overflow-hidden">
-                        <img src={w.img} alt={wTitle} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                        {w.img && <img src={w.img} alt={w.title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />}
                         <span className={`absolute top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-primary ${dir === "rtl" ? "right-3" : "left-3"}`}>{w.tag}</span>
                       </div>
                       <div className="flex items-center justify-between p-4">
-                        <button className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
                           {t("svcDetail.works.viewProject")} <ArrowLeft className={`h-3 w-3 ${arrowFlip}`} />
-                        </button>
-                        <h3 className="text-sm font-bold text-foreground">{wTitle}</h3>
+                        </span>
+                        <h3 className="text-sm font-bold text-foreground">{w.title}</h3>
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
