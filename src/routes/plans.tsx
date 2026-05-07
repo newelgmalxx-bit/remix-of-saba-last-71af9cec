@@ -6,7 +6,6 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
@@ -71,7 +70,6 @@ function PlansPage() {
 function PlanCard({ plan }: { plan: Plan }) {
   const { t, dir, lang } = useLang();
   const { add } = useCart();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
