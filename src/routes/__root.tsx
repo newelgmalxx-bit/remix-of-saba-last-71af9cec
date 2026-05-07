@@ -1,6 +1,6 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 
-import appCss from "../styles.css?url";
+import "../styles.css";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -34,54 +34,9 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
-      { name: "description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
-      { name: "author", content: "SABA DESIGN" },
-      { property: "og:title", content: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
-      { property: "og:description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@sabadesign" },
-      { name: "twitter:title", content: "سابا ديزاين | SABA DESIGN — تجارب رقمية تترك أثراً يدوم" },
-      { name: "twitter:description", content: "سابا ديزاين — وكالة رقمية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية وحلول التحول الرقمي." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6858bf39-5e04-4df7-93ca-cced8c9c16a4/id-preview-8b52bdfb--3e74ddaf-5741-44a3-8ad0-de9f7e4b5986.lovable.app-1777931035993.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6858bf39-5e04-4df7-93ca-cced8c9c16a4/id-preview-8b52bdfb--3e74ddaf-5741-44a3-8ad0-de9f7e4b5986.lovable.app-1777931035993.png" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap",
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="ar" dir="rtl">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   useTrackVisit();
