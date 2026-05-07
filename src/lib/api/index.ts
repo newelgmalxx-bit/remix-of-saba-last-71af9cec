@@ -284,6 +284,16 @@ const adminLegacy = {
     const r: any = await a.getSiteSettings();
     return r?.data ?? r;
   },
+  tracking: {
+    list: async () => {
+      const r: any = await a.trackingList();
+      return (r?.data?.items ?? r?.items ?? []) as any[];
+    },
+    create: (body: any) => a.trackingCreate(body),
+    update: (id: number | string, body: any) => a.trackingUpdate(id, body),
+    toggle: (id: number | string) => a.trackingToggle(id),
+    remove: (id: number | string) => a.trackingDelete(id),
+  },
 };
 
 // Merged: flat (new spec) + nested namespaces (legacy).

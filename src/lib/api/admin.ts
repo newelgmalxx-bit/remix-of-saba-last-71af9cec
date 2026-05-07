@@ -83,4 +83,12 @@ export const admin = {
 
   getSiteSettings: () => request('/admin/site/settings'),
   updateSiteSettings: (body: any) => request('/admin/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
+
+  // Tracking codes (pixels / head / body scripts)
+  trackingList: () => request<ApiResponse<{ items: any[] }>>('/admin/tracking'),
+  trackingCreate: (body: any) => request('/admin/tracking', { method: 'POST', body: JSON.stringify(body) }),
+  trackingUpdate: (id: number | string, body: any) => request(`/admin/tracking/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  trackingToggle: (id: number | string) => request(`/admin/tracking/${id}/toggle`, { method: 'PATCH' }),
+  trackingDelete: (id: number | string) => request(`/admin/tracking/${id}`, { method: 'DELETE' }),
+  getPublicTracking: () => request<ApiResponse<{ pixels?: string; head?: string; body?: string }>>('/tracking'),
 };
