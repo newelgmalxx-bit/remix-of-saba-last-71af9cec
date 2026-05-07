@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { admin as adminApi } from "@/lib/api";
+import { admin as adminApi, publicApi } from "@/lib/api";
 import type { Plan as ApiPlan } from "@/lib/api/types";
 
 export type Plan = {
@@ -109,7 +109,8 @@ function toApi(p: Plan, idx: number): any {
   };
 }
 
-export function usePlans() {
+export function usePlans(opts?: { source?: "public" | "admin" }) {
+  const source = opts?.source ?? "public";
   const [plans, setPlans] = useState<Plan[]>(defaultPlans);
 
   useEffect(() => {
@@ -117,9 +118,12 @@ export function usePlans() {
     // try to refresh from backend
     (async () => {
       try {
-        const res = await adminApi.plans.list();
-        if (res?.items?.length) {
-          const mapped = res.items.map(fromApi);
+        const res: any = source === "admin"
+          ? await adminApi.plans.list()
+          : await publicApi.getPlans();
+        const items: ApiPlan[] | undefined = res?.items ?? res?.data?.items;
+        if (items?.length) {
+          const mapped = items.map(fromApi);
           write(mapped);
           setPlans(mapped);
         }
@@ -132,7 +136,7 @@ export function usePlans() {
       window.removeEventListener("saba:plans", fn);
       window.removeEventListener("storage", fn);
     };
-  }, []);
+  }, [source]);
 
   const save = useCallback((next: Plan[]) => {
     write(next);
