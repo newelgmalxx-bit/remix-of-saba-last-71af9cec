@@ -34,7 +34,7 @@ function CheckoutPage() {
     notes: "",
     agree: true,
   });
-  const [payment, setPayment] = useState<PaymentMethod>("tabby");
+  const [payment, setPayment] = useState<PaymentMethod>("mayfatoorah");
   const [submitting, setSubmitting] = useState(false);
   const [useSaved, setUseSaved] = useState<boolean>(true);
 
