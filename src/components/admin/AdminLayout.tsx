@@ -328,6 +328,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
               <span className="hidden sm:block text-xs font-bold">{user?.name || L("المستخدم", "User")}</span>
             </Link>
           </div>
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children ?? <Outlet />}</main>
