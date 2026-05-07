@@ -300,6 +300,10 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                         if (!n.read) {
                           try { await admin.markNotificationsRead(n.id); } catch { /* ignore */ }
                           setNotifs((arr) => arr.map((x) => x.id === n.id ? { ...x, read: true } : x));
+                          try {
+                            const prev = JSON.parse(localStorage.getItem("saba_admin_notif_read") || "[]");
+                            localStorage.setItem("saba_admin_notif_read", JSON.stringify(Array.from(new Set([...prev, n.id]))));
+                          } catch { /* ignore */ }
                         }
                         setNotifOpen(false);
                         const target = n.link || inferLink(n);
