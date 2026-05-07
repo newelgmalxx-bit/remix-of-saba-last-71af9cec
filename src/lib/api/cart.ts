@@ -15,7 +15,4 @@ export const cart = {
 
   remove: (lineId: string) =>
     request<ApiResponse<Cart>>(`/cart/items/${lineId}`, { method: 'DELETE' }),
-
-  coupon: (code: string) =>
-    request<ApiResponse<Cart>>('/cart/coupon', { method: 'POST', body: JSON.stringify({ code }) }),
 };
