@@ -5,7 +5,6 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "التحليلات | لوحة التحكم" }] }),
@@ -21,19 +20,12 @@ function AnalyticsPage() {
     let cancelled = false;
     (async () => {
       const days = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : 365;
-      const since = new Date(Date.now() - days * 86400000).toISOString();
-      const [an, op, cp, vis] = await Promise.all([
+      const [an, op, cp] = await Promise.all([
         adminApi.analytics(range).catch(() => null),
         adminApi.orders.list({ limit: 1000 }).catch(() => ({ items: [] })),
         adminApi.clients.list({ limit: 1000 }).catch(() => ({ items: [] })),
-        supabase
-          .from("page_visits")
-          .select("path, source, session_id, created_at")
-          .gte("created_at", since)
-          .order("created_at", { ascending: false })
-          .limit(10000)
-          .then((r) => r.data || []),
       ]);
+      const vis: any[] = [];
       if (cancelled) return;
       const a: any = an || {};
       const orders: any[] = (op as any)?.items || [];
