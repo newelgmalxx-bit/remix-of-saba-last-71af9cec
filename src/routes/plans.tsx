@@ -83,22 +83,12 @@ function PlanCard({ plan }: { plan: Plan }) {
   const feats = lang === "en" && plan.featsEn?.length ? plan.featsEn : plan.feats;
 
   const handleAdd = () => {
-    if (!isAuthenticated) {
-      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
-      navigate({ to: "/login", search: { redirect: "/plans" } as any });
-      return;
-    }
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
     toast.success(t("plansPage.toast.added"), { description: `${t("plansPage.planPrefix")} ${plan.name}` });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
   const handleBuyNow = () => {
-    if (!isAuthenticated) {
-      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
-      navigate({ to: "/login", search: { redirect: "/plans" } as any });
-      return;
-    }
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
     navigate({ to: "/checkout" as any });
   };
