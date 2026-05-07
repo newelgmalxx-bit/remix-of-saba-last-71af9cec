@@ -58,8 +58,8 @@ export const admin = {
   updateUserRole: (id: string, role: string) => request(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
   deleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
 
-  getSettings: (group: string) => request(`/admin/settings/${group}`),
-  updateSettings: (group: string, body: any) => request(`/admin/settings/${group}`, { method: 'PUT', body: JSON.stringify(body) }),
+  getSettings: (group: string) => request(group === 'site' ? `/site/settings` : `/admin/settings/${group}`),
+  updateSettings: (group: string, body: any) => request(group === 'site' ? `/site/settings` : `/admin/settings/${group}`, { method: 'PUT', body: JSON.stringify(body) }),
 
   upload: async (file: File) => {
     const fd = new FormData(); fd.append('file', file);
