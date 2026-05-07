@@ -42,25 +42,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Upload an image to the API and return a public URL.
-// First converts to webp (for smaller payload), then sends as multipart/form-data.
-// On failure, returns the data URL as a fallback so the UI still works locally.
-import { supabase } from "@/integrations/supabase/client";
-
-export async function uploadImage(file: File, bucket = "avatars"): Promise<string> {
-  try {
-    const dataUrl = await fileToWebp(file);
-    const blob = await (await fetch(dataUrl)).blob();
-    const ext = (blob.type.split("/")[1] || "webp").replace("jpeg", "jpg");
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, blob, {
-      contentType: blob.type || "image/webp",
-      upsert: false,
-    });
-    if (error) throw error;
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    return data.publicUrl || dataUrl;
-  } catch {
-    try { return await fileToWebp(file); } catch { return ""; }
-  }
+// Upload stub — returns a local data URL until backend is wired up.
+export async function uploadImage(file: File, _bucket = "avatars"): Promise<string> {
+  void _bucket;
+  try { return await fileToWebp(file); } catch { return ""; }
 }
