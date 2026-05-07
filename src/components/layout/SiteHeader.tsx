@@ -1,6 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X, LogIn, ShoppingCart, User, Heart } from "lucide-react";
+import { Menu, X, LogIn, ShoppingCart, User, Heart, Package, LogOut, LayoutDashboard } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import flagSA from "@/assets/flag-sa.jpg";
 import flagUS from "@/assets/flag-us.jpg";
@@ -21,8 +23,17 @@ const navLinks: { to: any; key: TKey }[] = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const { lang, toggle: toggleLang, t } = useLang();
+  const navigate = useNavigate();
+  const [acctOpen, setAcctOpen] = useState(false);
+  const initial = (user?.name || user?.email || "?").trim().charAt(0).toUpperCase();
+  async function handleLogout() {
+    await logout();
+    setAcctOpen(false);
+    toast.success(t("account.nav.logout"));
+    navigate({ to: "/" });
+  }
   const [mounted, setMounted] = useState(false);
   const [favCount, setFavCount] = useState(0);
   useEffect(() => { setMounted(true); }, []);
@@ -103,13 +114,44 @@ export function SiteHeader() {
             )}
           </Link>
           {mounted && isAuthenticated ? (
-            <Link
-              to={(isAdmin ? "/admin" : "/account") as any}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
-            >
-              <User className="h-4 w-4" />
-              {t("nav.account")}
-            </Link>
+            <Popover open={acctOpen} onOpenChange={setAcctOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)] transition hover:bg-primary-dark"
+                  aria-label={t("nav.account")}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary text-xs font-bold">{initial}</span>
+                  <span className="max-w-[120px] truncate">{user?.name || t("nav.account")}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-60 p-2" dir={lang === "ar" ? "rtl" : "ltr"}>
+                <div className="border-b border-border px-2 pb-2 mb-1">
+                  <div className="text-sm font-bold truncate">{user?.name || ""}</div>
+                  <div className="text-xs text-muted-foreground truncate">{user?.email || ""}</div>
+                </div>
+                {isAdmin && (
+                  <Link to={"/admin" as any} onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                    <LayoutDashboard className="h-4 w-4" /> {lang === "ar" ? "لوحة التحكم" : "Admin"}
+                  </Link>
+                )}
+                <Link to={"/account" as any} onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <User className="h-4 w-4" /> {t("account.nav.overview")}
+                </Link>
+                <Link to={"/account/orders" as any} onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <Package className="h-4 w-4" /> {t("account.nav.orders")}
+                </Link>
+                <Link to={"/account/favorites" as any} onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <Heart className="h-4 w-4" /> {t("account.nav.favorites")}
+                </Link>
+                <Link to={"/account/profile" as any} onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <User className="h-4 w-4" /> {t("account.nav.profile")}
+                </Link>
+                <div className="my-1 h-px bg-border" />
+                <button onClick={handleLogout} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                  <LogOut className="h-4 w-4" /> {t("account.nav.logout")}
+                </button>
+              </PopoverContent>
+            </Popover>
           ) : (
             <>
               <Link
