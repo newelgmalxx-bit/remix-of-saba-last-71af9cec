@@ -224,17 +224,22 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6">
+        <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur px-3 sm:px-6">
+          <div className="flex flex-col gap-2 py-2 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-0">
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => setMobileOpen(true)} className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border">
-              <Menu className="h-4 w-4" />
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label={L("القائمة", "Menu")}
+              className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-sm hover:bg-muted active:scale-95 transition"
+            >
+              <Menu className="h-5 w-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold truncate">{title}</h1>
-              {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
+              <h1 className="text-base sm:text-xl font-bold truncate leading-tight">{title}</h1>
+              {subtitle && <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{subtitle}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
             {action}
             <Link
               to={"/" as any}
