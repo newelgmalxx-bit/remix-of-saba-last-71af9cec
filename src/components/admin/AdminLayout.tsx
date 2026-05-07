@@ -80,7 +80,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const isActive = (to: string, exact = false) => exact ? path === to : path === to || path.startsWith(to + "/");
 
   // Notifications
-  type Notif = { id: string; type?: string; title: string; desc?: string; time?: string; read?: boolean };
+  type Notif = { id: string; type?: string; title: string; desc?: string; time?: string; read?: boolean; link?: string };
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -97,6 +97,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
         desc: n.description ?? n.body ?? n.desc ?? "",
         time: n.time ?? n.created_at ?? n.createdAt ?? "",
         read: !!(n.read ?? n.is_read),
+        link: n.link ?? n.url ?? n.href ?? n.action_url ?? n.target ?? "",
       }));
       setNotifs(mapped);
     } catch {
