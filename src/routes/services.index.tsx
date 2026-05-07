@@ -10,6 +10,7 @@ import { useAllServices } from "@/hooks/useServiceContent";
 import { ServiceCard } from "@/components/sections/ServicesGrid";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
 
 const tabs: { key: TKey; cat: string }[] = [
   { key: "servicesPage.tab.all", cat: "الكل" },
@@ -184,13 +185,30 @@ function ServicesPage() {
 }
 
 export const Route = createFileRoute("/services/")({
-  head: () => ({
-    meta: [
-      { title: "خدماتنا | سابا ديزاين" },
-      { name: "description", content: "حلول رقمية متكاملة لنمو أعمالك: تصميم، برمجة، تسويق وسوشيال ميديا." },
-      { property: "og:title", content: "خدماتنا | سابا ديزاين" },
-      { property: "og:description", content: "حلول رقمية متكاملة لنمو أعمالك." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "خدمات تصميم وتطوير المواقع والتطبيقات | سابا ديزاين",
+      description:
+        "حلول رقمية متكاملة: تصميم وتطوير المواقع، تطبيقات الجوال، المتاجر الإلكترونية، الهوية البصرية، التسويق الرقمي، السيو، وإدارة السوشيال ميديا — أسعار تنافسية وجودة عالية.",
+      keywords:
+        "خدمات تصميم مواقع، تطوير تطبيقات، متجر إلكتروني، هوية بصرية، تسويق رقمي، سوشيال ميديا، سيو، السعودية",
+      path: "/services",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "الرئيسية", path: "/" },
+              { name: "الخدمات", path: "/services" },
+            ])
+          ),
+        },
+      ],
+    };
+  },
   component: ServicesPage,
 });
