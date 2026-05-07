@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
+import portfolioBg from "@/assets/portfolio-bg.jpg";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
@@ -30,22 +31,32 @@ function ServiceDetailPage() {
   const [open, setOpen] = useState<number | null>(0);
   const [allWorks, setAllWorks] = useState<WorkItem[]>([]);
 
+  const fallbackWorks: WorkItem[] = useMemo(() => ([
+    { id: "fw1", title: lang === "en" ? "Corporate Website" : "موقع شركة احترافي", tag: "ويب", img: portfolioBg },
+    { id: "fw2", title: lang === "en" ? "Mobile App" : "تطبيق موبايل", tag: "تطبيقات موبايل", img: servicesHero },
+    { id: "fw3", title: lang === "en" ? "Brand Identity" : "هوية بصرية", tag: "هوية بصرية", img: portfolioBg },
+    { id: "fw4", title: lang === "en" ? "Social Campaign" : "حملة سوشيال ميديا", tag: "سوشيال ميديا", img: servicesHero },
+    { id: "fw5", title: lang === "en" ? "Marketing Plan" : "خطة تسويق رقمية", tag: "تسويق", img: portfolioBg },
+    { id: "fw6", title: lang === "en" ? "UI/UX Design" : "تصميم واجهات", tag: "تصميم واجهات", img: servicesHero },
+  ]), [lang]);
+
   useEffect(() => {
     let cancelled = false;
     publicApi.getPortfolio()
       .then((res: any) => {
         if (cancelled) return;
         const items = res?.data?.items ?? res?.items ?? [];
-        setAllWorks(items.map((it: any) => ({
+        const mapped: WorkItem[] = items.map((it: any) => ({
           id: String(it.id ?? it._id ?? Math.random()),
           title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
           tag: it.category || "Project",
           img: it.cover || it.image || "",
-        })));
+        }));
+        setAllWorks(mapped.length > 0 ? mapped : fallbackWorks);
       })
-      .catch(() => { if (!cancelled) setAllWorks([]); });
+      .catch(() => { if (!cancelled) setAllWorks(fallbackWorks); });
     return () => { cancelled = true; };
-  }, [lang]);
+  }, [lang, fallbackWorks]);
 
   const filteredWorks = useMemo(() => {
     const cat = (service?.category || "").trim();
