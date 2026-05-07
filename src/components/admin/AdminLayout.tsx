@@ -33,8 +33,6 @@ const navGroups: (NavItem | "sep")[] = [
   "sep",
   { to: "/admin/site", ar: "إعدادات الموقع", en: "Site settings", icon: Building2 },
   { to: "/admin/seo", ar: "إعدادات SEO", en: "SEO settings", icon: Search },
-  { to: "/admin/tracking", ar: "التتبع والبكسلات", en: "Tracking & pixels", icon: Target },
-  { to: "/admin/payment", ar: "إعدادات الدفع", en: "Payment settings", icon: CreditCard },
   { to: "/admin/partner", ar: "إعدادات API الشريك", en: "Partner API", icon: Link2 },
   "sep",
   { to: "/admin/users", ar: "إدارة المستخدمين", en: "Users", icon: UserCheck },
@@ -43,10 +41,8 @@ const navGroups: (NavItem | "sep")[] = [
     to: "/admin/settings", ar: "الإعدادات", en: "Settings", icon: Settings,
     children: [
       { to: "/admin/settings/profile", ar: "الملف الشخصي", en: "Profile", icon: User },
-      { to: "/admin/settings/appearance", ar: "المظهر", en: "Appearance", icon: Palette },
       { to: "/admin/settings/integrations", ar: "التكاملات", en: "Integrations", icon: Plug },
       { to: "/admin/settings/team", ar: "الفريق والصلاحيات", en: "Team & roles", icon: Users2 },
-      { to: "/admin/settings/notifications", ar: "الإشعارات", en: "Notifications", icon: BellRing },
     ],
   },
 ];
