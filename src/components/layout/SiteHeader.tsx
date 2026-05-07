@@ -225,13 +225,40 @@ export function SiteHeader() {
           ))}
           <div className="mt-3 grid grid-cols-2 gap-2">
             {mounted && isAuthenticated ? (
-              <Link
-                to={(isAdmin ? "/admin" : "/account") as any}
-                onClick={() => setOpen(false)}
-                className="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-primary-foreground"
-              >
-                <User className="h-4 w-4" /> {t("nav.account")}
-              </Link>
+              <div className="col-span-2 rounded-2xl border border-border bg-card p-3">
+                <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">{initial}</span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold truncate">{user?.name || ""}</div>
+                    <div className="text-xs text-muted-foreground truncate">{user?.email || ""}</div>
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  {isAdmin && (
+                    <Link to={"/admin" as any} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted">
+                      <LayoutDashboard className="h-4 w-4" /> {lang === "ar" ? "لوحة التحكم" : "Admin"}
+                    </Link>
+                  )}
+                  <Link to={"/account" as any} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted">
+                    <User className="h-4 w-4" /> {t("account.nav.overview")}
+                  </Link>
+                  <Link to={"/account/orders" as any} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted">
+                    <Package className="h-4 w-4" /> {t("account.nav.orders")}
+                  </Link>
+                  <Link to={"/account/favorites" as any} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted">
+                    <Heart className="h-4 w-4" /> {t("account.nav.favorites")}
+                  </Link>
+                  <Link to={"/account/profile" as any} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted">
+                    <User className="h-4 w-4" /> {t("account.nav.profile")}
+                  </Link>
+                  <button
+                    onClick={() => { setOpen(false); handleLogout(); }}
+                    className="mt-1 flex items-center gap-2 rounded-md px-2 py-2.5 text-sm text-rose-600 hover:bg-rose-50 text-start"
+                  >
+                    <LogOut className="h-4 w-4" /> {t("account.nav.logout")}
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
                 <Link
