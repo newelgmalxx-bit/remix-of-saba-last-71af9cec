@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { buildSeo, breadcrumbJsonLd, SITE } from "@/lib/seo";
 
 const tools = ["Figma", "React", "Next.js", "Webflow", "Shopify", "TypeScript", "Node.js", "Tailwind", "Framer", "Adobe"];
 
@@ -341,12 +342,31 @@ function AboutPage() {
 }
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "من نحن | سابا ديزاين - وكالة رقمية بصمة عربية" },
-      { name: "description", content: "تعرّف على فريق سابا ديزاين، قصتنا، قيمنا، ورؤيتنا في صناعة تجارب رقمية تترك أثراً يدوم." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "من نحن | سابا ديزاين — وكالة رقمية ببصمة عربية",
+      description:
+        "تعرّف على فريق سابا ديزاين، قصتنا، قيمنا، ورؤيتنا في صناعة تجارب رقمية تترك أثراً يدوم. أكثر من 250 مشروع و120 عميل في السعودية والخليج.",
+      keywords: "من نحن، سابا ديزاين، فريق سابا، وكالة تصميم، قصة سابا، رؤية سابا",
+      path: "/about",
+      image: `${SITE.url}/logo.png`,
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "الرئيسية", path: "/" },
+              { name: "من نحن", path: "/about" },
+            ])
+          ),
+        },
+      ],
+    };
+  },
   component: AboutPage,
 });
 
