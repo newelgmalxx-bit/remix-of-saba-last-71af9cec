@@ -24,7 +24,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function AdminPlansPage() {
   const { lang } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const { plans: stored, save, reset } = usePlans();
+  const { plans: stored, save, reset } = usePlans({ source: "admin" });
   const [plans, setPlans] = useState<Plan[]>(stored);
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
