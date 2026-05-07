@@ -75,9 +75,6 @@ async function request<T = any>(
   if (!res.ok || (json && json.success === false)) {
     if (res.status === 401) {
       removeToken();
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login';
-      }
     }
     throw new ApiError(res.status, json?.message || `Request failed (${res.status})`, json?.errors);
   }
