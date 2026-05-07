@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
   UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug, Tag,
-  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket,
+  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket, ExternalLink,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import logoImg from "@/assets/logo.png";
@@ -236,6 +236,21 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
           </div>
           <div className="flex items-center gap-2">
             {action}
+            <Link
+              to={"/" as any}
+              title={L("عرض الموقع", "View site")}
+              className="hidden sm:inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-bold text-foreground/80 hover:border-primary hover:text-primary"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span>{L("عرض الموقع", "View site")}</span>
+            </Link>
+            <Link
+              to={"/" as any}
+              aria-label={L("عرض الموقع", "View site")}
+              className="sm:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Link>
             <LangToggle />
             <Popover open={notifOpen} onOpenChange={(o) => { setNotifOpen(o); if (o) loadNotifs(); }}>
               <PopoverTrigger asChild>
