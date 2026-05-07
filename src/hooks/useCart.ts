@@ -133,10 +133,13 @@ export function useCart() {
         ];
       }
       setCache({ ...cache, items: nextItems, ...computeTotals(nextItems), error: null });
-      try {
-        await api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty });
-        await trySyncFromApi();
-      } catch { /* keep local fallback */ }
+      // Plan items live only in local cart — backend only accepts real service slugs.
+      if (!item.serviceSlug.startsWith("plan:")) {
+        try {
+          await api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty });
+          await trySyncFromApi();
+        } catch { /* keep local fallback */ }
+      }
     },
     [],
   );
@@ -144,14 +147,18 @@ export function useCart() {
   const remove = useCallback(async (lineId: string) => {
     const nextItems = cache.items.filter((i) => i.id !== lineId);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
-    try { await api.cart.removeItem(lineId); await trySyncFromApi(); } catch {}
+    if (!lineId.startsWith("local-")) {
+      try { await api.cart.removeItem(lineId); await trySyncFromApi(); } catch {}
+    }
   }, []);
 
   const updateQty = useCallback(async (lineId: string, qty: number) => {
     if (qty < 1) return remove(lineId);
     const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
-    try { await api.cart.updateItem(lineId, qty); await trySyncFromApi(); } catch {}
+    if (!lineId.startsWith("local-")) {
+      try { await api.cart.updateItem(lineId, qty); await trySyncFromApi(); } catch {}
+    }
   }, [remove]);
 
   const clear = useCallback(async () => {
