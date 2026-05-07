@@ -60,10 +60,10 @@ export function ContactSection() {
             </p>
 
             <ul className="mt-6 space-y-4">
-              <InfoRow icon={Phone} label={t("contactForm.info.call")} value="+966 50 123 4567" />
-              <InfoRow icon={Mail} label={t("contactForm.info.email")} value="info@sabadesign.com" />
-              <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value="+966 50 123 4567" />
-              <InfoRow icon={MapPin} label={t("contactForm.info.location")} value={t("contactForm.info.locationV")} />
+              <InfoRow icon={Phone} label={t("contactForm.info.call")} value="+966 50 123 4567" href="tel:+966501234567" />
+              <InfoRow icon={Mail} label={t("contactForm.info.email")} value="info@sabadesign.com" href="mailto:info@sabadesign.com" />
+              <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value="+966 50 123 4567" href="https://wa.me/966501234567" external />
+              <InfoRow icon={MapPin} label={t("contactForm.info.location")} value={t("contactForm.info.locationV")} href="https://maps.google.com/?q=Saudi+Arabia" external />
             </ul>
 
             <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
@@ -183,16 +183,30 @@ function Select({ label, placeholder, options, required, value, onChange }: { la
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <li className="flex items-center justify-between gap-3">
+function InfoRow({ icon: Icon, label, value, href, external }: { icon: any; label: string; value: string; href?: string; external?: boolean }) {
+  const content = (
+    <>
       <div className="min-w-0">
         <div className="text-[11px] text-white/65">{label}</div>
         <div className="truncate text-sm font-semibold" dir="ltr">{value}</div>
       </div>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 transition group-hover:bg-white/25">
         <Icon className="h-4 w-4" />
       </span>
-    </li>
+    </>
   );
+  if (href) {
+    return (
+      <li>
+        <a
+          href={href}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          className="group flex items-center justify-between gap-3 rounded-lg -mx-1 px-1 py-0.5 transition hover:bg-white/5"
+        >
+          {content}
+        </a>
+      </li>
+    );
+  }
+  return <li className="flex items-center justify-between gap-3">{content}</li>;
 }
