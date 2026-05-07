@@ -115,7 +115,7 @@ export function ServiceCard({
           </span>
         )}
         {computedDiscount > 0 && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-white shadow">
+          <span className="absolute bottom-3 right-3 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-bold text-white shadow ring-1 ring-white/40">
             -{computedDiscount}%
           </span>
         )}

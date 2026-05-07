@@ -6,7 +6,6 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
@@ -71,7 +70,6 @@ function PlansPage() {
 function PlanCard({ plan }: { plan: Plan }) {
   const { t, dir, lang } = useLang();
   const { add } = useCart();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
@@ -83,22 +81,12 @@ function PlanCard({ plan }: { plan: Plan }) {
   const feats = lang === "en" && plan.featsEn?.length ? plan.featsEn : plan.feats;
 
   const handleAdd = () => {
-    if (!isAuthenticated) {
-      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
-      navigate({ to: "/login", search: { redirect: "/plans" } as any });
-      return;
-    }
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
     toast.success(t("plansPage.toast.added"), { description: `${t("plansPage.planPrefix")} ${plan.name}` });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
   const handleBuyNow = () => {
-    if (!isAuthenticated) {
-      toast.info(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please sign in first");
-      navigate({ to: "/login", search: { redirect: "/plans" } as any });
-      return;
-    }
     add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
     navigate({ to: "/checkout" as any });
   };
