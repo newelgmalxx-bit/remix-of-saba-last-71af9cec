@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
   MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
@@ -12,6 +12,7 @@ import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
+import { publicApi } from "@/lib/api/public";
 import { useFavorite } from "@/components/sections/ServicesGrid";
 import { SarIcon } from "@/components/ui/SarIcon";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
@@ -19,30 +20,39 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 
-const workTabKeys: TKey[] = [
-  "svcDetail.works.tab.all",
-  "svcDetail.works.tab.design",
-  "svcDetail.works.tab.dev",
-  "svcDetail.works.tab.social",
-  "svcDetail.works.tab.marketing",
-];
-const works: { tag: string; titleKey: TKey; img: string }[] = [
-  { tag: "Web", titleKey: "svcDetail.work.1.t", img: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&auto=format&fit=crop&q=80" },
-  { tag: "Mobile", titleKey: "svcDetail.work.2.t", img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format&fit=crop&q=80" },
-  { tag: "UI/UX", titleKey: "svcDetail.work.3.t", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80" },
-  { tag: "Web", titleKey: "svcDetail.work.4.t", img: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=80" },
-  { tag: "Brand", titleKey: "svcDetail.work.5.t", img: "https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&auto=format&fit=crop&q=80" },
-  { tag: "Mobile", titleKey: "svcDetail.work.6.t", img: "https://images.unsplash.com/photo-1517292987719-0369a794ec0f?w=800&auto=format&fit=crop&q=80" },
-];
+type WorkItem = { id: string; title: string; tag: string; img: string };
 
 function ServiceDetailPage() {
   const { t, dir, lang } = useLang();
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const service = live ?? serviceMap[slug];
-  const [tab, setTab] = useState<TKey>("svcDetail.works.tab.all");
   const [open, setOpen] = useState<number | null>(0);
-  const filteredWorks = works;
+  const [allWorks, setAllWorks] = useState<WorkItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    publicApi.getPortfolio()
+      .then((res: any) => {
+        if (cancelled) return;
+        const items = res?.data?.items ?? res?.items ?? [];
+        setAllWorks(items.map((it: any) => ({
+          id: String(it.id ?? it._id ?? Math.random()),
+          title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
+          tag: it.category || "Project",
+          img: it.cover || it.image || "",
+        })));
+      })
+      .catch(() => { if (!cancelled) setAllWorks([]); });
+    return () => { cancelled = true; };
+  }, [lang]);
+
+  const filteredWorks = useMemo(() => {
+    const cat = (service?.category || "").trim();
+    const matched = cat ? allWorks.filter((w) => w.tag === cat) : [];
+    const list = matched.length > 0 ? matched : allWorks;
+    return list.slice(0, 6);
+  }, [allWorks, service?.category]);
   const { plans } = usePlans();
   const { add } = useCart();
   const navigate = useNavigate();
