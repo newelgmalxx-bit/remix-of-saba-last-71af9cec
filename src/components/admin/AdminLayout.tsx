@@ -80,7 +80,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const isActive = (to: string, exact = false) => exact ? path === to : path === to || path.startsWith(to + "/");
 
   // Notifications
-  type Notif = { id: string; type?: string; title: string; desc?: string; time?: string; read?: boolean };
+  type Notif = { id: string; type?: string; title: string; desc?: string; time?: string; read?: boolean; link?: string };
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -97,6 +97,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
         desc: n.description ?? n.body ?? n.desc ?? "",
         time: n.time ?? n.created_at ?? n.createdAt ?? "",
         read: !!(n.read ?? n.is_read),
+        link: n.link ?? n.url ?? n.href ?? n.action_url ?? n.target ?? "",
       }));
       setNotifs(mapped);
     } catch {
@@ -126,6 +127,14 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     }
   };
 
+  const inferLink = (n: { type?: string; id: string }) => {
+    const tp = (n.type || "").toLowerCase();
+    if (tp.includes("order")) return "/admin/bookings";
+    if (tp.includes("ticket")) return "/admin/tickets";
+    if (tp.includes("invoice")) return "/admin/invoices";
+    if (tp.includes("user") || tp.includes("client")) return "/admin/clients";
+    return "";
+  };
   const fmtTime = (t: string) => {
     if (!t) return "";
     const d = new Date(t);
@@ -258,8 +267,20 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                   ) : (
                     notifs.map((n) => {
                       const Ic = iconFor(n.type);
+                      const handleClick = async () => {
+                        if (!n.read) {
+                          try { await admin.markNotificationsRead(n.id); } catch { /* ignore */ }
+                          setNotifs((arr) => arr.map((x) => x.id === n.id ? { ...x, read: true } : x));
+                        }
+                        setNotifOpen(false);
+                        const target = n.link || inferLink(n);
+                        if (target) {
+                          if (/^https?:\/\//i.test(target)) window.open(target, "_blank");
+                          else navigate({ to: target as any });
+                        }
+                      };
                       return (
-                        <div key={n.id} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
+                        <div key={n.id} onClick={handleClick} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
                           <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${toneFor(n.type)}`}>
                             <Ic className="h-4 w-4" />
                           </div>
