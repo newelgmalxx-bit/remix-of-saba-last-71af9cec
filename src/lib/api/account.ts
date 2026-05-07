@@ -42,4 +42,7 @@ export const account = {
     request<ApiResponse<{ id: string; number: string }>>('/account/tickets', {
       method: 'POST', body: JSON.stringify(body),
     }),
+
+  payOrder: (id: string) =>
+    request<ApiResponse<{ paymentUrl: string | null }>>(`/account/orders/${id}/pay`, { method: 'POST' }),
 };
