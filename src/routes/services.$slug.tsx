@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
   MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
@@ -8,12 +8,10 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import servicesHero from "@/assets/services-hero.png";
-import portfolioBg from "@/assets/portfolio-bg.jpg";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
-import { publicApi } from "@/lib/api/public";
 import { useFavorite } from "@/components/sections/ServicesGrid";
 import { SarIcon } from "@/components/ui/SarIcon";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
@@ -21,51 +19,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 
-type WorkItem = { id: string; title: string; tag: string; img: string };
+const workTabKeys: TKey[] = [
+  "svcDetail.works.tab.all",
+  "svcDetail.works.tab.design",
+  "svcDetail.works.tab.dev",
+  "svcDetail.works.tab.social",
+  "svcDetail.works.tab.marketing",
+];
+const works: { tag: string; titleKey: TKey; img: string }[] = [
+  { tag: "Web", titleKey: "svcDetail.work.1.t", img: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&auto=format&fit=crop&q=80" },
+  { tag: "Mobile", titleKey: "svcDetail.work.2.t", img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format&fit=crop&q=80" },
+  { tag: "UI/UX", titleKey: "svcDetail.work.3.t", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80" },
+  { tag: "Web", titleKey: "svcDetail.work.4.t", img: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=80" },
+  { tag: "Brand", titleKey: "svcDetail.work.5.t", img: "https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&auto=format&fit=crop&q=80" },
+  { tag: "Mobile", titleKey: "svcDetail.work.6.t", img: "https://images.unsplash.com/photo-1517292987719-0369a794ec0f?w=800&auto=format&fit=crop&q=80" },
+];
 
 function ServiceDetailPage() {
   const { t, dir, lang } = useLang();
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const service = live ?? serviceMap[slug];
+  const [tab, setTab] = useState<TKey>("svcDetail.works.tab.all");
   const [open, setOpen] = useState<number | null>(0);
-  const [allWorks, setAllWorks] = useState<WorkItem[]>([]);
-
-  const fallbackWorks: WorkItem[] = useMemo(() => ([
-    { id: "fw1", title: lang === "en" ? "Corporate Website" : "موقع شركة احترافي", tag: "ويب", img: portfolioBg },
-    { id: "fw2", title: lang === "en" ? "Mobile App" : "تطبيق موبايل", tag: "تطبيقات موبايل", img: servicesHero },
-    { id: "fw3", title: lang === "en" ? "Brand Identity" : "هوية بصرية", tag: "هوية بصرية", img: portfolioBg },
-    { id: "fw4", title: lang === "en" ? "Social Campaign" : "حملة سوشيال ميديا", tag: "سوشيال ميديا", img: servicesHero },
-    { id: "fw5", title: lang === "en" ? "Marketing Plan" : "خطة تسويق رقمية", tag: "تسويق", img: portfolioBg },
-    { id: "fw6", title: lang === "en" ? "UI/UX Design" : "تصميم واجهات", tag: "تصميم واجهات", img: servicesHero },
-  ]), [lang]);
-
-  useEffect(() => {
-    let cancelled = false;
-    publicApi.getPortfolio()
-      .then((res: any) => {
-        if (cancelled) return;
-        const items = res?.data?.items ?? res?.items ?? [];
-        const mapped: WorkItem[] = items.map((it: any) => ({
-          id: String(it.id ?? it._id ?? Math.random()),
-          title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
-          tag: it.category || "Project",
-          img: it.cover || it.image || "",
-        }));
-        setAllWorks(mapped.length > 0 ? mapped : fallbackWorks);
-      })
-      .catch(() => { if (!cancelled) setAllWorks(fallbackWorks); });
-    return () => { cancelled = true; };
-  }, [lang, fallbackWorks]);
-
-  const filteredWorks = useMemo(() => {
-    const cat = (service?.category || "").trim();
-    const matched = cat
-      ? allWorks.filter((w) => (w.tag || "").includes(cat) || cat.includes(w.tag || ""))
-      : [];
-    const list = matched.length > 0 ? matched : allWorks;
-    return list.slice(0, 6);
-  }, [allWorks, service?.category]);
+  const filteredWorks = works;
   const { plans } = usePlans();
   const { add } = useCart();
   const navigate = useNavigate();
@@ -372,30 +349,39 @@ function ServiceDetailPage() {
                   <h2 className="text-2xl font-extrabold text-foreground">{t("svcDetail.works.title")}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">{t("svcDetail.works.desc")}</p>
                 </div>
-                <Link to="/portfolio" className="inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
-                  {t("portfolioPage.hero.browse") as string} <ArrowLeft className={`h-3 w-3 ${arrowFlip}`} />
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  {workTabKeys.map((tk) => (
+                    <button
+                      key={tk}
+                      onClick={() => setTab(tk)}
+                      className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${
+                        tab === tk ? "bg-primary text-white" : "bg-secondary/60 text-foreground/70 hover:text-primary"
+                      }`}
+                    >
+                      {t(tk)}
+                    </button>
+                  ))}
+                </div>
               </div>
-              {filteredWorks.length === 0 ? (
-                <p className="mt-6 text-center text-sm text-muted-foreground">—</p>
-              ) : (
-                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredWorks.map((w) => (
-                    <Link key={w.id} to="/portfolio" className="group overflow-hidden rounded-2xl border border-border bg-secondary/30 transition hover:-translate-y-1 hover:shadow-md">
+              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredWorks.map((w) => {
+                  const wTitle = t(w.titleKey);
+                  return (
+                    <article key={w.titleKey} className="group overflow-hidden rounded-2xl border border-border bg-secondary/30 transition hover:-translate-y-1 hover:shadow-md">
                       <div className="relative aspect-[4/3] overflow-hidden">
-                        {w.img && <img src={w.img} alt={w.title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />}
+                        <img src={w.img} alt={wTitle} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                         <span className={`absolute top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-primary ${dir === "rtl" ? "right-3" : "left-3"}`}>{w.tag}</span>
                       </div>
                       <div className="flex items-center justify-between p-4">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
+                        <button className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
                           {t("svcDetail.works.viewProject")} <ArrowLeft className={`h-3 w-3 ${arrowFlip}`} />
-                        </span>
-                        <h3 className="text-sm font-bold text-foreground">{w.title}</h3>
+                        </button>
+                        <h3 className="text-sm font-bold text-foreground">{wTitle}</h3>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
