@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout, PanelCard, PrimaryButton, Pill } from "@/components/admin/AdminLayout";
-import { useState, useEffect } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { AdminLayout, PanelCard, PrimaryButton, GhostButton, Pill } from "@/components/admin/AdminLayout";
+import { useEffect, useState } from "react";
+import { Plus, Trash2, Edit, Code2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
@@ -11,94 +16,208 @@ export const Route = createFileRoute("/admin/tracking")({
   component: TrackingPage,
 });
 
-type Pixel = { key: string; label: string; placeholder: string; value: string; enabled: boolean };
+type TrackingItem = {
+  id: number;
+  name: string;
+  type: "pixel" | "head" | "body";
+  code: string;
+  is_active: number;
+  sort_order: number;
+  updated_at?: string;
+};
 
-const initial: Pixel[] = [
-  { key: "ga4", label: "Google Analytics 4", placeholder: "G-XXXXXXXXXX", value: "", enabled: false },
-  { key: "gtm", label: "Google Tag Manager", placeholder: "GTM-XXXXXXX", value: "", enabled: false },
-  { key: "google_ads", label: "Google Ads Conversion ID", placeholder: "AW-XXXXXXXXX", value: "", enabled: false },
-  { key: "meta", label: "Meta (Facebook) Pixel", placeholder: "1234567890", value: "", enabled: false },
-  { key: "tiktok", label: "TikTok Pixel", placeholder: "C0XXXXXXXXXX", value: "", enabled: false },
-  { key: "snapchat", label: "Snapchat Pixel", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx", value: "", enabled: false },
-  { key: "linkedin", label: "LinkedIn Insight Tag", placeholder: "1234567", value: "", enabled: false },
-  { key: "hotjar", label: "Hotjar Site ID", placeholder: "1234567", value: "", enabled: false },
-  { key: "clarity", label: "Microsoft Clarity", placeholder: "abcdefghij", value: "", enabled: false },
-];
+type Form = { name: string; type: "pixel" | "head" | "body"; code: string; sort_order: number; is_active: number };
+const empty: Form = { name: "", type: "pixel", code: "", sort_order: 0, is_active: 1 };
+
+const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
 
 function TrackingPage() {
   const { lang, dir } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [pixels, setPixels] = useState<Pixel[]>(initial);
-  const [head, setHead] = useState("");
-  const [body, setBody] = useState("");
-  useEffect(() => {
-    (async () => {
-      try {
-        const s = await adminApi.settings.get<any>("tracking");
-        if (Array.isArray(s?.pixels)) setPixels((cur) => cur.map(p => ({ ...p, ...(s.pixels.find((x: any) => x.key === p.key) || {}) })));
-        if (typeof s?.head === "string") setHead(s.head);
-        if (typeof s?.body === "string") setBody(s.body);
-      } catch {}
-    })();
-  }, []);
-  const save = async () => {
-    try { await adminApi.settings.update("tracking", { pixels, head, body }); toast.success(L("تم حفظ البكسلات", "Pixels saved")); }
-    catch (e: any) { toast.error(e?.message || "Save failed"); }
-  };
-  const update = (k: string, patch: Partial<Pixel>) => setPixels(pixels.map(p => p.key === k ? { ...p, ...patch } : p));
-  const active = pixels.filter(p => p.enabled && p.value).length;
+  const textAlign = dir === "rtl" ? "text-right" : "text-left";
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";
-  const iconMs = dir === "rtl" ? "ml-1" : "mr-1";
+
+  const [items, setItems] = useState<TrackingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [f, setF] = useState<Form>(empty);
+  const [delId, setDelId] = useState<number | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const list = await adminApi.tracking.list();
+      setItems((list as TrackingItem[]).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
+    } catch (e: any) {
+      toast.error(e?.message || L("تعذر التحميل", "Load failed"));
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { load(); }, []);
+
+  const openAdd = () => { setEditId(null); setF(empty); setOpen(true); };
+  const openEdit = (it: TrackingItem) => {
+    setEditId(it.id);
+    setF({ name: it.name, type: it.type, code: it.code, sort_order: it.sort_order ?? 0, is_active: it.is_active });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (!f.name.trim() || !f.code.trim()) {
+      toast.error(L("الاسم والكود مطلوبان", "Name and code are required"));
+      return;
+    }
+    try {
+      if (editId) {
+        await adminApi.tracking.update(editId, f);
+        toast.success(L("تم التحديث", "Updated"));
+      } else {
+        await adminApi.tracking.create({ name: f.name, type: f.type, code: f.code, sort_order: f.sort_order });
+        toast.success(L("تمت الإضافة", "Added"));
+      }
+      setOpen(false);
+      load();
+    } catch (e: any) {
+      toast.error(e?.message || L("فشل الحفظ", "Save failed"));
+    }
+  };
+
+  const toggle = async (it: TrackingItem) => {
+    const optimistic = it.is_active ? 0 : 1;
+    setItems((arr) => arr.map((x) => (x.id === it.id ? { ...x, is_active: optimistic } : x)));
+    try {
+      await adminApi.tracking.toggle(it.id);
+    } catch (e: any) {
+      setItems((arr) => arr.map((x) => (x.id === it.id ? { ...x, is_active: it.is_active } : x)));
+      toast.error(e?.message || L("فشل التحديث", "Toggle failed"));
+    }
+  };
+
+  const remove = async () => {
+    if (!delId) return;
+    const id = delId;
+    setDelId(null);
+    const prev = items;
+    setItems((arr) => arr.filter((x) => x.id !== id));
+    try {
+      await adminApi.tracking.remove(id);
+      toast.success(L("تم الحذف", "Deleted"));
+    } catch (e: any) {
+      setItems(prev);
+      toast.error(e?.message || L("فشل الحذف", "Delete failed"));
+    }
+  };
+
+  const typeTone = (t: string): "primary" | "violet" | "emerald" =>
+    t === "pixel" ? "primary" : t === "head" ? "violet" : "emerald";
+  const typeLabel = (t: string) =>
+    t === "pixel" ? L("بكسل", "Pixel") : t === "head" ? L("هيدر", "Head") : L("بدي", "Body");
+
   return (
-    <AdminLayout title={L("التتبع والبكسلات", "Tracking & Pixels")} subtitle={L("ربط أدوات التحليل والإعلانات", "Connect analytics and ad tools")} action={<PrimaryButton onClick={save}>{L("حفظ", "Save")}</PrimaryButton>}>
-      <div className="grid gap-4 sm:grid-cols-3 mb-6">
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="text-xs text-muted-foreground">{L("بكسلات نشطة", "Active Pixels")}</div>
-          <div className="text-2xl font-bold mt-2">{active}</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="text-xs text-muted-foreground">{L("إجمالي البكسلات المتاحة", "Total Available")}</div>
-          <div className="text-2xl font-bold mt-2">{pixels.length}</div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="text-xs text-muted-foreground">{L("سكربتات مخصصة", "Custom Scripts")}</div>
-          <div className="text-2xl font-bold mt-2">{(head ? 1 : 0) + (body ? 1 : 0)}</div>
-        </div>
-      </div>
-
-      <PanelCard title={L("بكسلات الجاهزة", "Ready Pixels")} className="mb-6">
-        <div className="space-y-3">
-          {pixels.map(p => (
-            <div key={p.key} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] items-center rounded-xl border border-border p-3">
-              <div>
-                <div className="font-bold text-sm">{p.label}</div>
-                <Pill tone={p.enabled && p.value ? "emerald" : "muted"}>
-                  {p.enabled && p.value ? <><CheckCircle2 className={`h-3 w-3 ${iconMs}`} /> {L("مفعّل", "Enabled")}</> : <><XCircle className={`h-3 w-3 ${iconMs}`} /> {L("غير مفعّل", "Disabled")}</>}
-                </Pill>
-              </div>
-              <input className={ic} dir="ltr" placeholder={p.placeholder} value={p.value} onChange={e => update(p.key, { value: e.target.value })} />
-              <button onClick={() => update(p.key, { enabled: !p.enabled })} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${p.enabled ? "bg-primary" : "bg-muted"}`}>
-                <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${p.enabled ? knobOn : knobOff}`} />
-              </button>
-            </div>
-          ))}
+    <AdminLayout
+      title={L("التتبع والبكسلات", "Tracking & Pixels")}
+      subtitle={L("إدارة أكواد التتبع والبكسلات الإعلانية", "Manage tracking and ad pixel codes")}
+      action={<PrimaryButton onClick={openAdd}><Plus className="h-4 w-4" /> {L("إضافة كود", "Add Code")}</PrimaryButton>}
+    >
+      <PanelCard>
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className={`${textAlign} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("الاسم", "Name")}</th>
+                <th className="px-3 py-3 font-medium">{L("النوع", "Type")}</th>
+                <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
+                <th className="px-3 py-3 font-medium">{L("الترتيب", "Order")}</th>
+                <th className="px-3 py-3 font-medium">{L("آخر تحديث", "Updated")}</th>
+                <th className="px-3 py-3 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="px-3 py-10 text-center text-xs text-muted-foreground">{L("جارٍ التحميل…", "Loading…")}</td></tr>
+              ) : items.length === 0 ? (
+                <tr><td colSpan={6} className="px-3 py-10 text-center text-xs text-muted-foreground">{L("لا توجد أكواد", "No codes yet")}</td></tr>
+              ) : items.map((it) => (
+                <tr key={it.id} className="border-b border-border hover:bg-muted/40">
+                  <td className="px-3 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Code2 className="h-4 w-4" /></div>
+                      <div className="font-bold">{it.name}</div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3"><Pill tone={typeTone(it.type)}>{typeLabel(it.type)}</Pill></td>
+                  <td className="px-3 py-3">
+                    <button onClick={() => toggle(it)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${it.is_active ? "bg-emerald-500" : "bg-muted"}`}>
+                      <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${it.is_active ? knobOn : knobOff}`} />
+                    </button>
+                  </td>
+                  <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{it.sort_order ?? 0}</td>
+                  <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{(it.updated_at || "").slice(0, 16)}</td>
+                  <td className="px-3 py-3">
+                    <div className="flex gap-1">
+                      <button onClick={() => openEdit(it)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Edit className="h-4 w-4" /></button>
+                      <button onClick={() => setDelId(it.id)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </PanelCard>
 
-      <PanelCard title={L("سكربتات مخصصة", "Custom Scripts")}>
-        <div className="space-y-4">
-          <div>
-            <div className="text-xs font-bold mb-1.5">{L("سكربت داخل", "Script inside")} &lt;head&gt;</div>
-            <textarea rows={5} dir="ltr" className={ic + " font-mono text-xs"} value={head} onChange={e => setHead(e.target.value)} placeholder="<script>...</script>" />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent dir={dir} className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editId ? L("تعديل كود", "Edit Code") : L("إضافة كود جديد", "Add New Code")}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="text-xs font-bold space-y-1.5 block col-span-2">{L("الاسم", "Name")}
+              <input className={ic} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder={L("مثال: Meta Pixel", "e.g. Meta Pixel")} />
+            </label>
+            <label className="text-xs font-bold space-y-1.5 block">{L("النوع", "Type")}
+              <select className={ic} value={f.type} onChange={(e) => setF({ ...f, type: e.target.value as any })}>
+                <option value="pixel">{L("بكسل", "Pixel")}</option>
+                <option value="head">{L("هيدر (head)", "Head")}</option>
+                <option value="body">{L("بدي (body)", "Body")}</option>
+              </select>
+            </label>
+            <label className="text-xs font-bold space-y-1.5 block">{L("الترتيب", "Sort Order")}
+              <input type="number" className={ic} dir="ltr" value={f.sort_order} onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) || 0 })} />
+            </label>
+            <label className="text-xs font-bold space-y-1.5 block col-span-2">{L("الكود", "Code")}
+              <textarea
+                className={ic + " font-mono text-xs"}
+                dir="ltr"
+                style={{ minHeight: 200 }}
+                value={f.code}
+                onChange={(e) => setF({ ...f, code: e.target.value })}
+                placeholder="<script>...</script>"
+              />
+            </label>
           </div>
-          <div>
-            <div className="text-xs font-bold mb-1.5">{L("سكربت قبل إغلاق", "Script before closing")} &lt;/body&gt;</div>
-            <textarea rows={5} dir="ltr" className={ic + " font-mono text-xs"} value={body} onChange={e => setBody(e.target.value)} placeholder="<script>...</script>" />
-          </div>
-        </div>
-      </PanelCard>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
+            <PrimaryButton onClick={save}>{editId ? L("حفظ", "Save") : L("إضافة", "Add")}</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={delId !== null} onOpenChange={(o) => !o && setDelId(null)}>
+        <AlertDialogContent dir={dir}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{L("تأكيد الحذف", "Confirm Delete")}</AlertDialogTitle>
+            <AlertDialogDescription>{L("هل أنت متأكد من حذف هذا الكود؟ لا يمكن التراجع.", "Are you sure you want to delete this code? This cannot be undone.")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{L("إلغاء", "Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={remove} className="bg-rose-500 hover:bg-rose-600">{L("حذف", "Delete")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
-const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
