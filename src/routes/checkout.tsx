@@ -398,55 +398,11 @@ function CheckoutPage() {
                 <div className="my-4 h-px bg-border" />
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-muted-foreground">{t("checkout.summary.subtotal")}</span><span data-ltr-number>{formatCurrency(subtotal)}</span></div>
-                  {coupon && discount > 0 && (
-                    <div className="flex justify-between text-emerald-600">
-                      <span>{L("خصم", "Discount")} ({coupon.code})</span>
-                      <span data-ltr-number>− {formatCurrency(discount)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between"><span className="text-muted-foreground">{t("checkout.summary.vat")}</span><span data-ltr-number>{formatCurrency(vat)}</span></div>
                   <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
                     <span>{t("checkout.summary.total")}</span>
                     <span className="text-primary" data-ltr-number>{formatCurrency(total)}</span>
                   </div>
-                </div>
-                <div className="mt-5 hidden">
-                  <label className="mb-2 flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                    <Tag className="h-3.5 w-3.5" /> {L("كوبون خصم", "Coupon")}
-                  </label>
-                  {coupon ? (
-                    <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
-                      <span className="font-bold text-emerald-700" dir="ltr">{coupon.code}</span>
-                      <button
-                        type="button"
-                        onClick={() => { removeCoupon(); setCouponErr(null); }}
-                        className="rounded-md p-1 text-emerald-700 hover:bg-emerald-100"
-                        aria-label={L("إزالة الكوبون", "Remove coupon")}
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        value={couponInput}
-                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleApplyCoupon(); }}
-                        placeholder={L("أدخل الكود", "Enter code")}
-                        dir="ltr"
-                        className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleApplyCoupon}
-                        disabled={couponApplying || !couponInput.trim()}
-                        className="rounded-lg border border-border bg-secondary px-4 text-sm font-bold hover:bg-accent disabled:opacity-50"
-                      >
-                        {couponApplying ? "…" : L("تطبيق", "Apply")}
-                      </button>
-                    </div>
-                  )}
-                  {couponErr && <p className="mt-2 text-xs text-rose-500">{couponErr}</p>}
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-[11px] text-muted-foreground">
                   <FileText className="h-3.5 w-3.5" />
