@@ -46,16 +46,6 @@ export type CartItem = {
   id: string; service_slug: string; service_title: string;
   plan_id: string | null; plan_name: string | null;
   price: number; original_price: number | null; qty: number;
-  // New backend fields for standalone-plan support
-  type?: "service" | "plan";
-  title?: string;
-  lineTotal?: number;
-  servicePlanId?: string | null;
-  badge?: string | null;
-  badgeAr?: string | null;
-  badgeEn?: string | null;
-  highlighted?: boolean;
-  features?: string[];
 };
 
 export type Cart = {

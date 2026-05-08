@@ -1,11 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
-  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet, Check, X, AlertCircle,
+  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, paymentMethods, type Order, type PaymentMethod } from "@/data/account";
+import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
@@ -48,41 +48,26 @@ function OrderDetail() {
   const { t, lang, dir } = useLang();
   const { orderId } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [payOpen, setPayOpen] = useState(false);
-  const [payMethod, setPayMethod] = useState<PaymentMethod>("mayfatoorah");
-  const [payingMethod, setPayingMethod] = useState<PaymentMethod | null>(null);
-  const [payError, setPayError] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
 
-  const openPayModal = () => {
+  const handlePayNow = async () => {
     if (!order) return;
-    setPayMethod(order.payment || "mayfatoorah");
-    setPayError(null);
-    setPayOpen(true);
-  };
-
-  const handlePay = async (method: PaymentMethod) => {
-    if (!order) return;
-    setPayingMethod(method);
-    setPayError(null);
+    setPaying(true);
     try {
-      const res: any = await account.payOrder(order.id, { paymentMethod: method });
-      const url = res?.data?.paymentUrl ?? res?.paymentUrl ?? null;
+      const res: any = await account.payOrder(order.id);
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
-        return;
+      } else {
+        toast.error(lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment");
       }
-      // COD
-      setOrder((prev) => prev ? { ...prev, payment: method, status: prev.status === "pending" ? "pending" : prev.status } : prev);
-      setPayOpen(false);
-      toast.success(lang === "ar" ? "تم تأكيد طلب الدفع عند الاستلام" : "Cash on delivery confirmed");
     } catch (e: any) {
-      setPayError(e?.message || (lang === "ar" ? "تعذّر إتمام العملية، حاول مرة أخرى" : "Could not complete, please try again"));
+      toast.error(e?.message || (lang === "ar" ? "حدث خطأ" : "Error"));
     } finally {
-      setPayingMethod(null);
+      setPaying(false);
     }
   };
 
@@ -285,10 +270,11 @@ function OrderDetail() {
             </div>
             {!order.paid && order.status !== "cancelled" && (
               <button
-                onClick={openPayModal}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                onClick={handlePayNow}
+                disabled={paying}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
               >
-                <Wallet className="h-4 w-4" />
+                {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
                 {lang === "ar" ? "ادفع الآن" : "Pay now"}
               </button>
             )}
@@ -308,109 +294,6 @@ function OrderDetail() {
           )}
         </aside>
       </div>
-
-      {payOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
-          onClick={() => payingMethod === null && setPayOpen(false)}
-        >
-          <div
-            dir={dir}
-            className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-card shadow-xl border border-border max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <div>
-                <h3 className="text-base font-bold">
-                  {lang === "ar" ? "اختر طريقة الدفع" : "Choose payment method"}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5" data-ltr-number>
-                  {lang === "ar" ? `المبلغ المستحق: ${formatCurrency(order.total, lang)}` : `Amount due: ${formatCurrency(order.total, lang)}`}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => payingMethod === null && setPayOpen(false)}
-                disabled={payingMethod !== null}
-                className="rounded-full p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-50"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-3">
-              {payError && (
-                <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <span>{payError}</span>
-                </div>
-              )}
-
-              <div className="grid gap-2">
-                {paymentMethods.map((m) => {
-                  const Icon = m.icon;
-                  const active = payMethod === m.id;
-                  const isLoading = payingMethod === m.id;
-                  const disabled = payingMethod !== null && !isLoading;
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => setPayMethod(m.id)}
-                      disabled={disabled}
-                      className={`relative w-full text-right rounded-2xl border-2 p-3 transition-all disabled:opacity-50 ${
-                        active
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-card hover:border-primary/50"
-                      }`}
-                    >
-                      {m.badge && (
-                        <span className="absolute -top-2 right-3 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-amber-950">
-                          {m.badge}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl ${m.logo ? "bg-white border border-border p-1" : active ? "bg-primary text-white" : "bg-primary-light text-primary"}`}>
-                          {m.logo ? (
-                            <img src={m.logo} alt={m.name} className="max-h-7 w-auto object-contain" />
-                          ) : (
-                            <Icon className="h-5 w-5" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold">{m.name}</div>
-                          <div className="text-xs text-muted-foreground">{m.desc}</div>
-                        </div>
-                        <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${active ? "border-primary bg-primary" : "border-border"}`}>
-                          {active && <Check className="h-3 w-3 text-white" />}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handlePay(payMethod)}
-                disabled={payingMethod !== null}
-                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
-              >
-                {payingMethod !== null ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Wallet className="h-4 w-4" />
-                )}
-                <span data-ltr-number>
-                  {lang === "ar"
-                    ? `متابعة الدفع • ${formatCurrency(order.total, lang)}`
-                    : `Continue • ${formatCurrency(order.total, lang)}`}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AccountLayout>
   );
 }

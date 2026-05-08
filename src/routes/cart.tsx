@@ -47,40 +47,18 @@ function CartPage() {
             <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
               <div className="space-y-3">
                 {items.map((it) => (
-                  <div
-                    key={it.id}
-                    className={`relative rounded-2xl bg-card p-4 sm:p-5 shadow-sm card-hover ${
-                      it.type === "plan"
-                        ? it.highlighted
-                          ? "border-2 border-amber-400"
-                          : "border border-indigo-200"
-                        : "border border-border"
-                    }`}
-                  >
-                    {it.type === "plan" && it.badge && (
-                      <span className="absolute -top-2 right-4 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
-                        {it.badge}
-                      </span>
-                    )}
+                  <div key={it.id} className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm card-hover">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs text-muted-foreground">
-                          {it.type === "plan" ? L("باقة", "Plan") : `${t("cart.planLabel")} ${it.planName}`}
-                        </div>
+                        <div className="text-xs text-muted-foreground">{t("cart.planLabel")} {it.planName}</div>
                         <h3 className="mt-1 text-base font-bold text-foreground line-clamp-1">{it.serviceTitle}</h3>
-                        {it.type === "plan" ? (
-                          <Link to={"/plans" as any} className="mt-1 inline-block text-xs text-primary hover:underline">
-                            {L("عرض الباقات", "View plans")}
-                          </Link>
-                        ) : (
-                          <Link
-                            to="/services/$slug"
-                            params={{ slug: it.serviceSlug }}
-                            className="mt-1 inline-block text-xs text-primary hover:underline"
-                          >
-                            {t("cart.viewService")}
-                          </Link>
-                        )}
+                        <Link
+                          to="/services/$slug"
+                          params={{ slug: it.serviceSlug }}
+                          className="mt-1 inline-block text-xs text-primary hover:underline"
+                        >
+                          {t("cart.viewService")}
+                        </Link>
                       </div>
                       <div className="flex items-center justify-between gap-4 sm:gap-6">
                         <div className="inline-flex items-center rounded-full border border-border bg-background">

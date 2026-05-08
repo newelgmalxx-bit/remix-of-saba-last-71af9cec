@@ -75,8 +75,6 @@ export const cart = {
   },
   addItem: async (body: { serviceSlug: string; planId?: string; qty?: number }) =>
     unwrapCart(cartNew.add(body)),
-  addPlanItem: async (body: { planId: string; qty?: number }) =>
-    unwrapCart(cartNew.addPlan(body)),
   updateItem: async (lineId: string, qty: number) =>
     unwrapCart(cartNew.updateQty(lineId, qty)),
   removeItem: async (lineId: string) =>
