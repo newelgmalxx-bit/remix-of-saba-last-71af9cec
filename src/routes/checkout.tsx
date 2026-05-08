@@ -348,7 +348,9 @@ function CheckoutPage() {
                       <div key={it.id} className="flex items-center justify-between border-b border-dashed border-border py-2 last:border-0 text-sm">
                         <div>
                           <div className="font-bold">{it.serviceTitle}</div>
-                          <div className="text-xs text-muted-foreground">{t("cart.planLabel")} {it.planName} × {it.qty}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {it.type === "plan" ? "باقة" : `${t("cart.planLabel")} ${it.planName}`} × {it.qty}
+                          </div>
                         </div>
                         <div className="font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
                       </div>
@@ -397,7 +399,9 @@ function CheckoutPage() {
                     <div key={it.id} className="flex items-start justify-between gap-3 text-sm">
                       <div className="flex-1 min-w-0">
                         <div className="font-bold line-clamp-1">{it.serviceTitle}</div>
-                        <div className="text-xs text-muted-foreground">{it.planName} × {it.qty}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {it.type === "plan" ? "باقة" : it.planName} × {it.qty}
+                        </div>
                       </div>
                       <div className="text-xs font-bold text-primary whitespace-nowrap" data-ltr-number>{formatCurrency(it.price * it.qty)}</div>
                     </div>
