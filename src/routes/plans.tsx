@@ -1,8 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft, Sparkles, MessageCircle } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Check, ShoppingCart, Zap, ArrowLeft, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePlans, type Plan } from "@/hooks/usePlans";
+import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
@@ -66,6 +69,9 @@ function PlansPage() {
 
 function PlanCard({ plan }: { plan: Plan }) {
   const { t, dir, lang } = useLang();
+  const { add } = useCart();
+  const navigate = useNavigate();
+  const [added, setAdded] = useState(false);
   const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
   const origNum = parseInt((plan.originalPrice || "").replace(/[^\d]/g, ""), 10) || 0;
   const discountPct = origNum > priceNum && priceNum > 0 ? Math.round(((origNum - priceNum) / origNum) * 100) : 0;
@@ -73,10 +79,17 @@ function PlanCard({ plan }: { plan: Plan }) {
   const badge = lang === "en" ? (plan.badgeEn || plan.badge) : plan.badge;
   const description = lang === "en" ? (plan.descriptionEn || plan.description) : plan.description;
   const feats = lang === "en" && plan.featsEn?.length ? plan.featsEn : plan.feats;
-  const contactMsg = lang === "ar"
-    ? `مرحبًا، أرغب بطلب ${name}.`
-    : `Hi, I'd like to order ${name}.`;
-  const contactLink = `/contact?plan=${encodeURIComponent(plan.id)}&message=${encodeURIComponent(contactMsg)}`;
+
+  const handleAdd = () => {
+    add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
+    toast.success(t("plansPage.toast.added"), { description: `${t("plansPage.planPrefix")} ${plan.name}` });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
+  };
+  const handleBuyNow = () => {
+    add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
+    navigate({ to: "/checkout" as any });
+  };
 
   return (
     <div
@@ -115,22 +128,23 @@ function PlanCard({ plan }: { plan: Plan }) {
         ))}
       </ul>
       <div className="mt-5 flex flex-col gap-2">
-        <Link
-          to={contactLink as any}
+        <button
+          onClick={handleBuyNow}
           className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition ${
             plan.featured
               ? "bg-primary text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
               : "bg-primary-dark text-white hover:opacity-90"
           }`}
         >
-          <MessageCircle className="h-4 w-4" />
-          {lang === "ar" ? "تواصل معنا للطلب" : "Contact us to order"}
-        </Link>
-        <p className="text-center text-[11px] leading-5 text-muted-foreground">
-          {lang === "ar"
-            ? "هذه الباقة تُطلب عبر التواصل المباشر مع فريقنا."
-            : "This plan is ordered by contacting our team directly."}
-        </p>
+          <Zap className="h-4 w-4" /> {t("plansPage.orderNow")}
+        </button>
+        <button
+          onClick={handleAdd}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white text-sm font-bold text-foreground/80 hover:border-primary hover:text-primary transition"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {added ? t("plansPage.added") : t("plansPage.addToCart")}
+        </button>
       </div>
     </div>
   );
