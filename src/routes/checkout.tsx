@@ -123,6 +123,14 @@ function CheckoutPage() {
         },
         paymentMethod: payment as any,
         notes: info.notes || undefined,
+        items: items.map((it) => ({
+          serviceSlug: it.serviceSlug,
+          serviceTitle: it.serviceTitle,
+          planId: it.planId,
+          planName: it.planName,
+          price: it.price,
+          qty: it.qty,
+        })),
       });
       try {
         localStorage.setItem(
