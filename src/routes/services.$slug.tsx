@@ -214,7 +214,6 @@ function ServiceDetailPage() {
                         </>
                       )}
                     </div>
-                    <div className="mt-1 text-[11px] text-muted-foreground">{t("svcDetail.price.vat")}</div>
                   </div>
                   <Link to={"/plans" as any} className="inline-flex h-9 items-center rounded-full border border-border bg-secondary/60 px-3 text-[11px] font-bold text-foreground/80 hover:border-primary hover:text-primary">
                     {t("svcDetail.allPlans")}
