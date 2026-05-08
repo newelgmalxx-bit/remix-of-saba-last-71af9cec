@@ -8,7 +8,7 @@ import { normalizeOrder } from "@/lib/api/normalize";
 import { useLang } from "@/i18n/LanguageProvider";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/account/orders/$orderId/pay")({
+export const Route = createFileRoute("/account/orders/$orderId/pay" as any)({
   head: () => ({ meta: [{ title: "إتمام الدفع | سابا ديزاين" }] }),
   component: PayOrderPage,
 });
