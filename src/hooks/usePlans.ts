@@ -15,6 +15,7 @@ export type Plan = {
   descriptionEn?: string;
   feats: string[];
   featsEn?: string[];
+  status?: string;
 };
 
 const KEY = "saba_plans_v1";
@@ -91,6 +92,9 @@ function fromApi(p: ApiPlan): Plan {
     featured: !!p.highlighted,
     feats: Array.isArray(p.featuresAr) && p.featuresAr.length ? p.featuresAr : [],
     featsEn: Array.isArray(p.featuresEn) && p.featuresEn.length ? p.featuresEn : [],
+    status: p.status || "active",
+    badge: p.badgeAr || undefined,
+    badgeEn: p.badgeEn || undefined,
   };
 }
 

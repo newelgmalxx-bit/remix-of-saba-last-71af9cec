@@ -10,6 +10,16 @@ export const cart = {
     return request<ApiResponse<Cart>>('/cart/items', { method: 'POST', body: JSON.stringify(body), headers: h });
   },
 
+  addPlan: (body: { planId: string; qty?: number }) => {
+    const h: Record<string, string> = {};
+    if (!getToken()) h['X-Session-Id'] = getSid();
+    return request<ApiResponse<Cart>>('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ planId: body.planId, qty: body.qty ?? 1 }),
+      headers: h,
+    });
+  },
+
   updateQty: (lineId: string, qty: number) =>
     request<ApiResponse<Cart>>(`/cart/items/${lineId}`, { method: 'PATCH', body: JSON.stringify({ qty }) }),
 

@@ -69,7 +69,7 @@ function PlansPage() {
 
 function PlanCard({ plan }: { plan: Plan }) {
   const { t, dir, lang } = useLang();
-  const { add } = useCart();
+  const { addPlan } = useCart();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const priceNum = parseInt(plan.price.replace(/[^\d]/g, ""), 10) || 0;
@@ -79,15 +79,18 @@ function PlanCard({ plan }: { plan: Plan }) {
   const badge = lang === "en" ? (plan.badgeEn || plan.badge) : plan.badge;
   const description = lang === "en" ? (plan.descriptionEn || plan.description) : plan.description;
   const feats = lang === "en" && plan.featsEn?.length ? plan.featsEn : plan.feats;
+  const isActive = (plan.status ?? "active") === "active";
 
   const handleAdd = () => {
-    add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
+    if (!isActive) return;
+    addPlan(plan.id);
     toast.success(t("plansPage.toast.added"), { description: `${t("plansPage.planPrefix")} ${plan.name}` });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
   const handleBuyNow = () => {
-    add({ serviceSlug: `plan:${plan.id}`, serviceTitle: `${t("plansPage.planPrefix")} ${plan.name}`, planName: plan.name, price: priceNum });
+    if (!isActive) return;
+    addPlan(plan.id);
     navigate({ to: "/checkout" as any });
   };
 
@@ -130,17 +133,19 @@ function PlanCard({ plan }: { plan: Plan }) {
       <div className="mt-5 flex flex-col gap-2">
         <button
           onClick={handleBuyNow}
+          disabled={!isActive}
           className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition ${
             plan.featured
               ? "bg-primary text-primary-foreground hover:bg-primary-dark shadow-[0_8px_20px_-8px_rgba(30,91,148,0.55)]"
               : "bg-primary-dark text-white hover:opacity-90"
-          }`}
+          } disabled:cursor-not-allowed disabled:opacity-50`}
         >
           <Zap className="h-4 w-4" /> {t("plansPage.orderNow")}
         </button>
         <button
           onClick={handleAdd}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white text-sm font-bold text-foreground/80 hover:border-primary hover:text-primary transition"
+          disabled={!isActive}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-white text-sm font-bold text-foreground/80 hover:border-primary hover:text-primary transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShoppingCart className="h-4 w-4" />
           {added ? t("plansPage.added") : t("plansPage.addToCart")}
