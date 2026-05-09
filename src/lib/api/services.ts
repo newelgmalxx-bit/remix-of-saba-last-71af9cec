@@ -13,22 +13,23 @@ export const services = {
 
 export const reviews = {
   list: (slug: string, params?: { page?: number; limit?: number; sort?: string }) => {
-    const q = params ? new URLSearchParams(params as any).toString() : '';
-    return request<ApiResponse<any>>(`/services/${slug}/reviews${q ? '?' + q : ''}`);
+    const qp = new URLSearchParams({ serviceSlug: slug, ...(params as any || {}) }).toString();
+    return request<ApiResponse<any>>(`/reviews?${qp}`);
   },
+  // POST /account/reviews (auth required) — backend expects { serviceSlug, rating, text }
   create: (slug: string, body: { rating: number; comment?: string }) =>
-    request(`/services/${slug}/reviews`, { method: 'POST', body: JSON.stringify(body) }),
-  update: (id: string, body: { rating?: number; comment?: string }) =>
-    request(`/reviews/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: (id: string) => request(`/reviews/${id}`, { method: 'DELETE' }),
+    request('/account/reviews', {
+      method: 'POST',
+      body: JSON.stringify({ serviceSlug: slug, rating: body.rating, text: body.comment ?? '' }),
+    }),
 };
 
 export const favorites = {
-  list: () => request<ApiResponse<{ slugs: string[] }>>('/me/favorites'),
+  list: () => request<ApiResponse<{ items: any[]; slugs?: string[] }>>('/account/favorites'),
   add: (slug: string) =>
-    request<ApiResponse<{ favorited: boolean }>>('/me/favorites', {
+    request<ApiResponse<{ favorited: boolean }>>('/account/favorites', {
       method: 'POST', body: JSON.stringify({ serviceSlug: slug }),
     }),
   remove: (slug: string) =>
-    request<ApiResponse<{ favorited: boolean }>>(`/me/favorites/${slug}`, { method: 'DELETE' }),
+    request<ApiResponse<{ favorited: boolean }>>(`/account/favorites/${slug}`, { method: 'DELETE' }),
 };
