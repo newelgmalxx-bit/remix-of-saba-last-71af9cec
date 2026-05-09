@@ -11,7 +11,7 @@ export const publicApi = {
     logo: string | null; nameAr: string; nameEn: string;
     taglineAr: string; taglineEn: string;
     social: Record<string, string>; maintenanceMode: boolean;
-  }>>('/admin/site/settings'),
+  }>>('/site/settings'),
   sendContact: (body: { name: string; email: string; phone?: string; service?: string; budget?: string; message: string }) =>
     request<ApiResponse<{ ok: boolean }>>('/contact', { method: 'POST', body: JSON.stringify(body) }),
 };

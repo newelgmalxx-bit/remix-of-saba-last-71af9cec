@@ -81,8 +81,9 @@ export const admin = {
   updateReviewStatus: (id: string, status: string) => request(`/admin/reviews/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteReview: (id: string) => request(`/admin/reviews/${id}`, { method: 'DELETE' }),
 
-  getSiteSettings: () => request('/admin/site/settings'),
-  updateSiteSettings: (body: any) => request('/admin/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
+  // Spec exposes a single /site/settings endpoint (GET public, PUT admin).
+  getSiteSettings: () => request('/site/settings'),
+  updateSiteSettings: (body: any) => request('/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
 
   // Tracking codes (pixels / head / body scripts)
   trackingList: () => request<ApiResponse<{ items: any[] }>>('/admin/tracking'),

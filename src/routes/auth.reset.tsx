@@ -33,7 +33,7 @@ function AuthResetPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch('https://saba-design.com/api/auth/reset', {
+      const res = await fetch('https://saba-design.com/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({

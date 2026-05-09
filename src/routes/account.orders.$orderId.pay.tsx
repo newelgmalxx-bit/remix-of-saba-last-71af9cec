@@ -44,7 +44,11 @@ function PayOrderPage() {
     if (!order) return;
     setPaying(true);
     try {
-      const res: any = await account.payOrder(order.id, { paymentMethod: payment });
+      const res: any = await account.payOrder(order.id, {
+        paymentMethod: payment,
+        phone: (order as any).contact_phone || (order as any).contactPhone || '',
+        city: (order as any).contact_city || (order as any).contactCity || '',
+      });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
