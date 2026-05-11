@@ -55,6 +55,11 @@ function normalize(d: any): SiteSettings {
     linkedin: d.linkedin ?? social.linkedin,
     youtube: d.youtube ?? social.youtube,
     tiktok: d.tiktok ?? social.tiktok,
+    snapchat: d.snapchat ?? social.snapchat,
+    vatPercent: d.vatPercent ?? (typeof d.vatRate === "number" ? d.vatRate * 100 : undefined),
+    currency: d.currency,
+    maintenanceMode: d.maintenanceMode ?? d.maintenance,
+    seo: d.seo,
   };
 }
 
