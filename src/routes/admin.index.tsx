@@ -71,9 +71,34 @@ function AdminDashboard() {
           source: b.source ?? "direct",
         }));
         setBookings(items as any);
-        const totalAll = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
-        const totalPaid = all.filter((o) => o.paid || o.payment_status === "paid").reduce((s, o) => s + (Number(o.total) || 0), 0);
-        const effectiveRevenue = totalPaid || totalAll;
+        const nowD = new Date();
+        const curY = nowD.getFullYear();
+        const curM = nowD.getMonth();
+        const prevDate = new Date(curY, curM - 1, 1);
+        const prevY = prevDate.getFullYear();
+        const prevM = prevDate.getMonth();
+        const isPaid = (o: any) => o.paid === true || o.payment_status === "paid" || o.paymentStatus === "paid";
+        const orderDate = (o: any) => {
+          const raw = (o.createdAt || o.created_at || "").toString();
+          const dt = new Date(raw.replace(" ", "T"));
+          return Number.isNaN(dt.getTime()) ? null : dt;
+        };
+        const paidThisMonth = all.filter((o) => {
+          if (!isPaid(o)) return false;
+          const dt = orderDate(o);
+          return !!dt && dt.getFullYear() === curY && dt.getMonth() === curM;
+        });
+        const paidPrevMonth = all.filter((o) => {
+          if (!isPaid(o)) return false;
+          const dt = orderDate(o);
+          return !!dt && dt.getFullYear() === prevY && dt.getMonth() === prevM;
+        });
+        const monthRevenue = paidThisMonth.reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const prevMonthRevenue = paidPrevMonth.reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const revenueGrowth = prevMonthRevenue > 0
+          ? Math.round(((monthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100)
+          : (monthRevenue > 0 ? 100 : 0);
+        const effectiveRevenue = monthRevenue;
 
         // Build last 6 months revenue series
         const now = new Date();
@@ -129,7 +154,8 @@ function AdminDashboard() {
         setStats((s: any) => ({
           ...s,
           revenue: effectiveRevenue,
-          ordersCount: all.length,
+          revenueGrowth,
+          ordersCount: paidThisMonth.length,
           totalBookings: all.length,
           remaining: Math.max(0, (s.monthlyTarget || 0) - effectiveRevenue),
         }));
