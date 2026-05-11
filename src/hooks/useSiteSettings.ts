@@ -16,6 +16,11 @@ export type SiteSettings = {
   linkedin?: string;
   youtube?: string;
   tiktok?: string;
+  snapchat?: string;
+  vatPercent?: number;
+  currency?: string;
+  maintenanceMode?: boolean;
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: string };
   // Allow any extra keys without typing each one
   [k: string]: any;
 };
@@ -50,6 +55,11 @@ function normalize(d: any): SiteSettings {
     linkedin: d.linkedin ?? social.linkedin,
     youtube: d.youtube ?? social.youtube,
     tiktok: d.tiktok ?? social.tiktok,
+    snapchat: d.snapchat ?? social.snapchat,
+    vatPercent: d.vatPercent ?? (typeof d.vatRate === "number" ? d.vatRate * 100 : undefined),
+    currency: d.currency,
+    maintenanceMode: d.maintenanceMode ?? d.maintenance,
+    seo: d.seo,
   };
 }
 
