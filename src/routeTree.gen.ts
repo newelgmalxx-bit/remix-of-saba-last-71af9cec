@@ -697,6 +697,7 @@ export interface RootRouteChildren {
   AccountIndexRoute: typeof AccountIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
+  OrderSummaryOrderIdRoute: typeof OrderSummaryOrderIdRoute
   AccountTicketsTicketIdRoute: typeof AccountTicketsTicketIdRoute
   AccountTicketsNewRoute: typeof AccountTicketsNewRoute
   AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
