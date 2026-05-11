@@ -64,11 +64,21 @@ export const account = {
     });
   },
 
-  // Re-pay an existing unpaid order via POST /checkout/myfatoorah.
-  payOrder: (id: string, _body?: { paymentMethod?: string; phone?: string; city?: string }) => {
-    return request<ApiResponse<{ paymentUrl: string }>>('/checkout/myfatoorah', {
-      method: 'POST', body: JSON.stringify({ orderId: id }),
-    });
+  // Re-pay an existing unpaid order.
+  // POST /account/orders/{id}/pay  body: { paymentMethod, phone?, city? }
+  // Returns: { paymentUrl?: string, paid?: boolean, status?: string }
+  // - paymentUrl: redirect URL for hosted gateways (mayfatoorah/tabby/tamara)
+  // - paid: true when payment was settled inline (e.g. cod confirmation)
+  payOrder: (id: string, body?: { paymentMethod?: string; phone?: string; city?: string }) => {
+    const payload = {
+      paymentMethod: body?.paymentMethod ?? 'mayfatoorah',
+      phone: body?.phone,
+      city: body?.city,
+    };
+    return request<ApiResponse<{ paymentUrl?: string; paid?: boolean; status?: string }>>(
+      `/account/orders/${id}/pay`,
+      { method: 'POST', body: JSON.stringify(payload) },
+    );
   },
 
   // ----- Invoices (auth) -----

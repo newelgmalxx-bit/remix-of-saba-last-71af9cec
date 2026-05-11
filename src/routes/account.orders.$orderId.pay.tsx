@@ -54,7 +54,12 @@ function PayOrderPage() {
         window.location.href = url;
         return;
       }
-      toast.success(lang === "ar" ? "تم بدء عملية الدفع" : "Payment initiated");
+      const paid = res?.data?.paid ?? res?.paid;
+      toast.success(
+        paid
+          ? (lang === "ar" ? "تم تسجيل الدفع بنجاح" : "Payment recorded")
+          : (lang === "ar" ? "تم تحديث طريقة الدفع" : "Payment method updated"),
+      );
       navigate({ to: "/account/orders/$orderId" as any, params: { orderId: order.id } as any });
     } catch (e: any) {
       toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
