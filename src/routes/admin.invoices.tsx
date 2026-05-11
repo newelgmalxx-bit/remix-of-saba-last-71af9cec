@@ -24,10 +24,12 @@ function InvoicesPage() {
     void: { l: L("ملغاة", "Void"), t: "rose" as const },
   };
 
-  const [invoices, setInvoices] = useState<AdminInvoice[]>([]);
+  const [invoices, setInvoices] = useState<(AdminInvoice & { orderId?: string })[]>([]);
+  const [orderMap, setOrderMap] = useState<Record<string, any>>({});
   const [tab, setTab] = useState<"all" | "paid" | "pending" | "void">("all");
   const [q, setQ] = useState("");
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
+  const [orderViewing, setOrderViewing] = useState<any | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
     orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0].value,
@@ -39,20 +41,51 @@ function InvoicesPage() {
   };
 
   useEffect(() => {
-    adminApi.invoices.list({ limit: 100 })
-      .then((p) => {
-        const items: AdminInvoice[] = (p.items || []).map((i: any) => ({
-          id: i.id, number: i.number, orderNumber: i.order_id ?? "",
-          client: i.client_name, email: i.client_email,
-          phone: i.client_phone ?? "", city: i.client_city ?? "",
-          payment: i.payment_method ?? paymentMethods[0],
-          amount: Number(i.total) || 0, status: i.status,
-          issued: (i.created_at || "").slice(0, 10),
-        }));
-        setInvoices(items);
-      })
-      .catch(() => setInvoices([]));
+    Promise.all([
+      adminApi.invoices.list({ limit: 100 }).catch(() => ({ items: [] })),
+      adminApi.orders.list({ limit: 200 }).catch(() => ({ items: [] })),
+    ]).then(([inv, ord]: any[]) => {
+      const map: Record<string, any> = {};
+      (ord.items || []).forEach((o: any) => {
+        if (o.id) map[o.id] = o;
+        if (o.number) map[o.number] = o;
+      });
+      setOrderMap(map);
+
+      const items = (inv.items || []).map((i: any) => {
+        const orderId = i.orderId ?? i.order_id ?? "";
+        const o = orderId ? map[orderId] : null;
+        return {
+          id: i.id,
+          number: i.number,
+          orderNumber: o?.number || orderId || "",
+          orderId: orderId || undefined,
+          client: i.clientName ?? i.client_name ?? o?.contact_name ?? o?.userName ?? "",
+          email: i.clientEmail ?? i.client_email ?? o?.contact_email ?? o?.userEmail ?? "",
+          phone: i.clientPhone ?? i.client_phone ?? o?.contact_phone ?? o?.phone ?? "",
+          city: i.clientCity ?? i.client_city ?? o?.contact_city ?? o?.city ?? "",
+          payment: i.paymentMethod ?? i.payment_method ?? o?.payment_method ?? paymentMethods[0].value,
+          amount: Number(i.total) || Number(o?.total) || 0,
+          status: i.status || (o?.payment_status === "paid" ? "paid" : "pending"),
+          issued: ((i.createdAt || i.created_at || "") + "").slice(0, 10),
+        };
+      });
+      setInvoices(items as any);
+    });
   }, []);
+
+  const openOrder = async (inv: AdminInvoice & { orderId?: string }) => {
+    const key = inv.orderId || inv.orderNumber;
+    if (!key) { toast.error(L("لا يوجد طلب مرتبط", "No linked order")); return; }
+    let o = orderMap[key];
+    if (!o && inv.orderId) {
+      try {
+        const r: any = await adminApi.orders.get?.(inv.orderId);
+        o = r?.order || r?.data?.order || r;
+      } catch {}
+    }
+    setOrderViewing(o || { id: inv.orderId, number: inv.orderNumber });
+  };
 
   const filtered = invoices.filter(i => {
     const num = (i.number ?? "").toString().toLowerCase();
