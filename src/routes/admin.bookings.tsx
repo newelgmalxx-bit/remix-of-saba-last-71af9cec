@@ -21,10 +21,15 @@ function BookingsPage() {
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const statusLabels: Record<AdminBooking["status"], string> = {
     pending: L("بانتظار التأكيد", "Pending"),
+    confirmed: L("مؤكد", "Confirmed"),
     in_progress: L("قيد التنفيذ", "In progress"),
     review: L("قيد المراجعة", "Under review"),
     completed: L("مكتمل", "Completed"),
     cancelled: L("ملغي", "Cancelled"),
+  };
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find(p => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
   };
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
