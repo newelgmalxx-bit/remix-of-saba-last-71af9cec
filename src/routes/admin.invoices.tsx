@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
-import { renderInvoiceToPdf } from "@/lib/renderInvoice";
+import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice";
 import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 export const Route = createFileRoute("/admin/invoices")({
