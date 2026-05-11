@@ -87,16 +87,61 @@ export const cart = {
 export const checkout = {
   ...checkoutNew,
   submit: async (body: Parameters<typeof checkoutNew.create>[0]) => {
-    const res: any = await checkoutNew.create(body);
-    const data = res?.data ?? res;
-    if (!data || (!data.orderNumber && !data.orderId && !data.order)) {
-      const { ApiError } = await import('./client');
-      throw new ApiError(
-        502,
-        'تعذر إنشاء الطلب على الخادم — استجابة فارغة. حاول مرة أخرى أو تواصل مع الدعم.'
-      );
+    // Call /checkout directly so we can read the order data even when the
+    // server returns `success: false` (e.g. the order was created but a
+    // post-create cart cleanup step failed with "cart item not found").
+    const { getToken, getLang, getSid, ApiError } = await import('./client');
+    const payload: any = {
+      paymentMethod: body.paymentMethod,
+      contactName: body.contactName ?? body.contact?.name ?? '',
+      contactEmail: body.contactEmail ?? body.contact?.email ?? '',
+      contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
+      contactCity: body.contactCity ?? body.contact?.city ?? body.city,
+      contactAddress: body.contactAddress ?? body.contact?.address,
+      notes: body.notes,
+    };
+    const token = getToken();
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Accept-Language': getLang(),
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    else headers['X-Session-Id'] = getSid();
+
+    const res = await fetch('https://saba-design.com/api/checkout', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    let json: any = null;
+    try { json = await res.json(); } catch {}
+    const data = json?.data ?? json ?? {};
+    const orderId = data.orderId ?? data.order?.id;
+    const orderNumber = data.orderNumber ?? data.order?.number ?? data.order?.orderNumber;
+
+    // If the order was actually created, treat it as success regardless of
+    // the `success` flag or any cleanup-side errors.
+    if (orderId || orderNumber) {
+      return {
+        orderId,
+        orderNumber,
+        paymentUrl: data.paymentUrl ?? null,
+        order: data.order,
+      };
     }
-    return data;
+
+    // Real failure (auth, validation, server error, empty response).
+    if (res.status === 401) {
+      throw new ApiError(401, json?.message || 'Unauthorized');
+    }
+    if (res.status === 422 || json?.errors) {
+      throw new ApiError(422, json?.message || 'Validation failed', json?.errors);
+    }
+    throw new ApiError(
+      res.status || 502,
+      json?.message || 'تعذر إنشاء الطلب على الخادم. حاول مرة أخرى أو تواصل مع الدعم.'
+    );
   },
 };
 
