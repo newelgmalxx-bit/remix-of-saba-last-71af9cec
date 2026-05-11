@@ -122,10 +122,17 @@ export function usePlans(opts?: { source?: "public" | "admin" }) {
     // try to refresh from backend
     (async () => {
       try {
-        const res: any = source === "admin"
-          ? await adminApi.plans.list()
-          : await publicApi.getPlans();
-        const items: ApiPlan[] | undefined = res?.items ?? res?.data?.items;
+        let items: any[] | undefined;
+        if (source === "admin") {
+          try {
+            const res: any = await adminApi.plans.list();
+            items = res?.items ?? res?.data?.items;
+          } catch {}
+        }
+        if (!items?.length) {
+          const res: any = await publicApi.getPlans();
+          items = res?.items ?? res?.data?.items;
+        }
         if (items?.length) {
           const mapped = items.map(fromApi);
           write(mapped);
