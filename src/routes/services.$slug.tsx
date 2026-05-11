@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import servicesHero from "@/assets/services-hero.png";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
