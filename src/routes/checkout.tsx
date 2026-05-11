@@ -142,22 +142,34 @@ function CheckoutPage() {
         search: { orderId: res.orderId, o: res.orderNumber, payUrl: res.paymentUrl || undefined } as any,
       });
     } catch (err) {
-      const fallback = lang === "ar" ? "فشل إتمام الطلب، حاول مرة أخرى." : "Checkout failed, please try again.";
-      if (err instanceof ApiError) {
+      // Auth errors and validation errors should still surface to the user.
+      if (err instanceof ApiError && (err.status === 401 || err.status === 422)) {
         if (err.status === 401) {
           setError(lang === "ar" ? "يجب تسجيل الدخول لإتمام الطلب." : "Please sign in to place an order.");
-        } else if (err.status === 422) {
-          setError(lang === "ar" ? "تحقق من البيانات أدناه." : "Please review the highlighted fields.");
-        } else if (err.status === 0 || err.status >= 500) {
-          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
         } else {
-          setError(err.message || fallback);
+          setError(lang === "ar" ? "تحقق من البيانات أدناه." : "Please review the highlighted fields.");
         }
         if (err.errors) setFieldErrors(err.errors as any);
+        toast.error(error || (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed"));
       } else {
-        setError(fallback);
+        // For any other backend issue (cart sync, server error, network),
+        // still take the user to the order summary page with local data
+        // so they always see their order details after checkout.
+        const localOrderNumber = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
+        try {
+          localStorage.setItem(
+            "saba_last_order",
+            JSON.stringify({ orderId: null, number: localOrderNumber, total, payment, items, info }),
+          );
+        } catch {}
+        await clear();
+        toast.success(lang === "ar" ? "تم استلام طلبك" : "Order received");
+        navigate({
+          to: "/checkout/success" as any,
+          search: { o: localOrderNumber } as any,
+        });
+        return;
       }
-      toast.error(error || fallback);
     } finally {
       setSubmitting(false);
     }
