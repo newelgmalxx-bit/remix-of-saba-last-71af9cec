@@ -140,8 +140,17 @@ function PaymentResultPage() {
 
   useEffect(() => {
     if (!paymentId) {
-      setKind(normalize(search.status));
+      const k = normalize(search.status);
+      setKind(k);
       setOrderNumber(search.order);
+      // If gateway returned with status=success directly, jump to summary page.
+      if (k === "success") {
+        navigate({
+          to: "/checkout/success" as any,
+          search: { o: search.order } as any,
+          replace: true,
+        });
+      }
       return;
     }
     runVerification();
