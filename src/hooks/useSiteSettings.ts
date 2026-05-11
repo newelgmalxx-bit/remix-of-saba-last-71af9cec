@@ -25,7 +25,7 @@ export type SiteSettings = {
   [k: string]: any;
 };
 
-const KEY = "saba_site_settings_v1";
+const KEY = "saba_site_settings_v2";
 
 function read(): SiteSettings {
   if (typeof window === "undefined") return {};
