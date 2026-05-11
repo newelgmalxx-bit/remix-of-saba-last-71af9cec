@@ -74,7 +74,7 @@ function SiteSettingsPage() {
 
         <PanelCard title={L("روابط التواصل الاجتماعي", "Social Media Links")} className="lg:col-span-3">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(["facebook","instagram","twitter","linkedin","youtube","tiktok"] as const).map(k => (
+            {(["facebook","instagram","twitter","linkedin","youtube","tiktok","snapchat"] as const).map(k => (
               <Lbl key={k} label={k}><input className={ic} dir="ltr" placeholder={`https://${k}.com/...`} value={(s as any)[k]} onChange={e => setS({ ...s, [k]: e.target.value })} /></Lbl>
             ))}
           </div>
@@ -82,7 +82,7 @@ function SiteSettingsPage() {
 
         <PanelCard title={L("وضع الصيانة", "Maintenance Mode")} className="lg:col-span-3">
           <label className="flex items-center gap-3">
-            <input type="checkbox" className="h-4 w-4" checked={s.maintenance} onChange={e => setS({ ...s, maintenance: e.target.checked })} />
+            <input type="checkbox" className="h-4 w-4" checked={s.maintenanceMode} onChange={e => setS({ ...s, maintenanceMode: e.target.checked })} />
             <span className="text-sm font-medium">{L("تفعيل وضع الصيانة (سيظهر للزوار صفحة \"الموقع تحت الصيانة\")", "Enable maintenance mode (visitors will see \"Site under maintenance\")")}</span>
           </label>
         </PanelCard>
