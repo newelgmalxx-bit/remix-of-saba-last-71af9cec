@@ -32,17 +32,21 @@ function ServicesPage() {
     try {
       const res: any = await api.admin.getServices();
       const list = res?.items || res?.data?.items || [];
-      const mapped: AdminService[] = list.map((s: any, i: number) => ({
-        id: String(s.id ?? `s${i + 1}`),
-        sku: s.sku || s.slug.toUpperCase(),
-        slug: s.slug,
-        titleAr: s.titleAr || s.slug,
-        titleEn: s.titleEn || s.slug,
-        category: s.category || "عام",
-        price: Number(s?.price?.amount ?? s?.price ?? 0),
-        bookings: 0,
-        status: (s.status as AdminService["status"]) || "active",
-      }));
+      const mapped: AdminService[] = list.map((s: any, i: number) => {
+        const titleAr = s.titleAr ?? s.title?.ar ?? s.title_ar ?? (typeof s.title === "string" ? s.title : "") ?? s.nameAr ?? "";
+        const titleEn = s.titleEn ?? s.title?.en ?? s.title_en ?? s.nameEn ?? "";
+        return {
+          id: String(s.id ?? `s${i + 1}`),
+          sku: s.sku || (s.slug ? s.slug.toUpperCase() : ""),
+          slug: s.slug,
+          titleAr: titleAr || titleEn || s.slug,
+          titleEn: titleEn || titleAr || s.slug,
+          category: s.category || "عام",
+          price: Number(s?.price?.amount ?? s?.price ?? 0),
+          bookings: 0,
+          status: (s.status as AdminService["status"]) || "active",
+        };
+      });
       setItems(mapped);
     } catch {
       setItems(initialServices);
