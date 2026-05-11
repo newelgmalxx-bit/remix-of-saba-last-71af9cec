@@ -110,7 +110,7 @@ function AdminTicketDetail() {
                   <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                     isSupport ? "bg-primary text-primary-foreground" : "bg-amber-100 text-amber-700"
                   }`}>
-                    {m.author.charAt(0)}
+                    {(m.author || "?").charAt(0)}
                   </div>
                   <div className={`max-w-[75%] flex flex-col ${isSupport ? "items-end" : "items-start"}`}>
                     <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
