@@ -30,20 +30,41 @@ function ServicesPage() {
 
   const fetchList = async () => {
     try {
-      const res: any = await api.admin.getServices();
+      const [res, ordersRes]: any = await Promise.all([
+        api.admin.getServices(),
+        api.admin.getOrders({ per_page: 1000 }).catch(() => null),
+      ]);
       const list = res?.items || res?.data?.items || [];
+      const orders: any[] = ordersRes?.items || ordersRes?.data?.items || ordersRes?.data || [];
+      const countBySlug: Record<string, number> = {};
+      const countById: Record<string, number> = {};
+      for (const o of orders) {
+        const items = o?.items || [];
+        const seenSlug = new Set<string>();
+        const seenId = new Set<string>();
+        for (const it of items) {
+          const slug = it?.service_slug || it?.slug;
+          const sid = it?.service_id ? String(it.service_id) : "";
+          if (slug && !seenSlug.has(slug)) { countBySlug[slug] = (countBySlug[slug] || 0) + 1; seenSlug.add(slug); }
+          if (sid && !seenId.has(sid)) { countById[sid] = (countById[sid] || 0) + 1; seenId.add(sid); }
+        }
+      }
       const mapped: AdminService[] = list.map((s: any, i: number) => {
         const titleAr = s.titleAr ?? s.title?.ar ?? s.title_ar ?? (typeof s.title === "string" ? s.title : "") ?? s.nameAr ?? "";
         const titleEn = s.titleEn ?? s.title?.en ?? s.title_en ?? s.nameEn ?? "";
+        const id = String(s.id ?? `s${i + 1}`);
+        const bookings = Number(
+          s.orders_count ?? s.ordersCount ?? s.bookings_count ?? s.bookingsCount ?? countBySlug[s.slug] ?? countById[id] ?? 0
+        );
         return {
-          id: String(s.id ?? `s${i + 1}`),
+          id,
           sku: s.sku || (s.slug ? s.slug.toUpperCase() : ""),
           slug: s.slug,
           titleAr: titleAr || s.slug,
           titleEn: titleEn || s.slug,
           category: s.category || "عام",
           price: Number(s?.price?.amount ?? s?.price ?? 0),
-          bookings: 0,
+          bookings,
           status: (s.status as AdminService["status"]) || "active",
         };
       });
@@ -52,6 +73,7 @@ function ServicesPage() {
       setItems(initialServices);
     } finally { setLoading(false); }
   };
+
   useEffect(() => { fetchList(); }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
