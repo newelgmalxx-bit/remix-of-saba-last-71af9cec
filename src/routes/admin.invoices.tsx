@@ -267,6 +267,43 @@ function InvoicesPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!orderViewing} onOpenChange={(o) => !o && setOrderViewing(null)}>
+        <DialogContent dir={dir} className="max-w-2xl">
+          <DialogHeader><DialogTitle>{L("تفاصيل الطلب", "Order Details")} <span dir="ltr">#{orderViewing?.number || orderViewing?.id}</span></DialogTitle></DialogHeader>
+          {orderViewing && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <Info label={L("العميل", "Client")} value={orderViewing.contact_name || orderViewing.userName || "—"} />
+                <Info label={L("البريد", "Email")} value={orderViewing.contact_email || orderViewing.userEmail || "—"} />
+                <Info label={L("الجوال", "Phone")} value={orderViewing.contact_phone || orderViewing.phone || "—"} dir="ltr" />
+                <Info label={L("المدينة", "City")} value={orderViewing.contact_city || orderViewing.city || "—"} />
+                <Info label={L("طريقة الدفع", "Payment")} value={payLabel(orderViewing.payment_method || orderViewing.payment || "")} />
+                <Info label={L("الحالة", "Status")} value={orderViewing.status || "—"} />
+                <Info label={L("الإجمالي", "Total")} value={fmtSAR(Number(orderViewing.total) || 0)} />
+                <Info label={L("التاريخ", "Date")} value={((orderViewing.created_at || "") + "").slice(0, 10)} />
+              </div>
+              {Array.isArray(orderViewing.items) && orderViewing.items.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold mb-2 text-muted-foreground">{L("العناصر", "Items")}</div>
+                  <div className="rounded-xl border border-border divide-y divide-border">
+                    {orderViewing.items.map((it: any, idx: number) => (
+                      <div key={idx} className="flex justify-between px-3 py-2">
+                        <span>{it.service_title || it.serviceTitle || it.title || it.desc}</span>
+                        <span className="font-bold" data-ltr-number>{fmtSAR(Number(it.price) * Number(it.qty || 1))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {orderViewing.notes && (
+                <div className="rounded-xl bg-muted/40 p-3 text-xs">{orderViewing.notes}</div>
+              )}
+            </div>
+          )}
+          <DialogFooter><GhostButton onClick={() => setOrderViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent dir={dir} className="max-w-xl">
           <DialogHeader><DialogTitle>{L("فاتورة يدوية جديدة", "New Manual Invoice")}</DialogTitle></DialogHeader>
