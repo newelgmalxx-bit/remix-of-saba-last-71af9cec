@@ -333,8 +333,8 @@ function BookingsPage() {
               <Lbl label={L("الخدمة", "Service")} full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
               <Lbl label={L("الإجمالي (ر.س)", "Total (SAR)")}><input type="number" className={ic} dir="ltr" value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
               <Lbl label={L("طريقة الدفع", "Payment method")}>
-                <select className={ic} value={editForm.payment ?? paymentMethods[0]} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
-                  {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                <select className={ic} value={editForm.payment ?? paymentMethods[0].value} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
+                  {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                 </select>
               </Lbl>
               <Lbl label={L("المصدر", "Source")}>
