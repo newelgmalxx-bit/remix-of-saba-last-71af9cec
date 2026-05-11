@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/tracking")({
 });
 
 type TrackingItem = {
-  id: number;
+  id: string | number;
   name: string;
   type: "pixel" | "head" | "body";
   code: string;
@@ -41,9 +41,9 @@ function TrackingPage() {
   const [items, setItems] = useState<TrackingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | number | null>(null);
   const [f, setF] = useState<Form>(empty);
-  const [delId, setDelId] = useState<number | null>(null);
+  const [delId, setDelId] = useState<string | number | null>(null);
 
   const load = async () => {
     setLoading(true);
