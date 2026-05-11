@@ -94,21 +94,37 @@ function AdminDashboard() {
         });
         setRevenue(months);
 
-        // Build sales by category from order items
-        const catTotals: Record<string, number> = {};
-        all.forEach((o) => {
-          (o.items || []).forEach((it: any) => {
-            const k = it.service_title || it.serviceTitle || it.service_slug || "—";
-            catTotals[k] = (catTotals[k] || 0) + (Number(it.price) || 0) * (Number(it.qty) || 1);
+        // Build sales by category from order items (resolved via services list)
+        adminApi.services.list({ limit: 500 }).then((sp: any) => {
+          const services: any[] = sp?.items || [];
+          const total = services.length || 0;
+          const active = services.filter((s) => (s.status || "active") === "active").length;
+          setStats((s: any) => ({ ...s, totalServices: total, activeServices: active }));
+
+          const slugToCat: Record<string, string> = {};
+          services.forEach((s) => {
+            const slug = s.slug || s.service_slug;
+            const cat = s.category_ar || s.category_en || s.category || L("بدون تصنيف", "Uncategorized");
+            if (slug) slugToCat[slug] = cat;
           });
-        });
-        const totalCat = Object.values(catTotals).reduce((s, v) => s + v, 0) || 1;
-        const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
-        const cats = Object.entries(catTotals)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([name, v], i) => ({ name, value: Math.round((v / totalCat) * 100), color: palette[i % palette.length] }));
-        setByCat(cats);
+
+          const catTotals: Record<string, number> = {};
+          all.forEach((o) => {
+            const lines = (o.items && o.items.length ? o.items : [{ service_slug: o.service_slug, service_title: o.service, price: o.total, qty: 1 }]);
+            lines.forEach((it: any) => {
+              const slug = it.service_slug || it.serviceSlug;
+              const k = slugToCat[slug] || it.service_title || it.serviceTitle || L("بدون تصنيف", "Uncategorized");
+              catTotals[k] = (catTotals[k] || 0) + (Number(it.price) || 0) * (Number(it.qty) || 1);
+            });
+          });
+          const totalCat = Object.values(catTotals).reduce((s, v) => s + v, 0) || 1;
+          const palette = ["#1E5B94", "#3a7fbe", "#5fa1d9", "#9bc4e8", "#cbe0f0"];
+          const cats = Object.entries(catTotals)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([name, v], i) => ({ name, value: Math.round((v / totalCat) * 100), color: palette[i % palette.length] }));
+          setByCat(cats);
+        }).catch(() => {});
 
         setStats((s: any) => ({
           ...s,
@@ -121,13 +137,6 @@ function AdminDashboard() {
       .catch(() => setBookings([]));
     adminApi.clients.list({ limit: 1 })
       .then((p: any) => setStats((s: any) => ({ ...s, totalClients: p?.total ?? s.totalClients })))
-      .catch(() => {});
-    adminApi.services.list({ limit: 1 })
-      .then((p: any) => setStats((s: any) => ({
-        ...s,
-        totalServices: p?.total ?? s.totalServices,
-        activeServices: p?.total ?? s.activeServices,
-      })))
       .catch(() => {});
     adminApi.notifications.list(5)
       .then((d: any) => {
