@@ -44,24 +44,19 @@ function PayOrderPage() {
     if (!order) return;
     setPaying(true);
     try {
-      const res: any = await account.payOrder(order.id, {
-        paymentMethod: payment,
-        phone: (order as any).contact_phone || (order as any).contactPhone || '',
-        city: (order as any).contact_city || (order as any).contactCity || '',
-      });
+      const res: any = await account.payOrder(order.id, { paymentMethod: payment });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
         return;
       }
-      const paid = res?.data?.paid ?? res?.paid;
-      toast.success(
-        paid
-          ? (lang === "ar" ? "تم تسجيل الدفع بنجاح" : "Payment recorded")
-          : (lang === "ar" ? "تم تحديث طريقة الدفع" : "Payment method updated"),
-      );
-      navigate({ to: "/account/orders/$orderId" as any, params: { orderId: order.id } as any });
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
     } catch (e: any) {
+      if (e?.status === 409) {
+        toast.error(e.message || (lang === "ar" ? "لا يمكن الدفع لهذا الطلب" : "Cannot pay this order"));
+        navigate({ to: "/account/orders/$orderId" as any, params: { orderId: order.id } as any });
+        return;
+      }
       toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
     } finally {
       setPaying(false);
