@@ -126,7 +126,7 @@ function ReportsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(stats.revenue)} icon={DollarSign} accent="primary" />
         <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.orders} icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={stats.conversion} icon={TrendingUp} accent="emerald" />
+        <StatCard label={L("إجمالي الضريبة", "Total VAT")} value={fmtSAR(stats.vat)} icon={TrendingUp} accent="emerald" />
         <StatCard label={L("العملاء النشطون", "Active Clients")} value={stats.clients} icon={Users} accent="amber" />
         <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} icon={Package} accent="primary" />
         <StatCard label={L("هامش الربح", "Profit Margin")} value={stats.profitMargin} icon={Activity} accent="violet" />
