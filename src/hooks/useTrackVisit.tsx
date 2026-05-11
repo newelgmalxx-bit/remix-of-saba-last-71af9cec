@@ -29,7 +29,7 @@ export function useTrackVisit() {
       sessionId: getSid(),
       userAgent: navigator.userAgent,
     });
-    fetch(`${BASE}/analytics/track`, {
+    fetch(`${BASE}/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Session-Id": getSid() },
       body,
