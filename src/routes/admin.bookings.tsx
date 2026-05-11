@@ -274,7 +274,7 @@ function BookingsPage() {
                     <td className="px-3 py-3">{b.service}</td>
                     <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3">
-                      <select value={b.payment} onChange={(e) => setBookings(bookings.map(x => x.id === b.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
+                      <select value={b.payment} onChange={(e) => updatePaymentMethod(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
                         {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                       </select>
                     </td>
