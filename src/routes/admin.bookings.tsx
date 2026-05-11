@@ -46,17 +46,23 @@ function BookingsPage() {
         const items = (p.items || []).map((b: any) => ({
           id: b.id,
           number: b.number,
-          client: b.contact_name || b.client || "",
-          email: b.contact_email || b.email || "",
+          client: b.contact_name || b.userName || b.client || "",
+          email: b.contact_email || b.userEmail || b.email || "",
           phone: b.contact_phone || b.phone || undefined,
           city: b.contact_city || b.city || undefined,
+          address: b.contact_address || b.address || undefined,
+          notes: b.notes || undefined,
           service: Array.isArray(b.items) && b.items.length
             ? b.items.map((i: any) => i.service_title || i.serviceTitle).filter(Boolean).join(" • ")
             : (b.service || ""),
+          subtotal: Number(b.subtotal) || undefined,
+          vat: Number(b.vat) || undefined,
+          couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
           total: Number(b.total) || 0,
           payment: b.payment_method || b.payment || "cod",
+          paymentId: b.payment_id ?? null,
           status: b.status,
-          date: (b.createdAt || "").slice(0, 10),
+          date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
           source: b.source ?? "direct",
           paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
         })) as AdminBooking[];
