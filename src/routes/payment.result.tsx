@@ -103,9 +103,10 @@ function PaymentResultPage() {
       if (result === "success") {
         stopTimer();
         setKind("success");
+        // Redirect to the order summary / invoice page after successful payment.
         navigate({
-          to: "/payment/result",
-          search: { status: "success", order: orderNumber },
+          to: "/checkout/success" as any,
+          search: { orderId, o: orderNumber } as any,
           replace: true,
         });
       } else if (result === "failed") {
