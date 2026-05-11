@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
-import { renderInvoiceToPdf } from "@/lib/renderInvoice";
+import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
@@ -132,10 +132,46 @@ function BookingsPage() {
     return s === "cod" || s.includes("كاش") || s.includes("استلام") || s.includes("cash");
   };
 
-  const updatePaymentStatus = (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
+  const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
     setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
-    adminApi.orders.setPaymentStatus?.(id, paymentStatus as string).catch(() => { /* offline-tolerant */ });
-    toast.success(paymentStatus === "paid" ? L("تم تأكيد الدفع وإصدار الفاتورة", "Payment confirmed — invoice issued") : L("تم تحديث حالة الدفع", "Payment status updated"));
+    try {
+      await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
+    } catch { /* offline-tolerant */ }
+
+    if (paymentStatus !== "paid") {
+      toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
+      return;
+    }
+
+    // Generate invoice PDF and persist it via /admin/invoices
+    const b = bookings.find(x => x.id === id);
+    if (!b) {
+      toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
+      return;
+    }
+    const subtotal = +(b.total / 1.15).toFixed(2);
+    const vat = +(b.total - subtotal).toFixed(2);
+    const invoiceData = {
+      number: b.number,
+      date: b.date,
+      orderId: b.id,
+      clientName: b.client,
+      clientEmail: b.email,
+      clientPhone: b.phone,
+      clientCity: b.city,
+      paymentMethod: payLabel(b.payment),
+      paymentStatus: "paid" as const,
+      items: [{ title: b.service || "—", qty: 1, price: subtotal }],
+      subtotal, vat, total: b.total,
+    };
+    try {
+      const pdf = await renderInvoiceToPdfBlob(invoiceData);
+      await adminApi.invoices.create(invoiceData, pdf);
+      toast.success(L("تم تأكيد الدفع وحفظ الفاتورة", "Payment confirmed — invoice saved"));
+    } catch (e: any) {
+      console.error("Invoice save failed", e);
+      toast.error(L("تم تأكيد الدفع لكن فشل حفظ الفاتورة", "Payment confirmed but invoice save failed"));
+    }
   };
 
   return (
