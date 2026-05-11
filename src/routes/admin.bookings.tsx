@@ -46,33 +46,51 @@ function BookingsPage() {
   const [editing, setEditing] = useState<AdminBooking | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
 
+  const mapOrderToBooking = (b: any): AdminBooking => ({
+    id: b.id,
+    number: b.number,
+    client: b.contact_name || b.userName || b.client || "",
+    email: b.contact_email || b.userEmail || b.email || "",
+    phone: b.contact_phone || b.phone || undefined,
+    city: b.contact_city || b.city || undefined,
+    address: b.contact_address || b.address || undefined,
+    notes: b.notes || undefined,
+    service: Array.isArray(b.items) && b.items.length
+      ? b.items.map((i: any) => i.service_title || i.serviceTitle || i.title).filter(Boolean).join(" • ")
+      : (b.service || ""),
+    subtotal: Number(b.subtotal) || undefined,
+    vat: Number(b.vat) || undefined,
+    couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
+    total: Number(b.total) || 0,
+    payment: normalizePay(b.payment_method || b.payment || "cod"),
+    paymentId: b.payment_id ?? null,
+    status: b.status,
+    date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
+    source: b.source ?? "direct",
+    paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
+  } as AdminBooking);
+
   useEffect(() => {
     adminApi.orders.list({ limit: 100 })
-      .then((p) => {
-        const items = (p.items || []).map((b: any) => ({
-          id: b.id,
-          number: b.number,
-          client: b.contact_name || b.userName || b.client || "",
-          email: b.contact_email || b.userEmail || b.email || "",
-          phone: b.contact_phone || b.phone || undefined,
-          city: b.contact_city || b.city || undefined,
-          address: b.contact_address || b.address || undefined,
-          notes: b.notes || undefined,
-          service: Array.isArray(b.items) && b.items.length
-            ? b.items.map((i: any) => i.service_title || i.serviceTitle).filter(Boolean).join(" • ")
-            : (b.service || ""),
-          subtotal: Number(b.subtotal) || undefined,
-          vat: Number(b.vat) || undefined,
-          couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
-          total: Number(b.total) || 0,
-          payment: normalizePay(b.payment_method || b.payment || "cod"),
-          paymentId: b.payment_id ?? null,
-          status: b.status,
-          date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
-          source: b.source ?? "direct",
-          paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
-        })) as AdminBooking[];
-        setBookings(items);
+      .then(async (p) => {
+        const list = (p.items || []) as any[];
+        setBookings(list.map(mapOrderToBooking));
+        // List endpoint omits items[] — fetch each order's details to fill the Service column.
+        const needsDetail = list.filter((b) => !Array.isArray(b.items) || !b.items.length);
+        if (!needsDetail.length) return;
+        const details = await Promise.all(
+          needsDetail.map((b) => adminApi.orders.get(b.id).catch(() => null))
+        );
+        setBookings((prev) => {
+          const byId = new Map(prev.map((x) => [x.id, x]));
+          details.forEach((d: any) => {
+            if (!d || !d.id) return;
+            const fresh = mapOrderToBooking(d);
+            const ex = byId.get(d.id);
+            if (ex) byId.set(d.id, { ...ex, service: fresh.service || ex.service });
+          });
+          return Array.from(byId.values());
+        });
       })
       .catch(() => setBookings([]));
   }, []);
