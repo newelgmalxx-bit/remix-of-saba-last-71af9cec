@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, ChevronLeft, Lock, ShieldCheck, FileText } from "lucide-react";
+import { Check, ChevronLeft, Lock, ShieldCheck, FileText, Loader2, AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
@@ -37,6 +37,8 @@ function CheckoutPage() {
   const [payment, setPayment] = useState<PaymentMethod>("mayfatoorah");
   const [submitting, setSubmitting] = useState(false);
   const [useSaved, setUseSaved] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   // When the logged-in user toggles between saved data and new data, refill the form.
   const applyMode = (saved: boolean) => {
@@ -73,45 +75,40 @@ function CheckoutPage() {
   const prev = () => setStep((s) => Math.max(0, s - 1));
 
   const placeOrder = async () => {
+    setError(null);
+    setFieldErrors({});
     if (!info.name || !info.email || !info.phone) {
-      toast.error(lang === "ar" ? "يرجى تعبئة بيانات التواصل" : "Please fill contact info");
+      setError(lang === "ar" ? "يرجى تعبئة بيانات التواصل" : "Please fill contact info");
+      setStep(0);
       return;
     }
-    // Backend currently accepts only Saudi numbers (05XXXXXXXX or +9665XXXXXXXX).
-    // Validate locally to give a clear message before hitting the API.
     const phone = info.phone.replace(/[\s-]/g, "");
     const saudiOk = /^(05\d{8}|\+9665\d{8}|009665\d{8})$/.test(phone);
     if (!saudiOk) {
-      toast.error(
+      setError(
         lang === "ar"
-          ? "رقم الجوال يجب أن يبدأ بـ 05 (مثال: 0512345678) أو +9665 — السيرفر لا يقبل أرقام خارج السعودية حالياً."
-          : "Phone must start with 05 (e.g. 0512345678) or +9665. Non-Saudi numbers aren't accepted by the server yet.",
+          ? "رقم الجوال يجب أن يبدأ بـ 05 (مثال: 0512345678) أو +9665."
+          : "Phone must start with 05 (e.g. 0512345678) or +9665.",
       );
       setStep(0);
       return;
     }
     setSubmitting(true);
     try {
-      // If logged in, persist any newly-entered contact info to the user's profile
-      // so future orders auto-fill correctly (e.g., phone missing from signup).
       if (user) {
         try {
           const updates: Record<string, string> = {};
-          // Only sync profile when user explicitly chose to enter new data.
           if (!useSaved) {
             if (info.name && info.name !== user.name) updates.name = info.name;
             if (info.phone && info.phone !== (user as any).phone) updates.phone = info.phone;
             if (info.email && info.email !== user.email) updates.email = info.email;
           } else if (info.phone && !(user as any).phone) {
-            // If profile was missing phone, save the one used now.
             updates.phone = info.phone;
           }
           if (Object.keys(updates).length > 0) {
             await api.account.updateProfile(updates);
           }
-        } catch {
-          // Non-blocking: continue with checkout even if profile update fails.
-        }
+        } catch { /* non-blocking */ }
       }
       const res = await api.checkout.submit({
         contact: {
@@ -138,21 +135,30 @@ function CheckoutPage() {
           JSON.stringify({ number: res.orderNumber, total, payment, items, info }),
         );
       } catch {}
-      // If hosted gateway URL is provided, redirect there.
       if (res.paymentUrl) {
         window.location.href = res.paymentUrl;
         return;
       }
-      // Otherwise success page (COD or already-handled gateway).
       await clear();
+      toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
       navigate({ to: "/checkout/success" as any, search: { o: res.orderNumber } as any });
     } catch (err) {
-      let msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed");
-      if (err instanceof ApiError && err.errors) {
-        const details = Object.values(err.errors).filter(Boolean).join(" • ");
-        if (details) msg = `${msg} — ${details}`;
+      const fallback = lang === "ar" ? "فشل إتمام الطلب، حاول مرة أخرى." : "Checkout failed, please try again.";
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError(lang === "ar" ? "يجب تسجيل الدخول لإتمام الطلب." : "Please sign in to place an order.");
+        } else if (err.status === 422) {
+          setError(lang === "ar" ? "تحقق من البيانات أدناه." : "Please review the highlighted fields.");
+        } else if (err.status === 0 || err.status >= 500) {
+          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
+        } else {
+          setError(err.message || fallback);
+        }
+        if (err.errors) setFieldErrors(err.errors as any);
+      } else {
+        setError(fallback);
       }
-      toast.error(msg);
+      toast.error(error || fallback);
     } finally {
       setSubmitting(false);
     }
@@ -202,6 +208,23 @@ function CheckoutPage() {
 
           <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
             <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-sm min-h-[400px]">
+              {error && (
+                <div role="alert" className="mb-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold">{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="mt-1 list-disc ps-5 text-xs">
+                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                          )),
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
               {step === 0 && (
                 <div className="space-y-5">
                   <h2 className="text-lg font-bold">{t("checkout.contact")}</h2>
@@ -381,7 +404,7 @@ function CheckoutPage() {
                     disabled={submitting}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                   >
-                    <Lock className="h-4 w-4" />
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
                     {submitting ? t("checkout.confirming") : `${t("checkout.confirm.full")} — ${formatCurrency(total)}`}
                   </button>
                 )}

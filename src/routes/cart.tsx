@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { items, remove, updateQty, subtotal, vat, total, count } = useCart();
+  const { items, remove, updateQty, subtotal, vat, total, count, loading, error, refresh } = useCart();
   const { t, lang, dir } = useLang();
 
   const L = (a: string, e: string) => (lang === "en" ? e : a);
@@ -41,7 +41,25 @@ function CartPage() {
             </Link>
           </div>
 
-          {items.length === 0 ? (
+          {error && (
+            <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div className="flex-1">
+                <div className="font-bold">{lang === "ar" ? "تعذر تحميل السلة من الخادم" : "Couldn't load your cart"}</div>
+                <div className="text-xs opacity-80">{error}</div>
+              </div>
+              <button onClick={() => refresh()} className="rounded-md border border-rose-300 px-2.5 py-1 text-xs font-bold hover:bg-rose-100">
+                {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+              </button>
+            </div>
+          )}
+
+          {loading && items.length === 0 ? (
+            <div className="flex items-center justify-center rounded-3xl border border-dashed border-border bg-card p-16">
+              <Loader2 className="h-7 w-7 animate-spin text-primary" />
+              <span className="ms-3 text-sm text-muted-foreground">{lang === "ar" ? "جارٍ تحميل السلة..." : "Loading cart..."}</span>
+            </div>
+          ) : items.length === 0 ? (
             <EmptyCart t={t} />
           ) : (
             <div className="grid gap-6 lg:grid-cols-[1fr_380px]">

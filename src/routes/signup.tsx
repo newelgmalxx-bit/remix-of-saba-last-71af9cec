@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -22,19 +22,27 @@ function SignupPage() {
   const [pwd, setPwd] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
     if (!name || !phone || !email || !pwd) {
-      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      setError(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      return;
+    }
+    if (pwd.length < 6) {
+      setError(lang === "ar" ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل" : "Password must be at least 6 characters");
       return;
     }
     if (pwd !== pwd2) {
-      toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      setError(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       return;
     }
     if (!agree) {
-      toast.error(lang === "ar" ? "يجب الموافقة على الشروط" : "You must accept the terms");
+      setError(lang === "ar" ? "يجب الموافقة على الشروط" : "You must accept the terms");
       return;
     }
     setSubmitting(true);
@@ -43,8 +51,21 @@ function SignupPage() {
       toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
       navigate({ to: "/account" });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إنشاء الحساب" : "Signup failed");
-      toast.error(msg);
+      const fallback = lang === "ar" ? "فشل إنشاء الحساب" : "Signup failed";
+      if (err instanceof ApiError) {
+        if (err.status === 409) {
+          setError(lang === "ar" ? "البريد الإلكتروني أو الجوال مستخدم بالفعل." : "This email or phone is already registered.");
+        } else if (err.status === 422) {
+          setError(lang === "ar" ? "تحقق من البيانات المدخلة." : "Please review the highlighted fields.");
+        } else if (err.status === 0 || err.status >= 500) {
+          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
+        } else {
+          setError(err.message || fallback);
+        }
+        if (err.errors) setFieldErrors(err.errors as any);
+      } else {
+        setError(fallback);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -69,6 +90,23 @@ function SignupPage() {
             </div>
 
             <form className="mt-7 space-y-5" onSubmit={onSubmit}>
+              {error && (
+                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold">{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="mt-1 list-disc ps-5">
+                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                          )),
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
               <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} value={name} onChange={setName} />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -104,7 +142,8 @@ function SignupPage() {
                 </span>
               </label>
 
-              <button type="submit" disabled={submitting} className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
+              <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? (lang === "ar" ? "جاري الإنشاء..." : "Creating...") : t("auth.signupBtn")}
               </button>
             </form>

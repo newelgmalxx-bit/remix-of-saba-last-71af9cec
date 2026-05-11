@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Phone, Check, ShieldCheck, Headphones, BarChart3, CloudCog, Loader2, AlertCircle } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -30,21 +30,25 @@ function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
     if (!identifier || !password) {
-      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      setError(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
       return;
     }
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRe = /^\+?\d[\d\s-]{6,}$/;
     if (tab === "email" && !emailRe.test(identifier.trim())) {
-      toast.error(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
+      setError(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
       return;
     }
     if (tab === "phone" && !phoneRe.test(identifier.trim())) {
-      toast.error(lang === "ar" ? "أدخل رقم جوال صحيح" : "Enter a valid phone number");
+      setError(lang === "ar" ? "أدخل رقم جوال صحيح" : "Enter a valid phone number");
       return;
     }
     setSubmitting(true);
@@ -56,8 +60,19 @@ function LoginPage() {
       const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
       navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول" : "Login failed");
-      toast.error(msg);
+      const fallback = lang === "ar" ? "فشل تسجيل الدخول. تأكد من البريد وكلمة المرور." : "Login failed. Check your email and password.";
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError(lang === "ar" ? "البريد الإلكتروني أو كلمة المرور غير صحيحة." : "Invalid email or password.");
+        } else if (err.status === 0 || err.status >= 500) {
+          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
+        } else {
+          setError(err.message || fallback);
+        }
+        if (err.errors) setFieldErrors(err.errors as any);
+      } else {
+        setError(fallback);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -105,6 +120,23 @@ function LoginPage() {
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+              {error && (
+                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold">{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="mt-1 list-disc ps-5">
+                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                          )),
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
               <Field
                 label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
                 type={tab === "email" ? "email" : "tel"}
@@ -158,8 +190,9 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="relative z-20 w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
+                className="relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70"
               >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
               </button>
             </form>
