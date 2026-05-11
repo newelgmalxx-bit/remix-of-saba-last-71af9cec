@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
