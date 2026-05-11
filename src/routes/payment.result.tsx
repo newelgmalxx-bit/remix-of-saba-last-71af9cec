@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, XCircle, Package, Home, RotateCcw, Loader2, AlertTriangle } from "lucide-react";
 import { z } from "zod";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useLang } from "@/i18n/LanguageProvider";
+import api, { ApiError } from "@/lib/api";
 
 type StatusKind = "success" | "pending" | "failed" | "error";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/payment/result")({
     status: z.string().optional(),
     order: z.string().optional(),
     pid: z.string().optional(),
+    paymentId: z.string().optional(),
     message: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "نتيجة الدفع | سابا ديزاين" }] }),
@@ -27,61 +29,124 @@ function normalize(s?: string): StatusKind {
   return v ? "error" : "error";
 }
 
+const MAX_ATTEMPTS = 8; // ~24s of polling before we surface a clear error.
+
 function PaymentResultPage() {
   const search = Route.useSearch();
   const { lang } = useLang();
   const navigate = useNavigate();
-  const [kind, setKind] = useState<StatusKind>(() => normalize(search.status));
+  const ar = lang === "ar";
+  const paymentId = search.paymentId || search.pid;
+
+  // Initial kind: if we have a paymentId we always start in `pending` and verify.
+  const [kind, setKind] = useState<StatusKind>(() =>
+    paymentId ? "pending" : normalize(search.status),
+  );
   const [orderNumber, setOrderNumber] = useState<string | undefined>(search.order);
   const [errorMsg, setErrorMsg] = useState<string | undefined>(search.message);
+  const [attempts, setAttempts] = useState(0);
+  const [verifying, setVerifying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cancelledRef = useRef(false);
 
-  useEffect(() => {
-    setKind(normalize(search.status));
-    setOrderNumber(search.order);
-  }, [search.status, search.order]);
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
-  useEffect(() => {
-    if (kind !== "pending" || !search.pid) return;
-
-    let cancelled = false;
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/checkout/status/${encodeURIComponent(search.pid!)}`, {
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) return;
-        const json = await res.json();
-        if (cancelled || !json?.success) return;
-        const d = json.data || {};
-        if (d.orderNumber) setOrderNumber(d.orderNumber);
-        const ps = String(d.paymentStatus || d.status || "").toLowerCase();
-        if (d.paid || ["paid", "success", "completed", "confirmed"].includes(ps)) {
-          setKind("success");
-          if (timerRef.current) clearInterval(timerRef.current);
-          navigate({
-            to: "/payment/result",
-            search: { status: "success", order: d.orderNumber || orderNumber },
-            replace: true,
-          });
-        } else if (["failed", "failure", "declined", "cancelled", "canceled"].includes(ps)) {
-          setKind("failed");
-          if (timerRef.current) clearInterval(timerRef.current);
+  const verifyOnce = useCallback(async (): Promise<"success" | "failed" | "pending" | "error"> => {
+    if (!paymentId) return "error";
+    setVerifying(true);
+    try {
+      const res = await api.checkout.verify(paymentId);
+      const d: any = res?.data || {};
+      if (d.orderNumber) setOrderNumber(d.orderNumber);
+      if (d.paid === true) return "success";
+      if (d.paid === false) return "pending";
+      return "pending";
+    } catch (e) {
+      if (e instanceof ApiError) {
+        if (e.status === 0 || e.status >= 500) {
+          setErrorMsg(ar ? "تعذر الاتصال بخادم الدفع." : "Couldn't reach the payment server.");
+        } else if (e.status === 404) {
+          setErrorMsg(ar ? "لم يتم العثور على عملية الدفع." : "Payment not found.");
+          return "failed";
+        } else {
+          setErrorMsg(e.message);
         }
-      } catch {
-        /* keep polling */
+      } else {
+        setErrorMsg(ar ? "خطأ غير متوقع أثناء التحقق من الدفع." : "Unexpected error verifying payment.");
+      }
+      return "error";
+    } finally {
+      setVerifying(false);
+    }
+  }, [paymentId, ar]);
+
+  const runVerification = useCallback(async () => {
+    if (!paymentId) return;
+    setKind("pending");
+    setErrorMsg(undefined);
+    setAttempts(0);
+    cancelledRef.current = false;
+
+    const tick = async () => {
+      if (cancelledRef.current) return;
+      setAttempts((n) => n + 1);
+      const result = await verifyOnce();
+      if (cancelledRef.current) return;
+      if (result === "success") {
+        stopTimer();
+        setKind("success");
+        navigate({
+          to: "/payment/result",
+          search: { status: "success", order: orderNumber },
+          replace: true,
+        });
+      } else if (result === "failed") {
+        stopTimer();
+        setKind("failed");
+      } else if (result === "error") {
+        // Network / server error — keep retrying until attempts exhausted.
       }
     };
 
-    poll();
-    timerRef.current = setInterval(poll, 3000);
-    return () => {
-      cancelled = true;
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [kind, search.pid]);
+    await tick();
+    timerRef.current = setInterval(() => {
+      // Stop after MAX_ATTEMPTS — show a clear error with manual retry.
+      setAttempts((n) => {
+        if (n >= MAX_ATTEMPTS) {
+          stopTimer();
+          setKind("error");
+          setErrorMsg((prev) =>
+            prev ||
+            (ar
+              ? "استغرق التحقق وقتًا طويلاً. اضغط إعادة المحاولة، أو راجع طلباتك للاطلاع على الحالة."
+              : "Verification is taking too long. Press retry or check your orders for the latest status."),
+          );
+          return n;
+        }
+        return n;
+      });
+      tick();
+    }, 3000);
+  }, [paymentId, navigate, orderNumber, verifyOnce, ar]);
 
-  const ar = lang === "ar";
+  useEffect(() => {
+    if (!paymentId) {
+      setKind(normalize(search.status));
+      setOrderNumber(search.order);
+      return;
+    }
+    runVerification();
+    return () => {
+      cancelledRef.current = true;
+      stopTimer();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentId]);
 
   const config = {
     success: {
@@ -98,8 +163,8 @@ function PaymentResultPage() {
     pending: {
       title: ar ? "جارٍ تأكيد الدفع" : "Confirming Payment",
       body: ar
-        ? "جارٍ تأكيد الدفع، يرجى الانتظار..."
-        : "We're confirming your payment, please wait...",
+        ? "جارٍ التحقق من الدفع لدى البوابة، يرجى الانتظار..."
+        : "Verifying your payment with the gateway, please wait...",
       Icon: Loader2,
       iconBg: "from-amber-400 to-amber-500",
       shadow: "shadow-[0_20px_50px_-15px_rgba(245,158,11,0.55)]",
@@ -120,12 +185,12 @@ function PaymentResultPage() {
       spin: false,
     },
     error: {
-      title: ar ? "حدث خطأ" : "Something Went Wrong",
+      title: ar ? "تعذر التحقق من الدفع" : "Couldn't Verify Payment",
       body:
         errorMsg ||
         (ar
-          ? "تعذّر معالجة طلبك. حاول مرة أخرى أو تواصل مع الدعم."
-          : "We couldn't process your request. Please try again or contact support."),
+          ? "حدث خطأ أثناء الاتصال ببوابة الدفع. حاول مرة أخرى أو راجع طلباتك."
+          : "We couldn't reach the payment gateway. Try again or check your orders."),
       Icon: AlertTriangle,
       iconBg: "from-orange-400 to-orange-600",
       shadow: "shadow-[0_20px_50px_-15px_rgba(249,115,22,0.55)]",
@@ -155,16 +220,16 @@ function PaymentResultPage() {
 
         {orderNumber && (
           <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
-            <span className="text-sm text-muted-foreground">
-              {ar ? "رقم الطلب" : "Order #"}
-            </span>
+            <span className="text-sm text-muted-foreground">{ar ? "رقم الطلب" : "Order #"}</span>
             <span className="text-base font-bold text-primary">{orderNumber}</span>
           </div>
         )}
 
         {kind === "pending" && (
           <p className="mt-4 text-xs text-muted-foreground">
-            {ar ? "يتم التحديث تلقائيًا كل 3 ثوانٍ" : "Auto-refreshing every 3 seconds"}
+            {ar
+              ? `محاولة ${attempts}/${MAX_ATTEMPTS} — يتم التحديث تلقائيًا كل 3 ثوانٍ`
+              : `Attempt ${attempts}/${MAX_ATTEMPTS} — auto-refreshing every 3 seconds`}
           </p>
         )}
 
@@ -188,7 +253,27 @@ function PaymentResultPage() {
             </>
           )}
 
-          {(kind === "failed" || kind === "error") && (
+          {kind === "error" && (
+            <>
+              <button
+                onClick={runVerification}
+                disabled={verifying}
+                className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
+              >
+                {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                {ar ? "إعادة المحاولة" : "Retry verification"}
+              </button>
+              <Link
+                to={"/account/orders" as any}
+                className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
+              >
+                <Package className="h-4 w-4" />
+                {ar ? "طلباتي" : "My Orders"}
+              </Link>
+            </>
+          )}
+
+          {kind === "failed" && (
             <>
               <Link
                 to={"/cart" as any}
