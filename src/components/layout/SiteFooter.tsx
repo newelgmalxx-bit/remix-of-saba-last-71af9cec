@@ -1,11 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function SiteFooter() {
   const { t } = useLang();
+  const site = useSiteSettings();
+  const socials = ([
+    [site.facebook, Facebook],
+    [site.instagram, Instagram],
+    [site.twitter, Twitter],
+    [site.linkedin, Linkedin],
+    [site.youtube, Youtube],
+    [site.tiktok, Music2],
+  ] as const).filter(([u]) => !!u);
   return (
     <footer className="bg-primary-dark text-white">
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
@@ -14,10 +24,12 @@ export function SiteFooter() {
           <img src={logo} alt={t("footer.brand")} width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
           <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
-            {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
+            {socials.map(([url, Icon], i) => (
               <a
                 key={i}
-                href="#"
+                href={url as string}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-primary"
               >
                 <Icon className="h-5 w-5" />
@@ -50,11 +62,11 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-5 text-lg font-bold">{t("footer.contactUs")}</h4>
           <ul className="space-y-3">
-            {[
-              { Icon: Phone, text: "+966 50 123 4567" },
-              { Icon: Mail, text: "info@sabadesign.com" },
-              { Icon: MapPin, text: t("footer.location") },
-            ].map(({ Icon, text }, i) => (
+            {([
+              site.phone ? { Icon: Phone, text: site.phone } : null,
+              site.email ? { Icon: Mail, text: site.email } : null,
+              { Icon: MapPin, text: site.address || t("footer.location") },
+            ].filter(Boolean) as { Icon: any; text: string }[]).map(({ Icon, text }, i) => (
               <li key={i} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                   <Icon className="h-4 w-4" />
