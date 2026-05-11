@@ -40,7 +40,22 @@ export const admin = {
   getInvoices: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/invoices${q ? '?' + q : ''}`); },
   getInvoice: (id: string) => request(`/admin/invoices/${id}`),
   // Spec only exposes GET on admin invoices; keep stubs for legacy callers.
-  createInvoice: (body: any) => request('/admin/invoices', { method: 'POST', body: JSON.stringify(body) }),
+  createInvoice: (body: any, pdf?: Blob) => {
+    if (pdf) {
+      const fd = new FormData();
+      fd.append('data', JSON.stringify(body));
+      fd.append('pdf', pdf, `invoice-${body.number || Date.now()}.pdf`);
+      return fetch(`${BASE}/admin/invoices`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      }).then(async (r) => {
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      });
+    }
+    return request('/admin/invoices', { method: 'POST', body: JSON.stringify(body) });
+  },
   updateInvoice: (id: string, body: any) => request(`/admin/invoices/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteInvoice: (id: string) => request(`/admin/invoices/${id}`, { method: 'DELETE' }),
   invoicePdf: (id: string) => fetch(`${BASE}/admin/invoices/${id}/pdf`, { headers: { Authorization: `Bearer ${getToken()}` } }).then(r => r.blob()),
