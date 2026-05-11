@@ -45,10 +45,6 @@ function ReportsPage() {
         const revenueTotal = orders.reduce((sum, o: any) => sum + (Number(o.total ?? o.amount ?? o.subtotal) || 0), 0) || Number(a.revenue) || 0;
         const clientsTotal = clients.length || Number(a.totalClients) || 0;
         const activeSvc = services.filter((s: any) => s.active !== false && s.status !== "inactive").length || Number(a.activeServices) || 0;
-        const paidOrders = orders.filter((o: any) => o.paid || o.payment_status === "paid" || o.status === "completed").length;
-        const conversionPct = a.conversionRate != null
-          ? Number(a.conversionRate)
-          : (ordersTotal > 0 ? (paidOrders / ordersTotal) * 100 : 0);
         const vatTotal = orders.reduce((sum, o: any) => sum + (Number(o.vat) || 0), 0);
         const marginPct = a.profitMargin != null
           ? Number(a.profitMargin)
@@ -58,7 +54,7 @@ function ReportsPage() {
           orders: ordersTotal,
           clients: clientsTotal,
           activeServices: activeSvc,
-          conversion: `${conversionPct.toFixed(1)}%`,
+          vat: vatTotal,
           profitMargin: `${marginPct.toFixed(1)}%`,
         });
       } catch {}
