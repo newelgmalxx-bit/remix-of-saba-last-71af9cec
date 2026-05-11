@@ -195,7 +195,7 @@ const adminLegacy = {
       const r: any = await a.getInvoices(q);
       return r.data;
     },
-    create: (body: any) => a.createInvoice(body),
+    create: (body: any, pdf?: Blob) => a.createInvoice(body, pdf),
     setStatus: (id: string, status: string) => a.updateInvoice(id, { status }),
     remove: (id: string) => a.deleteInvoice(id),
     pdf: (id: string) => a.invoicePdf(id),
