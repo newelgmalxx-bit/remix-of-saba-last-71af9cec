@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Phone, User, MapPin, Globe, Check, ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import { AuthHero } from "@/components/auth/AuthHero";
 import { LangSwitch } from "@/components/layout/SiteHeader";
 import { useLang } from "@/i18n/LanguageProvider";
