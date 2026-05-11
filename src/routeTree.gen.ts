@@ -1201,6 +1201,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountIndexRoute: AccountIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
+  OrderSummaryOrderIdRoute: OrderSummaryOrderIdRoute,
   AccountTicketsTicketIdRoute: AccountTicketsTicketIdRoute,
   AccountTicketsNewRoute: AccountTicketsNewRoute,
   AccountOrdersIndexRoute: AccountOrdersIndexRoute,
