@@ -1,8 +1,8 @@
-import { request, setToken, setUser, removeToken } from './client';
+import { request, setToken, setUser, removeToken, getToken } from './client';
 import type { User, ApiResponse } from './types';
 
 export const auth = {
-  signup: async (body: { name: string; email: string; phone?: string; password: string; city?: string }) => {
+  signup: async (body: { name: string; email: string; phone?: string; password: string }) => {
     const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/register', {
       method: 'POST', body: JSON.stringify(body),
     });
@@ -11,16 +11,16 @@ export const auth = {
   },
 
   login: async (body: { email?: string; phone?: string; emailOrPhone?: string; password: string }) => {
-    const emailOrPhone = body.emailOrPhone ?? body.email ?? body.phone ?? '';
-    const res = await request<ApiResponse<{ user: User; token: string; cart?: any }>>('/auth/login', {
-      method: 'POST', body: JSON.stringify({ emailOrPhone, password: body.password }),
+    const email = body.email ?? body.emailOrPhone ?? body.phone ?? '';
+    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/login', {
+      method: 'POST', body: JSON.stringify({ email, password: body.password }),
     });
     if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
     return res;
   },
 
   google: async (idToken: string) => {
-    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/oauth/google', {
+    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/google', {
       method: 'POST', body: JSON.stringify({ idToken }),
     });
     if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
@@ -28,7 +28,9 @@ export const auth = {
   },
 
   logout: async () => {
-    // Backend has no /auth/logout endpoint — clear client-side token only.
+    if (getToken()) {
+      try { await request('/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
+    }
     removeToken();
   },
 

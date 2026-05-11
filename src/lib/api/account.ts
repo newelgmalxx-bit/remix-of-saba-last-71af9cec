@@ -35,60 +35,55 @@ export const account = {
   ticketReply: (id: string, text: string) =>
     request(`/account/tickets/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
 
+  // Spec has no dedicated /close — use status update.
   ticketClose: (id: string) =>
-    request(`/account/tickets/${id}/close`, { method: 'PUT' }),
+    request(`/account/tickets/${id}/status`, { method: 'PUT', body: JSON.stringify({ status: 'closed' }) }),
 
   createTicket: (body: {
     subject: string;
     message: string;
-    department?: 'technical' | 'billing' | 'general';
-    // legacy fields kept for older callers — backend ignores them
     orderId?: string;
     priority?: 'low' | 'normal' | 'high';
   }) => {
-    const payload = {
+    const payload: Record<string, any> = {
       subject: body.subject,
       message: body.message,
-      department: body.department ?? 'general',
+      orderId: body.orderId,
+      priority: body.priority ?? 'normal',
     };
     return request<ApiResponse<{ id: string; number: string }>>('/account/tickets', {
       method: 'POST', body: JSON.stringify(payload),
     });
   },
 
-  // Re-pay an existing unpaid order. Spec doesn't expose a dedicated endpoint;
-  // we route through /checkout/initiate and pass `orderId` so the backend can
-  // attach the new payment session to the same order (instead of creating a
-  // new one). The webhook MUST update the existing order — see API_ENDPOINTS.md.
-  payOrder: (id: string, body?: { paymentMethod?: string; phone?: string; city?: string }) => {
-    const payload = {
-      orderId: id,
-      paymentMethod: body?.paymentMethod ?? 'mayfatoorah',
-      phone: body?.phone ?? '',
-      city: body?.city ?? '',
-    };
-    return request<ApiResponse<{
-      orderId: string;
-      orderNumber: string;
-      paymentUrl: string | null;
-    }>>('/checkout/initiate', { method: 'POST', body: JSON.stringify(payload) });
+  // Re-pay an existing unpaid order via POST /checkout/myfatoorah.
+  payOrder: (id: string, _body?: { paymentMethod?: string; phone?: string; city?: string }) => {
+    return request<ApiResponse<{ paymentUrl: string }>>('/checkout/myfatoorah', {
+      method: 'POST', body: JSON.stringify({ orderId: id }),
+    });
   },
 
+  // ----- Invoices (auth) -----
+  invoices: (params?: { page?: number }) => {
+    const q = params ? new URLSearchParams(params as any).toString() : '';
+    return request<PaginatedResponse<any>>(`/account/invoices${q ? '?' + q : ''}`);
+  },
+  invoiceDetail: (id: string) =>
+    request<ApiResponse<{ invoice: any }>>(`/account/invoices/${id}`),
+
   // ----- Reviews (auth) -----
-  createReview: (body: { serviceSlug: string; rating: number; text: string }) =>
+  createReview: (body: { serviceId: string; rating: number; comment?: string }) =>
     request<ApiResponse<{ review: any }>>('/account/reviews', {
       method: 'POST', body: JSON.stringify(body),
     }),
 
-  // ----- Favorites (auth) -----
+  // ----- Favorites (auth) — keyed by serviceId per spec -----
   favorites: () =>
     request<ApiResponse<{ items: any[] }>>('/account/favorites'),
 
-  addFavorite: (serviceSlug: string) =>
-    request<ApiResponse<any>>('/account/favorites', {
-      method: 'POST', body: JSON.stringify({ serviceSlug }),
-    }),
+  addFavorite: (serviceId: string) =>
+    request<ApiResponse<any>>(`/account/favorites/${serviceId}`, { method: 'POST' }),
 
-  removeFavorite: (serviceSlug: string) =>
-    request<ApiResponse<any>>(`/account/favorites/${serviceSlug}`, { method: 'DELETE' }),
+  removeFavorite: (serviceId: string) =>
+    request<ApiResponse<any>>(`/account/favorites/${serviceId}`, { method: 'DELETE' }),
 };

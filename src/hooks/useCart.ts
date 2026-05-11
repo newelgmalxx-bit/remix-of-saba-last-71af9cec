@@ -133,13 +133,21 @@ export function useCart() {
         ];
       }
       setCache({ ...cache, items: nextItems, ...computeTotals(nextItems), error: null });
-      // Plan items live only in local cart — backend only accepts real service slugs.
-      if (!item.serviceSlug.startsWith("plan:")) {
+      // Plan items (Starter/Basic/Pro/Premium) come from the standalone /plans endpoint.
+      // We send them with `servicePlanId` (from the `plan:<id>` slug) and no serviceId.
+      const isPlanLine = item.serviceSlug.startsWith("plan:");
+      const servicePlanId = isPlanLine ? item.serviceSlug.slice(5) : undefined;
         try {
-          await api.cart.addItem({ serviceSlug: item.serviceSlug, planId: item.planId, qty });
+          await api.cart.addItem({
+            serviceSlug: item.serviceSlug,
+            serviceTitle: item.serviceTitle,
+            planName: item.planName,
+            qty,
+            price: Number(item.price) || 0,
+            servicePlanId,
+          });
           await trySyncFromApi();
         } catch { /* keep local fallback */ }
-      }
     },
     [],
   );

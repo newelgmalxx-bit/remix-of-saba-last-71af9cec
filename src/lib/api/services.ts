@@ -11,25 +11,22 @@ export const services = {
     request<ApiResponse<{ service: ServiceFull }>>(`/services/${slug}`),
 };
 
+// Reviews are listed publicly by service id. Use account.createReview for posting.
 export const reviews = {
-  list: (slug: string, params?: { page?: number; limit?: number; sort?: string }) => {
-    const qp = new URLSearchParams({ serviceSlug: slug, ...(params as any || {}) }).toString();
-    return request<ApiResponse<any>>(`/reviews?${qp}`);
-  },
-  // POST /account/reviews (auth required) — backend expects { serviceSlug, rating, text }
-  create: (slug: string, body: { rating: number; comment?: string }) =>
+  list: (serviceId: string) =>
+    request<ApiResponse<any>>(`/reviews/${serviceId}`),
+  create: (serviceId: string, body: { rating: number; comment?: string }) =>
     request('/account/reviews', {
       method: 'POST',
-      body: JSON.stringify({ serviceSlug: slug, rating: body.rating, text: body.comment ?? '' }),
+      body: JSON.stringify({ serviceId, rating: body.rating, comment: body.comment ?? '' }),
     }),
 };
 
+// Favorites are keyed by service id per spec.
 export const favorites = {
   list: () => request<ApiResponse<{ items: any[]; slugs?: string[] }>>('/account/favorites'),
-  add: (slug: string) =>
-    request<ApiResponse<{ favorited: boolean }>>('/account/favorites', {
-      method: 'POST', body: JSON.stringify({ serviceSlug: slug }),
-    }),
-  remove: (slug: string) =>
-    request<ApiResponse<{ favorited: boolean }>>(`/account/favorites/${slug}`, { method: 'DELETE' }),
+  add: (serviceId: string) =>
+    request<ApiResponse<{ favorited: boolean }>>(`/account/favorites/${serviceId}`, { method: 'POST' }),
+  remove: (serviceId: string) =>
+    request<ApiResponse<{ favorited: boolean }>>(`/account/favorites/${serviceId}`, { method: 'DELETE' }),
 };
