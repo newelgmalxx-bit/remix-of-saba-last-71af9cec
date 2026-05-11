@@ -106,7 +106,7 @@ function ReportsPage() {
   };
 
   const exportTopCsv = () => {
-    const csv = `Metric,Value\nTotal Sales,${stats.revenue}\nTotal Orders,${stats.orders}\nConversion,${stats.conversion}`;
+    const csv = `Metric,Value\nTotal Sales,${stats.revenue}\nTotal Orders,${stats.orders}\nTotal VAT,${stats.vat}`;
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "summary.csv"; a.click();
