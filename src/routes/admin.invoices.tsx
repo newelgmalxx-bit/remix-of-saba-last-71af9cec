@@ -226,7 +226,7 @@ function InvoicesPage() {
             <Lb label={L("المبلغ (شامل الضريبة)", "Amount (incl. VAT)")}><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></Lb>
             <Lb label={L("طريقة الدفع", "Payment Method")}>
               <select className={ic} value={form.payment} onChange={e => setForm({ ...form, payment: e.target.value })}>
-                {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
               </select>
             </Lb>
             <Lb label={L("الحالة", "Status")}>
