@@ -178,6 +178,7 @@ const adminLegacy = {
       const r: any = await a.getOrder(id);
       return r.data?.order;
     },
+    update: (id: string, body: any) => a.updateOrder(id, body),
     setStatus: (id: string, body: any) => a.updateOrderStatus(id, body),
     setPaymentStatus: (id: string, paymentStatus: string) => a.updateOrderPaymentStatus(id, paymentStatus),
     addNote: (id: string, text: string) => a.addOrderNote(id, text),
