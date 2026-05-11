@@ -8,7 +8,7 @@ import type { InvoiceData } from "@/components/invoice/InvoiceDocument";
  * Render any DOM node into a single-page A4 PDF and trigger a download.
  * The node should be sized at A4 (~794x1123 @ 96dpi) for best results.
  */
-export async function downloadElementAsPdf(node: HTMLElement, fileName: string) {
+async function renderElementToPdf(node: HTMLElement): Promise<jsPDF> {
   const canvas = await html2canvas(node, {
     scale: 2,
     useCORS: true,
@@ -28,7 +28,17 @@ export async function downloadElementAsPdf(node: HTMLElement, fileName: string) 
   }
   const x = (pageW - w) / 2;
   pdf.addImage(imgData, "PNG", x, 0, w, h);
+  return pdf;
+}
+
+export async function downloadElementAsPdf(node: HTMLElement, fileName: string) {
+  const pdf = await renderElementToPdf(node);
   pdf.save(fileName);
+}
+
+export async function elementToPdfBlob(node: HTMLElement): Promise<Blob> {
+  const pdf = await renderElementToPdf(node);
+  return pdf.output("blob");
 }
 
 /** Build invoice data from a customer Order. */
