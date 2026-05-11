@@ -52,16 +52,26 @@ export const cart = {
   add: (body: AddCartBody) => {
     const h: Record<string, string> = {};
     if (!getToken()) h['X-Session-Id'] = getSid();
-    const payload = {
-      serviceId: body.serviceId,
-      servicePlanId: body.servicePlanId ?? body.planId,
-      serviceSlug: body.serviceSlug,
-      serviceTitle: body.serviceTitle ?? body.serviceSlug,
+    const servicePlanId = body.servicePlanId ?? body.planId;
+    // A line is EITHER a Service (serviceId+serviceSlug) OR a Plan (servicePlanId).
+    // When sending a plan, omit serviceSlug so the backend doesn't try to look it
+    // up as a service (which fails with "الخدمة غير موجودة أو غير متاحة").
+    const isPlan = !!servicePlanId;
+    const payload: Record<string, unknown> = {
+      servicePlanId,
       planName: body.planName,
       qty: body.qty ?? 1,
       price: body.price ?? 0,
       originalPrice: body.originalPrice,
     };
+    if (!isPlan) {
+      payload.serviceId = body.serviceId;
+      payload.serviceSlug = body.serviceSlug;
+      payload.serviceTitle = body.serviceTitle ?? body.serviceSlug;
+    } else {
+      // Still useful for display on the server side if it stores the title.
+      payload.serviceTitle = body.serviceTitle ?? body.planName;
+    }
     return unwrap(request<ApiResponse<any>>('/cart/items', { method: 'POST', body: JSON.stringify(payload), headers: h }));
   },
 
