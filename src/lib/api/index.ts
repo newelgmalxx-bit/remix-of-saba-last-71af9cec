@@ -1,6 +1,6 @@
 import { auth as authNew } from './auth';
 import { services as servicesNew, reviews, favorites } from './services';
-import { cart as cartNew } from './cart';
+import { cart as cartNew, type AddCartBody } from './cart';
 import { checkout as checkoutNew } from './checkout';
 import { account as accountNew } from './account';
 import { admin as adminNew } from './admin';
@@ -73,7 +73,7 @@ export const cart = {
   get: async () => {
     try { return await unwrapCart(cartNew.get()); } catch { return { items: [], subtotal: 0, vat: 0, total: 0, sessionId: '' } as Cart; }
   },
-  addItem: async (body: { serviceSlug: string; planId?: string; qty?: number }) =>
+  addItem: async (body: AddCartBody) =>
     unwrapCart(cartNew.add(body)),
   updateItem: async (lineId: string, qty: number) =>
     unwrapCart(cartNew.updateQty(lineId, qty)),
