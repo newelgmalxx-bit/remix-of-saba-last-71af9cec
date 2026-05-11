@@ -189,6 +189,20 @@ function BookingsPage() {
     }
   };
 
+  const updatePaymentMethod = async (id: string, payment: string) => {
+    const prev = bookings.find(x => x.id === id);
+    if (!prev || prev.payment === payment) return;
+    setBookings(bookings.map(x => x.id === id ? { ...x, payment } : x));
+    try {
+      await adminApi.orders.update?.(id, { paymentMethod: payment });
+      toast.success(L("تم تحديث طريقة الدفع", "Payment method updated"));
+    } catch (e: any) {
+      setBookings(bs => bs.map(x => x.id === id ? prev : x));
+      console.error("[order.updatePaymentMethod]", e);
+      toast.error(L("تعذّر حفظ طريقة الدفع", "Failed to save payment method"));
+    }
+  };
+
   const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
     const prev = bookings.find(x => x.id === id);
     const wasPaid = prev?.paymentStatus === "paid";
@@ -274,7 +288,7 @@ function BookingsPage() {
                     <td className="px-3 py-3">{b.service}</td>
                     <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3">
-                      <select value={b.payment} onChange={(e) => setBookings(bookings.map(x => x.id === b.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
+                      <select value={b.payment} onChange={(e) => updatePaymentMethod(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
                         {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                       </select>
                     </td>
