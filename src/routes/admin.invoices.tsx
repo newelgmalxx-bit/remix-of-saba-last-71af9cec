@@ -78,13 +78,29 @@ function InvoicesPage() {
   const handleAdd = async () => {
     if (!form.client || !form.amount) { toast.error(L("الاسم والمبلغ مطلوبان", "Name and amount are required")); return; }
     try {
+      const subtotal = Math.round(form.amount / 1.15);
+      const vat = form.amount - subtotal;
+      const tempNumber = "INV-" + (7822 + invoices.length);
+      const pdfData: any = {
+        number: tempNumber,
+        date: form.issued,
+        clientName: form.client,
+        clientEmail: form.email,
+        clientPhone: form.phone,
+        clientCity: form.city,
+        paymentMethod: form.payment,
+        paymentStatus: form.status === "paid" ? "paid" : form.status === "void" ? "refunded" : "unpaid",
+        items: [{ title: L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: subtotal }],
+        subtotal, vat, total: form.amount,
+      };
+      const pdfBlob = await renderInvoiceToPdfBlob(pdfData);
       const res = await adminApi.invoices.create({
         client: form.client, email: form.email, phone: form.phone, city: form.city,
         items: [{ desc: "Manual invoice", qty: 1, price: form.amount }],
-        payment: form.payment, notes: undefined,
-      });
+        payment: form.payment, status: form.status, notes: undefined,
+      }, pdfBlob);
       setInvoices([{ id: res.id, number: res.number, ...form }, ...invoices]);
-      toast.success(L("تم إنشاء الفاتورة", "Invoice created"));
+      toast.success(L("تم إنشاء الفاتورة وحفظ الـ PDF", "Invoice created and PDF saved"));
     } catch {
       const num = "INV-" + (7822 + invoices.length);
       setInvoices([{ id: "i" + Date.now(), number: num, ...form }, ...invoices]);
