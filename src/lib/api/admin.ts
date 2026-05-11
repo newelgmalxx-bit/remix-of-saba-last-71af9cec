@@ -1,6 +1,14 @@
 import { request, getToken, BASE } from './client';
 import type { ServiceFull, Plan, Order, ApiResponse, PaginatedResponse } from './types';
 
+const requireTrackingId = (id: number | string | null | undefined) => {
+  const trackingId = id == null ? '' : String(id).trim();
+  if (!trackingId) {
+    throw new Error('Tracking code id is required');
+  }
+  return trackingId;
+};
+
 export const admin = {
   // Dashboard
   getDashboard: () => request<ApiResponse<any>>('/admin/dashboard'),
@@ -129,9 +137,9 @@ export const admin = {
   // Tracking codes (pixels / head / body scripts)
   trackingList: () => request<ApiResponse<{ items: any[] }>>('/admin/tracking-codes'),
   trackingCreate: (body: any) => request('/admin/tracking-codes', { method: 'POST', body: JSON.stringify(body) }),
-  trackingUpdate: (id: number | string, body: any) => request(`/admin/tracking-codes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  trackingToggle: (id: number | string) => request(`/admin/tracking-codes/${id}`, { method: 'PUT', body: JSON.stringify({ toggle: true }) }),
-  trackingDelete: (id: number | string) => request(`/admin/tracking-codes/${id}`, { method: 'DELETE' }),
+  trackingUpdate: (id: number | string | null | undefined, body: any) => request(`/admin/tracking-codes/${requireTrackingId(id)}`, { method: 'PUT', body: JSON.stringify(body) }),
+  trackingToggle: (id: number | string | null | undefined) => request(`/admin/tracking-codes/${requireTrackingId(id)}`, { method: 'PUT', body: JSON.stringify({ toggle: true }) }),
+  trackingDelete: (id: number | string | null | undefined) => request(`/admin/tracking-codes/${requireTrackingId(id)}`, { method: 'DELETE' }),
   getPublicTracking: () => request<ApiResponse<{ pixels?: string; head?: string; body?: string }>>('/tracking'),
 
   // Coupons (admin)

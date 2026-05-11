@@ -315,9 +315,9 @@ const adminLegacy = {
       return (r?.data?.items ?? r?.items ?? []) as any[];
     },
     create: (body: any) => a.trackingCreate(body),
-    update: (id: number | string, body: any) => a.trackingUpdate(id, body),
-    toggle: (id: number | string) => a.trackingToggle(id),
-    remove: (id: number | string) => a.trackingDelete(id),
+    update: (id: number | string | null | undefined, body: any) => a.trackingUpdate(id, body),
+    toggle: (id: number | string | null | undefined) => a.trackingToggle(id),
+    remove: (id: number | string | null | undefined) => a.trackingDelete(id),
   },
 };
 

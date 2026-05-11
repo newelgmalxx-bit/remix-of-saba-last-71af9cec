@@ -30,6 +30,7 @@ type Form = { name: string; type: "pixel" | "head" | "body"; code: string; sort_
 const empty: Form = { name: "", type: "pixel", code: "", sort_order: 0, is_active: 1 };
 
 const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
+const hasTrackingId = (id: TrackingItem["id"] | null | undefined) => id != null && String(id).trim().length > 0;
 
 function TrackingPage() {
   const { lang, dir } = useLang();
@@ -60,6 +61,10 @@ function TrackingPage() {
 
   const openAdd = () => { setEditId(null); setF(empty); setOpen(true); };
   const openEdit = (it: TrackingItem) => {
+    if (!hasTrackingId(it.id)) {
+      toast.error(L("معرّف الكود غير موجود", "Tracking code id is missing"));
+      return;
+    }
     setEditId(it.id);
     setF({ name: it.name, type: it.type, code: it.code, sort_order: it.sort_order ?? 0, is_active: it.is_active });
     setOpen(true);
@@ -86,6 +91,10 @@ function TrackingPage() {
   };
 
   const toggle = async (it: TrackingItem) => {
+    if (!hasTrackingId(it.id)) {
+      toast.error(L("معرّف الكود غير موجود", "Tracking code id is missing"));
+      return;
+    }
     const optimistic = it.is_active ? 0 : 1;
     setItems((arr) => arr.map((x) => (x.id === it.id ? { ...x, is_active: optimistic } : x)));
     try {
@@ -97,7 +106,11 @@ function TrackingPage() {
   };
 
   const remove = async () => {
-    if (!delId) return;
+    if (!hasTrackingId(delId)) {
+      setDelId(null);
+      toast.error(L("معرّف الكود غير موجود", "Tracking code id is missing"));
+      return;
+    }
     const id = delId;
     setDelId(null);
     const prev = items;
