@@ -15,7 +15,7 @@ function ContactPage() {
   const { t, dir, lang } = useLang();
   const site = useSiteSettings();
   const quickChannels = [
-    site.whatsapp || site.phone ? { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: site.whatsapp || site.phone!, href: waHref(site.whatsapp || site.phone)!, accent: "from-emerald-500 to-emerald-600" } : null,
+    site.phone ? { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: site.phone, href: waHref(site.phone)!, accent: "from-emerald-500 to-emerald-600" } : null,
     site.phone ? { icon: Phone, label: t("contactPage.ch.phone"), value: site.phone, href: telHref(site.phone)!, accent: "from-primary to-primary-dark", ltr: true } : null,
     site.email ? { icon: Mail, label: t("contactPage.ch.email"), value: site.email, href: mailHref(site.email)!, accent: "from-sky-500 to-sky-700", ltr: true } : null,
   ].filter(Boolean) as { icon: any; label: string; value: string; href: string; accent: string; ltr?: boolean }[];
