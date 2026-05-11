@@ -1,11 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function SiteFooter() {
   const { t } = useLang();
+  const site = useSiteSettings();
+  const socials = ([
+    [site.facebook, Facebook],
+    [site.instagram, Instagram],
+    [site.twitter, Twitter],
+    [site.linkedin, Linkedin],
+    [site.youtube, Youtube],
+    [site.tiktok, Music2],
+  ] as const).filter(([u]) => !!u);
   return (
     <footer className="bg-primary-dark text-white">
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
