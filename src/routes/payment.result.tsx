@@ -66,6 +66,15 @@ function PaymentResultPage() {
       const d: any = res?.data || {};
       if (d.orderNumber) setOrderNumber(d.orderNumber);
       if (d.orderId) setOrderId(d.orderId);
+      // As soon as we know the order (paid or not), jump to the summary page.
+      if (d.orderId || d.orderNumber) {
+        navigate({
+          to: "/checkout/success" as any,
+          search: { orderId: d.orderId, o: d.orderNumber } as any,
+          replace: true,
+        });
+        return d.paid === true ? "success" : "pending";
+      }
       if (d.paid === true) return "success";
       if (d.paid === false) return "pending";
       return "pending";
@@ -86,7 +95,7 @@ function PaymentResultPage() {
     } finally {
       setVerifying(false);
     }
-  }, [paymentId, ar]);
+  }, [paymentId, ar, navigate]);
 
   const runVerification = useCallback(async () => {
     if (!paymentId) return;
@@ -143,8 +152,9 @@ function PaymentResultPage() {
       const k = normalize(search.status);
       setKind(k);
       setOrderNumber(search.order);
-      // If gateway returned with status=success directly, jump to summary page.
-      if (k === "success") {
+      // If we have an order reference, always jump to the summary page
+      // regardless of payment status (paid / pending / failed).
+      if (search.order) {
         navigate({
           to: "/checkout/success" as any,
           search: { o: search.order } as any,
