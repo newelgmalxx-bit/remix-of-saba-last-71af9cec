@@ -211,7 +211,7 @@ function ClientsPage() {
     <AdminLayout title={L("العملاء", "Clients")} subtitle={L("رؤى وشرائح وإحصائيات الاحتفاظ بالعملاء", "Insights, segments and retention stats")} action={<PrimaryButton onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> {L("إضافة عميل", "Add Client")}</PrimaryButton>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard label={L("إجمالي العملاء", "Total Clients")} value={clients.length} icon={Users} accent="emerald" />
-        <StatCard label={L("عملاء VIP", "VIP Clients")} value={clients.filter(c => c.segment === "vip").length} icon={Star} accent="amber" />
+        <StatCard label={L("عملاء نشطون", "Active Clients")} value={clients.filter(c => (c.orders || 0) > 0).length} icon={Star} accent="amber" />
         <StatCard label={L("معدل النمو", "Growth Rate")} value={growthRate} icon={TrendingUp} accent="primary" />
         <StatCard label={L("متوسط الطلب", "Avg. Order")} value={fmtSAR(avgOrder)} icon={ShoppingBag} accent="violet" />
       </div>
