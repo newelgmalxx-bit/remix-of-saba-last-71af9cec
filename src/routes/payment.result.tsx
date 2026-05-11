@@ -56,6 +56,8 @@ function PaymentResultPage() {
     }
   };
 
+  const [orderId, setOrderId] = useState<string | undefined>(undefined);
+
   const verifyOnce = useCallback(async (): Promise<"success" | "failed" | "pending" | "error"> => {
     if (!paymentId) return "error";
     setVerifying(true);
@@ -63,6 +65,7 @@ function PaymentResultPage() {
       const res = await api.checkout.verify(paymentId);
       const d: any = res?.data || {};
       if (d.orderNumber) setOrderNumber(d.orderNumber);
+      if (d.orderId) setOrderId(d.orderId);
       if (d.paid === true) return "success";
       if (d.paid === false) return "pending";
       return "pending";
