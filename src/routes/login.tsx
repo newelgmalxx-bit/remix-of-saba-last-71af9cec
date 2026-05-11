@@ -30,21 +30,25 @@ function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
     if (!identifier || !password) {
-      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      setError(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
       return;
     }
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRe = /^\+?\d[\d\s-]{6,}$/;
     if (tab === "email" && !emailRe.test(identifier.trim())) {
-      toast.error(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
+      setError(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
       return;
     }
     if (tab === "phone" && !phoneRe.test(identifier.trim())) {
-      toast.error(lang === "ar" ? "أدخل رقم جوال صحيح" : "Enter a valid phone number");
+      setError(lang === "ar" ? "أدخل رقم جوال صحيح" : "Enter a valid phone number");
       return;
     }
     setSubmitting(true);
@@ -56,8 +60,19 @@ function LoginPage() {
       const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
       navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول" : "Login failed");
-      toast.error(msg);
+      const fallback = lang === "ar" ? "فشل تسجيل الدخول. تأكد من البريد وكلمة المرور." : "Login failed. Check your email and password.";
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError(lang === "ar" ? "البريد الإلكتروني أو كلمة المرور غير صحيحة." : "Invalid email or password.");
+        } else if (err.status === 0 || err.status >= 500) {
+          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
+        } else {
+          setError(err.message || fallback);
+        }
+        if (err.errors) setFieldErrors(err.errors as any);
+      } else {
+        setError(fallback);
+      }
     } finally {
       setSubmitting(false);
     }
