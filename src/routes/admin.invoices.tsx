@@ -340,3 +340,12 @@ const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-
 function Lb({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="text-xs font-bold space-y-1.5 block">{label}{children}</label>;
 }
+
+function Info({ label, value, dir }: { label: string; value: React.ReactNode; dir?: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-muted/30 px-3 py-2">
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="font-bold text-sm" dir={dir as any}>{value}</div>
+    </div>
+  );
+}
