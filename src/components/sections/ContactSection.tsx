@@ -62,38 +62,51 @@ export function ContactSection() {
             </p>
 
             <ul className="mt-6 space-y-4">
-              <InfoRow icon={Phone} label={t("contactForm.info.call")} value="+966 50 123 4567" href="tel:+966501234567" />
-              <InfoRow icon={Mail} label={t("contactForm.info.email")} value="info@sabadesign.com" href="mailto:info@sabadesign.com" />
-              <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value="+966 50 123 4567" href="https://wa.me/966501234567" external />
-              <InfoRow icon={MapPin} label={t("contactForm.info.location")} value={t("contactForm.info.locationV")} href="https://maps.google.com/?q=Saudi+Arabia" external />
+              {site.phone && <InfoRow icon={Phone} label={t("contactForm.info.call")} value={site.phone} href={telHref(site.phone)} />}
+              {site.email && <InfoRow icon={Mail} label={t("contactForm.info.email")} value={site.email} href={mailHref(site.email)} />}
+              {(site.whatsapp || site.phone) && <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value={site.whatsapp || site.phone!} href={waHref(site.whatsapp || site.phone)} external />}
+              {site.address && <InfoRow icon={MapPin} label={t("contactForm.info.location")} value={site.address} href={`https://maps.google.com/?q=${encodeURIComponent(site.address)}`} external />}
             </ul>
 
-            <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-[11px] text-white/70">{t("contactForm.info.hours")}</div>
-                  <div className="mt-1 text-sm font-semibold">{t("contactForm.info.hoursV")}</div>
+            {site.workHours && (
+              <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] text-white/70">{t("contactForm.info.hours")}</div>
+                    <div className="mt-1 text-sm font-semibold">{site.workHours}</div>
+                  </div>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
+                    <Clock className="h-4 w-4" />
+                  </span>
                 </div>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
-                  <Clock className="h-4 w-4" />
-                </span>
               </div>
-            </div>
+            )}
 
-            <div className="mt-6">
-              <p className="text-[11px] text-white/70">{t("contactForm.info.follow")}</p>
-              <div className="mt-3 flex items-center gap-2">
-                {[Instagram, Twitter, Linkedin, Facebook].map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 hover:scale-110"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
+            {(site.instagram || site.twitter || site.linkedin || site.facebook || site.youtube || site.tiktok) && (
+              <div className="mt-6">
+                <p className="text-[11px] text-white/70">{t("contactForm.info.follow")}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  {([
+                    [site.instagram, Instagram],
+                    [site.twitter, Twitter],
+                    [site.linkedin, Linkedin],
+                    [site.facebook, Facebook],
+                    [site.youtube, Youtube],
+                    [site.tiktok, Music2],
+                  ] as const).filter(([u]) => !!u).map(([u, Icon], i) => (
+                    <a
+                      key={i}
+                      href={u as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 hover:scale-110"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Form — left in RTL */}
