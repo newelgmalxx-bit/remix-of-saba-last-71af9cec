@@ -37,6 +37,8 @@ function CheckoutPage() {
   const [payment, setPayment] = useState<PaymentMethod>("mayfatoorah");
   const [submitting, setSubmitting] = useState(false);
   const [useSaved, setUseSaved] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   // When the logged-in user toggles between saved data and new data, refill the form.
   const applyMode = (saved: boolean) => {
