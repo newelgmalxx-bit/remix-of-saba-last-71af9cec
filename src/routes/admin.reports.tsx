@@ -23,8 +23,8 @@ function ReportsPage() {
   const [period, setPeriod] = useState(periodsExt[0]);
   const [format, setFormat] = useState(formats[0]);
   const [topPeriod, setTopPeriod] = useState(periods[1]);
-  const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; conversion: string; profitMargin: string }>({
-    revenue: 0, orders: 0, clients: 0, activeServices: 0, conversion: "0%", profitMargin: "0%",
+  const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; vat: number; profitMargin: string }>({
+    revenue: 0, orders: 0, clients: 0, activeServices: 0, vat: 0, profitMargin: "0%",
   });
 
   useEffect(() => {
