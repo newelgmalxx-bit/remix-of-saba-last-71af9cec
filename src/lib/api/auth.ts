@@ -11,9 +11,9 @@ export const auth = {
   },
 
   login: async (body: { email?: string; phone?: string; emailOrPhone?: string; password: string }) => {
-    const email = body.email ?? body.emailOrPhone ?? body.phone ?? '';
+    const emailOrPhone = body.emailOrPhone ?? body.email ?? body.phone ?? '';
     const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/login', {
-      method: 'POST', body: JSON.stringify({ email, password: body.password }),
+      method: 'POST', body: JSON.stringify({ emailOrPhone, password: body.password }),
     });
     if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
     return res;
