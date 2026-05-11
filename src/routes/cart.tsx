@@ -14,7 +14,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { items, remove, updateQty, subtotal, vat, total, count } = useCart();
+  const { items, remove, updateQty, subtotal, vat, total, count, loading, error, refresh } = useCart();
   const { t, lang, dir } = useLang();
 
   const L = (a: string, e: string) => (lang === "en" ? e : a);
