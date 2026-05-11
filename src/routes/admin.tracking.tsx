@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/tracking")({
 });
 
 type TrackingItem = {
-  id: number;
+  id: string | number;
   name: string;
   type: "pixel" | "head" | "body";
   code: string;
