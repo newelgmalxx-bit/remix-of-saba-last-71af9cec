@@ -152,8 +152,9 @@ function PaymentResultPage() {
       const k = normalize(search.status);
       setKind(k);
       setOrderNumber(search.order);
-      // If gateway returned with status=success directly, jump to summary page.
-      if (k === "success") {
+      // If we have an order reference, always jump to the summary page
+      // regardless of payment status (paid / pending / failed).
+      if (search.order) {
         navigate({
           to: "/checkout/success" as any,
           search: { o: search.order } as any,
