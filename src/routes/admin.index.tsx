@@ -138,6 +138,7 @@ function AdminDashboard() {
     adminApi.clients.list({ limit: 1 })
       .then((p: any) => setStats((s: any) => ({ ...s, totalClients: p?.total ?? s.totalClients })))
       .catch(() => {});
+    adminApi.notifications.list(5)
       .then((d: any) => {
         const list = d?.items ?? d ?? [];
         setActivity(list.map((n: any) => ({
