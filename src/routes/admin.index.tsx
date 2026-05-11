@@ -228,22 +228,18 @@ function AdminDashboard() {
               </span>
             </div>
           </div>
-          <div className={`${dir === "rtl" ? "md:justify-self-end" : "md:justify-self-start"} flex items-center gap-4`}>
-            <div className="relative h-28 w-28">
-              <svg viewBox="0 0 36 36" className="h-28 w-28 -rotate-90">
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="white" strokeWidth="3" strokeDasharray="78,100" strokeLinecap="round" />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold">{stats.monthlyTarget ? Math.min(100, Math.round((stats.revenue / stats.monthlyTarget) * 100)) : 0}%</div>
-                <div className="text-[10px] text-white/75">{L("من الهدف", "of target")}</div>
-              </div>
+          <div className={`${dir === "rtl" ? "md:justify-self-end" : "md:justify-self-start"} grid grid-cols-3 gap-3 text-center`}>
+            <div className="rounded-xl bg-white/10 backdrop-blur px-3 py-3 min-w-[88px]">
+              <div className="text-[11px] text-white/75">{L("مدفوع هذا الشهر", "Paid this month")}</div>
+              <div className="mt-1 text-2xl font-extrabold">{(stats.paidThisMonthCount || 0).toLocaleString(lang === "en" ? "en-US" : "ar-SA")}</div>
             </div>
-            <div className="text-sm">
-              <div className="text-white/75">{L("الهدف الشهري", "Monthly target")}</div>
-              <div className="text-lg font-bold">{fmtSAR(stats.monthlyTarget)}</div>
-              <div className="mt-2 text-white/75">{L("المتبقي", "Remaining")}</div>
-              <div className="text-lg font-bold">{fmtSAR(stats.remaining)}</div>
+            <div className="rounded-xl bg-white/10 backdrop-blur px-3 py-3 min-w-[88px]">
+              <div className="text-[11px] text-white/75">{L("بانتظار التأكيد", "Pending")}</div>
+              <div className="mt-1 text-2xl font-extrabold">{(stats.pendingCount || 0).toLocaleString(lang === "en" ? "en-US" : "ar-SA")}</div>
+            </div>
+            <div className="rounded-xl bg-white/10 backdrop-blur px-3 py-3 min-w-[88px]">
+              <div className="text-[11px] text-white/75">{L("متوسط الطلب", "Avg order")}</div>
+              <div className="mt-1 text-lg font-extrabold leading-tight">{fmtSAR(stats.avgOrderValue || 0)}</div>
             </div>
           </div>
         </div>
