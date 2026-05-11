@@ -70,30 +70,32 @@ function BookingsPage() {
     paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
   } as AdminBooking);
 
-  useEffect(() => {
-    adminApi.orders.list({ limit: 100 })
-      .then(async (p) => {
-        const list = (p.items || []) as any[];
-        setBookings(list.map(mapOrderToBooking));
-        // List endpoint omits items[] — fetch each order's details to fill the Service column.
-        const needsDetail = list.filter((b) => !Array.isArray(b.items) || !b.items.length);
-        if (!needsDetail.length) return;
-        const details = await Promise.all(
-          needsDetail.map((b) => adminApi.orders.get(b.id).catch(() => null))
-        );
-        setBookings((prev) => {
-          const byId = new Map(prev.map((x) => [x.id, x]));
-          details.forEach((d: any) => {
-            if (!d || !d.id) return;
-            const fresh = mapOrderToBooking(d);
-            const ex = byId.get(d.id);
-            if (ex) byId.set(d.id, { ...ex, service: fresh.service || ex.service });
-          });
-          return Array.from(byId.values());
+  const reloadBookings = async () => {
+    try {
+      const p: any = await adminApi.orders.list({ limit: 100 });
+      const list = (p.items || []) as any[];
+      setBookings(list.map(mapOrderToBooking));
+      const needsDetail = list.filter((b) => !Array.isArray(b.items) || !b.items.length);
+      if (!needsDetail.length) return;
+      const details = await Promise.all(
+        needsDetail.map((b) => adminApi.orders.get(b.id).catch(() => null))
+      );
+      setBookings((prev) => {
+        const byId = new Map(prev.map((x) => [x.id, x]));
+        details.forEach((d: any) => {
+          if (!d || !d.id) return;
+          const fresh = mapOrderToBooking(d);
+          const ex = byId.get(d.id);
+          if (ex) byId.set(d.id, { ...ex, service: fresh.service || ex.service });
         });
-      })
-      .catch(() => setBookings([]));
-  }, []);
+        return Array.from(byId.values());
+      });
+    } catch {
+      setBookings([]);
+    }
+  };
+
+  useEffect(() => { reloadBookings(); }, []);
 
   const periodDays = period === "all" ? null : Number(period);
   const filtered = bookings.filter(b => {
@@ -181,6 +183,7 @@ function BookingsPage() {
       if (status === "completed" && !wasPaid) {
         await issueInvoiceForBooking({ ...prev, paymentStatus: "paid", status: "completed" });
       }
+      await reloadBookings();
     } catch (e: any) {
       // Rollback on failure
       setBookings(bs => bs.map(x => x.id === id ? prev : x));
@@ -194,8 +197,9 @@ function BookingsPage() {
     if (!prev || prev.payment === payment) return;
     setBookings(bookings.map(x => x.id === id ? { ...x, payment } : x));
     try {
-      await adminApi.orders.update?.(id, { paymentMethod: payment });
+      await adminApi.orders.setPaymentMethod?.(id, payment);
       toast.success(L("تم تحديث طريقة الدفع", "Payment method updated"));
+      await reloadBookings();
     } catch (e: any) {
       setBookings(bs => bs.map(x => x.id === id ? prev : x));
       console.error("[order.updatePaymentMethod]", e);
@@ -209,7 +213,13 @@ function BookingsPage() {
     setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
     try {
       await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
-    } catch {}
+      await reloadBookings();
+    } catch (e) {
+      setBookings(bs => bs.map(x => x.id === id ? (prev as any) : x));
+      console.error("[order.setPaymentStatus]", e);
+      toast.error(L("تعذّر حفظ حالة الدفع", "Failed to save payment status"));
+      return;
+    }
 
     if (paymentStatus !== "paid") {
       toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
