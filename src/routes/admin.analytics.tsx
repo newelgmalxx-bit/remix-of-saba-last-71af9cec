@@ -228,24 +228,6 @@ function AnalyticsPage() {
         </PanelCard>
       </div>
 
-      {/* Engagement */}
-      <h3 className="text-sm font-bold text-muted-foreground mb-3">{L("التفاعل", "Engagement")}</h3>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("معدل الارتداد", "Bounce Rate")} value={fmt(data?.bounceRate ?? "0%")} icon={MousePointerClick} accent="amber" />
-        <StatCard label={L("صفحات/جلسة", "Pages / Session")} value={fmt(data?.pagesPerSession ?? 0)} icon={Eye} accent="primary" />
-        <StatCard label={L("متوسط مدة الجلسة", "Avg. Session")} value={fmt(data?.avgSession ?? "0s")} icon={Clock} accent="violet" />
-        <StatCard label={L("جلسات متفاعلة", "Engaged Sessions")} value={fmt(data?.engagedSessions ?? 0)} icon={TrendingUp} accent="emerald" />
-      </div>
-
-      {/* Conversions */}
-      <h3 className="text-sm font-bold text-muted-foreground mb-3">{L("التحويلات", "Conversions")}</h3>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={fmt(data?.conversionRate ?? "0%")} icon={TrendingUp} accent="emerald" />
-        <StatCard label={L("إضافات للسلة", "Add to Cart")} value={fmt(data?.addToCart ?? 0)} icon={MousePointerClick} accent="primary" />
-        <StatCard label={L("بدء دفع", "Checkouts Started")} value={fmt(data?.checkoutsStarted ?? 0)} icon={Clock} accent="amber" />
-        <StatCard label={L("طلبات مكتملة", "Completed Orders")} value={fmt(data?.completed ?? 0)} icon={Eye} accent="violet" />
-      </div>
-
       {/* Revenue */}
       <h3 className="text-sm font-bold text-muted-foreground mb-3">{L("الإيرادات والطلبات", "Revenue & Orders")}</h3>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
