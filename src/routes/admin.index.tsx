@@ -151,13 +151,20 @@ function AdminDashboard() {
           setByCat(cats);
         }).catch(() => {});
 
+        const pendingCount = all.filter((o) => o.status === "pending").length;
+        const paidAllCount = all.filter(isPaid).length;
+        const avgOrderValue = paidAllCount > 0
+          ? Math.round(all.filter(isPaid).reduce((s, o) => s + (Number(o.total) || 0), 0) / paidAllCount)
+          : 0;
         setStats((s: any) => ({
           ...s,
           revenue: effectiveRevenue,
           revenueGrowth,
-          ordersCount: paidThisMonth.length,
+          ordersCount: all.length,
           totalBookings: all.length,
-          remaining: Math.max(0, (s.monthlyTarget || 0) - effectiveRevenue),
+          paidThisMonthCount: paidThisMonth.length,
+          pendingCount,
+          avgOrderValue,
         }));
       })
       .catch(() => setBookings([]));
