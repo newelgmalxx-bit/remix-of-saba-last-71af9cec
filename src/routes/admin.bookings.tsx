@@ -221,28 +221,6 @@ function BookingsPage() {
       return;
     }
 
-  const updatePaymentMethod = async (id: string, payment: string) => {
-    const prev = bookings.find(x => x.id === id);
-    if (!prev || prev.payment === payment) return;
-    setBookings(bookings.map(x => x.id === id ? { ...x, payment } : x));
-    try {
-      await adminApi.orders.update?.(id, { paymentMethod: payment });
-      toast.success(L("تم تحديث طريقة الدفع", "Payment method updated"));
-    } catch (e: any) {
-      setBookings(bs => bs.map(x => x.id === id ? prev : x));
-      console.error("[order.updatePaymentMethod]", e);
-      toast.error(L("تعذّر حفظ طريقة الدفع", "Failed to save payment method"));
-    }
-  };
-
-  const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
-    const prev = bookings.find(x => x.id === id);
-    const wasPaid = prev?.paymentStatus === "paid";
-    setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
-    try {
-      await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
-    } catch {}
-
     if (paymentStatus !== "paid") {
       toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
       return;
