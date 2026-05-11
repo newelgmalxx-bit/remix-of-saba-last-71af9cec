@@ -87,8 +87,16 @@ export const cart = {
 export const checkout = {
   ...checkoutNew,
   submit: async (body: Parameters<typeof checkoutNew.create>[0]) => {
-    const res = await checkoutNew.create(body);
-    return res.data;
+    const res: any = await checkoutNew.create(body);
+    const data = res?.data ?? res;
+    if (!data || (!data.orderNumber && !data.orderId && !data.order)) {
+      const { ApiError } = await import('./client');
+      throw new ApiError(
+        502,
+        'تعذر إنشاء الطلب على الخادم — استجابة فارغة. حاول مرة أخرى أو تواصل مع الدعم.'
+      );
+    }
+    return data;
   },
 };
 

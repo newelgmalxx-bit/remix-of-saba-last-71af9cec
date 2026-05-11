@@ -15,13 +15,13 @@ export type CartItem = {
 const STORAGE_KEY = "saba_cart_v1";
 const VAT_RATE = 0.15;
 
-function normalizeFromApi(line: CartLine): CartItem {
+function normalizeFromApi(line: any): CartItem {
   return {
     id: String(line.id),
-    serviceSlug: line.service_slug,
-    serviceTitle: line.service_title,
-    planId: line.plan_id ?? "default",
-    planName: line.plan_name ?? "",
+    serviceSlug: line.serviceSlug ?? line.service_slug ?? "",
+    serviceTitle: line.serviceTitle ?? line.service_title ?? "",
+    planId: line.planId ?? line.plan_id ?? line.servicePlanId ?? "default",
+    planName: line.planName ?? line.plan_name ?? "",
     price: Number(line.price) || 0,
     qty: Number(line.qty) || 1,
   };
