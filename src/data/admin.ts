@@ -77,9 +77,9 @@ export const bookingStatusMap: Record<AdminBooking["status"], { label: string; t
   cancelled: { label: "ملغي", tone: "rose" },
 };
 
-export const paymentMethods: { value: string; labelAr: string; labelEn: string }[] = [
-  { value: "cod", labelAr: "الدفع عند الاستلام", labelEn: "Cash on delivery" },
-  { value: "myfatoorah", labelAr: "ماي فاتورة", labelEn: "MyFatoorah" },
+export const paymentMethods: { value: string; labelAr: string; labelEn: string; aliases?: string[] }[] = [
+  { value: "cod", labelAr: "الدفع عند الاستلام", labelEn: "Cash on delivery", aliases: ["cash", "كاش"] },
+  { value: "myfatoorah", labelAr: "ماي فاتورة", labelEn: "MyFatoorah", aliases: ["mayfatoorah", "my_fatoorah", "ماي فاتورة"] },
 ];
 
 export type AdminInvoice = {
