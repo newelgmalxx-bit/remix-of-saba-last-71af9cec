@@ -339,51 +339,8 @@ function ServiceDetailPage() {
           </div>
         </section>
 
-        {/* Previous works */}
-        <section className="pb-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
-              <div className={`flex flex-col gap-4 md:items-center md:justify-between ${dir === "rtl" ? "items-end md:flex-row-reverse" : "items-start md:flex-row"}`}>
-                <div className={startAlign}>
-                  <h2 className="text-2xl font-extrabold text-foreground">{t("svcDetail.works.title")}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">{t("svcDetail.works.desc")}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {workTabKeys.map((tk) => (
-                    <button
-                      key={tk}
-                      onClick={() => setTab(tk)}
-                      className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${
-                        tab === tk ? "bg-primary text-white" : "bg-secondary/60 text-foreground/70 hover:text-primary"
-                      }`}
-                    >
-                      {t(tk)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredWorks.map((w) => {
-                  const wTitle = t(w.titleKey);
-                  return (
-                    <article key={w.titleKey} className="group overflow-hidden rounded-2xl border border-border bg-secondary/30 transition hover:-translate-y-1 hover:shadow-md">
-                      <div className="relative aspect-[4/3] overflow-hidden">
-                        <img src={w.img} alt={wTitle} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                        <span className={`absolute top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-primary ${dir === "rtl" ? "right-3" : "left-3"}`}>{w.tag}</span>
-                      </div>
-                      <div className="flex items-center justify-between p-4">
-                        <button className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
-                          {t("svcDetail.works.viewProject")} <ArrowLeft className={`h-3 w-3 ${arrowFlip}`} />
-                        </button>
-                        <h3 className="text-sm font-bold text-foreground">{wTitle}</h3>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Previous works — same as home */}
+        <PortfolioSection />
 
         {/* Stats */}
         <section className="pb-12">
