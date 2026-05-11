@@ -66,8 +66,11 @@ function PaymentResultPage() {
       const d: any = res?.data || {};
       if (d.orderNumber) setOrderNumber(d.orderNumber);
       if (d.orderId) setOrderId(d.orderId);
-      // As soon as we know the order (paid or not), jump to the summary page.
-      if (d.orderId || d.orderNumber) {
+      // Redirect to the order summary page as soon as we have ANY positive
+      // signal from the gateway — order ref, paid=true, or even just a
+      // confirmed payment (used for plan orders that may not always return
+      // an orderId in the verify payload).
+      if (d.paid === true || d.orderId || d.orderNumber) {
         navigate({
           to: "/checkout/success" as any,
           search: { orderId: d.orderId, o: d.orderNumber } as any,
@@ -75,7 +78,6 @@ function PaymentResultPage() {
         });
         return d.paid === true ? "success" : "pending";
       }
-      if (d.paid === true) return "success";
       if (d.paid === false) return "pending";
       return "pending";
     } catch (e) {
