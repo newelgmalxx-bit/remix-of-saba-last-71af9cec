@@ -200,7 +200,11 @@ function InvoicesPage() {
                 return (
                   <tr key={i.id} className="border-b border-border hover:bg-muted/40">
                     <td className="px-3 py-3 font-bold text-primary" dir="ltr">{i.number}</td>
-                    <td className="px-3 py-3 text-muted-foreground" dir="ltr">#{i.orderNumber}</td>
+                    <td className="px-3 py-3">
+                      {i.orderNumber ? (
+                        <button onClick={() => openOrder(i)} className="font-bold text-primary hover:underline" dir="ltr">#{i.orderNumber}</button>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </td>
                     <td className="px-3 py-3"><div className="font-medium">{i.client}</div><div className="text-[11px] text-muted-foreground">{i.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
