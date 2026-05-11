@@ -113,42 +113,12 @@ function BookingsPage() {
     toast.success(L("تم الحذف", "Deleted"));
   };
 
-  const updateStatus = (id: string, status: string) => {
-    setBookings(bookings.map(x => x.id === id ? {
-      ...x,
-      status: status as any,
-      // Auto-mark as paid when order completes
-      paymentStatus: status === "completed" ? "paid" : x.paymentStatus,
-    } : x));
-    adminApi.orders.setStatus(id, { status }).catch(() => { /* offline-tolerant */ });
-    if (status === "completed") {
-      adminApi.orders.setPaymentStatus?.(id, "paid").catch(() => { /* offline-tolerant */ });
-    }
-    toast.success(L("تم تحديث الحالة", "Status updated"));
-  };
-
   const isCod = (p: string) => {
     const s = (p || "").toLowerCase();
     return s === "cod" || s.includes("كاش") || s.includes("استلام") || s.includes("cash");
   };
 
-  const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
-    setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
-    try {
-      await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
-    } catch { /* offline-tolerant */ }
-
-    if (paymentStatus !== "paid") {
-      toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
-      return;
-    }
-
-    // Generate invoice PDF and persist it via /admin/invoices
-    const b = bookings.find(x => x.id === id);
-    if (!b) {
-      toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
-      return;
-    }
+  const issueInvoiceForBooking = async (b: AdminBooking) => {
     const subtotal = +(b.total / 1.15).toFixed(2);
     const vat = +(b.total - subtotal).toFixed(2);
     const invoiceData = {
@@ -167,11 +137,49 @@ function BookingsPage() {
     try {
       const pdf = await renderInvoiceToPdfBlob(invoiceData);
       await adminApi.invoices.create(invoiceData, pdf);
-      toast.success(L("تم تأكيد الدفع وحفظ الفاتورة", "Payment confirmed — invoice saved"));
+      toast.success(L("تم حفظ الفاتورة", "Invoice saved"));
     } catch (e: any) {
       console.error("Invoice save failed", e);
-      toast.error(L("تم تأكيد الدفع لكن فشل حفظ الفاتورة", "Payment confirmed but invoice save failed"));
+      toast.error(L("فشل حفظ الفاتورة", "Failed to save invoice"));
     }
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    const prev = bookings.find(x => x.id === id);
+    const wasPaid = prev?.paymentStatus === "paid" || prev?.status === "completed";
+    setBookings(bookings.map(x => x.id === id ? {
+      ...x,
+      status: status as any,
+      paymentStatus: status === "completed" ? "paid" : x.paymentStatus,
+    } : x));
+    adminApi.orders.setStatus(id, { status }).catch(() => {});
+    if (status === "completed") {
+      adminApi.orders.setPaymentStatus?.(id, "paid").catch(() => {});
+    }
+    toast.success(L("تم تحديث الحالة", "Status updated"));
+    if (status === "completed" && !wasPaid && prev) {
+      await issueInvoiceForBooking({ ...prev, paymentStatus: "paid", status: "completed" });
+    }
+  };
+
+  const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
+    const prev = bookings.find(x => x.id === id);
+    const wasPaid = prev?.paymentStatus === "paid";
+    setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
+    try {
+      await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
+    } catch {}
+
+    if (paymentStatus !== "paid") {
+      toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
+      return;
+    }
+    if (wasPaid || !prev) {
+      toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
+      return;
+    }
+    toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
+    await issueInvoiceForBooking({ ...prev, paymentStatus: "paid" });
   };
 
   return (
