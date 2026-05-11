@@ -178,9 +178,22 @@ const adminLegacy = {
       const r: any = await a.getOrder(id);
       return r.data?.order;
     },
-    update: (id: string, body: any) => a.updateOrder(id, body),
+    update: (id: string, body: any) => {
+      // Route payment-related updates to the dedicated /payment endpoint
+      if (body && (body.paymentMethod || body.payment_method || body.paymentStatus || body.payment_status)) {
+        const payload: any = {};
+        if (body.paymentMethod || body.payment_method) payload.payment_method = body.paymentMethod || body.payment_method;
+        if (body.paymentStatus || body.payment_status) payload.payment_status = body.paymentStatus || body.payment_status;
+        return a.updateOrderPayment(id, payload);
+      }
+      if (body && body.status && Object.keys(body).length === 1) {
+        return a.updateOrderStatus(id, body);
+      }
+      return a.updateOrder(id, body);
+    },
     setStatus: (id: string, body: any) => a.updateOrderStatus(id, body),
     setPaymentStatus: (id: string, paymentStatus: string) => a.updateOrderPaymentStatus(id, paymentStatus),
+    setPaymentMethod: (id: string, paymentMethod: string) => a.updateOrderPaymentMethod(id, paymentMethod),
     addNote: (id: string, text: string) => a.addOrderNote(id, text),
   },
   consultations: {
