@@ -139,6 +139,25 @@ function SuccessPage() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center justify-center gap-3">
+              {!order.paid && payUrl && (
+                <a
+                  href={payUrl}
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                >
+                  <Wallet className="h-4 w-4" />
+                  {lang === "ar" ? "ادفع الآن" : "Pay now"}
+                </a>
+              )}
+              {!order.paid && !payUrl && (
+                <Link
+                  to={"/account/orders/$orderId/pay" as any}
+                  params={{ orderId: order.id } as any}
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                >
+                  <Wallet className="h-4 w-4" />
+                  {lang === "ar" ? "ادفع الآن" : "Pay now"}
+                </Link>
+              )}
               {order.paid && (
                 <button
                   onClick={() => downloadInvoice(order, user?.name || "")}
