@@ -122,9 +122,9 @@ function ContactPage() {
                 {t("contactPage.location.desc")}
               </p>
               <ul className="mt-6 space-y-4">
-                <Row icon={MapPin} label={t("contactPage.row.address")} value={t("contactPage.row.address.v")} />
-                <Row icon={Clock} label={t("contactPage.row.hours")} value={t("contactPage.row.hours.v")} />
-                <Row icon={Phone} label={t("contactPage.row.officePhone")} value="+966 11 123 4567" ltr />
+                {site.address && <Row icon={MapPin} label={t("contactPage.row.address")} value={site.address} />}
+                {site.workHours && <Row icon={Clock} label={t("contactPage.row.hours")} value={site.workHours} />}
+                {site.phone && <Row icon={Phone} label={t("contactPage.row.officePhone")} value={site.phone} ltr />}
               </ul>
               <a
                 href="https://maps.google.com/?q=Riyadh,Saudi+Arabia"
