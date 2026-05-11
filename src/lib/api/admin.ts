@@ -2,14 +2,18 @@ import { request, getToken, BASE } from './client';
 import type { ServiceFull, Plan, Order, ApiResponse, PaginatedResponse } from './types';
 
 export const admin = {
+  // Dashboard
+  getDashboard: () => request<ApiResponse<any>>('/admin/dashboard'),
+
   getServices: (p?: any) => {
     const q = p ? new URLSearchParams(p).toString() : '';
     return request<PaginatedResponse<ServiceFull>>(`/admin/services${q ? '?' + q : ''}`);
   },
   createService: (body: any) => request<ApiResponse<{ service: ServiceFull }>>('/admin/services', { method: 'POST', body: JSON.stringify(body) }),
-  getService: (slug: string) => request<ApiResponse<{ service: ServiceFull }>>(`/admin/services/${slug}`),
-  updateService: (slug: string, body: any) => request<ApiResponse<{ service: ServiceFull }>>(`/admin/services/${slug}`, { method: 'PUT', body: JSON.stringify(body) }),
-  deleteService: (slug: string) => request(`/admin/services/${slug}`, { method: 'DELETE' }),
+  // Spec uses {id}; we keep param name `idOrSlug` for backward compat with admin pages still using slug.
+  getService: (idOrSlug: string) => request<ApiResponse<{ service: ServiceFull }>>(`/admin/services/${idOrSlug}`),
+  updateService: (idOrSlug: string, body: any) => request<ApiResponse<{ service: ServiceFull }>>(`/admin/services/${idOrSlug}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteService: (idOrSlug: string) => request(`/admin/services/${idOrSlug}`, { method: 'DELETE' }),
   exportServices: () => fetch(`${BASE}/admin/services/export`, { headers: { Authorization: `Bearer ${getToken()}` } }).then(r => r.blob()),
 
   getPlans: () => request<ApiResponse<{ items: Plan[] }>>('/admin/plans'),
@@ -19,33 +23,38 @@ export const admin = {
 
   getOrders: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request<PaginatedResponse<Order>>(`/admin/orders${q ? '?' + q : ''}`); },
   getOrder: (id: string) => request<ApiResponse<{ order: Order }>>(`/admin/orders/${id}`),
-  updateOrderStatus: (id: string, body: any) => request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) }),
-  updateOrderPaymentStatus: (id: string, paymentStatus: string) => request(`/admin/orders/${id}/payment-status`, { method: 'PATCH', body: JSON.stringify({ paymentStatus }) }),
-  addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}/note`, { method: 'POST', body: JSON.stringify({ text }) }),
+  // Spec exposes a single PUT /admin/orders/{id} for updates.
+  updateOrder: (id: string, body: any) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  updateOrderStatus: (id: string, body: any) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  updateOrderPaymentStatus: (id: string, paymentStatus: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ paymentStatus }) }),
+  addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ note: text }) }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
-  updateBooking: (id: string, body: any) => request(`/admin/bookings/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) }),
-  addBookingNote: (id: string, text: string) => request(`/admin/bookings/${id}/note`, { method: 'POST', body: JSON.stringify({ text }) }),
+  updateBooking: (id: string, body: any) => request(`/admin/bookings/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  addBookingNote: (id: string, text: string) => request(`/admin/bookings/${id}`, { method: 'PUT', body: JSON.stringify({ note: text }) }),
 
   getInvoices: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/invoices${q ? '?' + q : ''}`); },
+  getInvoice: (id: string) => request(`/admin/invoices/${id}`),
+  // Spec only exposes GET on admin invoices; keep stubs for legacy callers.
   createInvoice: (body: any) => request('/admin/invoices', { method: 'POST', body: JSON.stringify(body) }),
-  updateInvoice: (id: string, body: any) => request(`/admin/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  updateInvoice: (id: string, body: any) => request(`/admin/invoices/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteInvoice: (id: string) => request(`/admin/invoices/${id}`, { method: 'DELETE' }),
   invoicePdf: (id: string) => fetch(`${BASE}/admin/invoices/${id}/pdf`, { headers: { Authorization: `Bearer ${getToken()}` } }).then(r => r.blob()),
 
-  getClients: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/clients${q ? '?' + q : ''}`); },
-  createClient: (body: any) => request('/admin/clients', { method: 'POST', body: JSON.stringify(body) }),
-  updateClient: (id: string, body: any) => request(`/admin/clients/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  deleteClient: (id: string) => request(`/admin/clients/${id}`, { method: 'DELETE' }),
+  // "Clients" are not a separate resource in the new spec — alias to /admin/users.
+  getClients: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/users${q ? '?' + q : ''}`); },
+  createClient: (body: any) => request('/admin/users', { method: 'POST', body: JSON.stringify(body) }),
+  updateClient: (id: string, body: any) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteClient: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
 
   getPortfolio: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/portfolio${q ? '?' + q : ''}`); },
   createPortfolio: (body: any) => request('/admin/portfolio', { method: 'POST', body: JSON.stringify(body) }),
   updatePortfolio: (id: string, body: any) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deletePortfolio: (id: string) => request(`/admin/portfolio/${id}`, { method: 'DELETE' }),
-  togglePortfolioVisibility: (id: string, visible: boolean) => request(`/admin/portfolio/${id}/visibility`, { method: 'PATCH', body: JSON.stringify({ visible }) }),
+  togglePortfolioVisibility: (id: string, visible: boolean) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify({ visible }) }),
 
-  getAnalytics: (range?: string) => request(`/admin/analytics${range ? '?range=' + range : ''}`),
-  getStats: () => request('/admin/stats'),
+  getAnalytics: (range?: string) => request(`/admin/dashboard${range ? '?range=' + range : ''}`),
+  getStats: () => request('/admin/dashboard'),
 
   generateReport: (body: any) => {
     if (body.format === 'csv') return fetch(`${BASE}/admin/reports/generate`, { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.blob());
@@ -53,43 +62,57 @@ export const admin = {
   },
 
   getUsers: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/users${q ? '?' + q : ''}`); },
-  inviteUser: (body: any) => request('/admin/users/invite', { method: 'POST', body: JSON.stringify(body) }),
+  inviteUser: (body: any) => request('/admin/users', { method: 'POST', body: JSON.stringify(body) }),
   updateUser: (id: string, body: any) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  updateUserRole: (id: string, role: string) => request(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  updateUserRole: (id: string, role: string) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify({ role }) }),
   deleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
 
-  getSettings: (group: string) => request(group === 'site' ? `/site/settings` : `/admin/settings/${group}`),
-  updateSettings: (group: string, body: any) => request(group === 'site' ? `/site/settings` : `/admin/settings/${group}`, { method: 'PUT', body: JSON.stringify(body) }),
+  getSettings: (group: string) => request(group === 'site' ? `/settings` : `/admin/settings`),
+  updateSettings: (_group: string, body: any) => request(`/admin/settings`, { method: 'PUT', body: JSON.stringify(body) }),
 
-  upload: async (file: File) => {
+  upload: async (file: File, bucket: string = 'general') => {
     const fd = new FormData(); fd.append('file', file);
-    return fetch(`${BASE}/admin/uploads`, {
+    fd.append('bucket', bucket);
+    return fetch(`${BASE}/upload`, {
       method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: fd,
     }).then(r => r.json());
   },
 
   getNotifications: (limit?: number) => request(`/admin/notifications${limit ? '?limit=' + limit : ''}`),
-  markNotificationsRead: (id?: string) => request(`/admin/notifications${id ? '?id=' + id : ''}`, { method: 'PATCH' }),
+  markNotificationsRead: (id?: string) =>
+    id
+      ? request(`/admin/notifications/${id}/read`, { method: 'PUT' })
+      : request(`/admin/notifications/read-all`, { method: 'PUT' }),
 
   getTickets: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/tickets${q ? '?' + q : ''}`); },
   getTicketDetail: (id: string) => request(`/admin/tickets/${id}`),
   replyTicket: (id: string, text: string) => request(`/admin/tickets/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
-  updateTicketStatus: (id: string, status: string) => request(`/admin/tickets/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  updateTicketPriority: (id: string, priority: string) => request(`/admin/tickets/${id}/priority`, { method: 'PATCH', body: JSON.stringify({ priority }) }),
+  updateTicketStatus: (id: string, status: string) => request(`/admin/tickets/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  updateTicketPriority: (id: string, priority: string) => request(`/admin/tickets/${id}`, { method: 'PUT', body: JSON.stringify({ priority }) }),
 
   getReviews: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/reviews${q ? '?' + q : ''}`); },
-  updateReviewStatus: (id: string, status: string) => request(`/admin/reviews/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  updateReviewStatus: (id: string, status: string) => request(`/admin/reviews/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
   deleteReview: (id: string) => request(`/admin/reviews/${id}`, { method: 'DELETE' }),
 
-  // Spec exposes a single /site/settings endpoint (GET public, PUT admin).
-  getSiteSettings: () => request('/site/settings'),
-  updateSiteSettings: (body: any) => request('/site/settings', { method: 'PUT', body: JSON.stringify(body) }),
+  // Site settings — public GET via /settings, admin update via /admin/settings.
+  getSiteSettings: () => request('/settings'),
+  updateSiteSettings: (body: any) => request('/admin/settings', { method: 'PUT', body: JSON.stringify(body) }),
 
   // Tracking codes (pixels / head / body scripts)
-  trackingList: () => request<ApiResponse<{ items: any[] }>>('/admin/tracking'),
-  trackingCreate: (body: any) => request('/admin/tracking', { method: 'POST', body: JSON.stringify(body) }),
-  trackingUpdate: (id: number | string, body: any) => request(`/admin/tracking/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  trackingToggle: (id: number | string) => request(`/admin/tracking/${id}/toggle`, { method: 'PATCH' }),
-  trackingDelete: (id: number | string) => request(`/admin/tracking/${id}`, { method: 'DELETE' }),
+  trackingList: () => request<ApiResponse<{ items: any[] }>>('/admin/tracking-codes'),
+  trackingCreate: (body: any) => request('/admin/tracking-codes', { method: 'POST', body: JSON.stringify(body) }),
+  trackingUpdate: (id: number | string, body: any) => request(`/admin/tracking-codes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  trackingToggle: (id: number | string) => request(`/admin/tracking-codes/${id}`, { method: 'PUT', body: JSON.stringify({ toggle: true }) }),
+  trackingDelete: (id: number | string) => request(`/admin/tracking-codes/${id}`, { method: 'DELETE' }),
   getPublicTracking: () => request<ApiResponse<{ pixels?: string; head?: string; body?: string }>>('/tracking'),
+
+  // Coupons (admin)
+  getCoupons: () => request<ApiResponse<{ items: any[] }>>('/admin/coupons'),
+  createCoupon: (body: any) => request('/admin/coupons', { method: 'POST', body: JSON.stringify(body) }),
+  updateCoupon: (id: string, body: any) => request(`/admin/coupons/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteCoupon: (id: string) => request(`/admin/coupons/${id}`, { method: 'DELETE' }),
+
+  // Contact messages (admin)
+  getContactMessages: () => request<ApiResponse<{ items: any[] }>>('/admin/contact-messages'),
+  updateContactMessage: (id: string, body: any) => request(`/admin/contact-messages/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
 };
