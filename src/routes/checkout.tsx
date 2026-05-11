@@ -404,7 +404,7 @@ function CheckoutPage() {
                     disabled={submitting}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                   >
-                    <Lock className="h-4 w-4" />
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
                     {submitting ? t("checkout.confirming") : `${t("checkout.confirm.full")} — ${formatCurrency(total)}`}
                   </button>
                 )}
