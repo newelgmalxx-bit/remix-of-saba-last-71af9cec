@@ -55,7 +55,7 @@ function PortfolioPage() {
     setForm((f) => ({ ...f, cover: webp }));
   };
 
-  const filtered = items.filter(i => i.titleAr.includes(q) || i.titleEn.toLowerCase().includes(q.toLowerCase()));
+  const filtered = items.filter(i => (i.titleAr ?? "").includes(q) || (i.titleEn ?? "").toLowerCase().includes(q.toLowerCase()));
   const toggle = (id: string) => {
     const next = items.map(i => i.id === id ? { ...i, visible: !i.visible } : i);
     setItems(next);
