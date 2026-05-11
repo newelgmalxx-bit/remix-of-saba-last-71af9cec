@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/bookings")({
   component: BookingsPage,
 });
 
-const statusKeys: AdminBooking["status"][] = ["pending", "in_progress", "review", "completed", "cancelled"];
+const statusKeys: AdminBooking["status"][] = ["pending", "confirmed", "in_progress", "review", "completed", "cancelled"];
 
 function BookingsPage() {
   const { lang, dir } = useLang();
