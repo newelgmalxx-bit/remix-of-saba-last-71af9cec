@@ -64,7 +64,7 @@ export function ContactSection() {
             <ul className="mt-6 space-y-4">
               {site.phone && <InfoRow icon={Phone} label={t("contactForm.info.call")} value={site.phone} href={telHref(site.phone)} />}
               {site.email && <InfoRow icon={Mail} label={t("contactForm.info.email")} value={site.email} href={mailHref(site.email)} />}
-              {(site.whatsapp || site.phone) && <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value={site.whatsapp || site.phone!} href={waHref(site.whatsapp || site.phone)} external />}
+              {site.phone && <InfoRow icon={MessageCircle} label={t("contactForm.info.whatsapp")} value={site.phone} href={waHref(site.phone)} external />}
               {site.address && <InfoRow icon={MapPin} label={t("contactForm.info.location")} value={site.address} href={`https://maps.google.com/?q=${encodeURIComponent(site.address)}`} external />}
             </ul>
 
