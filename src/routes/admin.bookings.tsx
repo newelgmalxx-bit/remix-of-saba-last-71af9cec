@@ -65,7 +65,7 @@ function BookingsPage() {
           vat: Number(b.vat) || undefined,
           couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
           total: Number(b.total) || 0,
-          payment: b.payment_method || b.payment || "cod",
+          payment: normalizePay(b.payment_method || b.payment || "cod"),
           paymentId: b.payment_id ?? null,
           status: b.status,
           date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
