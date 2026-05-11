@@ -70,13 +70,17 @@ export const adminBookings: AdminBooking[] = [
 
 export const bookingStatusMap: Record<AdminBooking["status"], { label: string; tone: "amber" | "primary" | "violet" | "emerald" | "rose" }> = {
   pending: { label: "بانتظار التأكيد", tone: "amber" },
+  confirmed: { label: "مؤكد", tone: "primary" },
   in_progress: { label: "قيد التنفيذ", tone: "primary" },
   review: { label: "قيد المراجعة", tone: "violet" },
   completed: { label: "مكتمل", tone: "emerald" },
   cancelled: { label: "ملغي", tone: "rose" },
 };
 
-export const paymentMethods = ["مدى", "فيزا", "ماستركارد", "Apple Pay", "تابي", "تمارا", "ماي فاتورة", "تحويل بنكي", "كاش"];
+export const paymentMethods: { value: string; labelAr: string; labelEn: string }[] = [
+  { value: "cod", labelAr: "الدفع عند الاستلام", labelEn: "Cash on delivery" },
+  { value: "myfatoorah", labelAr: "ماي فاتورة", labelEn: "MyFatoorah" },
+];
 
 export type AdminInvoice = {
   id: string; number: string; orderNumber: string; client: string; email: string;
