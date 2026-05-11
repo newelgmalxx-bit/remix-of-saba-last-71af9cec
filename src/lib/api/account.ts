@@ -16,16 +16,24 @@ export const account = {
   changePassword: (current: string, newPass: string) =>
     request('/account/password', { method: 'PUT', body: JSON.stringify({ currentPassword: current, newPassword: newPass }) }),
 
-  orders: (params?: { status?: string; page?: number }) => {
-    const q = params ? new URLSearchParams(params as any).toString() : '';
+  orders: (params?: { status?: string; page?: number; limit?: number }) => {
+    const clean: Record<string, string> = {};
+    if (params) for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== '') clean[k] = String(v);
+    }
+    const q = new URLSearchParams(clean).toString();
     return request<PaginatedResponse<Order>>(`/account/orders${q ? '?' + q : ''}`);
   },
 
   orderDetail: (id: string) =>
     request<ApiResponse<{ order: Order }>>(`/account/orders/${id}`),
 
-  tickets: (params?: { page?: number }) => {
-    const q = params ? new URLSearchParams(params as any).toString() : '';
+  tickets: (params?: { page?: number; status?: string; priority?: string; limit?: number }) => {
+    const clean: Record<string, string> = {};
+    if (params) for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== '') clean[k] = String(v);
+    }
+    const q = new URLSearchParams(clean).toString();
     return request<PaginatedResponse<Ticket>>(`/account/tickets${q ? '?' + q : ''}`);
   },
 
