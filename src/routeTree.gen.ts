@@ -331,6 +331,11 @@ const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
   path: '/account/orders/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrderSummaryOrderIdRoute = OrderSummaryOrderIdRouteImport.update({
+  id: '/order-summary/$orderId',
+  path: '/order-summary/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
