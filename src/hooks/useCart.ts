@@ -107,11 +107,13 @@ export function useCart() {
 
   useEffect(() => {
     mounted.current = true;
-    // Sync from cache (loaded from localStorage) after hydration.
     setState(cache);
     const fn = (s: State) => mounted.current && setState(s);
     listeners.add(fn);
-    trySyncFromApi();
+    if (!didInitialSync) {
+      didInitialSync = true;
+      trySyncFromApi(true);
+    }
     return () => { mounted.current = false; listeners.delete(fn); };
   }, []);
 
