@@ -13,7 +13,7 @@ function normalizeCart(raw: any): Cart {
       id: String(it.id),
       service_slug: it.service_slug ?? it.serviceSlug ?? '',
       service_title: it.service_title ?? it.serviceTitle ?? '',
-      plan_id: it.plan_id ?? it.planId ?? null,
+      plan_id: it.plan_id ?? it.servicePlanId ?? it.planId ?? null,
       plan_name: it.plan_name ?? it.planName ?? null,
       price: Number(it.price) || 0,
       original_price: it.original_price ?? it.originalPrice ?? null,
@@ -33,13 +33,36 @@ async function unwrap(p: Promise<ApiResponse<any>>): Promise<ApiResponse<Cart>> 
   return { ...res, data: normalizeCart(res?.data) };
 }
 
+export type AddCartBody = {
+  serviceId?: string;
+  servicePlanId?: string;
+  serviceSlug: string;
+  serviceTitle?: string;
+  planName?: string;
+  qty?: number;
+  price?: number;
+  originalPrice?: number;
+  // legacy alias accepted for backward compat
+  planId?: string;
+};
+
 export const cart = {
   get: () => unwrap(request<ApiResponse<any>>('/cart')),
 
-  add: (body: { serviceSlug: string; planId?: string; qty?: number }) => {
+  add: (body: AddCartBody) => {
     const h: Record<string, string> = {};
     if (!getToken()) h['X-Session-Id'] = getSid();
-    return unwrap(request<ApiResponse<any>>('/cart/items', { method: 'POST', body: JSON.stringify(body), headers: h }));
+    const payload = {
+      serviceId: body.serviceId,
+      servicePlanId: body.servicePlanId ?? body.planId,
+      serviceSlug: body.serviceSlug,
+      serviceTitle: body.serviceTitle ?? body.serviceSlug,
+      planName: body.planName,
+      qty: body.qty ?? 1,
+      price: body.price ?? 0,
+      originalPrice: body.originalPrice,
+    };
+    return unwrap(request<ApiResponse<any>>('/cart/items', { method: 'POST', body: JSON.stringify(payload), headers: h }));
   },
 
   updateQty: (lineId: string, qty: number) =>
