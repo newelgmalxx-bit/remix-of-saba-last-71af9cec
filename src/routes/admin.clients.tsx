@@ -115,6 +115,14 @@ function ClientsPage() {
         };
       });
       setClients(items);
+
+      // Compute avg order from real orders/invoices/bookings totals
+      const allTotals = sources.map((s) => Number(s.total) || 0).filter((n) => n > 0);
+      if (allTotals.length) {
+        const avg = allTotals.reduce((a, b) => a + b, 0) / allTotals.length;
+        setAvgOrder(Math.round(avg));
+      }
+
       // Build client-growth series — fill gaps between months so the chart is continuous
       const list: any[] = cp.items || [];
       const monthMap = new Map<string, number>();
@@ -141,18 +149,29 @@ function ClientsPage() {
         }
         if (unknown) series[0] = { ...series[0], n: series[0].n + unknown };
       } else if (list.length) {
-        // No joinedAt at all — show a single bucket for "current month" so chart isn't empty
         const now = new Date();
         const k = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
         series = [{ m: k, n: list.length, r: 0 }];
       }
       if (series.length) setGrowthSeries((prev) => (prev.length ? prev : series));
+
+      // Compute growth rate: this month new clients vs last month
+      if (series.length >= 1) {
+        const last = series[series.length - 1]?.n || 0;
+        const prev = series.length >= 2 ? series[series.length - 2]?.n || 0 : 0;
+        let rate = 0;
+        if (prev === 0 && last > 0) rate = 100;
+        else if (prev > 0) rate = Math.round(((last - prev) / prev) * 100);
+        setGrowthRate(`${rate > 0 ? "+" : ""}${rate}%`);
+      }
     });
     adminApi.analytics().then((a: any) => {
       if (!a) return;
-      setGrowthRate(`${a.growthRate ?? 0}%`);
-      setAvgOrder(Number(a.avgOrder) || 0);
-      if (Array.isArray(a.clientGrowth)) setGrowthSeries(a.clientGrowth);
+      if (a.growthRate !== undefined && a.growthRate !== null && Number(a.growthRate) !== 0) {
+        setGrowthRate(`${a.growthRate}%`);
+      }
+      if (Number(a.avgOrder) > 0) setAvgOrder(Number(a.avgOrder));
+      if (Array.isArray(a.clientGrowth) && a.clientGrowth.length) setGrowthSeries(a.clientGrowth);
     }).catch(() => {});
   }, []);
 
