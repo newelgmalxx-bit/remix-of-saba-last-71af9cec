@@ -23,8 +23,8 @@ function ReportsPage() {
   const [period, setPeriod] = useState(periodsExt[0]);
   const [format, setFormat] = useState(formats[0]);
   const [topPeriod, setTopPeriod] = useState(periods[1]);
-  const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; conversion: string; profitMargin: string }>({
-    revenue: 0, orders: 0, clients: 0, activeServices: 0, conversion: "0%", profitMargin: "0%",
+  const [stats, setStats] = useState<{ revenue: number; orders: number; clients: number; activeServices: number; vat: number; profitMargin: string }>({
+    revenue: 0, orders: 0, clients: 0, activeServices: 0, vat: 0, profitMargin: "0%",
   });
 
   useEffect(() => {
@@ -45,10 +45,6 @@ function ReportsPage() {
         const revenueTotal = orders.reduce((sum, o: any) => sum + (Number(o.total ?? o.amount ?? o.subtotal) || 0), 0) || Number(a.revenue) || 0;
         const clientsTotal = clients.length || Number(a.totalClients) || 0;
         const activeSvc = services.filter((s: any) => s.active !== false && s.status !== "inactive").length || Number(a.activeServices) || 0;
-        const paidOrders = orders.filter((o: any) => o.paid || o.payment_status === "paid" || o.status === "completed").length;
-        const conversionPct = a.conversionRate != null
-          ? Number(a.conversionRate)
-          : (ordersTotal > 0 ? (paidOrders / ordersTotal) * 100 : 0);
         const vatTotal = orders.reduce((sum, o: any) => sum + (Number(o.vat) || 0), 0);
         const marginPct = a.profitMargin != null
           ? Number(a.profitMargin)
@@ -58,7 +54,7 @@ function ReportsPage() {
           orders: ordersTotal,
           clients: clientsTotal,
           activeServices: activeSvc,
-          conversion: `${conversionPct.toFixed(1)}%`,
+          vat: vatTotal,
           profitMargin: `${marginPct.toFixed(1)}%`,
         });
       } catch {}
@@ -84,7 +80,7 @@ function ReportsPage() {
     const rows: [string, string][] = [
       [L("إجمالي المبيعات", "Total Sales"), String(stats.revenue)],
       [L("إجمالي الطلبات", "Total Orders"), String(stats.orders)],
-      [L("معدل التحويل", "Conversion Rate"), stats.conversion],
+      [L("إجمالي الضريبة", "Total VAT"), String(stats.vat)],
       [L("العملاء النشطون", "Active Clients"), String(stats.clients)],
       [L("الخدمات النشطة", "Active Services"), String(stats.activeServices)],
       [L("هامش الربح", "Profit Margin"), stats.profitMargin],
@@ -110,7 +106,7 @@ function ReportsPage() {
   };
 
   const exportTopCsv = () => {
-    const csv = `Metric,Value\nTotal Sales,${stats.revenue}\nTotal Orders,${stats.orders}\nConversion,${stats.conversion}`;
+    const csv = `Metric,Value\nTotal Sales,${stats.revenue}\nTotal Orders,${stats.orders}\nTotal VAT,${stats.vat}`;
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "summary.csv"; a.click();
@@ -130,7 +126,7 @@ function ReportsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         <StatCard label={L("إجمالي المبيعات", "Total Sales")} value={fmtSAR(stats.revenue)} icon={DollarSign} accent="primary" />
         <StatCard label={L("إجمالي الطلبات", "Total Orders")} value={stats.orders} icon={ShoppingCart} accent="violet" />
-        <StatCard label={L("معدل التحويل", "Conversion Rate")} value={stats.conversion} icon={TrendingUp} accent="emerald" />
+        <StatCard label={L("إجمالي الضريبة", "Total VAT")} value={fmtSAR(stats.vat)} icon={TrendingUp} accent="emerald" />
         <StatCard label={L("العملاء النشطون", "Active Clients")} value={stats.clients} icon={Users} accent="amber" />
         <StatCard label={L("الخدمات النشطة", "Active Services")} value={stats.activeServices} icon={Package} accent="primary" />
         <StatCard label={L("هامش الربح", "Profit Margin")} value={stats.profitMargin} icon={Activity} accent="violet" />
