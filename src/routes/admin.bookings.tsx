@@ -21,10 +21,15 @@ function BookingsPage() {
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const statusLabels: Record<AdminBooking["status"], string> = {
     pending: L("بانتظار التأكيد", "Pending"),
+    confirmed: L("مؤكد", "Confirmed"),
     in_progress: L("قيد التنفيذ", "In progress"),
     review: L("قيد المراجعة", "Under review"),
     completed: L("مكتمل", "Completed"),
     cancelled: L("ملغي", "Cancelled"),
+  };
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find(p => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
   };
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
@@ -41,17 +46,23 @@ function BookingsPage() {
         const items = (p.items || []).map((b: any) => ({
           id: b.id,
           number: b.number,
-          client: b.contact_name || b.client || "",
-          email: b.contact_email || b.email || "",
+          client: b.contact_name || b.userName || b.client || "",
+          email: b.contact_email || b.userEmail || b.email || "",
           phone: b.contact_phone || b.phone || undefined,
           city: b.contact_city || b.city || undefined,
+          address: b.contact_address || b.address || undefined,
+          notes: b.notes || undefined,
           service: Array.isArray(b.items) && b.items.length
             ? b.items.map((i: any) => i.service_title || i.serviceTitle).filter(Boolean).join(" • ")
             : (b.service || ""),
+          subtotal: Number(b.subtotal) || undefined,
+          vat: Number(b.vat) || undefined,
+          couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
           total: Number(b.total) || 0,
           payment: b.payment_method || b.payment || "cod",
+          paymentId: b.payment_id ?? null,
           status: b.status,
-          date: (b.createdAt || "").slice(0, 10),
+          date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
           source: b.source ?? "direct",
           paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
         })) as AdminBooking[];
@@ -187,7 +198,7 @@ function BookingsPage() {
                     <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(b.total)}</td>
                     <td className="px-3 py-3">
                       <select value={b.payment} onChange={(e) => setBookings(bookings.map(x => x.id === b.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
-                        {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                        {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                       </select>
                     </td>
                     <td className="px-3 py-3">
@@ -250,8 +261,9 @@ function BookingsPage() {
         <DialogContent dir={dir} className="max-w-2xl">
           <DialogHeader><DialogTitle>{L("فاتورة الطلب", "Order invoice")} <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
           {viewing && (() => {
-            const subtotal = Math.round(viewing.total / 1.15);
-            const vat = viewing.total - subtotal;
+            const subtotal = viewing.subtotal && viewing.subtotal > 0 ? viewing.subtotal : Math.round(viewing.total / 1.15);
+            const vat = viewing.vat && viewing.vat > 0 ? viewing.vat : viewing.total - subtotal;
+            const discount = viewing.couponDiscount || 0;
             return (
               <div className="space-y-4">
                 <div className={`rounded-2xl ${dir === "rtl" ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-primary to-primary-dark text-white p-5`}>
@@ -270,16 +282,25 @@ function BookingsPage() {
                   <div><div className="text-[11px] text-muted-foreground">{L("العميل", "Client")}</div><div className="font-bold">{viewing.client}</div><div className="text-xs text-muted-foreground">{viewing.email}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">{L("الجوال", "Phone")}</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
                   <div><div className="text-[11px] text-muted-foreground">{L("المدينة", "City")}</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("طريقة الدفع", "Payment method")}</div><div className="font-bold">{viewing.payment}</div></div>
+                  <div><div className="text-[11px] text-muted-foreground">{L("طريقة الدفع", "Payment method")}</div><div className="font-bold">{payLabel(viewing.payment)}</div></div>
+                  {viewing.address && (
+                    <div className="col-span-2"><div className="text-[11px] text-muted-foreground">{L("العنوان", "Address")}</div><div className="font-medium">{viewing.address}</div></div>
+                  )}
+                  {viewing.notes && (
+                    <div className="col-span-2"><div className="text-[11px] text-muted-foreground">{L("ملاحظات", "Notes")}</div><div className="font-medium whitespace-pre-wrap">{viewing.notes}</div></div>
+                  )}
                 </div>
                 <div className="rounded-xl border border-border overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50 text-xs"><tr><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("الخدمة", "Service")}</th><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("الكمية", "Qty")}</th><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("السعر", "Price")}</th></tr></thead>
-                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service}</td><td className="px-3 py-3" data-ltr-number>1</td><td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(subtotal)}</td></tr></tbody>
+                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service || "—"}</td><td className="px-3 py-3" data-ltr-number>1</td><td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(subtotal)}</td></tr></tbody>
                   </table>
                 </div>
                 <div className="space-y-1.5 text-sm border-t border-border pt-3">
                   <div className="flex justify-between"><span className="text-muted-foreground">{L("المجموع الفرعي", "Subtotal")}</span><span className="font-medium" data-ltr-number>{fmtSAR(subtotal)}</span></div>
+                  {discount > 0 && (
+                    <div className="flex justify-between"><span className="text-muted-foreground">{L("خصم الكوبون", "Coupon discount")}</span><span className="font-medium text-emerald-600" data-ltr-number>-{fmtSAR(discount)}</span></div>
+                  )}
                   <div className="flex justify-between"><span className="text-muted-foreground">{L("ضريبة القيمة المضافة (15%)", "VAT (15%)")}</span><span className="font-medium" data-ltr-number>{fmtSAR(vat)}</span></div>
                   <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>{L("الإجمالي", "Total")}</span><span data-ltr-number>{fmtSAR(viewing.total)}</span></div>
                 </div>
@@ -293,9 +314,9 @@ function BookingsPage() {
                       clientEmail: viewing.email,
                       clientPhone: viewing.phone,
                       clientCity: viewing.city,
-                      paymentMethod: viewing.payment,
+                      paymentMethod: payLabel(viewing.payment),
                       paymentStatus: viewing.paymentStatus ?? "unpaid",
-                      items: [{ title: viewing.service, qty: 1, price: subtotal }],
+                      items: [{ title: viewing.service || "—", qty: 1, price: subtotal }],
                       subtotal, vat, total: viewing.total,
                     })}
                   >
@@ -322,8 +343,8 @@ function BookingsPage() {
               <Lbl label={L("الخدمة", "Service")} full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
               <Lbl label={L("الإجمالي (ر.س)", "Total (SAR)")}><input type="number" className={ic} dir="ltr" value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
               <Lbl label={L("طريقة الدفع", "Payment method")}>
-                <select className={ic} value={editForm.payment ?? paymentMethods[0]} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
-                  {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                <select className={ic} value={editForm.payment ?? paymentMethods[0].value} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
+                  {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                 </select>
               </Lbl>
               <Lbl label={L("المصدر", "Source")}>

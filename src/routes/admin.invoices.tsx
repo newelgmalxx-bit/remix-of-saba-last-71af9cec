@@ -30,9 +30,13 @@ function InvoicesPage() {
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
-    orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0],
+    orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0].value,
     amount: 0, status: "pending", issued: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"),
   });
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find(p => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
+  };
 
   useEffect(() => {
     adminApi.invoices.list({ limit: 100 })
@@ -152,8 +156,8 @@ function InvoicesPage() {
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
                     <td className="px-3 py-3">
-                      <select value={i.payment ?? paymentMethods[0]} onChange={(e) => setInvoices(invoices.map(x => x.id === i.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
-                        {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                      <select value={i.payment ?? paymentMethods[0].value} onChange={(e) => setInvoices(invoices.map(x => x.id === i.id ? { ...x, payment: e.target.value } : x))} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
+                        {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
                       </select>
                     </td>
                     <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(i.amount)}</td>
@@ -222,7 +226,7 @@ function InvoicesPage() {
             <Lb label={L("المبلغ (شامل الضريبة)", "Amount (incl. VAT)")}><input type="number" className={ic} dir="ltr" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></Lb>
             <Lb label={L("طريقة الدفع", "Payment Method")}>
               <select className={ic} value={form.payment} onChange={e => setForm({ ...form, payment: e.target.value })}>
-                {paymentMethods.map(p => <option key={p} value={p}>{p}</option>)}
+                {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
               </select>
             </Lb>
             <Lb label={L("الحالة", "Status")}>
