@@ -45,9 +45,17 @@ export const adminServices: AdminService[] = [
 
 export type AdminBooking = {
   id: string; number: string; client: string; email: string; service: string;
-  total: number; payment: string; status: "pending" | "in_progress" | "review" | "completed" | "cancelled"; date: string;
+  total: number; payment: string;
+  status: "pending" | "confirmed" | "in_progress" | "review" | "completed" | "cancelled";
+  date: string;
   source?: "direct" | "partner";
   phone?: string; city?: string;
+  address?: string;
+  notes?: string;
+  subtotal?: number;
+  vat?: number;
+  couponDiscount?: number;
+  paymentId?: string | null;
   paymentStatus?: "unpaid" | "paid" | "refunded";
 };
 
