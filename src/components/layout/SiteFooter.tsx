@@ -62,11 +62,11 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-5 text-lg font-bold">{t("footer.contactUs")}</h4>
           <ul className="space-y-3">
-            {[
-              { Icon: Phone, text: "+966 50 123 4567" },
-              { Icon: Mail, text: "info@sabadesign.com" },
-              { Icon: MapPin, text: t("footer.location") },
-            ].map(({ Icon, text }, i) => (
+            {([
+              site.phone ? { Icon: Phone, text: site.phone } : null,
+              site.email ? { Icon: Mail, text: site.email } : null,
+              { Icon: MapPin, text: site.address || t("footer.location") },
+            ].filter(Boolean) as { Icon: any; text: string }[]).map(({ Icon, text }, i) => (
               <li key={i} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm transition hover:border-white/25 hover:bg-white/10">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                   <Icon className="h-4 w-4" />
