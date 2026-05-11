@@ -16,6 +16,11 @@ export type SiteSettings = {
   linkedin?: string;
   youtube?: string;
   tiktok?: string;
+  snapchat?: string;
+  vatPercent?: number;
+  currency?: string;
+  maintenanceMode?: boolean;
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: string };
   // Allow any extra keys without typing each one
   [k: string]: any;
 };
