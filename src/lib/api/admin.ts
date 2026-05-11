@@ -72,7 +72,8 @@ export const admin = {
   deletePortfolio: (id: string) => request(`/admin/portfolio/${id}`, { method: 'DELETE' }),
   togglePortfolioVisibility: (id: string, visible: boolean) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify({ visible }) }),
 
-  getAnalytics: (range?: string) => request(`/admin/dashboard${range ? '?range=' + range : ''}`),
+  getAnalytics: (range?: string) => request(`/admin/analytics/overview${range ? '?range=' + range : ''}`),
+  getAnalyticsRealtime: () => request('/admin/analytics/realtime'),
   getStats: () => request('/admin/dashboard'),
 
   generateReport: (body: any) => {

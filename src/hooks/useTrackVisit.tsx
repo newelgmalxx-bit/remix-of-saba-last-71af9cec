@@ -1,16 +1,6 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
-
-function getSessionId() {
-  if (typeof window === "undefined") return "";
-  let id = localStorage.getItem("saba:visit:sid");
-  if (!id) {
-    id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    localStorage.setItem("saba:visit:sid", id);
-  }
-  return id;
-}
+import { BASE, getSid } from "@/lib/api";
 
 function classifySource(referrer: string): string {
   if (!referrer) return "direct";
@@ -32,14 +22,18 @@ export function useTrackVisit() {
     if (typeof window === "undefined") return;
     if (path.startsWith("/admin")) return;
     const referrer = document.referrer || "";
-    supabase.from("page_visits").insert({
+    const body = JSON.stringify({
       path,
       referrer: referrer || null,
       source: classifySource(referrer),
-      session_id: getSessionId(),
-      user_agent: navigator.userAgent,
-    }).then(({ error }) => {
-      if (error) console.warn("[track] failed", error.message);
+      sessionId: getSid(),
+      userAgent: navigator.userAgent,
     });
+    fetch(`${BASE}/analytics/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Session-Id": getSid() },
+      body,
+      keepalive: true,
+    }).catch((e) => console.warn("[track] failed", e?.message));
   }, [path]);
 }

@@ -5,7 +5,6 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
 import { fmtSAR } from "@/data/admin";
 
 export const Route = createFileRoute("/admin/analytics")({
@@ -18,162 +17,35 @@ function AnalyticsPage() {
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const [range, setRange] = useState<"7d" | "30d" | "90d" | "year">("30d");
   const [data, setData] = useState<any>(null);
+  const [realtime, setRealtime] = useState<any>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const days = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : 365;
-      const sinceMs = Date.now() - days * 86400000;
-      const sinceIso = new Date(sinceMs).toISOString();
-
-      const [an, op, cp, vq] = await Promise.all([
-        adminApi.analytics(range).catch(() => null),
-        adminApi.orders.list({ limit: 1000 }).catch(() => ({ items: [] })),
-        adminApi.clients.list({ limit: 1000 }).catch(() => ({ items: [] })),
-        supabase.from("page_visits").select("path, source, session_id, created_at").gte("created_at", sinceIso).order("created_at", { ascending: false }).limit(5000),
-      ]);
+      const r: any = await adminApi.getAnalytics(range).catch(() => null);
       if (cancelled) return;
-      const a: any = an || {};
-      const orders: any[] = (op as any)?.items || [];
-      const clients: any[] = (cp as any)?.items || [];
-      const visitRows: any[] = (vq as any)?.data || [];
-      const now = Date.now();
-
-      // Visits per day
-      const dayMap = new Map<string, number>();
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now - i * 86400000);
-        dayMap.set(d.toISOString().slice(0, 10), 0);
-      }
-      visitRows.forEach((v) => {
-        const k = new Date(v.created_at).toISOString().slice(0, 10);
-        if (dayMap.has(k)) dayMap.set(k, (dayMap.get(k) || 0) + 1);
-      });
-      const visits = Array.from(dayMap.entries()).map(([date, views]) => ({ date, views }));
-      const uniqueSessions = new Set(visitRows.map((v) => v.session_id).filter(Boolean)).size;
-
-      // Sources
-      const sourceCount = new Map<string, number>();
-      visitRows.forEach((v) => {
-        const s = v.source || "direct";
-        sourceCount.set(s, (sourceCount.get(s) || 0) + 1);
-      });
-      const sourceLabel = (s: string) => {
-        const map: Record<string, [string, string]> = {
-          google: ["بحث Google", "Google Search"],
-          search: ["محركات بحث", "Search Engines"],
-          social: ["سوشيال ميديا", "Social Media"],
-          referral: ["إحالات", "Referrals"],
-          internal: ["داخلي", "Internal"],
-          direct: ["مباشر", "Direct"],
-        };
-        const v = map[s] || [s, s];
-        return L(v[0], v[1]);
-      };
-      const computedSources = Array.from(sourceCount.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ name: sourceLabel(k), value: v }));
-
-      // Sessions / engagement
-      const sessionsMap = new Map<string, { times: number[]; paths: string[] }>();
-      visitRows.forEach((v) => {
-        const sid = v.session_id || `anon-${v.created_at}`;
-        const t = new Date(v.created_at).getTime();
-        const s = sessionsMap.get(sid) || { times: [], paths: [] };
-        s.times.push(t);
-        s.paths.push(v.path || "/");
-        sessionsMap.set(sid, s);
-      });
-      const sessionList = Array.from(sessionsMap.values());
-      const totalSessions = sessionList.length;
-      const bounceSessions = sessionList.filter((s) => s.paths.length <= 1).length;
-      const engagedSessions = sessionList.filter((s) => {
-        const dur = Math.max(...s.times) - Math.min(...s.times);
-        return s.paths.length > 1 || dur >= 30000;
-      }).length;
-      const totalPages = sessionList.reduce((sum, s) => sum + s.paths.length, 0);
-      const totalDurMs = sessionList.reduce((sum, s) => sum + (Math.max(...s.times) - Math.min(...s.times)), 0);
-      const avgSessionSec = totalSessions ? Math.round(totalDurMs / totalSessions / 1000) : 0;
-      const fmtDuration = (sec: number) => {
-        if (!sec) return "0s";
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        return m ? `${m}m ${s}s` : `${s}s`;
-      };
-      const pagesPerSession = totalSessions ? (totalPages / totalSessions).toFixed(1) : "0";
-      const bounceRate = totalSessions ? `${Math.round((bounceSessions / totalSessions) * 100)}%` : "0%";
-
-      // Conversions
-      const cartVisits = visitRows.filter((v) => String(v.path || "").startsWith("/cart")).length;
-      const checkoutVisits = visitRows.filter((v) => String(v.path || "").startsWith("/checkout")).length;
-
-      // Orders / revenue
-      const inRange = (d: any) => {
-        const t = new Date(d || 0).getTime();
-        return Number.isFinite(t) && t >= sinceMs;
-      };
-      const recentOrders = orders.filter((o) => inRange(o.created_at || o.createdAt || o.date));
-      const revenueTotal = recentOrders.reduce((s, o) => s + (Number(o.total ?? o.amount) || 0), 0);
-      const avgOrderValue = recentOrders.length ? Math.round(revenueTotal / recentOrders.length) : 0;
-      const completedCount = recentOrders.filter((o) => ["completed", "paid", "delivered"].includes(String(o.status))).length;
-
-      // Monthly revenue
-      const monthMap = new Map<string, number>();
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(1);
-        d.setMonth(d.getMonth() - i);
-        monthMap.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, 0);
-      }
-      orders.forEach((o) => {
-        const t = new Date(o.created_at || o.createdAt || o.date || 0);
-        if (!Number.isFinite(t.getTime())) return;
-        const k = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}`;
-        if (monthMap.has(k)) monthMap.set(k, (monthMap.get(k) || 0) + (Number(o.total ?? o.amount) || 0));
-      });
-      const months = Array.from(monthMap.entries()).map(([m, v]) => ({ m, v }));
-
-      // Growth (vs previous period)
-      const prevSinceMs = sinceMs - days * 86400000;
-      const prevOrders = orders.filter((o) => {
-        const t = new Date(o.created_at || o.createdAt || o.date || 0).getTime();
-        return t >= prevSinceMs && t < sinceMs;
-      });
-      const prevRevenue = prevOrders.reduce((s, o) => s + (Number(o.total ?? o.amount) || 0), 0);
-      const growthRate = prevRevenue > 0
-        ? `${(((revenueTotal - prevRevenue) / prevRevenue) * 100).toFixed(1)}%`
-        : (revenueTotal > 0 ? "+100%" : "0%");
-
-      setData({
-        ...a,
-        pageViews: visitRows.length,
-        uniqueVisitors: uniqueSessions,
-        sessions: totalSessions,
-        avgSession: fmtDuration(avgSessionSec),
-        bounceRate,
-        pagesPerSession,
-        engagedSessions,
-        addToCart: cartVisits,
-        checkoutsStarted: checkoutVisits,
-        completed: completedCount,
-        ordersCount: recentOrders.length,
-        clientsCount: clients.length,
-        revenue: revenueTotal,
-        avgOrderValue,
-        growthRate,
-        conversionRate: totalSessions ? `${((completedCount / totalSessions) * 100).toFixed(1)}%` : "0%",
-        visits,
-        sources: computedSources,
-        monthlyRevenue: months,
-      });
+      setData(r?.data ?? r ?? {});
     })();
     return () => { cancelled = true; };
-  }, [range, lang]);
+  }, [range]);
 
-  const monthlyRevenue = data?.monthlyRevenue ?? [];
-  const visitsData = (data?.visits ?? []).map((v: any) => ({ d: v.date, v: v.views }));
-  const sources = (data?.sources ?? []).map((s: any) => ({ name: s.name, v: s.value ?? s.v }));
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      const r: any = await adminApi.getAnalyticsRealtime().catch(() => null);
+      if (!cancelled) setRealtime(r?.data ?? r ?? {});
+    };
+    tick();
+    const id = setInterval(tick, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
   const fmt = (n: any) => (typeof n === "number" ? n.toLocaleString(lang === "en" ? "en-US" : "ar-SA") : (n ?? "—"));
+  const sources = (data?.sources ?? []).map((s: any) => ({ name: s.name, v: s.value ?? s.v ?? 0 }));
+  const weekly = (data?.weeklyTraffic ?? data?.visits ?? []).map((v: any) => ({ d: v.date ?? v.d, v: v.views ?? v.v ?? 0 }));
+  const monthly = (data?.monthlyRevenue ?? []).map((m: any) => ({ m: m.month ?? m.m, v: m.revenue ?? m.v ?? 0 }));
+  const topPages = data?.topPages ?? [];
+  const topServices = data?.topServices ?? [];
 
   return (
     <AdminLayout title={L("التحليلات", "Analytics")} subtitle={L("رؤى متقدمة لأداء الموقع والتفاعل", "Advanced insights into site performance and engagement")} action={
@@ -184,22 +56,30 @@ function AnalyticsPage() {
         <option value="year">{L("هذا العام", "This Year")}</option>
       </select>
     }>
+      {/* Realtime */}
+      {realtime && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 mb-6">
+          <StatCard label={L("مستخدمون نشطون الآن", "Active Users Now")} value={fmt(realtime?.activeUsers ?? 0)} icon={Activity} accent="emerald" />
+          <StatCard label={L("جلسات نشطة", "Active Sessions")} value={fmt(realtime?.activeSessions ?? 0)} icon={Users} accent="violet" />
+        </div>
+      )}
+
       {/* Visits */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label={L("مشاهدات الصفحة", "Page Views")} value={fmt(data?.pageViews ?? 0)} icon={Eye} accent="primary" />
-        <StatCard label={L("زوار فريدون", "Unique Visitors")} value={fmt(data?.uniqueVisitors ?? 0)} icon={Eye} accent="violet" />
-        <StatCard label={L("جلسات", "Sessions")} value={fmt(data?.sessions ?? 0)} icon={MousePointerClick} accent="emerald" />
-        <StatCard label={L("متوسط مدة الزيارة", "Avg. Session Duration")} value={fmt(data?.avgSession ?? "0s")} icon={Clock} accent="amber" />
+        <StatCard label={L("الزيارات", "Visits")} value={fmt(data?.visits ?? 0)} icon={Eye} accent="primary" />
+        <StatCard label={L("زوار فريدون", "Unique Visitors")} value={fmt(data?.uniqueVisitors ?? 0)} icon={Users} accent="violet" />
+        <StatCard label={L("مشاهدات الصفحة", "Page Views")} value={fmt(data?.pageViews ?? 0)} icon={MousePointerClick} accent="emerald" />
+        <StatCard label={L("متوسط مدة الزيارة", "Avg. Session")} value={fmt(data?.avgSession ?? "0s")} icon={Clock} accent="amber" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
-        <PanelCard title={L("حركة المرور", "Traffic")} subtitle={L("الزيارات حسب اليوم", "Visits by day")} className="lg:col-span-2">
+        <PanelCard title={L("حركة المرور الأسبوعية", "Weekly Traffic")} subtitle={L("الزيارات حسب اليوم", "Visits by day")} className="lg:col-span-2">
           <div className="h-72">
-            {visitsData.length === 0 || visitsData.every((d: any) => !d.v) ? (
+            {weekly.length === 0 || weekly.every((d: any) => !d.v) ? (
               <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
             ) : (
               <ResponsiveContainer>
-                <LineChart data={visitsData}>
+                <LineChart data={weekly}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
                   <XAxis dataKey="d" stroke="#7c8aa0" fontSize={12} />
                   <YAxis stroke="#7c8aa0" fontSize={12} />
@@ -217,10 +97,42 @@ function AnalyticsPage() {
             <ul className="space-y-3">
               {sources.map((s: { name: string; v: number }) => (
                 <li key={s.name}>
-                  <div className="flex justify-between text-xs mb-1"><span className="font-medium">{s.name}</span><span className="font-bold">{s.v}</span></div>
+                  <div className="flex justify-between text-xs mb-1"><span className="font-medium">{s.name}</span><span className="font-bold">{fmt(s.v)}</span></div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (s.v / Math.max(...sources.map((x: any) => x.v), 1)) * 100)}%` }} />
                   </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PanelCard>
+      </div>
+
+      {/* Top pages + services */}
+      <div className="grid gap-6 lg:grid-cols-2 mb-6">
+        <PanelCard title={L("أكثر الصفحات زيارة", "Top Pages")} subtitle={L("أعلى الصفحات أداءً", "Best performing pages")}>
+          {topPages.length === 0 ? (
+            <div className="text-sm text-muted-foreground text-center py-8">{L("لا توجد بيانات بعد", "No data yet")}</div>
+          ) : (
+            <ul className="space-y-2">
+              {topPages.map((p: any, i: number) => (
+                <li key={i} className="flex justify-between text-xs border-b border-border pb-2">
+                  <span className="font-medium truncate">{p.path}</span>
+                  <span className="font-bold">{fmt(p.views ?? p.count ?? 0)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PanelCard>
+        <PanelCard title={L("أكثر الخدمات طلباً", "Top Services")} subtitle={L("الخدمات الأكثر مبيعاً", "Best selling services")}>
+          {topServices.length === 0 ? (
+            <div className="text-sm text-muted-foreground text-center py-8">{L("لا توجد بيانات بعد", "No data yet")}</div>
+          ) : (
+            <ul className="space-y-2">
+              {topServices.map((s: any, i: number) => (
+                <li key={i} className="flex justify-between text-xs border-b border-border pb-2">
+                  <span className="font-medium truncate">{s.title ?? s.name}</span>
+                  <span className="font-bold">{fmt(s.orders ?? s.count ?? 0)}</span>
                 </li>
               ))}
             </ul>
@@ -234,16 +146,16 @@ function AnalyticsPage() {
         <StatCard label={L("إجمالي الإيرادات", "Total Revenue")} value={fmtSAR(data?.revenue ?? 0)} icon={DollarSign} accent="primary" />
         <StatCard label={L("الطلبات", "Orders")} value={fmt(data?.ordersCount ?? 0)} icon={ShoppingCart} accent="violet" />
         <StatCard label={L("متوسط الطلب", "Avg. Order")} value={fmtSAR(data?.avgOrderValue ?? 0)} icon={Activity} accent="emerald" />
-        <StatCard label={L("معدل النمو", "Growth Rate")} value={fmt(data?.growthRate ?? "0%")} icon={TrendingUp} accent="amber" />
+        <StatCard label={L("معدل النمو", "Growth Rate")} value={fmt(data?.growthRate ?? data?.revenueGrowth ?? "0%")} icon={TrendingUp} accent="amber" />
       </div>
 
       <PanelCard title={L("الإيرادات الشهرية", "Monthly Revenue")} subtitle={L("آخر 12 شهر", "Last 12 months")}>
         <div className="h-72">
-          {monthlyRevenue.length === 0 || monthlyRevenue.every((d: any) => !d.v) ? (
+          {monthly.length === 0 || monthly.every((d: any) => !d.v) ? (
             <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
           ) : (
             <ResponsiveContainer>
-              <BarChart data={monthlyRevenue}>
+              <BarChart data={monthly}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
                 <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
                 <YAxis stroke="#7c8aa0" fontSize={12} />
@@ -254,12 +166,6 @@ function AnalyticsPage() {
           )}
         </div>
       </PanelCard>
-
-      {/* Clients summary */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 mt-6">
-        <StatCard label={L("إجمالي العملاء", "Total Clients")} value={fmt(data?.clientsCount ?? 0)} icon={Users} accent="primary" />
-        <StatCard label={L("نشاط عام", "Overall Activity")} value={fmt((data?.pageViews ?? 0) + (data?.ordersCount ?? 0))} icon={Activity} accent="violet" />
-      </div>
     </AdminLayout>
   );
 }
