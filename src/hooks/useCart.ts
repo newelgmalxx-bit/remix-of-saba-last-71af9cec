@@ -77,11 +77,12 @@ function setCache(next: State) {
   listeners.forEach((fn) => fn(next));
 }
 
-async function trySyncFromApi(): Promise<void> {
+let didInitialSync = false;
+async function trySyncFromApi(initial = false): Promise<void> {
+  if (initial) setCache({ ...cache, loading: true, error: null });
   try {
     const res = await api.cart.get();
     const remoteItems = (res.items || []).map(normalizeFromApi);
-    // Preserve local-only plan items (backend doesn't accept `plan:*` slugs).
     const localOnly = cache.items.filter((i) => i.serviceSlug.startsWith("plan:"));
     const merged = [...remoteItems, ...localOnly];
     setCache({
@@ -90,7 +91,13 @@ async function trySyncFromApi(): Promise<void> {
       loading: false,
       error: null,
     });
-  } catch { /* silent — local cart still works */ }
+  } catch (err: any) {
+    setCache({
+      ...cache,
+      loading: false,
+      error: initial ? (err?.message || "Couldn't load cart") : cache.error,
+    });
+  }
 }
 
 export function useCart() {
