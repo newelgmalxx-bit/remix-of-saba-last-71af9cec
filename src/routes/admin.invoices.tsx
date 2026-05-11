@@ -30,9 +30,13 @@ function InvoicesPage() {
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
-    orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0],
+    orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0].value,
     amount: 0, status: "pending", issued: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA"),
   });
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find(p => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
+  };
 
   useEffect(() => {
     adminApi.invoices.list({ limit: 100 })
