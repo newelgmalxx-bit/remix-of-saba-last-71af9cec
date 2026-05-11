@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar } from "lucide-react";
+import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
@@ -15,13 +15,14 @@ export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
     o: z.string().optional(),
     orderId: z.string().optional(),
+    payUrl: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "تم استلام طلبك | سابا ديزاين" }] }),
   component: SuccessPage,
 });
 
 function SuccessPage() {
-  const { o, orderId } = Route.useSearch();
+  const { o, orderId, payUrl } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
   const id = orderId || o;
