@@ -176,7 +176,10 @@ const adminLegacy = {
     },
     get: async (id: string) => {
       const r: any = await a.getOrder(id);
-      return r.data?.order;
+      const order = r?.data?.order;
+      if (!order) return order;
+      // Backend returns items/user as siblings of order — merge for callers.
+      return { ...order, items: r?.data?.items ?? order.items, user: r?.data?.user ?? order.user };
     },
     update: (id: string, body: any) => {
       // Route payment-related updates to the dedicated /payment endpoint
