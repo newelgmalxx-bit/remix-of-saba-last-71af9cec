@@ -88,15 +88,15 @@ function fromApi(p: any): Plan {
   const descEn = p.descriptionEn ?? p.description_en ?? "";
   const badgeAr = p.badgeAr ?? p.badge_ar ?? p.badge ?? "";
   const badgeEn = p.badgeEn ?? p.badge_en ?? "";
-  const featsAr = Array.isArray(p.featuresAr) ? p.featuresAr
-    : Array.isArray(p.features_ar) ? p.features_ar
-    : Array.isArray(p.features) ? p.features
-    : Array.isArray(p.feats) ? p.feats
-    : [];
-  const featsEn = Array.isArray(p.featuresEn) ? p.featuresEn
-    : Array.isArray(p.features_en) ? p.features_en
-    : Array.isArray(p.featsEn) ? p.featsEn
-    : [];
+  const parseFeats = (v: any): string[] => {
+    if (Array.isArray(v)) return v;
+    if (typeof v === "string" && v.trim()) {
+      try { const j = JSON.parse(v); return Array.isArray(j) ? j : []; } catch { return []; }
+    }
+    return [];
+  };
+  const featsAr = parseFeats(p.featuresAr ?? p.features_ar ?? p.features ?? p.feats);
+  const featsEn = parseFeats(p.featuresEn ?? p.features_en ?? p.featsEn);
   return {
     id: String(p.id ?? `p_${Math.random().toString(36).slice(2)}`),
     name: nameAr || nameEn || "",
