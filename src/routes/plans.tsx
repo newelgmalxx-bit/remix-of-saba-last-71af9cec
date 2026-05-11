@@ -119,11 +119,11 @@ function PlanCard({ plan }: { plan: Plan }) {
       {description && <p className="mt-2 text-xs leading-6 text-muted-foreground">{description}</p>}
       <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
         {feats.map((f) => (
-          <li key={f} className="flex items-center justify-between gap-2 text-xs text-foreground/80">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+          <li key={f} className="flex items-start gap-2 text-xs leading-6 text-foreground/80">
+            <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
               <Check className="h-3 w-3" />
             </span>
-            <span>{f}</span>
+            <span className="flex-1 min-w-0 break-words">{f}</span>
           </li>
         ))}
       </ul>
