@@ -90,6 +90,23 @@ function SignupPage() {
             </div>
 
             <form className="mt-7 space-y-5" onSubmit={onSubmit}>
+              {error && (
+                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold">{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="mt-1 list-disc ps-5">
+                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                          )),
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
               <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} value={name} onChange={setName} />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
