@@ -601,6 +601,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/services'
     | '/account/orders/$orderId'
+    | '/order-summary/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
     | '/admin/services/$slug'
