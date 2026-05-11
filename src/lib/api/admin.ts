@@ -26,7 +26,11 @@ export const admin = {
   // Spec exposes a single PUT /admin/orders/{id} for updates.
   updateOrder: (id: string, body: any) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   updateOrderStatus: (id: string, body: any) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  updateOrderPaymentStatus: (id: string, paymentStatus: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ paymentStatus }) }),
+  updateOrderPaymentStatus: (id: string, paymentStatus: string) =>
+    paymentStatus === 'paid'
+      ? request(`/admin/orders/${id}/confirm-payment`, { method: 'POST' })
+      : request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ paymentStatus }) }),
+  confirmOrderPayment: (id: string) => request(`/admin/orders/${id}/confirm-payment`, { method: 'POST' }),
   addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ note: text }) }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
