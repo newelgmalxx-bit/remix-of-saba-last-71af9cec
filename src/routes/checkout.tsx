@@ -135,13 +135,12 @@ function CheckoutPage() {
           JSON.stringify({ number: res.orderNumber, total, payment, items, info }),
         );
       } catch {}
-      if (res.paymentUrl) {
-        window.location.href = res.paymentUrl;
-        return;
-      }
       await clear();
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
-      navigate({ to: "/checkout/success" as any, search: { o: res.orderNumber } as any });
+      navigate({
+        to: "/checkout/success" as any,
+        search: { orderId: res.orderId, o: res.orderNumber, payUrl: res.paymentUrl || undefined } as any,
+      });
     } catch (err) {
       const fallback = lang === "ar" ? "فشل إتمام الطلب، حاول مرة أخرى." : "Checkout failed, please try again.";
       if (err instanceof ApiError) {

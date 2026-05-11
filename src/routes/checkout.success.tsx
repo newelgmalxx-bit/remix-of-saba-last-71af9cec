@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar } from "lucide-react";
+import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
@@ -15,13 +15,14 @@ export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
     o: z.string().optional(),
     orderId: z.string().optional(),
+    payUrl: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "تم استلام طلبك | سابا ديزاين" }] }),
   component: SuccessPage,
 });
 
 function SuccessPage() {
-  const { o, orderId } = Route.useSearch();
+  const { o, orderId, payUrl } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
   const id = orderId || o;
@@ -59,6 +60,11 @@ function SuccessPage() {
             <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
               <span className="text-sm text-muted-foreground">{t("checkout.success.orderLabel")}</span>
               <span className="text-base font-bold text-primary" dir="ltr">{order?.number || o}</span>
+            </div>
+          )}
+          {order && !order.paid && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
+              {lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"}
             </div>
           )}
         </div>
@@ -133,6 +139,25 @@ function SuccessPage() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center justify-center gap-3">
+              {!order.paid && payUrl && (
+                <a
+                  href={payUrl}
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                >
+                  <Wallet className="h-4 w-4" />
+                  {lang === "ar" ? "ادفع الآن" : "Pay now"}
+                </a>
+              )}
+              {!order.paid && !payUrl && (
+                <Link
+                  to={"/account/orders/$orderId/pay" as any}
+                  params={{ orderId: order.id } as any}
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                >
+                  <Wallet className="h-4 w-4" />
+                  {lang === "ar" ? "ادفع الآن" : "Pay now"}
+                </Link>
+              )}
               {order.paid && (
                 <button
                   onClick={() => downloadInvoice(order, user?.name || "")}
