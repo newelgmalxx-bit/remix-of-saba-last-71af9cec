@@ -142,7 +142,8 @@ function SignupPage() {
                 </span>
               </label>
 
-              <button type="submit" disabled={submitting} className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark">
+              <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? (lang === "ar" ? "جاري الإنشاء..." : "Creating...") : t("auth.signupBtn")}
               </button>
             </form>
