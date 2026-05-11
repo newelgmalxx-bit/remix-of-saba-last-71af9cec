@@ -42,7 +42,6 @@ const navGroups: (NavItem | "sep")[] = [
     to: "/admin/settings", ar: "الإعدادات", en: "Settings", icon: Settings,
     children: [
       { to: "/admin/settings/profile", ar: "الملف الشخصي", en: "Profile", icon: User },
-      { to: "/admin/settings/integrations", ar: "التكاملات", en: "Integrations", icon: Plug },
       { to: "/admin/settings/team", ar: "الفريق والصلاحيات", en: "Team & roles", icon: Users2 },
     ],
   },
