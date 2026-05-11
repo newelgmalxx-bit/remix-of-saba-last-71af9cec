@@ -9,14 +9,16 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useSiteSettings, telHref, waHref, mailHref } from "@/hooks/useSiteSettings";
 
 function ContactPage() {
   const { t, dir, lang } = useLang();
+  const site = useSiteSettings();
   const quickChannels = [
-    { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: t("contactPage.ch.whatsapp.v"), href: "https://wa.me/966501234567", accent: "from-emerald-500 to-emerald-600" },
-    { icon: Phone, label: t("contactPage.ch.phone"), value: "+966 50 123 4567", href: "tel:+966501234567", accent: "from-primary to-primary-dark", ltr: true },
-    { icon: Mail, label: t("contactPage.ch.email"), value: "info@sabadesign.com", href: "mailto:info@sabadesign.com", accent: "from-sky-500 to-sky-700", ltr: true },
-  ];
+    site.whatsapp || site.phone ? { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: site.whatsapp || site.phone!, href: waHref(site.whatsapp || site.phone)!, accent: "from-emerald-500 to-emerald-600" } : null,
+    site.phone ? { icon: Phone, label: t("contactPage.ch.phone"), value: site.phone, href: telHref(site.phone)!, accent: "from-primary to-primary-dark", ltr: true } : null,
+    site.email ? { icon: Mail, label: t("contactPage.ch.email"), value: site.email, href: mailHref(site.email)!, accent: "from-sky-500 to-sky-700", ltr: true } : null,
+  ].filter(Boolean) as { icon: any; label: string; value: string; href: string; accent: string; ltr?: boolean }[];
   const promises = [
     { icon: Zap, title: t("contactPage.promise1.t"), desc: t("contactPage.promise1.d") },
     { icon: ShieldCheck, title: t("contactPage.promise2.t"), desc: t("contactPage.promise2.d") },
