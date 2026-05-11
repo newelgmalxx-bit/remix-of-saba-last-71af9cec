@@ -39,9 +39,46 @@ function SuccessPage() {
         if (alive && raw) setOrder(normalizeOrder(raw));
       })
       .catch(() => {})
-      .finally(() => { if (alive) setLoading(false); });
+      .finally(() => {
+        if (!alive) return;
+        // Fallback to the locally cached last order so the summary always shows
+        // (covers cash-on-delivery and any case where the API didn't return one).
+        setOrder((prev) => {
+          if (prev) return prev;
+          try {
+            const cached = JSON.parse(localStorage.getItem("saba_last_order") || "null");
+            if (cached && (cached.number === o || cached.orderId === id || !o)) {
+              const items = (cached.items || []).map((it: any, i: number) => ({
+                id: it.id || `i${i}`,
+                serviceSlug: it.serviceSlug,
+                serviceTitle: it.serviceTitle,
+                planName: it.planName,
+                price: Number(it.price) || 0,
+                qty: Number(it.qty) || 1,
+              }));
+              const subtotal = items.reduce((s: number, it: any) => s + it.price * it.qty, 0);
+              const vat = Math.round(subtotal * 0.15);
+              return {
+                id: id || cached.number,
+                number: cached.number,
+                createdAt: new Date().toISOString().slice(0, 10),
+                status: "pending",
+                payment: cached.payment || "cod",
+                paid: false,
+                items,
+                subtotal,
+                vat,
+                total: cached.total ?? subtotal + vat,
+                timeline: [],
+              } as Order;
+            }
+          } catch {}
+          return prev;
+        });
+        setLoading(false);
+      });
     return () => { alive = false; };
-  }, [id]);
+  }, [id, o]);
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
