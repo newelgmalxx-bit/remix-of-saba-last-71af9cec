@@ -24,10 +24,12 @@ export function SiteFooter() {
           <img src={logo} alt={t("footer.brand")} width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
           <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
-            {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
+            {socials.map(([url, Icon], i) => (
               <a
                 key={i}
-                href="#"
+                href={url as string}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-primary"
               >
                 <Icon className="h-5 w-5" />
