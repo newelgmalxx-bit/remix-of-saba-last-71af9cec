@@ -9,6 +9,12 @@ export type PaymentMethodInfo = {
   type?: string;
 };
 
+// Spec doesn't expose a payment-methods endpoint — UI can use a static list.
+export const PAYMENT_METHODS: PaymentMethodInfo[] = [
+  { id: 'myfatoorah', name: 'MyFatoorah', type: 'gateway' },
+  { id: 'cod', name: 'Cash on Delivery', type: 'cod' },
+];
+
 export const checkout = {
   // POST /checkout — creates the order from the server-side cart.
   // body: { paymentMethod, contactName, contactEmail, contactPhone, contactCity?, contactAddress?, notes? }

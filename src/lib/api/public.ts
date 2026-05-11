@@ -1,4 +1,4 @@
-import { request } from './client';
+import { request, getToken, BASE } from './client';
 import type { Plan, ApiResponse } from './types';
 
 export const publicApi = {
@@ -11,7 +11,31 @@ export const publicApi = {
     logo: string | null; nameAr: string; nameEn: string;
     taglineAr: string; taglineEn: string;
     social: Record<string, string>; maintenanceMode: boolean;
-  }>>('/site/settings'),
+    currency?: string; vatRate?: number;
+  }>>('/settings'),
   sendContact: (body: { name: string; email: string; phone?: string; service?: string; budget?: string; message: string }) =>
     request<ApiResponse<{ ok: boolean }>>('/contact', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Public reviews list keyed by service id.
+  getReviews: (serviceId: string) =>
+    request<ApiResponse<{ items: any[] }>>(`/reviews/${serviceId}`),
+
+  // Public bookings endpoint.
+  createBooking: (body: { name: string; email: string; phone?: string; date?: string; time?: string; notes?: string; serviceId?: string }) =>
+    request<ApiResponse<any>>('/bookings', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Tracking codes for the storefront.
+  getTracking: () => request<ApiResponse<{ pixels?: string; head?: string; body?: string }>>('/tracking'),
+
+  // Generic upload (auth required by backend).
+  upload: async (file: File, bucket: string = 'general') => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('bucket', bucket);
+    return fetch(`${BASE}/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getToken() ?? ''}` },
+      body: fd,
+    }).then((r) => r.json());
+  },
 };
