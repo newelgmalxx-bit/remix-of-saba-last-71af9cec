@@ -284,6 +284,7 @@ function BookingsPage() {
                 <th className="px-3 py-3 font-medium">{L("حالة الدفع", "Pay status")}</th>
                 <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium">{L("التاريخ", "Date")}</th>
+                <th className="px-3 py-3 font-medium">{L("الفاتورة", "Invoice")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
