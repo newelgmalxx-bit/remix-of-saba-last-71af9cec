@@ -114,7 +114,7 @@ function AdminTicketDetail() {
                   </div>
                   <div className={`max-w-[75%] flex flex-col ${isSupport ? "items-end" : "items-start"}`}>
                     <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <span className="font-bold text-foreground">{m.author}</span>
+                      <span className="font-bold text-foreground">{m.author || "—"}</span>
                       <span>•</span>
                       <span data-ltr-number>{m.at}</span>
                     </div>
