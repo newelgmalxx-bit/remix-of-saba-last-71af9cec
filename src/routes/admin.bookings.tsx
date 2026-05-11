@@ -27,8 +27,14 @@ function BookingsPage() {
     completed: L("مكتمل", "Completed"),
     cancelled: L("ملغي", "Cancelled"),
   };
+  const normalizePay = (v: string) => {
+    const s = (v || "").toString().toLowerCase().trim();
+    const m = paymentMethods.find(p => p.value === s || p.aliases?.some(a => a.toLowerCase() === s));
+    return m?.value ?? s;
+  };
   const payLabel = (v: string) => {
-    const m = paymentMethods.find(p => p.value === v);
+    const key = normalizePay(v);
+    const m = paymentMethods.find(p => p.value === key);
     return m ? L(m.labelAr, m.labelEn) : v;
   };
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
