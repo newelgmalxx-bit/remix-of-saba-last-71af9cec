@@ -56,6 +56,8 @@ function PaymentResultPage() {
     }
   };
 
+  const [orderId, setOrderId] = useState<string | undefined>(undefined);
+
   const verifyOnce = useCallback(async (): Promise<"success" | "failed" | "pending" | "error"> => {
     if (!paymentId) return "error";
     setVerifying(true);
@@ -63,6 +65,7 @@ function PaymentResultPage() {
       const res = await api.checkout.verify(paymentId);
       const d: any = res?.data || {};
       if (d.orderNumber) setOrderNumber(d.orderNumber);
+      if (d.orderId) setOrderId(d.orderId);
       if (d.paid === true) return "success";
       if (d.paid === false) return "pending";
       return "pending";
@@ -100,9 +103,10 @@ function PaymentResultPage() {
       if (result === "success") {
         stopTimer();
         setKind("success");
+        // Redirect to the order summary / invoice page after successful payment.
         navigate({
-          to: "/payment/result",
-          search: { status: "success", order: orderNumber },
+          to: "/checkout/success" as any,
+          search: { orderId, o: orderNumber } as any,
           replace: true,
         });
       } else if (result === "failed") {
@@ -136,8 +140,17 @@ function PaymentResultPage() {
 
   useEffect(() => {
     if (!paymentId) {
-      setKind(normalize(search.status));
+      const k = normalize(search.status);
+      setKind(k);
       setOrderNumber(search.order);
+      // If gateway returned with status=success directly, jump to summary page.
+      if (k === "success") {
+        navigate({
+          to: "/checkout/success" as any,
+          search: { o: search.order } as any,
+          replace: true,
+        });
+      }
       return;
     }
     runVerification();
