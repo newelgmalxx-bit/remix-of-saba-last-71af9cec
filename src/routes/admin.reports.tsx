@@ -80,7 +80,7 @@ function ReportsPage() {
     const rows: [string, string][] = [
       [L("إجمالي المبيعات", "Total Sales"), String(stats.revenue)],
       [L("إجمالي الطلبات", "Total Orders"), String(stats.orders)],
-      [L("معدل التحويل", "Conversion Rate"), stats.conversion],
+      [L("إجمالي الضريبة", "Total VAT"), String(stats.vat)],
       [L("العملاء النشطون", "Active Clients"), String(stats.clients)],
       [L("الخدمات النشطة", "Active Services"), String(stats.activeServices)],
       [L("هامش الربح", "Profit Margin"), stats.profitMargin],
