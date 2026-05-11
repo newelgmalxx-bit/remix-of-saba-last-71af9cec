@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 import { useInjectTracking } from "@/hooks/useInjectTracking";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 const GOOGLE_CLIENT_ID =
@@ -61,6 +62,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   useTrackVisit();
   useInjectTracking();
+  usePageTracking();
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <LanguageProvider>
