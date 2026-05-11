@@ -1077,6 +1077,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountOrdersOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/order-summary/$orderId': {
+      id: '/order-summary/$orderId'
+      path: '/order-summary/$orderId'
+      fullPath: '/order-summary/$orderId'
+      preLoaderRoute: typeof OrderSummaryOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
