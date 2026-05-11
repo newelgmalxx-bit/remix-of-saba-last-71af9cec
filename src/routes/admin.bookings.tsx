@@ -284,6 +284,7 @@ function BookingsPage() {
                 <th className="px-3 py-3 font-medium">{L("حالة الدفع", "Pay status")}</th>
                 <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium">{L("التاريخ", "Date")}</th>
+                <th className="px-3 py-3 font-medium">{L("الفاتورة", "Invoice")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -331,20 +332,24 @@ function BookingsPage() {
                     </td>
                     <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{b.date}</td>
                     <td className="px-3 py-3">
+                      <button
+                        onClick={() => {
+                          if (b.paymentStatus !== "paid" && b.status !== "completed") {
+                            toast.error(L("لا يمكن إصدار الفاتورة قبل تأكيد الدفع", "Confirm payment before issuing the invoice"));
+                            return;
+                          }
+                          setViewing(b);
+                        }}
+                        title={L("عرض الفاتورة", "View invoice")}
+                        disabled={b.paymentStatus !== "paid" && b.status !== "completed"}
+                        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${b.paymentStatus === "paid" || b.status === "completed" ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20" : "border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed"}`}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        {L("عرض الفاتورة", "View invoice")}
+                      </button>
+                    </td>
+                    <td className="px-3 py-3">
                       <div className="flex gap-1">
-                        <button
-                          onClick={() => {
-                            if (b.paymentStatus !== "paid" && b.status !== "completed") {
-                              toast.error(L("لا يمكن إصدار الفاتورة قبل تأكيد الدفع", "Confirm payment before issuing the invoice"));
-                              return;
-                            }
-                            setViewing(b);
-                          }}
-                          title={L("عرض الفاتورة", "View invoice")}
-                          className={`flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted ${b.paymentStatus === "paid" || b.status === "completed" ? "text-primary" : "text-muted-foreground/40"}`}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
                         <button onClick={() => openEdit(b)} title={L("تعديل", "Edit")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-foreground/70"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(b.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
                       </div>
