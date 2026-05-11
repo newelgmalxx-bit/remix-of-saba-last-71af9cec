@@ -62,6 +62,11 @@ function SuccessPage() {
               <span className="text-base font-bold text-primary" dir="ltr">{order?.number || o}</span>
             </div>
           )}
+          {order && !order.paid && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
+              {lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"}
+            </div>
+          )}
         </div>
 
         {loading && (
