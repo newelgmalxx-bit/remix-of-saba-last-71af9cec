@@ -22,19 +22,27 @@ function SignupPage() {
   const [pwd, setPwd] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
     if (!name || !phone || !email || !pwd) {
-      toast.error(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      setError(lang === "ar" ? "يرجى تعبئة جميع الحقول" : "Please fill all fields");
+      return;
+    }
+    if (pwd.length < 6) {
+      setError(lang === "ar" ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل" : "Password must be at least 6 characters");
       return;
     }
     if (pwd !== pwd2) {
-      toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      setError(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       return;
     }
     if (!agree) {
-      toast.error(lang === "ar" ? "يجب الموافقة على الشروط" : "You must accept the terms");
+      setError(lang === "ar" ? "يجب الموافقة على الشروط" : "You must accept the terms");
       return;
     }
     setSubmitting(true);
@@ -43,8 +51,21 @@ function SignupPage() {
       toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
       navigate({ to: "/account" });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل إنشاء الحساب" : "Signup failed");
-      toast.error(msg);
+      const fallback = lang === "ar" ? "فشل إنشاء الحساب" : "Signup failed";
+      if (err instanceof ApiError) {
+        if (err.status === 409) {
+          setError(lang === "ar" ? "البريد الإلكتروني أو الجوال مستخدم بالفعل." : "This email or phone is already registered.");
+        } else if (err.status === 422) {
+          setError(lang === "ar" ? "تحقق من البيانات المدخلة." : "Please review the highlighted fields.");
+        } else if (err.status === 0 || err.status >= 500) {
+          setError(lang === "ar" ? "تعذر الاتصال بالخادم، حاول مرة أخرى." : "Couldn't reach the server, please try again.");
+        } else {
+          setError(err.message || fallback);
+        }
+        if (err.errors) setFieldErrors(err.errors as any);
+      } else {
+        setError(fallback);
+      }
     } finally {
       setSubmitting(false);
     }
