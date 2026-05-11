@@ -80,21 +80,36 @@ function write(plans: Plan[]) {
 }
 
 function fromApi(p: any): Plan {
-  const amount = p?.price?.amount ?? p?.price ?? 0;
-  const original = p?.price?.originalAmount ?? p?.originalPrice ?? null;
+  const amount = p?.price?.amount ?? p?.price ?? p?.priceAmount ?? 0;
+  const original = p?.price?.originalAmount ?? p?.originalPrice ?? p?.original_price ?? null;
+  const nameAr = p.nameAr ?? p.name_ar ?? p.titleAr ?? p.title_ar ?? p.name ?? "";
+  const nameEn = p.nameEn ?? p.name_en ?? p.titleEn ?? p.title_en ?? p.name ?? "";
+  const descAr = p.descriptionAr ?? p.description_ar ?? p.description ?? "";
+  const descEn = p.descriptionEn ?? p.description_en ?? "";
+  const badgeAr = p.badgeAr ?? p.badge_ar ?? p.badge ?? "";
+  const badgeEn = p.badgeEn ?? p.badge_en ?? "";
+  const featsAr = Array.isArray(p.featuresAr) ? p.featuresAr
+    : Array.isArray(p.features_ar) ? p.features_ar
+    : Array.isArray(p.features) ? p.features
+    : Array.isArray(p.feats) ? p.feats
+    : [];
+  const featsEn = Array.isArray(p.featuresEn) ? p.featuresEn
+    : Array.isArray(p.features_en) ? p.features_en
+    : Array.isArray(p.featsEn) ? p.featsEn
+    : [];
   return {
-    id: p.id,
-    name: p.nameAr || p.nameEn || "",
-    nameEn: p.nameEn || p.nameAr || "",
+    id: String(p.id ?? `p_${Math.random().toString(36).slice(2)}`),
+    name: nameAr || nameEn || "",
+    nameEn: nameEn || nameAr || "",
     price: amount != null ? String(amount) : "",
     originalPrice: original != null ? String(original) : undefined,
-    featured: !!p.highlighted,
-    badge: p.badgeAr ?? p.badge ?? "",
-    badgeEn: p.badgeEn ?? "",
-    description: p.descriptionAr ?? p.description ?? "",
-    descriptionEn: p.descriptionEn ?? "",
-    feats: Array.isArray(p.featuresAr) ? p.featuresAr : [],
-    featsEn: Array.isArray(p.featuresEn) ? p.featuresEn : [],
+    featured: !!(p.highlighted ?? p.featured ?? p.is_featured),
+    badge: badgeAr,
+    badgeEn,
+    description: descAr,
+    descriptionEn: descEn,
+    feats: featsAr,
+    featsEn,
   };
 }
 
