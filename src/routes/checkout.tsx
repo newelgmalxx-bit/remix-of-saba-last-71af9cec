@@ -137,10 +137,17 @@ function CheckoutPage() {
       } catch {}
       await clear();
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
-      navigate({
-        to: "/checkout/success" as any,
-        search: { orderId: res.orderId, o: res.orderNumber, payUrl: res.paymentUrl || undefined } as any,
-      });
+      if (res.orderId) {
+        navigate({
+          to: "/account/orders/$orderId" as any,
+          params: { orderId: res.orderId } as any,
+        });
+      } else {
+        navigate({
+          to: "/checkout/success" as any,
+          search: { o: res.orderNumber, payUrl: res.paymentUrl || undefined } as any,
+        });
+      }
     } catch (err) {
       // Auth errors and validation errors should still surface to the user.
       if (err instanceof ApiError && (err.status === 401 || err.status === 422)) {
