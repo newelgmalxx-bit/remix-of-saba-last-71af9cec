@@ -432,6 +432,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/services': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
