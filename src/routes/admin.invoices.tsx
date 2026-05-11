@@ -24,10 +24,12 @@ function InvoicesPage() {
     void: { l: L("ملغاة", "Void"), t: "rose" as const },
   };
 
-  const [invoices, setInvoices] = useState<AdminInvoice[]>([]);
+  const [invoices, setInvoices] = useState<(AdminInvoice & { orderId?: string })[]>([]);
+  const [orderMap, setOrderMap] = useState<Record<string, any>>({});
   const [tab, setTab] = useState<"all" | "paid" | "pending" | "void">("all");
   const [q, setQ] = useState("");
   const [viewing, setViewing] = useState<AdminInvoice | null>(null);
+  const [orderViewing, setOrderViewing] = useState<any | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<Omit<AdminInvoice, "id" | "number">>({
     orderNumber: "", client: "", email: "", phone: "", city: "", payment: paymentMethods[0].value,
@@ -39,20 +41,51 @@ function InvoicesPage() {
   };
 
   useEffect(() => {
-    adminApi.invoices.list({ limit: 100 })
-      .then((p) => {
-        const items: AdminInvoice[] = (p.items || []).map((i: any) => ({
-          id: i.id, number: i.number, orderNumber: i.order_id ?? "",
-          client: i.client_name, email: i.client_email,
-          phone: i.client_phone ?? "", city: i.client_city ?? "",
-          payment: i.payment_method ?? paymentMethods[0],
-          amount: Number(i.total) || 0, status: i.status,
-          issued: (i.created_at || "").slice(0, 10),
-        }));
-        setInvoices(items);
-      })
-      .catch(() => setInvoices([]));
+    Promise.all([
+      adminApi.invoices.list({ limit: 100 }).catch(() => ({ items: [] })),
+      adminApi.orders.list({ limit: 200 }).catch(() => ({ items: [] })),
+    ]).then(([inv, ord]: any[]) => {
+      const map: Record<string, any> = {};
+      (ord.items || []).forEach((o: any) => {
+        if (o.id) map[o.id] = o;
+        if (o.number) map[o.number] = o;
+      });
+      setOrderMap(map);
+
+      const items = (inv.items || []).map((i: any) => {
+        const orderId = i.orderId ?? i.order_id ?? "";
+        const o = orderId ? map[orderId] : null;
+        return {
+          id: i.id,
+          number: i.number,
+          orderNumber: o?.number || orderId || "",
+          orderId: orderId || undefined,
+          client: i.clientName ?? i.client_name ?? o?.contact_name ?? o?.userName ?? "",
+          email: i.clientEmail ?? i.client_email ?? o?.contact_email ?? o?.userEmail ?? "",
+          phone: i.clientPhone ?? i.client_phone ?? o?.contact_phone ?? o?.phone ?? "",
+          city: i.clientCity ?? i.client_city ?? o?.contact_city ?? o?.city ?? "",
+          payment: i.paymentMethod ?? i.payment_method ?? o?.payment_method ?? paymentMethods[0].value,
+          amount: Number(i.total) || Number(o?.total) || 0,
+          status: i.status || (o?.payment_status === "paid" ? "paid" : "pending"),
+          issued: ((i.createdAt || i.created_at || "") + "").slice(0, 10),
+        };
+      });
+      setInvoices(items as any);
+    });
   }, []);
+
+  const openOrder = async (inv: AdminInvoice & { orderId?: string }) => {
+    const key = inv.orderId || inv.orderNumber;
+    if (!key) { toast.error(L("لا يوجد طلب مرتبط", "No linked order")); return; }
+    let o = orderMap[key];
+    if (!o && inv.orderId) {
+      try {
+        const r: any = await adminApi.orders.get?.(inv.orderId);
+        o = r?.order || r?.data?.order || r;
+      } catch {}
+    }
+    setOrderViewing(o || { id: inv.orderId, number: inv.orderNumber });
+  };
 
   const filtered = invoices.filter(i => {
     const num = (i.number ?? "").toString().toLowerCase();
@@ -167,7 +200,11 @@ function InvoicesPage() {
                 return (
                   <tr key={i.id} className="border-b border-border hover:bg-muted/40">
                     <td className="px-3 py-3 font-bold text-primary" dir="ltr">{i.number}</td>
-                    <td className="px-3 py-3 text-muted-foreground" dir="ltr">#{i.orderNumber}</td>
+                    <td className="px-3 py-3">
+                      {i.orderNumber ? (
+                        <button onClick={() => openOrder(i)} className="font-bold text-primary hover:underline" dir="ltr">#{i.orderNumber}</button>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </td>
                     <td className="px-3 py-3"><div className="font-medium">{i.client}</div><div className="text-[11px] text-muted-foreground">{i.email}</div></td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{i.phone ?? "—"}</td>
                     <td className="px-3 py-3 text-xs">{i.city ?? "—"}</td>
@@ -230,6 +267,43 @@ function InvoicesPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!orderViewing} onOpenChange={(o) => !o && setOrderViewing(null)}>
+        <DialogContent dir={dir} className="max-w-2xl">
+          <DialogHeader><DialogTitle>{L("تفاصيل الطلب", "Order Details")} <span dir="ltr">#{orderViewing?.number || orderViewing?.id}</span></DialogTitle></DialogHeader>
+          {orderViewing && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <Info label={L("العميل", "Client")} value={orderViewing.contact_name || orderViewing.userName || "—"} />
+                <Info label={L("البريد", "Email")} value={orderViewing.contact_email || orderViewing.userEmail || "—"} />
+                <Info label={L("الجوال", "Phone")} value={orderViewing.contact_phone || orderViewing.phone || "—"} dir="ltr" />
+                <Info label={L("المدينة", "City")} value={orderViewing.contact_city || orderViewing.city || "—"} />
+                <Info label={L("طريقة الدفع", "Payment")} value={payLabel(orderViewing.payment_method || orderViewing.payment || "")} />
+                <Info label={L("الحالة", "Status")} value={orderViewing.status || "—"} />
+                <Info label={L("الإجمالي", "Total")} value={fmtSAR(Number(orderViewing.total) || 0)} />
+                <Info label={L("التاريخ", "Date")} value={((orderViewing.created_at || "") + "").slice(0, 10)} />
+              </div>
+              {Array.isArray(orderViewing.items) && orderViewing.items.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold mb-2 text-muted-foreground">{L("العناصر", "Items")}</div>
+                  <div className="rounded-xl border border-border divide-y divide-border">
+                    {orderViewing.items.map((it: any, idx: number) => (
+                      <div key={idx} className="flex justify-between px-3 py-2">
+                        <span>{it.service_title || it.serviceTitle || it.title || it.desc}</span>
+                        <span className="font-bold" data-ltr-number>{fmtSAR(Number(it.price) * Number(it.qty || 1))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {orderViewing.notes && (
+                <div className="rounded-xl bg-muted/40 p-3 text-xs">{orderViewing.notes}</div>
+              )}
+            </div>
+          )}
+          <DialogFooter><GhostButton onClick={() => setOrderViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent dir={dir} className="max-w-xl">
           <DialogHeader><DialogTitle>{L("فاتورة يدوية جديدة", "New Manual Invoice")}</DialogTitle></DialogHeader>
@@ -265,4 +339,13 @@ function InvoicesPage() {
 const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
 function Lb({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="text-xs font-bold space-y-1.5 block">{label}{children}</label>;
+}
+
+function Info({ label, value, dir }: { label: string; value: React.ReactNode; dir?: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-muted/30 px-3 py-2">
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="font-bold text-sm" dir={dir as any}>{value}</div>
+    </div>
+  );
 }
