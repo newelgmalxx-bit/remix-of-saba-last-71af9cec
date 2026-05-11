@@ -154,7 +154,8 @@ function AdminDashboard() {
         setStats((s: any) => ({
           ...s,
           revenue: effectiveRevenue,
-          ordersCount: all.length,
+          revenueGrowth,
+          ordersCount: paidThisMonth.length,
           totalBookings: all.length,
           remaining: Math.max(0, (s.monthlyTarget || 0) - effectiveRevenue),
         }));
