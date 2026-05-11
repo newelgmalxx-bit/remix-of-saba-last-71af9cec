@@ -139,8 +139,9 @@ function CheckoutPage() {
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
       if (res.orderId) {
         navigate({
-          to: "/account/orders/$orderId" as any,
+          to: "/order-summary/$orderId" as any,
           params: { orderId: res.orderId } as any,
+          search: { o: res.orderNumber, payUrl: res.paymentUrl || undefined } as any,
         });
       } else {
         navigate({
