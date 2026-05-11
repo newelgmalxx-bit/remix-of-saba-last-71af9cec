@@ -120,6 +120,23 @@ function LoginPage() {
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+              {error && (
+                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold">{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="mt-1 list-disc ps-5">
+                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                          )),
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
               <Field
                 label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
                 type={tab === "email" ? "email" : "tel"}
@@ -173,8 +190,9 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="relative z-20 w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark"
+                className="relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70"
               >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
               </button>
             </form>
