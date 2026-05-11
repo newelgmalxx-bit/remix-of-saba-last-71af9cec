@@ -67,7 +67,7 @@ function AdminDashboard() {
           total: Number(b.total) || 0,
           payment: b.payment_method || b.payment,
           status: b.status,
-          date: (b.createdAt || "").slice(0, 10),
+          date: ((b.createdAt || b.created_at || "") as string).slice(0, 10),
           source: b.source ?? "direct",
         }));
         setBookings(items as any);
