@@ -17,7 +17,7 @@ export type Plan = {
   featsEn?: string[];
 };
 
-const KEY = "saba_plans_v1";
+const KEY = "saba_plans_v2";
 
 export const defaultPlans: Plan[] = [
   {
