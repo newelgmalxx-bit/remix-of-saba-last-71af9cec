@@ -67,12 +67,12 @@ function AdminDashboard() {
           total: Number(b.total) || 0,
           payment: b.payment_method || b.payment,
           status: b.status,
-          date: (b.createdAt || "").slice(0, 10),
+          date: ((b.createdAt || b.created_at || "") as string).slice(0, 10),
           source: b.source ?? "direct",
         }));
         setBookings(items as any);
         const totalAll = all.reduce((s, o) => s + (Number(o.total) || 0), 0);
-        const totalPaid = all.filter((o) => o.paid).reduce((s, o) => s + (Number(o.total) || 0), 0);
+        const totalPaid = all.filter((o) => o.paid || o.payment_status === "paid").reduce((s, o) => s + (Number(o.total) || 0), 0);
         const effectiveRevenue = totalPaid || totalAll;
 
         // Build last 6 months revenue series
@@ -85,7 +85,8 @@ function AdminDashboard() {
           months.push({ key, m, v: 0 });
         }
         all.forEach((o) => {
-          const dt = new Date((o.createdAt || "").replace(" ", "T"));
+          const raw = (o.createdAt || o.created_at || "").toString();
+          const dt = new Date(raw.replace(" ", "T"));
           if (Number.isNaN(dt.getTime())) return;
           const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
           const row = months.find((r) => r.key === key);
