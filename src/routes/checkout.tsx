@@ -132,7 +132,7 @@ function CheckoutPage() {
       try {
         localStorage.setItem(
           "saba_last_order",
-          JSON.stringify({ number: res.orderNumber, total, payment, items, info }),
+          JSON.stringify({ orderId: res.orderId, number: res.orderNumber, total, payment, items, info }),
         );
       } catch {}
       await clear();
