@@ -18,10 +18,14 @@ async function refreshRemoteServices() {
       const slug = s.slug;
       remoteSlugs.push(slug);
       const cur = store[slug] || {};
-      const priceObj: any = (s as any).price || {};
-      const amount = priceObj.amount;
-      const originalAmount = priceObj.originalAmount;
-      const discountPercent = priceObj.discountPercent;
+      const rawPrice: any = (s as any).price;
+      const rawOriginal: any = (s as any).originalPrice;
+      const rawDiscount: any = (s as any).discountPercent;
+      // API may return flat numbers (price / originalPrice) OR nested { amount, originalAmount, discountPercent }
+      const priceObj = rawPrice && typeof rawPrice === "object" ? rawPrice : {};
+      const amount = priceObj.amount ?? (typeof rawPrice === "number" || typeof rawPrice === "string" ? rawPrice : undefined);
+      const originalAmount = priceObj.originalAmount ?? rawOriginal;
+      const discountPercent = priceObj.discountPercent ?? rawDiscount;
       store[slug] = {
         ...cur,
         isCustom: !serviceMap[slug] ? true : cur.isCustom,
