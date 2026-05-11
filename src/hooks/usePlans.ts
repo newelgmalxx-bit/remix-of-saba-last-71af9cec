@@ -79,18 +79,22 @@ function write(plans: Plan[]) {
   window.dispatchEvent(new Event("saba:plans"));
 }
 
-function fromApi(p: ApiPlan): Plan {
-  const amount = (p.price as any)?.amount ?? p.price ?? 0;
-  const original = (p.price as any)?.originalAmount ?? null;
+function fromApi(p: any): Plan {
+  const amount = p?.price?.amount ?? p?.price ?? 0;
+  const original = p?.price?.originalAmount ?? p?.originalPrice ?? null;
   return {
     id: p.id,
     name: p.nameAr || p.nameEn || "",
     nameEn: p.nameEn || p.nameAr || "",
-    price: String(amount ?? ""),
+    price: amount != null ? String(amount) : "",
     originalPrice: original != null ? String(original) : undefined,
     featured: !!p.highlighted,
-    feats: Array.isArray(p.featuresAr) && p.featuresAr.length ? p.featuresAr : [],
-    featsEn: Array.isArray(p.featuresEn) && p.featuresEn.length ? p.featuresEn : [],
+    badge: p.badgeAr ?? p.badge ?? "",
+    badgeEn: p.badgeEn ?? "",
+    description: p.descriptionAr ?? p.description ?? "",
+    descriptionEn: p.descriptionEn ?? "",
+    feats: Array.isArray(p.featuresAr) ? p.featuresAr : [],
+    featsEn: Array.isArray(p.featuresEn) ? p.featuresEn : [],
   };
 }
 
@@ -118,10 +122,17 @@ export function usePlans(opts?: { source?: "public" | "admin" }) {
     // try to refresh from backend
     (async () => {
       try {
-        const res: any = source === "admin"
-          ? await adminApi.plans.list()
-          : await publicApi.getPlans();
-        const items: ApiPlan[] | undefined = res?.items ?? res?.data?.items;
+        let items: any[] | undefined;
+        if (source === "admin") {
+          try {
+            const res: any = await adminApi.plans.list();
+            items = res?.items ?? res?.data?.items;
+          } catch {}
+        }
+        if (!items?.length) {
+          const res: any = await publicApi.getPlans();
+          items = res?.items ?? res?.data?.items;
+        }
         if (items?.length) {
           const mapped = items.map(fromApi);
           write(mapped);
