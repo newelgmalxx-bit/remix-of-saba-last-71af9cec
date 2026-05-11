@@ -164,19 +164,28 @@ function BookingsPage() {
 
   const updateStatus = async (id: string, status: string) => {
     const prev = bookings.find(x => x.id === id);
-    const wasPaid = prev?.paymentStatus === "paid" || prev?.status === "completed";
+    if (!prev || prev.status === status) return;
+    const wasPaid = prev.paymentStatus === "paid" || prev.status === "completed";
+    // Optimistic UI
     setBookings(bookings.map(x => x.id === id ? {
       ...x,
       status: status as any,
       paymentStatus: status === "completed" ? "paid" : x.paymentStatus,
     } : x));
-    adminApi.orders.setStatus(id, { status }).catch(() => {});
-    if (status === "completed") {
-      adminApi.orders.setPaymentStatus?.(id, "paid").catch(() => {});
-    }
-    toast.success(L("تم تحديث الحالة", "Status updated"));
-    if (status === "completed" && !wasPaid && prev) {
-      await issueInvoiceForBooking({ ...prev, paymentStatus: "paid", status: "completed" });
+    try {
+      await adminApi.orders.setStatus(id, { status });
+      if (status === "completed") {
+        await adminApi.orders.setPaymentStatus?.(id, "paid");
+      }
+      toast.success(L("تم تحديث الحالة", "Status updated"));
+      if (status === "completed" && !wasPaid) {
+        await issueInvoiceForBooking({ ...prev, paymentStatus: "paid", status: "completed" });
+      }
+    } catch (e: any) {
+      // Rollback on failure
+      setBookings(bs => bs.map(x => x.id === id ? prev : x));
+      console.error("[order.setStatus]", e);
+      toast.error(L("تعذّر حفظ الحالة على الخادم", "Failed to save status on server"));
     }
   };
 
