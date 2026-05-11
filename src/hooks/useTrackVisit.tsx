@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 function getSessionId() {
   if (typeof window === "undefined") return "";
@@ -30,8 +31,15 @@ export function useTrackVisit() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (path.startsWith("/admin")) return;
-    // Visit tracking disabled (cleanup pass — backend pending).
-    void classifySource;
-    void getSessionId;
+    const referrer = document.referrer || "";
+    supabase.from("page_visits").insert({
+      path,
+      referrer: referrer || null,
+      source: classifySource(referrer),
+      session_id: getSessionId(),
+      user_agent: navigator.userAgent,
+    }).then(({ error }) => {
+      if (error) console.warn("[track] failed", error.message);
+    });
   }, [path]);
 }
