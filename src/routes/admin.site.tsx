@@ -15,20 +15,26 @@ export const Route = createFileRoute("/admin/site")({
 function SiteSettingsPage() {
   const { lang } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [s, setS] = useState({
+  const [s, setS] = useState<any>({
     name: "سابا ديزاين", tagline: L("وكالتك الإبداعية لتصميم وتطوير المواقع والتطبيقات", "Your creative agency for web and app design & development"),
     email: "info@saba.sa", phone: "+966 55 000 0000", address: L("الرياض، المملكة العربية السعودية", "Riyadh, Saudi Arabia"),
-    logo: "", favicon: "",
+    logo: "", invoiceLogo: "", favicon: "",
     facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "", tiktok: "", snapchat: "",
     workHours: L("الأحد - الخميس · 9 ص - 6 م", "Sun - Thu · 9 AM - 6 PM"),
     maintenanceMode: false, primaryLang: "ar", currency: "SAR", vatPercent: 15,
+    company: {
+      logo: "", nameAr: "", nameEn: "", commercialRegister: "", taxNumber: "",
+      addressAr: "", addressEn: "", phone: "", email: "", website: "",
+      iban: "", bankName: "", invoiceFooterNoteAr: "", invoiceFooterNoteEn: "",
+    },
   });
+  const setC = (k: string, v: string) => setS((cur: any) => ({ ...cur, company: { ...(cur.company || {}), [k]: v } }));
 
   useEffect(() => {
     (async () => {
       try {
         const data = await adminApi.settings.get<any>("site");
-        if (data && typeof data === "object") setS((cur) => ({ ...cur, ...data }));
+        if (data && typeof data === "object") setS((cur: any) => ({ ...cur, ...data, company: { ...(cur.company || {}), ...((data as any).company || {}) } }));
       } catch {}
     })();
   }, []);
@@ -37,7 +43,7 @@ function SiteSettingsPage() {
     try { await adminApi.settings.update("site", s); toast.success(L("تم حفظ الإعدادات", "Settings saved")); }
     catch (e: any) { toast.error(e?.message || "Save failed"); }
   };
-  const upload = (k: "logo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = (k: "logo" | "invoiceLogo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     setS({ ...s, [k]: await uploadImage(f) });
   };
@@ -46,7 +52,8 @@ function SiteSettingsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <PanelCard title={L("الهوية والشعار", "Identity & Logo")} className="lg:col-span-1">
           <div className="space-y-4">
-            <Img label={L("الشعار", "Logo")} value={s.logo} onChange={upload("logo")} onClear={() => setS({ ...s, logo: "" })} t={L} />
+            <Img label={L("الشعار العام", "Site Logo")} value={s.logo} onChange={upload("logo")} onClear={() => setS({ ...s, logo: "" })} t={L} />
+            <Img label={L("شعار الفاتورة (نسخة بيضاء/فاتحة)", "Invoice Logo (white/light)")} value={s.invoiceLogo} onChange={upload("invoiceLogo")} onClear={() => setS({ ...s, invoiceLogo: "" })} t={L} />
             <Img label={L("أيقونة المتصفح Favicon", "Favicon")} value={s.favicon} onChange={upload("favicon")} onClear={() => setS({ ...s, favicon: "" })} small t={L} />
           </div>
         </PanelCard>
@@ -77,6 +84,24 @@ function SiteSettingsPage() {
             {(["facebook","instagram","twitter","linkedin","youtube","tiktok","snapchat"] as const).map(k => (
               <Lbl key={k} label={k}><input className={ic} dir="ltr" placeholder={`https://${k}.com/...`} value={(s as any)[k]} onChange={e => setS({ ...s, [k]: e.target.value })} /></Lbl>
             ))}
+          </div>
+        </PanelCard>
+
+        <PanelCard title={L("بيانات الشركة (تظهر في الفاتورة)", "Company Info (shown on invoice)")} className="lg:col-span-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Lbl label={L("الاسم بالعربية", "Name (Arabic)")}><input className={ic} value={s.company?.nameAr || ""} onChange={e => setC("nameAr", e.target.value)} /></Lbl>
+            <Lbl label={L("الاسم بالإنجليزية", "Name (English)")}><input className={ic} dir="ltr" value={s.company?.nameEn || ""} onChange={e => setC("nameEn", e.target.value)} /></Lbl>
+            <Lbl label={L("السجل التجاري", "Commercial Register")}><input className={ic} dir="ltr" placeholder="10 digits" value={s.company?.commercialRegister || ""} onChange={e => setC("commercialRegister", e.target.value)} /></Lbl>
+            <Lbl label={L("الرقم الضريبي", "Tax Number")}><input className={ic} dir="ltr" placeholder="3xxxxxxxxxxx03" value={s.company?.taxNumber || ""} onChange={e => setC("taxNumber", e.target.value)} /></Lbl>
+            <Lbl label={L("الجوال", "Phone")}><input className={ic} dir="ltr" value={s.company?.phone || ""} onChange={e => setC("phone", e.target.value)} /></Lbl>
+            <Lbl label={L("البريد", "Email")}><input className={ic} dir="ltr" value={s.company?.email || ""} onChange={e => setC("email", e.target.value)} /></Lbl>
+            <Lbl label={L("الموقع الإلكتروني", "Website")}><input className={ic} dir="ltr" value={s.company?.website || ""} onChange={e => setC("website", e.target.value)} /></Lbl>
+            <Lbl label={L("اسم البنك", "Bank Name")}><input className={ic} value={s.company?.bankName || ""} onChange={e => setC("bankName", e.target.value)} /></Lbl>
+            <Lbl label="IBAN"><input className={ic} dir="ltr" placeholder="SA..." value={s.company?.iban || ""} onChange={e => setC("iban", e.target.value)} /></Lbl>
+            <Lbl label={L("العنوان بالعربية", "Address (Arabic)")} full><input className={ic} value={s.company?.addressAr || ""} onChange={e => setC("addressAr", e.target.value)} /></Lbl>
+            <Lbl label={L("العنوان بالإنجليزية", "Address (English)")} full><input className={ic} dir="ltr" value={s.company?.addressEn || ""} onChange={e => setC("addressEn", e.target.value)} /></Lbl>
+            <Lbl label={L("ملاحظة تذييل الفاتورة (عربي)", "Invoice Footer Note (AR)")} full><textarea rows={2} className={ic} value={s.company?.invoiceFooterNoteAr || ""} onChange={e => setC("invoiceFooterNoteAr", e.target.value)} /></Lbl>
+            <Lbl label={L("ملاحظة تذييل الفاتورة (إنجليزي)", "Invoice Footer Note (EN)")} full><textarea rows={2} className={ic} dir="ltr" value={s.company?.invoiceFooterNoteEn || ""} onChange={e => setC("invoiceFooterNoteEn", e.target.value)} /></Lbl>
           </div>
         </PanelCard>
 
