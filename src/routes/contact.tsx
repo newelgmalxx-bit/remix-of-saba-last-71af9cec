@@ -14,8 +14,9 @@ import { useSiteSettings, telHref, waHref, mailHref } from "@/hooks/useSiteSetti
 function ContactPage() {
   const { t, dir, lang } = useLang();
   const site = useSiteSettings();
+  const waNumber = site.whatsapp || site.phone;
   const quickChannels = [
-    site.phone ? { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: site.phone, href: waHref(site.phone)!, accent: "from-emerald-500 to-emerald-600", ltr: true } : null,
+    waNumber ? { icon: MessageCircle, label: t("contactPage.ch.whatsapp"), value: waNumber, href: waHref(waNumber)!, accent: "from-emerald-500 to-emerald-600", ltr: true } : null,
     site.phone ? { icon: Phone, label: t("contactPage.ch.phone"), value: site.phone, href: telHref(site.phone)!, accent: "from-primary to-primary-dark", ltr: true } : null,
     site.email ? { icon: Mail, label: t("contactPage.ch.email"), value: site.email, href: mailHref(site.email)!, accent: "from-sky-500 to-sky-700", ltr: true } : null,
   ].filter(Boolean) as { icon: any; label: string; value: string; href: string; accent: string; ltr?: boolean }[];
