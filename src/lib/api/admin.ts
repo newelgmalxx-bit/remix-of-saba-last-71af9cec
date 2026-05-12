@@ -83,10 +83,20 @@ export const admin = {
   deleteClient: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
 
   getPortfolio: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/portfolio${q ? '?' + q : ''}`); },
-  createPortfolio: (body: any) => request('/admin/portfolio', { method: 'POST', body: JSON.stringify(body) }),
-  updatePortfolio: (id: string, body: any) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  createPortfolio: (body: any) => {
+    const { visible, status, ...rest } = body || {};
+    const s = status != null ? Number(status) : (visible === false ? 0 : 1);
+    return request('/admin/portfolio', { method: 'POST', body: JSON.stringify({ ...rest, status: s }) });
+  },
+  updatePortfolio: (id: string, body: any) => {
+    const { visible, status, ...rest } = body || {};
+    const payload: any = { ...rest };
+    if (status != null) payload.status = Number(status);
+    else if (visible != null) payload.status = visible ? 1 : 0;
+    return request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  },
   deletePortfolio: (id: string) => request(`/admin/portfolio/${id}`, { method: 'DELETE' }),
-  togglePortfolioVisibility: (id: string, visible: boolean) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify({ visible }) }),
+  togglePortfolioVisibility: (id: string, visible: boolean) => request(`/admin/portfolio/${id}`, { method: 'PUT', body: JSON.stringify({ status: visible ? 1 : 0 }) }),
 
   getAnalytics: (range?: string) => request(`/admin/analytics/overview${range ? '?range=' + range : ''}`),
   getAnalyticsRealtime: () => request('/admin/analytics/realtime'),
