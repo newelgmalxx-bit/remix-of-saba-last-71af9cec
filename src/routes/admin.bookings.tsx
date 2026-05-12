@@ -11,6 +11,7 @@ import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice"
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ orderId: typeof s.orderId === "string" ? s.orderId : undefined }),
   component: BookingsPage,
 });
 
@@ -96,6 +97,23 @@ function BookingsPage() {
   };
 
   useEffect(() => { reloadBookings(); }, []);
+
+  // Auto-open order details when navigated with ?orderId=
+  const search = Route.useSearch();
+  useEffect(() => {
+    const id = search?.orderId;
+    if (!id) return;
+    const found = bookings.find((b) => b.id === id);
+    if (found) { setViewing(found); return; }
+    // Fetch from API if not in current list
+    (async () => {
+      try {
+        const d: any = await adminApi.orders.get(id);
+        if (d && d.id) setViewing(mapOrderToBooking(d));
+      } catch { /* ignore */ }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search?.orderId, bookings.length]);
 
   const periodDays = period === "all" ? null : Number(period);
   const filtered = bookings.filter(b => {
