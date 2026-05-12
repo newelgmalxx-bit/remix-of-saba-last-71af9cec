@@ -48,6 +48,24 @@ function OrderSummaryPage() {
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [info, setInfo] = useState<CachedInfo | null>(null);
+  const [showGateways, setShowGateways] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [paying, setPaying] = useState(false);
+
+  const handlePay = async () => {
+    if (!order) return;
+    setPaying(true);
+    try {
+      const res: any = await account.payOrder(order.id, { paymentMethod: selectedGateway });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+    } finally {
+      setPaying(false);
+    }
+  };
   const [loading, setLoading] = useState(true);
 
   const cached = useMemo(() => {
