@@ -83,11 +83,9 @@ async function trySyncFromApi(initial = false): Promise<void> {
   try {
     const res = await api.cart.get();
     const remoteItems = (res.items || []).map(normalizeFromApi);
-    const localOnly = cache.items.filter((i) => i.serviceSlug.startsWith("plan:"));
-    const merged = [...remoteItems, ...localOnly];
     setCache({
-      items: merged,
-      ...computeTotals(merged),
+      items: remoteItems,
+      ...computeTotals(remoteItems),
       loading: false,
       error: null,
     });
