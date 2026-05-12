@@ -132,7 +132,7 @@ function AnalyticsPage() {
               {topServices.map((s: any, i: number) => (
                 <li key={i} className="flex justify-between text-xs border-b border-border pb-2">
                   <span className="font-medium truncate">{s.title ?? s.name}</span>
-                  <span className="font-bold">{fmt(s.orders ?? s.count ?? 0)}</span>
+                  <span className="font-bold">{fmt(s.sold ?? s.orders ?? s.count ?? 0)}</span>
                 </li>
               ))}
             </ul>
