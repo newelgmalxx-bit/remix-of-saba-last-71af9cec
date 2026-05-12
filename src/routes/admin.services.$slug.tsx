@@ -140,6 +140,8 @@ function ServiceEditorPage() {
         bannerImage: bannerImage || null,
         overviewDescriptionAr: overviewDescription,
         overviewDescriptionEn,
+        benefits: benefits.map((b) => ({ titleAr: b.title, titleEn: b.title, descAr: b.desc, descEn: b.desc })),
+        overview: overview.map((o) => ({ titleAr: o.title, titleEn: o.title, descAr: o.desc, descEn: o.desc })),
         status,
       });
       toast.success("تم الحفظ على السيرفر");
@@ -307,14 +309,18 @@ function ServiceEditorPage() {
         </PanelCard>
 
         {/* Benefits */}
-        <PanelCard title="المميزات" action={
-          <span className="text-xs text-muted-foreground">يُنصح بإبقاء العدد كما هو للحفاظ على الأيقونات</span>
+        <PanelCard title="المميزات (ماذا ستحصل عليه)" action={
+          <button onClick={() => setBenefits([...benefits, { title: "", desc: "" }])} className="text-xs text-primary font-bold inline-flex items-center gap-1"><Plus className="h-3 w-3" /> إضافة ميزة</button>
         }>
+          {benefits.length === 0 && (
+            <p className="mb-3 text-xs text-muted-foreground">لا توجد مميزات بعد. اضغط "إضافة ميزة" لإضافة أول ميزة.</p>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             {benefits.map((b, i) => (
               <div key={i} className="rounded-xl border border-border p-4 space-y-3">
-                <Field label={`ميزة ${i + 1}`}><input className={inputCls} value={b.title} onChange={(e) => { const n = [...benefits]; n[i] = { ...n[i], title: e.target.value }; setBenefits(n); }} /></Field>
-                <Field label="الوصف"><textarea rows={2} className={inputCls} value={b.desc} onChange={(e) => { const n = [...benefits]; n[i] = { ...n[i], desc: e.target.value }; setBenefits(n); }} /></Field>
+                <Field label={`ميزة ${i + 1}`}><input className={inputCls} placeholder="عنوان الميزة" value={b.title} onChange={(e) => { const n = [...benefits]; n[i] = { ...n[i], title: e.target.value }; setBenefits(n); }} /></Field>
+                <Field label="الوصف"><textarea rows={2} className={inputCls} placeholder="وصف مختصر للميزة" value={b.desc} onChange={(e) => { const n = [...benefits]; n[i] = { ...n[i], desc: e.target.value }; setBenefits(n); }} /></Field>
+                <button onClick={() => setBenefits(benefits.filter((_, x) => x !== i))} className="text-xs text-rose-500 inline-flex items-center gap-1"><Trash2 className="h-3 w-3" /> حذف</button>
               </div>
             ))}
           </div>
