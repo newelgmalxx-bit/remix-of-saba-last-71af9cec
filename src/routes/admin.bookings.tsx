@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
 import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice";
+import { InvoiceDocument, type InvoiceData } from "@/components/invoice/InvoiceDocument";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
