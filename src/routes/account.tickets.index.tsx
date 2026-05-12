@@ -86,7 +86,7 @@ function TicketsList() {
                       <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                         <span>{t("account.tickets.createdAt")} <span data-ltr-number>{tk.createdAt}</span></span>
                         <span>•</span>
-                        <span><span data-ltr-number>{tk.messages.length}</span> {t("account.tickets.messages")}</span>
+                        <span><span data-ltr-number>{msgCount}</span> {t("account.tickets.messages")}</span>
                         {tk.orderId && (
                           <>
                             <span>•</span>
