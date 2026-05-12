@@ -138,27 +138,19 @@ function CheckoutPage() {
       await clear();
       const isCod = payment === "cod";
       // MyFatoorah (or any online gateway): redirect straight to the payment
-      // URL. The gateway will redirect back to /payment/result, which then
-      // forwards to /order-summary/:id?paid=1.
+      // URL. The gateway will redirect back to /checkout/success?order=…&paymentId=…
+      // (or /checkout/failed?order=…) which we handle ourselves.
       if (!isCod && res.paymentUrl) {
         toast.success(lang === "ar" ? "جارٍ تحويلك لبوابة الدفع" : "Redirecting to payment");
         window.location.href = res.paymentUrl;
         return;
       }
-      // Cash on delivery (or no gateway URL): go straight to order summary.
+      // Cash on delivery (or no gateway URL): go straight to success screen.
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
-      if (res.orderId) {
-        navigate({
-          to: "/order-summary/$orderId" as any,
-          params: { orderId: res.orderId } as any,
-          search: { o: res.orderNumber } as any,
-        });
-      } else {
-        navigate({
-          to: "/checkout/success" as any,
-          search: { o: res.orderNumber } as any,
-        });
-      }
+      navigate({
+        to: "/checkout/success" as any,
+        search: { order: res.orderId, o: res.orderNumber } as any,
+      });
     } catch (err) {
       // Auth errors and validation errors should still surface to the user.
       if (err instanceof ApiError && (err.status === 401 || err.status === 422)) {
