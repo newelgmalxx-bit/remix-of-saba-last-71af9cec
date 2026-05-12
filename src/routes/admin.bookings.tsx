@@ -376,75 +376,42 @@ function BookingsPage() {
 
       {/* Invoice view */}
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent dir={dir} className="max-w-2xl">
-          <DialogHeader><DialogTitle>{L("فاتورة الطلب", "Order invoice")} <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-[860px] max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-5 pt-5"><DialogTitle>{L("فاتورة الطلب", "Order invoice")} <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
           {viewing && (() => {
-            const subtotal = viewing.subtotal && viewing.subtotal > 0 ? viewing.subtotal : Math.round(viewing.total / 1.15);
-            const vat = viewing.vat && viewing.vat > 0 ? viewing.vat : viewing.total - subtotal;
-            const discount = viewing.couponDiscount || 0;
+            const subtotal = viewing.subtotal && viewing.subtotal > 0 ? viewing.subtotal : +(viewing.total / 1.15).toFixed(2);
+            const vat = viewing.vat && viewing.vat > 0 ? viewing.vat : +(viewing.total - subtotal).toFixed(2);
+            const isPaid = viewing.paymentStatus === "paid" || viewing.status === "completed";
+            const invoiceData: InvoiceData = {
+              number: viewing.number,
+              date: viewing.date,
+              clientName: viewing.client,
+              clientEmail: viewing.email,
+              clientPhone: viewing.phone,
+              clientCity: viewing.city,
+              paymentMethod: payLabel(viewing.payment),
+              paymentStatus: isPaid ? "paid" : "unpaid",
+              items: [{ title: viewing.service || "—", qty: 1, price: subtotal }],
+              subtotal, vat, total: viewing.total,
+              lang: dir === "rtl" ? "ar" : "en",
+            };
             return (
-              <div className="space-y-4">
-                <div className={`rounded-2xl ${dir === "rtl" ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-primary to-primary-dark text-white p-5`}>
-                  <div className="flex justify-between">
-                    <div>
-                      <div className="text-xs opacity-80">{L("سابا ديزاين — فاتورة", "SABA DESIGN — Invoice")}</div>
-                      <div className="text-2xl font-extrabold mt-1" dir="ltr">#{viewing.number}</div>
-                    </div>
-                    <div className={`${dir === "rtl" ? "text-left" : "text-right"} text-xs`}>
-                      <div className="opacity-80">{L("التاريخ", "Date")}</div>
-                      <div className="font-bold" data-ltr-number>{viewing.date}</div>
-                    </div>
+              <div className="space-y-4 px-5 pb-5">
+                <div className="overflow-x-auto rounded-xl border border-border bg-white">
+                  <div style={{ transform: "scale(0.92)", transformOrigin: "top center" }}>
+                    <InvoiceDocument data={invoiceData} />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div><div className="text-[11px] text-muted-foreground">{L("العميل", "Client")}</div><div className="font-bold">{viewing.client}</div><div className="text-xs text-muted-foreground">{viewing.email}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("الجوال", "Phone")}</div><div className="font-bold" dir="ltr">{viewing.phone ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("المدينة", "City")}</div><div className="font-bold">{viewing.city ?? "—"}</div></div>
-                  <div><div className="text-[11px] text-muted-foreground">{L("طريقة الدفع", "Payment method")}</div><div className="font-bold">{payLabel(viewing.payment)}</div></div>
-                  {viewing.address && (
-                    <div className="col-span-2"><div className="text-[11px] text-muted-foreground">{L("العنوان", "Address")}</div><div className="font-medium">{viewing.address}</div></div>
-                  )}
-                  {viewing.notes && (
-                    <div className="col-span-2"><div className="text-[11px] text-muted-foreground">{L("ملاحظات", "Notes")}</div><div className="font-medium whitespace-pre-wrap">{viewing.notes}</div></div>
-                  )}
-                </div>
-                <div className="rounded-xl border border-border overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50 text-xs"><tr><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("الخدمة", "Service")}</th><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("الكمية", "Qty")}</th><th className={`px-3 py-2 ${dir === "rtl" ? "text-right" : "text-left"} font-medium`}>{L("السعر", "Price")}</th></tr></thead>
-                    <tbody><tr className="border-t border-border"><td className="px-3 py-3 font-medium">{viewing.service || "—"}</td><td className="px-3 py-3" data-ltr-number>1</td><td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(subtotal)}</td></tr></tbody>
-                  </table>
-                </div>
-                <div className="space-y-1.5 text-sm border-t border-border pt-3">
-                  <div className="flex justify-between"><span className="text-muted-foreground">{L("المجموع الفرعي", "Subtotal")}</span><span className="font-medium" data-ltr-number>{fmtSAR(subtotal)}</span></div>
-                  {discount > 0 && (
-                    <div className="flex justify-between"><span className="text-muted-foreground">{L("خصم الكوبون", "Coupon discount")}</span><span className="font-medium text-emerald-600" data-ltr-number>-{fmtSAR(discount)}</span></div>
-                  )}
-                  <div className="flex justify-between"><span className="text-muted-foreground">{L("ضريبة القيمة المضافة (15%)", "VAT (15%)")}</span><span className="font-medium" data-ltr-number>{fmtSAR(vat)}</span></div>
-                  <div className="flex justify-between text-base font-extrabold text-primary pt-2 border-t border-border"><span>{L("الإجمالي", "Total")}</span><span data-ltr-number>{fmtSAR(viewing.total)}</span></div>
                 </div>
                 <div className="flex justify-between items-center">
                   <Pill tone={(bookingStatusMap[viewing.status as keyof typeof bookingStatusMap]?.tone) ?? "primary"}>{statusLabels[viewing.status] ?? viewing.status}</Pill>
-                  <PrimaryButton
-                    onClick={() => renderInvoiceToPdf({
-                      number: viewing.number,
-                      date: viewing.date,
-                      clientName: viewing.client,
-                      clientEmail: viewing.email,
-                      clientPhone: viewing.phone,
-                      clientCity: viewing.city,
-                      paymentMethod: payLabel(viewing.payment),
-                      paymentStatus: viewing.paymentStatus ?? "unpaid",
-                      items: [{ title: viewing.service || "—", qty: 1, price: subtotal }],
-                      subtotal, vat, total: viewing.total,
-                    })}
-                  >
+                  <PrimaryButton onClick={() => renderInvoiceToPdf(invoiceData)}>
                     <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
                   </PrimaryButton>
                 </div>
               </div>
             );
           })()}
-          <DialogFooter><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
+          <DialogFooter className="px-5 pb-5"><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
         </DialogContent>
       </Dialog>
 
