@@ -3,7 +3,7 @@ import { InvoiceDocument, type InvoiceData, type InvoiceCompany } from "@/compon
 import { downloadElementAsPdf, elementToPdfBlob } from "./invoice";
 import { publicApi } from "@/lib/api";
 
-const SETTINGS_KEY = "saba_site_settings_v2";
+const SETTINGS_KEY = "saba_invoice_settings_v1";
 
 function readCachedSettings(): any {
   if (typeof window === "undefined") return {};
