@@ -2,7 +2,7 @@ import React from "react";
 import sarLogo from "@/assets/sar.png";
 import { publicApi } from "@/lib/api";
 
-const SETTINGS_KEY = "saba_site_settings_v2";
+const SETTINGS_KEY = "saba_invoice_settings_v1";
 
 function readCachedCompany(): { company?: InvoiceCompany; logo?: string; invoiceLogo?: string } {
   if (typeof window === "undefined") return {};
