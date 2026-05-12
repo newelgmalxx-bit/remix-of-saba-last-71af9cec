@@ -113,7 +113,7 @@ function SiteSettingsPage() {
 
         <PanelCard title={L("روابط التواصل الاجتماعي", "Social Media Links")} className="lg:col-span-3">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(["facebook","instagram","twitter","linkedin","youtube","tiktok","snapchat"] as const).map(k => (
+            {(["facebook","instagram","twitter","linkedin","tiktok","snapchat"] as const).map(k => (
               <Lbl key={k} label={k}><input className={ic} dir="ltr" placeholder={`https://${k}.com/...`} value={(s as any)[k]} onChange={e => setS({ ...s, [k]: e.target.value })} /></Lbl>
             ))}
           </div>

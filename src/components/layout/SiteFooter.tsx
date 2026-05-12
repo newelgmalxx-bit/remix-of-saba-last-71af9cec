@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Music2 } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
@@ -13,7 +13,6 @@ export function SiteFooter() {
     [site.instagram, Instagram],
     [site.twitter, Twitter],
     [site.linkedin, Linkedin],
-    [site.youtube, Youtube],
     [site.tiktok, Music2],
   ] as const).filter(([u]) => !!u);
   return (
