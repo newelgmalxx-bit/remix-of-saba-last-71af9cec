@@ -39,7 +39,7 @@ function PortfolioPage() {
       .then((d) => {
         const list: AdminPortfolio[] = (d.items || []).map((p: any) => ({
           id: p.id, titleAr: p.titleAr, titleEn: p.titleEn, category: p.category,
-          image: "🎨", visible: !!p.visible, link: p.link ?? "#",
+          image: "🎨", visible: p.status != null ? Number(p.status) === 1 : !!p.visible, link: p.link ?? "#",
           cover: p.cover ?? "", description: p.descriptionAr ?? p.descriptionEn ?? "",
           tech: p.tech ?? [], client: p.client_name ?? "", year: p.year ?? "",
         }));
