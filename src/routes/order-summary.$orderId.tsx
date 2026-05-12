@@ -142,10 +142,10 @@ function OrderSummaryPage() {
           )}
           {order && (
             <div className="mt-3">
-              {order.paid ? (
+              {(order.paid || paidFlag === 1) ? (
                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {lang === "ar" ? "تم الدفع" : "Paid"}
+                  {lang === "ar" ? "تم الدفع بنجاح" : "Payment received"}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
