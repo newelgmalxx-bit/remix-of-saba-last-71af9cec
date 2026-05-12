@@ -404,6 +404,35 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children ?? <Outlet />}</main>
       </div>
+
+      {/* Invoice popup (from notifications, anywhere in admin) */}
+      <Dialog open={!!invoiceModal || invoiceLoading} onOpenChange={(o) => { if (!o) { setInvoiceModal(null); setInvoiceLoading(false); } }}>
+        <DialogContent dir={dir} className="max-w-[860px] max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-5 pt-5">
+            <DialogTitle>{L("الفاتورة", "Invoice")} {invoiceModal && <span dir="ltr">#{invoiceModal.number}</span>}</DialogTitle>
+          </DialogHeader>
+          {invoiceLoading && !invoiceModal && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">{L("جارٍ التحميل...", "Loading...")}</div>
+          )}
+          {invoiceModal && (
+            <div className="space-y-4 px-5 pb-5">
+              <div className="overflow-x-auto rounded-xl border border-border bg-white">
+                <div style={{ transform: "scale(0.92)", transformOrigin: "top center" }}>
+                  <InvoiceDocument data={invoiceModal} />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <PrimaryButton onClick={() => renderInvoiceToPdf(invoiceModal)}>
+                  <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
+                </PrimaryButton>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="px-5 pb-5">
+            <GhostButton onClick={() => { setInvoiceModal(null); setInvoiceLoading(false); }}>{L("إغلاق", "Close")}</GhostButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
