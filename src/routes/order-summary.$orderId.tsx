@@ -296,7 +296,7 @@ function OrderSummaryPage() {
                     </span>
                   )}
                 </div>
-                {!order.paid && (
+                {!order.paid && paidFlag !== 1 && (
                   payUrl ? (
                     <a
                       href={payUrl}
