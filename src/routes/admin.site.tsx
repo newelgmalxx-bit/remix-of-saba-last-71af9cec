@@ -87,6 +87,24 @@ function SiteSettingsPage() {
           </div>
         </PanelCard>
 
+        <PanelCard title={L("بيانات الشركة (تظهر في الفاتورة)", "Company Info (shown on invoice)")} className="lg:col-span-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Lbl label={L("الاسم بالعربية", "Name (Arabic)")}><input className={ic} value={s.company?.nameAr || ""} onChange={e => setC("nameAr", e.target.value)} /></Lbl>
+            <Lbl label={L("الاسم بالإنجليزية", "Name (English)")}><input className={ic} dir="ltr" value={s.company?.nameEn || ""} onChange={e => setC("nameEn", e.target.value)} /></Lbl>
+            <Lbl label={L("السجل التجاري", "Commercial Register")}><input className={ic} dir="ltr" placeholder="10 digits" value={s.company?.commercialRegister || ""} onChange={e => setC("commercialRegister", e.target.value)} /></Lbl>
+            <Lbl label={L("الرقم الضريبي", "Tax Number")}><input className={ic} dir="ltr" placeholder="3xxxxxxxxxxx03" value={s.company?.taxNumber || ""} onChange={e => setC("taxNumber", e.target.value)} /></Lbl>
+            <Lbl label={L("الجوال", "Phone")}><input className={ic} dir="ltr" value={s.company?.phone || ""} onChange={e => setC("phone", e.target.value)} /></Lbl>
+            <Lbl label={L("البريد", "Email")}><input className={ic} dir="ltr" value={s.company?.email || ""} onChange={e => setC("email", e.target.value)} /></Lbl>
+            <Lbl label={L("الموقع الإلكتروني", "Website")}><input className={ic} dir="ltr" value={s.company?.website || ""} onChange={e => setC("website", e.target.value)} /></Lbl>
+            <Lbl label={L("اسم البنك", "Bank Name")}><input className={ic} value={s.company?.bankName || ""} onChange={e => setC("bankName", e.target.value)} /></Lbl>
+            <Lbl label="IBAN"><input className={ic} dir="ltr" placeholder="SA..." value={s.company?.iban || ""} onChange={e => setC("iban", e.target.value)} /></Lbl>
+            <Lbl label={L("العنوان بالعربية", "Address (Arabic)")} full><input className={ic} value={s.company?.addressAr || ""} onChange={e => setC("addressAr", e.target.value)} /></Lbl>
+            <Lbl label={L("العنوان بالإنجليزية", "Address (English)")} full><input className={ic} dir="ltr" value={s.company?.addressEn || ""} onChange={e => setC("addressEn", e.target.value)} /></Lbl>
+            <Lbl label={L("ملاحظة تذييل الفاتورة (عربي)", "Invoice Footer Note (AR)")} full><textarea rows={2} className={ic} value={s.company?.invoiceFooterNoteAr || ""} onChange={e => setC("invoiceFooterNoteAr", e.target.value)} /></Lbl>
+            <Lbl label={L("ملاحظة تذييل الفاتورة (إنجليزي)", "Invoice Footer Note (EN)")} full><textarea rows={2} className={ic} dir="ltr" value={s.company?.invoiceFooterNoteEn || ""} onChange={e => setC("invoiceFooterNoteEn", e.target.value)} /></Lbl>
+          </div>
+        </PanelCard>
+
         <PanelCard title={L("وضع الصيانة", "Maintenance Mode")} className="lg:col-span-3">
           <label className="flex items-center gap-3">
             <input type="checkbox" className="h-4 w-4" checked={s.maintenanceMode} onChange={e => setS({ ...s, maintenanceMode: e.target.checked })} />
