@@ -138,7 +138,7 @@ function TicketDetail() {
                       isClient ? "bg-primary text-primary-foreground" : "bg-amber-100 text-amber-700"
                     }`}
                   >
-                    {m.author.charAt(0)}
+                    {(m.author || "?").charAt(0)}
                   </div>
                   <div className={`max-w-[75%] ${isClient ? "items-end" : "items-start"} flex flex-col`}>
                     <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
