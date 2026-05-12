@@ -154,20 +154,22 @@ function CheckoutPage() {
           window.location.href = url;
           return;
         }
-        // No payment URL available — send user to the success screen
+        // No payment URL available — send user to the order summary
         // (which will offer a "Pay now" button via /payment endpoint).
         toast.message(lang === "ar" ? "تم إنشاء الطلب — أكمل الدفع" : "Order created — complete payment");
         navigate({
-          to: "/checkout/success" as any,
-          search: { order: res.orderId, o: res.orderNumber } as any,
+          to: "/order-summary/$orderId" as any,
+          params: { orderId: res.orderId } as any,
+          search: { o: res.orderNumber } as any,
         });
         return;
       }
-      // Cash on delivery: go straight to success screen.
+      // Cash on delivery: go straight to order summary.
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
       navigate({
-        to: "/checkout/success" as any,
-        search: { order: res.orderId, o: res.orderNumber } as any,
+        to: "/order-summary/$orderId" as any,
+        params: { orderId: res.orderId } as any,
+        search: { o: res.orderNumber } as any,
       });
     } catch (err) {
       // Auth errors and validation errors should still surface to the user.
