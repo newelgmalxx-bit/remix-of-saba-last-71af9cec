@@ -42,8 +42,42 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Upload stub — returns a local data URL until backend is wired up.
-export async function uploadImage(file: File, _bucket = "avatars"): Promise<string> {
-  void _bucket;
-  try { return await fileToWebp(file); } catch { return ""; }
+// Uploads the image to the backend (multipart/form-data) and returns the public URL.
+// Never returns base64 — image fields in API requests must always be URL strings.
+export async function uploadImage(file: File, bucket = "avatars"): Promise<string> {
+  if (typeof window === "undefined") return "";
+  const { BASE, getToken, getSid } = await import("./api/client");
+
+  // Try to convert to webp Blob first (smaller upload). Fall back to original file.
+  let uploadBlob: Blob = file;
+  let filename = file.name || "upload";
+  try {
+    if (file.type !== "image/svg+xml") {
+      const webpDataUrl = await fileToWebp(file);
+      if (webpDataUrl.startsWith("data:image/webp")) {
+        const res = await fetch(webpDataUrl);
+        uploadBlob = await res.blob();
+        filename = (filename.replace(/\.[^.]+$/, "") || "upload") + ".webp";
+      }
+    }
+  } catch { /* fall back to original file */ }
+
+  const fd = new FormData();
+  fd.append("file", uploadBlob, filename);
+  fd.append("bucket", bucket);
+
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  else headers["X-Session-Id"] = getSid();
+
+  const res = await fetch(`${BASE}/upload`, { method: "POST", headers, body: fd });
+  let json: any = null;
+  try { json = await res.json(); } catch { /* ignore */ }
+  if (!res.ok || (json && json.success === false)) {
+    throw new Error(json?.message || `Upload failed (${res.status})`);
+  }
+  const url = json?.data?.url ?? json?.url ?? json?.data?.path ?? "";
+  if (!url || typeof url !== "string") throw new Error("Upload response missing url");
+  return url;
 }
