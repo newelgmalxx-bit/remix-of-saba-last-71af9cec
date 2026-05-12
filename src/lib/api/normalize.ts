@@ -26,7 +26,7 @@ export function normalizeOrder(o: ApiOrder): UiOrder {
   return {
     id: o.id,
     number: o.number,
-    createdAt: (o.createdAt || "").slice(0, 10),
+    createdAt: (((o as any).createdAt || (o as any).created_at) || "").slice(0, 10),
     status: (o.status as OrderStatus) || "pending",
     payment: (o.payment_method as PaymentMethod) || "cod",
     paid,
