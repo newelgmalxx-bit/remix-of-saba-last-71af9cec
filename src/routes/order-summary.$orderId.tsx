@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet,
-  User, Mail, Phone, Building2, StickyNote, Hash, CreditCard,
+  User, Mail, Phone, Building2, StickyNote, Hash, CreditCard, Check,
 } from "lucide-react";
+import { paymentMethods, type PaymentMethod } from "@/data/account";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
