@@ -16,6 +16,8 @@ import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
 
+const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+
 export const Route = createFileRoute("/order-summary/$orderId")({
   validateSearch: z.object({
     o: z.string().optional(),
