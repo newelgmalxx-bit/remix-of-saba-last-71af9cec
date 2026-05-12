@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { paymentMethods, type PaymentMethod } from "@/data/account";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
