@@ -86,6 +86,50 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [invoiceModal, setInvoiceModal] = useState<InvoiceData | null>(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find((p) => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
+  };
+
+  const openInvoiceModal = async (invoiceId: string) => {
+    setInvoiceLoading(true);
+    try {
+      const r: any = await adminApi.invoices.get(invoiceId);
+      const i: any = r?.invoice || r?.data?.invoice || r?.data || r;
+      if (!i) throw new Error("not found");
+      const itemsRaw: any[] = Array.isArray(i.items) ? i.items : [];
+      const items = itemsRaw.length > 0
+        ? itemsRaw.map((it: any) => ({
+            title: it.service_title || it.serviceTitle || it.title || it.desc || "—",
+            qty: Number(it.qty || 1),
+            price: Number(it.price) || 0,
+          }))
+        : [{ title: i.service || L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: +(Number(i.total || 0) / 1.15).toFixed(2) }];
+      const subtotal = +items.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2);
+      const total = Number(i.total) || +(subtotal * 1.15).toFixed(2);
+      const vat = +(total - subtotal).toFixed(2);
+      const status = i.status === "paid" ? "paid" : i.status === "void" ? "refunded" : "unpaid";
+      setInvoiceModal({
+        number: i.number || invoiceId,
+        date: ((i.createdAt || i.created_at || "") + "").slice(0, 10),
+        clientName: i.clientName || i.client_name || "",
+        clientEmail: i.clientEmail || i.client_email || "",
+        clientPhone: i.clientPhone || i.client_phone || "",
+        clientCity: i.clientCity || i.client_city || "",
+        paymentMethod: payLabel(i.paymentMethod || i.payment_method || ""),
+        paymentStatus: status,
+        items, subtotal, vat, total,
+        lang: dir === "rtl" ? "ar" : "en",
+      });
+    } catch {
+      toast.error(L("تعذّر تحميل الفاتورة", "Failed to load invoice"));
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
 
   const loadNotifs = async () => {
     setNotifLoading(true);
