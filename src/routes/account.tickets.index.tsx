@@ -60,7 +60,9 @@ function TicketsList() {
           tickets.map((tk) => {
             const s = statusMap[tk.status];
             const Icon = s.icon;
-            const last = tk.messages[tk.messages.length - 1] || { author: "", text: "" };
+            const msgs = tk.messages || [];
+            const last = msgs[msgs.length - 1] || { author: "", text: "" };
+            const msgCount = (tk as any).messages_count ?? (tk as any).messageCount ?? (tk as any).messagesCount ?? msgs.length;
             return (
               <Link
                 key={tk.id}
