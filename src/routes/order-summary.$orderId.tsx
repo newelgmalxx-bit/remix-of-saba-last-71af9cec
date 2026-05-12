@@ -39,7 +39,7 @@ type CachedInfo = {
 
 function OrderSummaryPage() {
   const { orderId } = Route.useParams();
-  const { o, payUrl } = Route.useSearch();
+  const { o, payUrl, paid: paidFlag } = Route.useSearch();
   const { t, lang, dir } = useLang();
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
