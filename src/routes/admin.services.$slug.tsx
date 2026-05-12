@@ -94,8 +94,10 @@ function ServiceEditorPage() {
         if (svc.breadcrumbAr) setBreadcrumb(svc.breadcrumbAr);
         if (svc.breadcrumbEn) setBreadcrumbEn(svc.breadcrumbEn);
         if (svc.cover || svc.bannerImage) setBannerImage(svc.bannerImage || svc.cover);
-        if (svc.overviewDescriptionAr) setOverviewDescription(svc.overviewDescriptionAr);
-        if (svc.overviewDescriptionEn) setOverviewDescriptionEn(svc.overviewDescriptionEn);
+        const ovAr = svc.overviewDescriptionAr ?? svc.overview_description_ar ?? svc.overviewDescription;
+        const ovEn = svc.overviewDescriptionEn ?? svc.overview_description_en;
+        if (ovAr) setOverviewDescription(ovAr);
+        if (ovEn) setOverviewDescriptionEn(ovEn);
         if (amt != null) setPrice(String(amt));
         if (orig != null) setOriginalPrice(String(orig));
         if (svc.status) setStatus(svc.status);
