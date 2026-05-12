@@ -22,6 +22,7 @@ type Project = {
   img?: string;
   dark?: boolean;
   span: string;
+  link?: string;
 };
 
 const SPANS = [
