@@ -60,7 +60,9 @@ function TicketsList() {
           tickets.map((tk) => {
             const s = statusMap[tk.status];
             const Icon = s.icon;
-            const last = tk.messages[tk.messages.length - 1] || { author: "", text: "" };
+            const msgs = tk.messages || [];
+            const last = msgs[msgs.length - 1] || { author: "", text: "" };
+            const msgCount = (tk as any).messages_count ?? (tk as any).messageCount ?? (tk as any).messagesCount ?? msgs.length;
             return (
               <Link
                 key={tk.id}
@@ -84,7 +86,7 @@ function TicketsList() {
                       <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                         <span>{t("account.tickets.createdAt")} <span data-ltr-number>{tk.createdAt}</span></span>
                         <span>•</span>
-                        <span><span data-ltr-number>{tk.messages.length}</span> {t("account.tickets.messages")}</span>
+                        <span><span data-ltr-number>{msgCount}</span> {t("account.tickets.messages")}</span>
                         {tk.orderId && (
                           <>
                             <span>•</span>
