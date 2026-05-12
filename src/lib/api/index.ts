@@ -122,8 +122,9 @@ export const checkout = {
     let json: any = null;
     try { json = await res.json(); } catch {}
     const data = json?.data ?? json ?? {};
-    const orderId = data.orderId ?? data.order?.id;
-    const orderNumber = data.orderNumber ?? data.order?.number ?? data.order?.orderNumber;
+    const orderId = data.orderId ?? data.order_id ?? data.order?.id;
+    const orderNumber = data.orderNumber ?? data.order_number ?? data.order?.number ?? data.order?.orderNumber;
+    const paymentUrl = data.paymentUrl ?? data.payment_url ?? data.invoiceURL ?? data.invoice_url ?? data.url ?? data.order?.paymentUrl ?? data.order?.payment_url ?? null;
 
     // If the order was actually created, treat it as success regardless of
     // the `success` flag or any cleanup-side errors.
@@ -131,7 +132,7 @@ export const checkout = {
       return {
         orderId,
         orderNumber,
-        paymentUrl: data.paymentUrl ?? null,
+        paymentUrl,
         order: data.order,
       };
     }
