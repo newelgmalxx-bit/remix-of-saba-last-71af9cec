@@ -52,7 +52,8 @@ function SiteSettingsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <PanelCard title={L("الهوية والشعار", "Identity & Logo")} className="lg:col-span-1">
           <div className="space-y-4">
-            <Img label={L("الشعار", "Logo")} value={s.logo} onChange={upload("logo")} onClear={() => setS({ ...s, logo: "" })} t={L} />
+            <Img label={L("الشعار العام", "Site Logo")} value={s.logo} onChange={upload("logo")} onClear={() => setS({ ...s, logo: "" })} t={L} />
+            <Img label={L("شعار الفاتورة (نسخة بيضاء/فاتحة)", "Invoice Logo (white/light)")} value={s.invoiceLogo} onChange={upload("invoiceLogo")} onClear={() => setS({ ...s, invoiceLogo: "" })} t={L} />
             <Img label={L("أيقونة المتصفح Favicon", "Favicon")} value={s.favicon} onChange={upload("favicon")} onClear={() => setS({ ...s, favicon: "" })} small t={L} />
           </div>
         </PanelCard>
