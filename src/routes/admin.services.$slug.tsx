@@ -142,6 +142,8 @@ function ServiceEditorPage() {
         bannerImage: bannerImage || null,
         overviewDescriptionAr: overviewDescription,
         overviewDescriptionEn,
+        overview_description_ar: overviewDescription,
+        overview_description_en: overviewDescriptionEn,
         benefits: benefits.map((b) => ({ titleAr: b.title, titleEn: b.title, descAr: b.desc, descEn: b.desc })),
         overview: overview.map((o) => ({ titleAr: o.title, titleEn: o.title, descAr: o.desc, descEn: o.desc })),
         status,
