@@ -6,49 +6,78 @@ export type PaymentMethodInfo = {
   name: string;
   description?: string;
   logo?: string | null;
+  fee?: number;
   type?: string;
 };
 
-// Spec doesn't expose a payment-methods endpoint — UI can use a static list.
+// Static fallback if /checkout/payment-methods is unavailable.
 export const PAYMENT_METHODS: PaymentMethodInfo[] = [
   { id: 'myfatoorah', name: 'MyFatoorah', type: 'gateway' },
   { id: 'cod', name: 'Cash on Delivery', type: 'cod' },
 ];
 
+// Normalize any UI-side payment id to a backend-accepted value.
+// Backend accepts ONLY "myfatoorah" or "cod". Anything else (mada, visa,
+// numeric MyFatoorah method ids, the legacy "mayfatoorah" typo) is treated
+// as the MyFatoorah gateway.
+export function normalizePaymentMethod(id: string | null | undefined): 'myfatoorah' | 'cod' {
+  return id === 'cod' ? 'cod' : 'myfatoorah';
+}
+
+type CheckoutBody = {
+  contact?: { name?: string; email?: string; phone: string; city?: string; address?: string };
+  paymentMethod: 'myfatoorah' | 'cod' | string;
+  notes?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  contactCity?: string;
+  contactAddress?: string;
+  city?: string;
+  phone?: string;
+  items?: Array<{ serviceSlug: string; serviceTitle?: string; planId?: string | null; planName?: string | null; price?: number; qty?: number }>;
+};
+
+function buildPayload(body: CheckoutBody) {
+  return {
+    paymentMethod: normalizePaymentMethod(body.paymentMethod),
+    contactName: body.contactName ?? body.contact?.name ?? '',
+    contactEmail: body.contactEmail ?? body.contact?.email ?? '',
+    contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
+    city: body.contactCity ?? body.contact?.city ?? body.city,
+    contactCity: body.contactCity ?? body.contact?.city ?? body.city,
+    contactAddress: body.contactAddress ?? body.contact?.address,
+    notes: body.notes,
+    items: body.items,
+  };
+}
+
+type CheckoutResponse = ApiResponse<{
+  orderId: string;
+  orderNumber: string;
+  paymentUrl?: string | null;
+  invoiceId?: string | null;
+  order?: Order;
+}>;
+
 export const checkout = {
-  // POST /checkout — creates the order from the server-side cart.
-  // body: { paymentMethod, contactName, contactEmail, contactPhone, contactCity?, contactAddress?, notes? }
-  // Returns: { orderId, orderNumber, paymentUrl? }
-  create: (body: {
-    contact?: { name?: string; email?: string; phone: string; city?: string; address?: string };
-    paymentMethod: 'myfatoorah' | 'cod' | string;
-    notes?: string;
-    contactName?: string;
-    contactEmail?: string;
-    contactPhone?: string;
-    contactCity?: string;
-    contactAddress?: string;
-    // legacy
-    phone?: string;
-    city?: string;
-    items?: Array<{ serviceSlug: string; serviceTitle?: string; planId?: string; planName?: string; price?: number; qty?: number }>;
-  }) => {
-    const payload: any = {
-      paymentMethod: body.paymentMethod,
-      contactName: body.contactName ?? body.contact?.name ?? '',
-      contactEmail: body.contactEmail ?? body.contact?.email ?? '',
-      contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
-      contactCity: body.contactCity ?? body.contact?.city ?? body.city,
-      contactAddress: body.contactAddress ?? body.contact?.address,
-      notes: body.notes,
-    };
-    return request<ApiResponse<{
-      orderId: string;
-      orderNumber: string;
-      paymentUrl?: string | null;
-      order?: Order;
-    }>>('/checkout', { method: 'POST', body: JSON.stringify(payload) });
-  },
+  // POST /checkout — create order (online or COD).
+  create: (body: CheckoutBody) =>
+    request<CheckoutResponse>('/checkout', { method: 'POST', body: JSON.stringify(buildPayload(body)) }),
+
+  // POST /checkout/initiate — alias used for online (MyFatoorah) checkout.
+  initiate: (body: CheckoutBody) =>
+    request<CheckoutResponse>('/checkout/initiate', {
+      method: 'POST',
+      body: JSON.stringify(buildPayload({ ...body, paymentMethod: 'myfatoorah' })),
+    }),
+
+  // POST /checkout/cod — Cash on Delivery checkout.
+  cod: (body: CheckoutBody) =>
+    request<CheckoutResponse>('/checkout/cod', {
+      method: 'POST',
+      body: JSON.stringify(buildPayload({ ...body, paymentMethod: 'cod' })),
+    }),
 
   // POST /checkout/myfatoorah — initiate hosted payment session for an existing order.
   initiateMyfatoorah: (orderId: string) =>
@@ -56,9 +85,25 @@ export const checkout = {
       method: 'POST', body: JSON.stringify({ orderId }),
     }),
 
-  // GET /checkout/callback?paymentId=xxx — MyFatoorah return callback.
+  // GET /checkout/verify?paymentId=xxx — MyFatoorah return verification.
   verify: (paymentId: string) =>
+    request<ApiResponse<{
+      orderId: string;
+      orderNumber: string;
+      paid: boolean;
+      paymentStatus?: 'paid' | 'pending' | 'failed';
+      status?: 'confirmed' | 'pending' | 'cancelled';
+      invoiceId?: string | null;
+      paymentId?: string | null;
+    }>>(`/checkout/verify?paymentId=${encodeURIComponent(paymentId)}`),
+
+  // Legacy alias kept for older callers.
+  callback: (paymentId: string) =>
     request<ApiResponse<{ paid: boolean; orderId?: string; orderNumber?: string }>>(
-      `/checkout/callback?paymentId=${encodeURIComponent(paymentId)}`
+      `/checkout/verify?paymentId=${encodeURIComponent(paymentId)}`
     ),
+
+  // GET /checkout/payment-methods — load methods from backend.
+  paymentMethods: () =>
+    request<ApiResponse<{ items: PaymentMethodInfo[] }>>('/checkout/payment-methods'),
 };
