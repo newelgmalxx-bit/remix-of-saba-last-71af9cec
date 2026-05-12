@@ -38,10 +38,18 @@ function PortfolioPage() {
     adminApi.portfolio.list()
       .then((d) => {
         const list: AdminPortfolio[] = (d.items || []).map((p: any) => ({
-          id: p.id, titleAr: p.titleAr, titleEn: p.titleEn, category: p.category,
-          image: "🎨", visible: p.status != null ? Number(p.status) === 1 : !!p.visible, link: p.link ?? "#",
-          cover: p.cover ?? "", description: p.descriptionAr ?? p.descriptionEn ?? "",
-          tech: p.tech ?? [], client: p.client_name ?? "", year: p.year ?? "",
+          id: p.id,
+          titleAr: p.titleAr ?? p.title_ar ?? "",
+          titleEn: p.titleEn ?? p.title_en ?? "",
+          category: p.category ?? "",
+          image: "🎨",
+          visible: p.status != null ? Number(p.status) === 1 : !!p.visible,
+          link: p.link ?? "#",
+          cover: p.cover ?? "",
+          description: p.descriptionAr ?? p.description_ar ?? p.descriptionEn ?? p.description_en ?? "",
+          tech: p.tech ?? [],
+          client: p.client_name ?? p.clientName ?? "",
+          year: p.year ?? "",
         }));
         setItems(list);
       })
