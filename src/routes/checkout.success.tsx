@@ -34,19 +34,41 @@ function SuccessPage() {
   const [loading, setLoading] = useState(!!id || !!paymentId);
   const [verifying, setVerifying] = useState(!!paymentId);
 
-  // Verify MyFatoorah payment when we returned with a paymentId.
+  // Verify MyFatoorah payment when we returned with a paymentId, then
+  // forward to the order summary page (paid or failed).
   useEffect(() => {
-    if (!paymentId) return;
+    if (!paymentId) {
+      // No paymentId — if we have an order id, just forward to the summary.
+      if (id) {
+        navigate({
+          to: "/order-summary/$orderId" as any,
+          params: { orderId: id } as any,
+          search: { o: orderQ || o } as any,
+          replace: true,
+        });
+      }
+      return;
+    }
     let alive = true;
     setVerifying(true);
     checkoutApi.verify(paymentId)
       .then((res: any) => {
         const data = res?.data ?? res ?? {};
         if (!alive) return;
+        const targetId = data.orderId || id;
         if (data.paid === false) {
           navigate({
             to: "/checkout/failed" as any,
-            search: { order: data.orderId || id } as any,
+            search: { order: targetId } as any,
+            replace: true,
+          });
+          return;
+        }
+        if (targetId) {
+          navigate({
+            to: "/order-summary/$orderId" as any,
+            params: { orderId: targetId } as any,
+            search: { o: data.orderNumber || orderQ || o, paid: 1 } as any,
             replace: true,
           });
         }
@@ -54,7 +76,7 @@ function SuccessPage() {
       .catch(() => { /* fall through to order display */ })
       .finally(() => { if (alive) setVerifying(false); });
     return () => { alive = false; };
-  }, [paymentId, id, navigate]);
+  }, [paymentId, id, orderQ, o, navigate]);
 
   useEffect(() => {
     if (!id) return;
