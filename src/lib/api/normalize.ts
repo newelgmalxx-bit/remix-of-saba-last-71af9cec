@@ -67,7 +67,7 @@ export function normalizeTicket(t: ApiTicket): UiTicket {
     orderId: t.orderId ?? undefined,
     status: t.status,
     priority: t.priority,
-    createdAt: (t.createdAt || "").slice(0, 10),
+    createdAt: (((t as any).createdAt || (t as any).created_at) || "").slice(0, 10),
     messages,
   };
 }
