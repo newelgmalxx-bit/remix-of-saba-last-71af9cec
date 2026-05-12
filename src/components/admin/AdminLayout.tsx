@@ -7,6 +7,7 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket, ExternalLink,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import logoImg from "@/assets/logo.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import flagSa from "@/assets/flag-sa.jpg";
@@ -15,6 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { toast } from "sonner";
 import { admin } from "@/lib/api/admin";
+import { admin as adminApi } from "@/lib/api";
+import { InvoiceDocument, type InvoiceData } from "@/components/invoice/InvoiceDocument";
+import { renderInvoiceToPdf } from "@/lib/renderInvoice";
+import { Download } from "lucide-react";
+import { paymentMethods } from "@/data/admin";
 
 type NavItem = { to: string; ar: string; en: string; icon: any; children?: { to: string; ar: string; en: string; icon: any }[] };
 
