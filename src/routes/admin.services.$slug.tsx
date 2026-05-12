@@ -84,20 +84,79 @@ function ServiceEditorPage() {
       try {
         const svc: any = await api.admin.services.get(slug);
         if (cancelled || !svc) return;
-        const amt = svc?.price?.amount;
-        const orig = svc?.price?.originalAmount;
-        if (svc.titleAr) setTitle(svc.titleAr);
-        if (svc.titleEn) setTitleEn(svc.titleEn);
-        if (svc.subtitleAr) setSubtitle(svc.subtitleAr);
-        if (svc.subtitleEn) setSubtitleEn(svc.subtitleEn);
-        if (svc.category) setCategory(svc.category);
-        if (svc.breadcrumbAr) setBreadcrumb(svc.breadcrumbAr);
-        if (svc.breadcrumbEn) setBreadcrumbEn(svc.breadcrumbEn);
-        if (svc.cover || svc.bannerImage) setBannerImage(svc.bannerImage || svc.cover);
-        const ovAr = svc.overviewDescriptionAr ?? svc.overview_description_ar ?? svc.overviewDescription;
-        const ovEn = svc.overviewDescriptionEn ?? svc.overview_description_en;
+        const pick = (...keys: string[]) => {
+          for (const k of keys) {
+            const v = svc[k];
+            if (v !== undefined && v !== null && v !== "") return v;
+          }
+          return undefined;
+        };
+        const parseJson = (v: any) => {
+          if (Array.isArray(v) || (v && typeof v === "object")) return v;
+          if (typeof v === "string") {
+            try { return JSON.parse(v); } catch { return undefined; }
+          }
+          return undefined;
+        };
+        const amt = pick("price") ?? svc?.price?.amount;
+        const orig = pick("original_price", "originalPrice") ?? svc?.price?.originalAmount;
+        const titleAr = pick("title_ar", "titleAr");
+        const titleEn = pick("title_en", "titleEn");
+        const subAr = pick("subtitle_ar", "subtitleAr");
+        const subEn = pick("subtitle_en", "subtitleEn");
+        const cat = pick("category");
+        const bcAr = pick("breadcrumb_ar", "breadcrumbAr");
+        const bcEn = pick("breadcrumb_en", "breadcrumbEn");
+        const cover = pick("banner_image", "bannerImage", "cover");
+        const ovAr = pick("overview_description_ar", "overviewDescriptionAr", "overviewDescription");
+        const ovEn = pick("overview_description_en", "overviewDescriptionEn");
+        const heroH = parseJson(pick("hero_highlights", "heroHighlights"));
+        const heroHEn = parseJson(pick("hero_highlights_en", "heroHighlightsEn"));
+        const ovList = parseJson(pick("overview"));
+        const benList = parseJson(pick("benefits"));
+        const stepList = parseJson(pick("steps"));
+        const statList = parseJson(pick("stats"));
+        const testList = parseJson(pick("testimonials"));
+        const faqList = parseJson(pick("faqs"));
+        const seoObj = parseJson(pick("seo"));
+        if (titleAr) setTitle(titleAr);
+        if (titleEn) setTitleEn(titleEn);
+        if (subAr) setSubtitle(subAr);
+        if (subEn) setSubtitleEn(subEn);
+        if (cat) setCategory(cat);
+        if (bcAr) setBreadcrumb(bcAr);
+        if (bcEn) setBreadcrumbEn(bcEn);
+        if (cover) setBannerImage(cover);
         if (ovAr) setOverviewDescription(ovAr);
         if (ovEn) setOverviewDescriptionEn(ovEn);
+        if (Array.isArray(heroH)) setHeroHighlights(heroH);
+        if (Array.isArray(heroHEn)) setHeroHighlightsEn(heroHEn);
+        if (Array.isArray(ovList)) {
+          setOverview(ovList.map((o: any) => ({
+            title: o.titleAr ?? o.title_ar ?? o.title ?? "",
+            desc: o.descAr ?? o.desc_ar ?? o.desc ?? "",
+          })));
+        }
+        if (Array.isArray(benList)) {
+          setBenefits(benList.map((b: any) => ({
+            title: b.titleAr ?? b.title_ar ?? b.title ?? "",
+            desc: b.descAr ?? b.desc_ar ?? b.desc ?? "",
+          })));
+        }
+        if (Array.isArray(stepList)) {
+          setSteps(stepList.map((s: any) => ({ title: s.titleAr ?? s.title_ar ?? s.title ?? "" })));
+        }
+        if (Array.isArray(statList)) setStats(statList);
+        if (Array.isArray(testList)) setTestimonials(testList);
+        if (Array.isArray(faqList)) setFaqs(faqList);
+        if (seoObj && typeof seoObj === "object") {
+          setSeo({
+            title: seoObj.title ?? "",
+            description: seoObj.description ?? "",
+            keywords: seoObj.keywords ?? "",
+            ogImage: seoObj.ogImage ?? seoObj.og_image ?? "",
+          });
+        }
         if (amt != null) setPrice(String(amt));
         if (orig != null) setOriginalPrice(String(orig));
         if (svc.status) setStatus(svc.status);
