@@ -438,6 +438,36 @@ function OrderSummaryPage() {
         )}
       </main>
       <SiteFooter />
+
+      <Dialog open={!!payError} onOpenChange={(o) => { if (!o) setPayError(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              {lang === "ar" ? "تعذّر إتمام الدفع" : "Payment could not be completed"}
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-sm leading-6">
+              {payError}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <button
+              type="button"
+              onClick={() => setPayError(null)}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-bold hover:bg-muted"
+            >
+              {lang === "ar" ? "إغلاق" : "Close"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPayError(null); setShowGateways(true); }}
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 text-sm font-bold text-primary-foreground hover:opacity-95"
+            >
+              {lang === "ar" ? "اختيار بوابة أخرى" : "Try another gateway"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
