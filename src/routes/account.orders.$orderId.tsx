@@ -51,9 +51,22 @@ function OrderDetail() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const handlePayNow = () => {
-    if (!order) return;
-    navigate({ to: "/account/orders/$orderId/pay" as any, params: { orderId: order.id } as any });
+  const [paying, setPaying] = useState(false);
+  const handlePayNow = async () => {
+    if (!order || paying) return;
+    setPaying(true);
+    try {
+      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      const { toast } = await import("sonner");
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+    } catch (e: any) {
+      const { toast } = await import("sonner");
+      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+    } finally {
+      setPaying(false);
+    }
   };
 
   useEffect(() => {
