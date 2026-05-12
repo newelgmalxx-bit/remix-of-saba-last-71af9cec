@@ -52,23 +52,26 @@ export const cart = {
   add: (body: AddCartBody) => {
     const h: Record<string, string> = {};
     if (!getToken()) h['X-Session-Id'] = getSid();
-    const servicePlanId = body.servicePlanId ?? body.planId;
+    const servicePlanId =
+      body.servicePlanId ??
+      body.planId ??
+      (body.serviceSlug?.startsWith('plan:') ? body.serviceSlug.slice(5) : undefined);
     const isPlan = !!servicePlanId;
-    // Backend requires `serviceSlug` for ALL lines (services + plans).
-    // For plan lines we still send servicePlanId so the backend resolves the
-    // plan record; serviceSlug is sent as `plan:<id>` so the row stays valid.
+    // Plans and services are independent products on the backend.
+    // - Plan line:    { planId }                       (NO serviceSlug)
+    // - Service line: { serviceSlug, [serviceId] }     (NO planId)
     const payload: Record<string, unknown> = {
-      serviceSlug: body.serviceSlug,
-      serviceTitle: body.serviceTitle ?? body.planName ?? body.serviceSlug,
-      planName: body.planName,
       qty: body.qty ?? 1,
       price: body.price ?? 0,
       originalPrice: body.originalPrice,
     };
     if (isPlan) {
-      payload.servicePlanId = servicePlanId;
+      payload.planId = servicePlanId;
+      if (body.planName) payload.planName = body.planName;
     } else {
+      payload.serviceSlug = body.serviceSlug;
       if (body.serviceId) payload.serviceId = body.serviceId;
+      if (body.serviceTitle) payload.serviceTitle = body.serviceTitle;
     }
     return unwrap(request<ApiResponse<any>>('/cart/items', { method: 'POST', body: JSON.stringify(payload), headers: h }));
   },
