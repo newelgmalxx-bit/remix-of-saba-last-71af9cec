@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { paymentMethods, type PaymentMethod } from "@/data/account";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
@@ -51,6 +53,7 @@ function OrderSummaryPage() {
   const [showGateways, setShowGateways] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
   const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   const handlePay = async () => {
     if (!order) return;
@@ -59,9 +62,17 @@ function OrderSummaryPage() {
       const res: any = await account.payOrder(order.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
-      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. يرجى المحاولة لاحقًا أو اختيار بوابة دفع أخرى." : "Could not get the payment URL. Please try again later or choose another gateway.");
     } catch (e: any) {
-      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+      const msg = e?.message || "";
+      const is404 = e?.status === 404 || /404|not\s*found/i.test(msg);
+      setPayError(
+        is404
+          ? (lang === "ar"
+              ? "بوابة الدفع غير متاحة حاليًا لهذا الطلب. جرّب اختيار بوابة دفع أخرى أو تواصل مع الدعم."
+              : "The payment gateway is currently unavailable for this order. Try another gateway or contact support.")
+          : (msg || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"))
+      );
     } finally {
       setPaying(false);
     }
@@ -427,6 +438,36 @@ function OrderSummaryPage() {
         )}
       </main>
       <SiteFooter />
+
+      <Dialog open={!!payError} onOpenChange={(o) => { if (!o) setPayError(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              {lang === "ar" ? "تعذّر إتمام الدفع" : "Payment could not be completed"}
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-sm leading-6">
+              {payError}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <button
+              type="button"
+              onClick={() => setPayError(null)}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-bold hover:bg-muted"
+            >
+              {lang === "ar" ? "إغلاق" : "Close"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPayError(null); setShowGateways(true); }}
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 text-sm font-bold text-primary-foreground hover:opacity-95"
+            >
+              {lang === "ar" ? "اختيار بوابة أخرى" : "Try another gateway"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
