@@ -18,6 +18,7 @@ export const Route = createFileRoute("/order-summary/$orderId")({
   validateSearch: z.object({
     o: z.string().optional(),
     payUrl: z.string().optional(),
+    paid: z.coerce.number().optional(),
   }),
   head: () => ({
     meta: [
@@ -38,7 +39,7 @@ type CachedInfo = {
 
 function OrderSummaryPage() {
   const { orderId } = Route.useParams();
-  const { o, payUrl } = Route.useSearch();
+  const { o, payUrl, paid: paidFlag } = Route.useSearch();
   const { t, lang, dir } = useLang();
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
@@ -141,10 +142,10 @@ function OrderSummaryPage() {
           )}
           {order && (
             <div className="mt-3">
-              {order.paid ? (
+              {(order.paid || paidFlag === 1) ? (
                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {lang === "ar" ? "تم الدفع" : "Paid"}
+                  {lang === "ar" ? "تم الدفع بنجاح" : "Payment received"}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
@@ -295,7 +296,7 @@ function OrderSummaryPage() {
                     </span>
                   )}
                 </div>
-                {!order.paid && (
+                {!order.paid && paidFlag !== 1 && (
                   payUrl ? (
                     <a
                       href={payUrl}

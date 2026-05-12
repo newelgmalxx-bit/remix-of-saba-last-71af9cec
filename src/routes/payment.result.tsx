@@ -71,11 +71,20 @@ function PaymentResultPage() {
       // confirmed payment (used for plan orders that may not always return
       // an orderId in the verify payload).
       if (d.paid === true || d.orderId || d.orderNumber) {
-        navigate({
-          to: "/checkout/success" as any,
-          search: { orderId: d.orderId, o: d.orderNumber } as any,
-          replace: true,
-        });
+        if (d.orderId) {
+          navigate({
+            to: "/order-summary/$orderId" as any,
+            params: { orderId: d.orderId } as any,
+            search: { o: d.orderNumber, paid: d.paid === true ? 1 : undefined } as any,
+            replace: true,
+          });
+        } else {
+          navigate({
+            to: "/checkout/success" as any,
+            search: { o: d.orderNumber, paid: d.paid === true ? 1 : undefined } as any,
+            replace: true,
+          });
+        }
         return d.paid === true ? "success" : "pending";
       }
       if (d.paid === false) return "pending";
