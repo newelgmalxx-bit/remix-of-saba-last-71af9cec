@@ -93,7 +93,8 @@ const SAR = ({ n }: { n: number }) => (
   </span>
 );
 
-export const InvoiceDocument = React.forwardRef<HTMLDivElement, { data: InvoiceData }>(({ data }, ref) => {
+export const InvoiceDocument = React.forwardRef<HTMLDivElement, { data: InvoiceData }>(({ data: input }, ref) => {
+  const data = useAutoCompany(input);
   const paid = data.paymentStatus === "paid";
   const lang = data.lang === "en" ? "en" : "ar";
   const isAr = lang === "ar";
