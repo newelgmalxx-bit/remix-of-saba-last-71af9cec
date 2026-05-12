@@ -303,10 +303,31 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                         }
                         setNotifOpen(false);
                         const target = n.link || inferLink(n);
-                        if (target) {
-                          if (/^https?:\/\//i.test(target)) window.open(target, "_blank");
-                          else navigate({ to: target as any });
+                        if (!target) return;
+                        if (/^https?:\/\//i.test(target)) { window.open(target, "_blank"); return; }
+                        // Special handling for backend notification link patterns
+                        const orderMatch = target.match(/^\/admin\/orders\/([^/?#]+)/);
+                        const invoiceMatch = target.match(/^\/admin\/invoices\/([^/?#]+)/);
+                        const contactMatch = target.match(/^\/admin\/contact-messages\//);
+                        if (orderMatch) {
+                          navigate({ to: "/admin/bookings" as any, search: { orderId: orderMatch[1] } as any });
+                          return;
                         }
+                        if (invoiceMatch) {
+                          try {
+                            const blob = await admin.invoicePdf(invoiceMatch[1]);
+                            if (blob && blob.size) {
+                              const url = URL.createObjectURL(blob);
+                              window.open(url, "_blank");
+                              setTimeout(() => URL.revokeObjectURL(url), 60000);
+                              return;
+                            }
+                          } catch { /* fall through */ }
+                          navigate({ to: "/admin/invoices" as any });
+                          return;
+                        }
+                        if (contactMatch) { navigate({ to: "/admin/clients" as any }); return; }
+                        navigate({ to: target as any });
                       };
                       return (
                         <div key={n.id} onClick={handleClick} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
