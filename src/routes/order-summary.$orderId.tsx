@@ -18,6 +18,7 @@ export const Route = createFileRoute("/order-summary/$orderId")({
   validateSearch: z.object({
     o: z.string().optional(),
     payUrl: z.string().optional(),
+    paid: z.coerce.number().optional(),
   }),
   head: () => ({
     meta: [
