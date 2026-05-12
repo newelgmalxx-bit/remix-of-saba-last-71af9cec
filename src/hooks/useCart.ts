@@ -58,12 +58,15 @@ function loadLocal(): CartItem[] {
   } catch { return []; }
 }
 
-function saveLocal(items: CartItem[]) {
+function saveLocal(_items: CartItem[]) {
+  // Cart state is the source of truth on the backend. We intentionally do
+  // NOT persist items to localStorage — keeping them around caused "ghost"
+  // items to appear on the cart page when the backend cart was empty.
   if (typeof window === "undefined") return;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
 }
 
-const initialItems = loadLocal();
+const initialItems: CartItem[] = [];
 let cache: State = {
   items: initialItems,
   ...computeTotals(initialItems),
