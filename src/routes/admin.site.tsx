@@ -34,11 +34,25 @@ function SiteSettingsPage() {
   });
   const setC = (k: string, v: string) => setS((cur: any) => ({ ...cur, company: { ...(cur.company || {}), [k]: v } }));
 
+  const setSeo = (k: string, v: string) => setS((cur: any) => ({ ...cur, seo: { ...(cur.seo || {}), [k]: v } }));
+
   useEffect(() => {
     (async () => {
       try {
-        const data = await adminApi.settings.get<any>("site");
-        if (data && typeof data === "object") setS((cur: any) => ({ ...cur, ...data, company: { ...(cur.company || {}), ...((data as any).company || {}) } }));
+        const raw: any = await adminApi.settings.get<any>("site");
+        // Backend may return { items: {...} } / { settings: { site: {...}, company: {...} } } or flat
+        const data = raw?.items ?? raw;
+        const siteNested = data?.site ?? raw?.settings?.site ?? {};
+        const companyNested = data?.company ?? raw?.settings?.company ?? {};
+        const merged = { ...siteNested, ...data };
+        if (merged && typeof merged === "object") {
+          setS((cur: any) => ({
+            ...cur,
+            ...merged,
+            seo: { ...(cur.seo || {}), ...((merged as any).seo && !Array.isArray((merged as any).seo) ? (merged as any).seo : {}) },
+            company: { ...(cur.company || {}), ...(companyNested || {}) },
+          }));
+        }
       } catch {}
     })();
   }, []);
