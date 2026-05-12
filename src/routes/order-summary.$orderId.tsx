@@ -53,6 +53,7 @@ function OrderSummaryPage() {
   const [showGateways, setShowGateways] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
   const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   const handlePay = async () => {
     if (!order) return;
@@ -61,9 +62,17 @@ function OrderSummaryPage() {
       const res: any = await account.payOrder(order.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
-      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. يرجى المحاولة لاحقًا أو اختيار بوابة دفع أخرى." : "Could not get the payment URL. Please try again later or choose another gateway.");
     } catch (e: any) {
-      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+      const msg = e?.message || "";
+      const is404 = e?.status === 404 || /404|not\s*found/i.test(msg);
+      setPayError(
+        is404
+          ? (lang === "ar"
+              ? "بوابة الدفع غير متاحة حاليًا لهذا الطلب. جرّب اختيار بوابة دفع أخرى أو تواصل مع الدعم."
+              : "The payment gateway is currently unavailable for this order. Try another gateway or contact support.")
+          : (msg || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"))
+      );
     } finally {
       setPaying(false);
     }
