@@ -16,12 +16,16 @@ function SiteSettingsPage() {
   const { lang } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const [s, setS] = useState<any>({
-    name: "سابا ديزاين", tagline: L("وكالتك الإبداعية لتصميم وتطوير المواقع والتطبيقات", "Your creative agency for web and app design & development"),
-    email: "info@saba.sa", phone: "+966 55 000 0000", address: L("الرياض، المملكة العربية السعودية", "Riyadh, Saudi Arabia"),
+    name: "سابا ديزاين", nameAr: "سابا ديزاين", nameEn: "SABA Design",
+    tagline: L("وكالتك الإبداعية لتصميم وتطوير المواقع والتطبيقات", "Your creative agency for web and app design & development"),
+    descriptionAr: "", descriptionEn: "",
+    email: "info@saba.sa", phone: "+966 55 000 0000", whatsapp: "",
+    address: L("الرياض، المملكة العربية السعودية", "Riyadh, Saudi Arabia"),
     logo: "", invoiceLogo: "", favicon: "",
     facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "", tiktok: "", snapchat: "",
     workHours: L("الأحد - الخميس · 9 ص - 6 م", "Sun - Thu · 9 AM - 6 PM"),
     maintenanceMode: false, primaryLang: "ar", currency: "SAR", vatPercent: 15,
+    seo: { metaTitle: "", metaDescription: "", ogImage: "" },
     company: {
       logo: "", nameAr: "", nameEn: "", commercialRegister: "", taxNumber: "",
       addressAr: "", addressEn: "", phone: "", email: "", website: "",
@@ -30,11 +34,25 @@ function SiteSettingsPage() {
   });
   const setC = (k: string, v: string) => setS((cur: any) => ({ ...cur, company: { ...(cur.company || {}), [k]: v } }));
 
+  const setSeo = (k: string, v: string) => setS((cur: any) => ({ ...cur, seo: { ...(cur.seo || {}), [k]: v } }));
+
   useEffect(() => {
     (async () => {
       try {
-        const data = await adminApi.settings.get<any>("site");
-        if (data && typeof data === "object") setS((cur: any) => ({ ...cur, ...data, company: { ...(cur.company || {}), ...((data as any).company || {}) } }));
+        const raw: any = await adminApi.settings.get<any>("site");
+        // Backend may return { items: {...} } / { settings: { site: {...}, company: {...} } } or flat
+        const data = raw?.items ?? raw;
+        const siteNested = data?.site ?? raw?.settings?.site ?? {};
+        const companyNested = data?.company ?? raw?.settings?.company ?? {};
+        const merged = { ...siteNested, ...data };
+        if (merged && typeof merged === "object") {
+          setS((cur: any) => ({
+            ...cur,
+            ...merged,
+            seo: { ...(cur.seo || {}), ...((merged as any).seo && !Array.isArray((merged as any).seo) ? (merged as any).seo : {}) },
+            company: { ...(cur.company || {}), ...(companyNested || {}) },
+          }));
+        }
       } catch {}
     })();
   }, []);
@@ -60,12 +78,17 @@ function SiteSettingsPage() {
 
         <PanelCard title={L("معلومات أساسية", "Basic Information")} className="lg:col-span-2">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Lbl label={L("اسم الموقع", "Site Name")}><input className={ic} value={s.name} onChange={e => setS({ ...s, name: e.target.value })} /></Lbl>
-            <Lbl label={L("الشعار النصي (Tagline)", "Tagline")}><input className={ic} value={s.tagline} onChange={e => setS({ ...s, tagline: e.target.value })} /></Lbl>
-            <Lbl label={L("البريد الإلكتروني", "Email")}><input className={ic} value={s.email} onChange={e => setS({ ...s, email: e.target.value })} /></Lbl>
-            <Lbl label={L("رقم الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })} /></Lbl>
-            <Lbl label={L("العنوان", "Address")} full><input className={ic} value={s.address} onChange={e => setS({ ...s, address: e.target.value })} /></Lbl>
-            <Lbl label={L("ساعات العمل", "Work Hours")} full><input className={ic} value={s.workHours} onChange={e => setS({ ...s, workHours: e.target.value })} /></Lbl>
+            <Lbl label={L("اسم الموقع", "Site Name")}><input className={ic} value={s.name || ""} onChange={e => setS({ ...s, name: e.target.value })} /></Lbl>
+            <Lbl label={L("الشعار النصي (Tagline)", "Tagline")}><input className={ic} value={s.tagline || ""} onChange={e => setS({ ...s, tagline: e.target.value })} /></Lbl>
+            <Lbl label={L("الاسم بالعربية", "Name (Arabic)")}><input className={ic} value={s.nameAr || ""} onChange={e => setS({ ...s, nameAr: e.target.value })} /></Lbl>
+            <Lbl label={L("الاسم بالإنجليزية", "Name (English)")}><input className={ic} dir="ltr" value={s.nameEn || ""} onChange={e => setS({ ...s, nameEn: e.target.value })} /></Lbl>
+            <Lbl label={L("البريد الإلكتروني", "Email")}><input className={ic} value={s.email || ""} onChange={e => setS({ ...s, email: e.target.value })} /></Lbl>
+            <Lbl label={L("رقم الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={s.phone || ""} onChange={e => setS({ ...s, phone: e.target.value })} /></Lbl>
+            <Lbl label={L("رقم واتساب", "WhatsApp Number")}><input type="tel" inputMode="tel" className={ic} dir="ltr" placeholder="+9665xxxxxxxx" value={s.whatsapp || ""} onChange={e => setS({ ...s, whatsapp: e.target.value })} /></Lbl>
+            <Lbl label={L("ساعات العمل", "Work Hours")}><input className={ic} value={s.workHours || ""} onChange={e => setS({ ...s, workHours: e.target.value })} /></Lbl>
+            <Lbl label={L("العنوان", "Address")} full><input className={ic} value={s.address || ""} onChange={e => setS({ ...s, address: e.target.value })} /></Lbl>
+            <Lbl label={L("وصف الموقع (عربي)", "Description (AR)")} full><textarea rows={2} className={ic} value={s.descriptionAr || ""} onChange={e => setS({ ...s, descriptionAr: e.target.value })} /></Lbl>
+            <Lbl label={L("وصف الموقع (إنجليزي)", "Description (EN)")} full><textarea rows={2} className={ic} dir="ltr" value={s.descriptionEn || ""} onChange={e => setS({ ...s, descriptionEn: e.target.value })} /></Lbl>
             <Lbl label={L("اللغة الافتراضية", "Default Language")}>
               <select className={ic} value={s.primaryLang} onChange={e => setS({ ...s, primaryLang: e.target.value })}>
                 <option value="ar">العربية</option><option value="en">English</option>
@@ -76,6 +99,15 @@ function SiteSettingsPage() {
                 <option value="SAR">{L("ريال سعودي", "Saudi Riyal")} (SAR)</option><option value="USD">{L("دولار أمريكي", "US Dollar")} (USD)</option><option value="AED">{L("درهم إماراتي", "UAE Dirham")} (AED)</option>
               </select>
             </Lbl>
+            <Lbl label={L("نسبة الضريبة %", "VAT %")}><input type="number" className={ic} dir="ltr" value={s.vatPercent ?? 15} onChange={e => setS({ ...s, vatPercent: Number(e.target.value) })} /></Lbl>
+          </div>
+        </PanelCard>
+
+        <PanelCard title={L("إعدادات SEO", "SEO Settings")} className="lg:col-span-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Lbl label={L("عنوان الصفحة (Meta Title)", "Meta Title")}><input className={ic} value={s.seo?.metaTitle || ""} onChange={e => setSeo("metaTitle", e.target.value)} /></Lbl>
+            <Lbl label={L("صورة المشاركة OG Image", "OG Image URL")}><input className={ic} dir="ltr" value={s.seo?.ogImage || ""} onChange={e => setSeo("ogImage", e.target.value)} /></Lbl>
+            <Lbl label={L("الوصف (Meta Description)", "Meta Description")} full><textarea rows={2} className={ic} value={s.seo?.metaDescription || ""} onChange={e => setSeo("metaDescription", e.target.value)} /></Lbl>
           </div>
         </PanelCard>
 
