@@ -123,7 +123,7 @@ export const admin = {
   getTickets: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/tickets${q ? '?' + q : ''}`); },
   getTicketDetail: (id: string) => request(`/admin/tickets/${id}`),
   replyTicket: (id: string, text: string) => request(`/admin/tickets/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
-  updateTicketStatus: (id: string, status: string) => request(`/admin/tickets/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  updateTicketStatus: (id: string, status: string) => request(`/admin/tickets/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   updateTicketPriority: (id: string, priority: string) => request(`/admin/tickets/${id}`, { method: 'PUT', body: JSON.stringify({ priority }) }),
 
   getReviews: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/reviews${q ? '?' + q : ''}`); },
