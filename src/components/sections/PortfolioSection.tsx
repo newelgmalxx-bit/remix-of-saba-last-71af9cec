@@ -111,10 +111,17 @@ export function PortfolioSection() {
         </div>
 
         <div className="mt-10 grid auto-rows-[220px] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {filtered.map((p) => (
-            <article
+          {filtered.map((p) => {
+            const hasLink = !!p.link && p.link !== "#";
+            const Tag: any = hasLink ? "a" : "article";
+            const linkProps = hasLink
+              ? { href: p.link, target: "_blank", rel: "noopener noreferrer" }
+              : {};
+            return (
+            <Tag
               key={p.brand}
-              className={`group relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${p.span}`}
+              {...linkProps}
+              className={`group relative block overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${p.span} ${hasLink ? "cursor-pointer" : ""}`}
             >
               {p.dark ? (
                 <div className="absolute inset-0 bg-[#0d2540]" />
@@ -146,8 +153,9 @@ export function PortfolioSection() {
                   ))}
                 </div>
               </div>
-            </article>
-          ))}
+            </Tag>
+            );
+          })}
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-white px-8 py-6 text-center md:flex-row md:text-start">
