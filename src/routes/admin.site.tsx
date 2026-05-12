@@ -34,7 +34,7 @@ function SiteSettingsPage() {
     (async () => {
       try {
         const data = await adminApi.settings.get<any>("site");
-        if (data && typeof data === "object") setS((cur) => ({ ...cur, ...data }));
+        if (data && typeof data === "object") setS((cur: any) => ({ ...cur, ...data, company: { ...(cur.company || {}), ...((data as any).company || {}) } }));
       } catch {}
     })();
   }, []);
@@ -43,7 +43,7 @@ function SiteSettingsPage() {
     try { await adminApi.settings.update("site", s); toast.success(L("تم حفظ الإعدادات", "Settings saved")); }
     catch (e: any) { toast.error(e?.message || "Save failed"); }
   };
-  const upload = (k: "logo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = (k: "logo" | "invoiceLogo" | "favicon") => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     setS({ ...s, [k]: await uploadImage(f) });
   };
