@@ -16,12 +16,16 @@ function SiteSettingsPage() {
   const { lang } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
   const [s, setS] = useState<any>({
-    name: "سابا ديزاين", tagline: L("وكالتك الإبداعية لتصميم وتطوير المواقع والتطبيقات", "Your creative agency for web and app design & development"),
-    email: "info@saba.sa", phone: "+966 55 000 0000", address: L("الرياض، المملكة العربية السعودية", "Riyadh, Saudi Arabia"),
+    name: "سابا ديزاين", nameAr: "سابا ديزاين", nameEn: "SABA Design",
+    tagline: L("وكالتك الإبداعية لتصميم وتطوير المواقع والتطبيقات", "Your creative agency for web and app design & development"),
+    descriptionAr: "", descriptionEn: "",
+    email: "info@saba.sa", phone: "+966 55 000 0000", whatsapp: "",
+    address: L("الرياض، المملكة العربية السعودية", "Riyadh, Saudi Arabia"),
     logo: "", invoiceLogo: "", favicon: "",
     facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "", tiktok: "", snapchat: "",
     workHours: L("الأحد - الخميس · 9 ص - 6 م", "Sun - Thu · 9 AM - 6 PM"),
     maintenanceMode: false, primaryLang: "ar", currency: "SAR", vatPercent: 15,
+    seo: { metaTitle: "", metaDescription: "", ogImage: "" },
     company: {
       logo: "", nameAr: "", nameEn: "", commercialRegister: "", taxNumber: "",
       addressAr: "", addressEn: "", phone: "", email: "", website: "",
