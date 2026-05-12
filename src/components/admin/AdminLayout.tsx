@@ -314,16 +314,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                           return;
                         }
                         if (invoiceMatch) {
-                          try {
-                            const blob = await admin.invoicePdf(invoiceMatch[1]);
-                            if (blob && blob.size) {
-                              const url = URL.createObjectURL(blob);
-                              window.open(url, "_blank");
-                              setTimeout(() => URL.revokeObjectURL(url), 60000);
-                              return;
-                            }
-                          } catch { /* fall through */ }
-                          navigate({ to: "/admin/invoices" as any });
+                          navigate({ to: "/admin/invoices" as any, search: { invoiceId: invoiceMatch[1] } as any });
                           return;
                         }
                         if (contactMatch) { navigate({ to: "/admin/clients" as any }); return; }
