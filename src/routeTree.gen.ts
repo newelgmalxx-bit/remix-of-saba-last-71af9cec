@@ -29,8 +29,8 @@ import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PaymentResultRouteImport } from './routes/payment.result'
 import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
-import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as OrderSummaryOrderIdRouteImport } from './routes/order-summary.$orderId'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrackingRouteImport } from './routes/admin.tracking'
@@ -162,6 +162,11 @@ const PaymentResultRoute = PaymentResultRouteImport.update({
 const PaymentFailedRoute = PaymentFailedRouteImport.update({
   id: '/payment/failed',
   path: '/payment/failed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderSummaryOrderIdRoute = OrderSummaryOrderIdRouteImport.update({
+  id: '/order-summary/$orderId',
+  path: '/order-summary/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -331,11 +336,6 @@ const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
   path: '/account/orders/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrderSummaryOrderIdRoute = OrderSummaryOrderIdRouteImport.update({
-  id: '/order-summary/$orderId',
-  path: '/order-summary/$orderId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -371,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -378,7 +379,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
@@ -425,6 +425,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -432,7 +433,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/services': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
@@ -482,6 +482,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/auth/reset': typeof AuthResetRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/payment/failed': typeof PaymentFailedRoute
   '/payment/result': typeof PaymentResultRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -489,7 +490,6 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/order-summary/$orderId': typeof OrderSummaryOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
@@ -540,6 +540,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/auth/reset'
     | '/checkout/success'
+    | '/order-summary/$orderId'
     | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
@@ -547,7 +548,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/services/'
     | '/account/orders/$orderId'
-    | '/order-summary/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
     | '/admin/services/$slug'
@@ -594,6 +594,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/auth/reset'
     | '/checkout/success'
+    | '/order-summary/$orderId'
     | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
@@ -601,7 +602,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/services'
     | '/account/orders/$orderId'
-    | '/order-summary/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
     | '/admin/services/$slug'
@@ -650,6 +650,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/auth/reset'
     | '/checkout/success'
+    | '/order-summary/$orderId'
     | '/payment/failed'
     | '/payment/result'
     | '/services/$slug'
@@ -657,7 +658,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/services/'
     | '/account/orders/$orderId'
-    | '/order-summary/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
     | '/admin/services/$slug'
@@ -691,13 +691,13 @@ export interface RootRouteChildren {
   AccountFavoritesRoute: typeof AccountFavoritesRoute
   AccountProfileRoute: typeof AccountProfileRoute
   AuthResetRoute: typeof AuthResetRoute
+  OrderSummaryOrderIdRoute: typeof OrderSummaryOrderIdRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentResultRoute: typeof PaymentResultRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   AccountIndexRoute: typeof AccountIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
-  OrderSummaryOrderIdRoute: typeof OrderSummaryOrderIdRoute
   AccountTicketsTicketIdRoute: typeof AccountTicketsTicketIdRoute
   AccountTicketsNewRoute: typeof AccountTicketsNewRoute
   AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
@@ -844,6 +844,13 @@ declare module '@tanstack/react-router' {
       path: '/payment/failed'
       fullPath: '/payment/failed'
       preLoaderRoute: typeof PaymentFailedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order-summary/$orderId': {
+      id: '/order-summary/$orderId'
+      path: '/order-summary/$orderId'
+      fullPath: '/order-summary/$orderId'
+      preLoaderRoute: typeof OrderSummaryOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/success': {
@@ -1077,13 +1084,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountOrdersOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/order-summary/$orderId': {
-      id: '/order-summary/$orderId'
-      path: '/order-summary/$orderId'
-      fullPath: '/order-summary/$orderId'
-      preLoaderRoute: typeof OrderSummaryOrderIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -1195,13 +1195,13 @@ const rootRouteChildren: RootRouteChildren = {
   AccountFavoritesRoute: AccountFavoritesRoute,
   AccountProfileRoute: AccountProfileRoute,
   AuthResetRoute: AuthResetRoute,
+  OrderSummaryOrderIdRoute: OrderSummaryOrderIdRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentResultRoute: PaymentResultRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   AccountIndexRoute: AccountIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
-  OrderSummaryOrderIdRoute: OrderSummaryOrderIdRoute,
   AccountTicketsTicketIdRoute: AccountTicketsTicketIdRoute,
   AccountTicketsNewRoute: AccountTicketsNewRoute,
   AccountOrdersIndexRoute: AccountOrdersIndexRoute,

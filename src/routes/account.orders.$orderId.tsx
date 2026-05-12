@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
@@ -47,13 +47,26 @@ function OrderDetail() {
   const { t, lang, dir } = useLang();
   const { orderId } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // navigation no longer needed; pay is inline
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const handlePayNow = () => {
-    if (!order) return;
-    navigate({ to: "/account/orders/$orderId/pay" as any, params: { orderId: order.id } as any });
+  const [paying, setPaying] = useState(false);
+  const handlePayNow = async () => {
+    if (!order || paying) return;
+    setPaying(true);
+    try {
+      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      const { toast } = await import("sonner");
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+    } catch (e: any) {
+      const { toast } = await import("sonner");
+      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+    } finally {
+      setPaying(false);
+    }
   };
 
   useEffect(() => {
@@ -256,9 +269,10 @@ function OrderDetail() {
             {!order.paid && order.status !== "cancelled" && (
               <button
                 onClick={handlePayNow}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                disabled={paying}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
               >
-                <Wallet className="h-4 w-4" />
+                {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
                 {lang === "ar" ? "ادفع الآن" : "Pay now"}
               </button>
             )}

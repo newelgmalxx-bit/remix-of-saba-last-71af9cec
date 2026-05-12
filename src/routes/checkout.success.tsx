@@ -193,14 +193,19 @@ function SuccessPage() {
                 </a>
               )}
               {!order.paid && !payUrl && (
-                <Link
-                  to={"/account/orders/$orderId/pay" as any}
-                  params={{ orderId: order.id } as any}
+                <button
+                  onClick={async () => {
+                    try {
+                      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+                      const url = res?.data?.paymentUrl || res?.paymentUrl;
+                      if (url) { window.location.href = url; return; }
+                    } catch {}
+                  }}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
                 >
                   <Wallet className="h-4 w-4" />
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
-                </Link>
+                </button>
               )}
               {order.paid && (
                 <button
