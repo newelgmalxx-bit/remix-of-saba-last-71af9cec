@@ -41,7 +41,25 @@ function ServiceDetailPage() {
   const { t, dir, lang } = useLang();
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
-  const service = live ?? serviceMap[slug];
+  const [remoteDetail, setRemoteDetail] = useState<any>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res: any = await servicesApi.detail(slug);
+        const svc = res?.service ?? res?.data?.service ?? res;
+        if (!cancelled && svc) setRemoteDetail(svc);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [slug]);
+  const baseService = live ?? serviceMap[slug];
+  const remoteOverview = lang === "en"
+    ? (remoteDetail?.overviewDescriptionEn || remoteDetail?.overviewDescriptionAr)
+    : (remoteDetail?.overviewDescriptionAr || remoteDetail?.overviewDescriptionEn);
+  const service = baseService
+    ? { ...baseService, overviewDescription: remoteOverview || baseService.overviewDescription }
+    : baseService;
   const [tab, setTab] = useState<TKey>("svcDetail.works.tab.all");
   const [open, setOpen] = useState<number | null>(0);
   const filteredWorks = works;
