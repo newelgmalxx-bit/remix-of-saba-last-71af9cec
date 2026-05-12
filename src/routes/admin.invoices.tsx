@@ -12,6 +12,7 @@ import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "الفواتير | لوحة التحكم" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ invoiceId: typeof s.invoiceId === "string" ? s.invoiceId : undefined }),
   component: InvoicesPage,
 });
 
@@ -73,6 +74,36 @@ function InvoicesPage() {
       setInvoices(items as any);
     });
   }, []);
+
+  const search = Route.useSearch();
+  useEffect(() => {
+    const id = search.invoiceId;
+    if (!id || invoices.length === 0) return;
+    const found = invoices.find((x) => x.id === id || x.number === id);
+    if (found) { setViewing(found); return; }
+    (async () => {
+      try {
+        const r: any = await (adminApi.invoices as any).get?.(id);
+        const i = r?.invoice || r?.data?.invoice || r?.data || r;
+        if (i) {
+          setViewing({
+            id: i.id || id,
+            number: i.number || id,
+            orderNumber: i.orderNumber || i.order_number || "",
+            orderId: i.orderId || i.order_id || undefined,
+            client: i.clientName ?? i.client_name ?? "",
+            email: i.clientEmail ?? i.client_email ?? "",
+            phone: i.clientPhone ?? i.client_phone ?? "",
+            city: i.clientCity ?? i.client_city ?? "",
+            payment: i.paymentMethod ?? i.payment_method ?? paymentMethods[0].value,
+            amount: Number(i.total) || 0,
+            status: i.status || "pending",
+            issued: ((i.createdAt || i.created_at || "") + "").slice(0, 10),
+          } as any);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [search.invoiceId, invoices]);
 
   const openOrder = async (inv: AdminInvoice & { orderId?: string }) => {
     const key = inv.orderId || inv.orderNumber;
