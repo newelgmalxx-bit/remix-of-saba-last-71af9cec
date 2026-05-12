@@ -327,15 +327,62 @@ function OrderSummaryPage() {
                       <Wallet className="h-4 w-4" />
                       {lang === "ar" ? "ادفع الآن" : "Pay now"}
                     </a>
-                  ) : (
-                    <Link
-                      to={"/account/orders/$orderId/pay" as any}
-                      params={{ orderId: order.id } as any}
+                  ) : !showGateways ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowGateways(true)}
                       className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
                     >
                       <Wallet className="h-4 w-4" />
                       {lang === "ar" ? "ادفع الآن" : "Pay now"}
-                    </Link>
+                    </button>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      <div className="text-xs font-bold text-muted-foreground">
+                        {lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}
+                      </div>
+                      <div className="grid gap-2">
+                        {paymentMethods.filter(m => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                          const Icon = m.icon;
+                          const active = selectedGateway === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => setSelectedGateway(m.id)}
+                              className={`flex items-center gap-3 rounded-xl border-2 p-3 text-right transition-all ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+                            >
+                              <div className={`flex h-9 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg ${m.logo ? "bg-white border border-border p-1" : active ? "bg-primary text-white" : "bg-primary-light text-primary"}`}>
+                                {m.logo ? <img src={m.logo} alt={m.name} className="max-h-7 w-auto object-contain" /> : <Icon className="h-4 w-4" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-bold">{m.name}</div>
+                                <div className="text-[11px] text-muted-foreground line-clamp-1">{m.desc}</div>
+                              </div>
+                              <div className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${active ? "border-primary bg-primary" : "border-border"}`}>
+                                {active && <Check className="h-2.5 w-2.5 text-white" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handlePay}
+                        disabled={paying}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+                      >
+                        {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                        {lang === "ar" ? `ادفع ${formatCurrency(order.total, lang)}` : `Pay ${formatCurrency(order.total, lang)}`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowGateways(false)}
+                        className="w-full text-xs text-muted-foreground hover:text-primary"
+                      >
+                        {lang === "ar" ? "إلغاء" : "Cancel"}
+                      </button>
+                    </div>
                   )
                 )}
                 <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
