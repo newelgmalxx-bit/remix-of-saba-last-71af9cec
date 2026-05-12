@@ -231,27 +231,38 @@ function InvoicesPage() {
       </PanelCard>
 
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent dir={dir} className="max-w-3xl">
-          <DialogHeader><DialogTitle>{L("الفاتورة", "Invoice")} {viewing?.number}</DialogTitle></DialogHeader>
+        <DialogContent dir={dir} className="max-w-[860px] max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-5 pt-5"><DialogTitle>{L("الفاتورة", "Invoice")} <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
           {viewing && (() => {
-            const subtotal = Math.round(viewing.amount / 1.15);
-            const vat = viewing.amount - subtotal;
+            const v: any = viewing;
+            const linkedOrder: any = v.orderId ? orderMap[v.orderId] : (v.orderNumber ? orderMap[v.orderNumber] : null);
+            const orderItems: any[] = Array.isArray(linkedOrder?.items) ? linkedOrder.items : [];
+            const items = orderItems.length > 0
+              ? orderItems.map((it: any) => ({
+                  title: it.service_title || it.serviceTitle || it.title || it.desc || "—",
+                  qty: Number(it.qty || 1),
+                  price: Number(it.price) || 0,
+                }))
+              : [{ title: linkedOrder?.service || L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: +(viewing.amount / 1.15).toFixed(2) }];
+            const subtotal = +items.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2);
+            const total = viewing.amount || +(subtotal * 1.15).toFixed(2);
+            const vat = +(total - subtotal).toFixed(2);
             const data = {
               number: viewing.number,
               date: viewing.issued,
-              clientName: viewing.client,
-              clientEmail: viewing.email,
-              clientPhone: viewing.phone,
-              clientCity: viewing.city,
-              paymentMethod: viewing.payment,
+              clientName: viewing.client || linkedOrder?.contact_name || linkedOrder?.userName,
+              clientEmail: viewing.email || linkedOrder?.contact_email || linkedOrder?.userEmail,
+              clientPhone: viewing.phone || linkedOrder?.contact_phone || linkedOrder?.phone,
+              clientCity: viewing.city || linkedOrder?.contact_city || linkedOrder?.city,
+              paymentMethod: payLabel(viewing.payment || linkedOrder?.payment_method || ""),
               paymentStatus: viewing.status === "paid" ? "paid" : viewing.status === "void" ? "refunded" : "unpaid",
-              items: [{ title: L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: subtotal }],
-              subtotal, vat, total: viewing.amount,
+              items, subtotal, vat, total,
+              lang: dir === "rtl" ? "ar" : "en",
             };
             return (
-              <div className="space-y-3">
-                <div className="overflow-auto max-h-[70vh] flex justify-center bg-muted/30 rounded-xl p-4">
-                  <div style={{ transform: "scale(0.7)", transformOrigin: "top center" }}>
+              <div className="space-y-4 px-5 pb-5">
+                <div className="overflow-x-auto rounded-xl border border-border bg-white">
+                  <div style={{ transform: "scale(0.92)", transformOrigin: "top center" }}>
                     <InvoiceDocument data={data as any} />
                   </div>
                 </div>
@@ -263,7 +274,7 @@ function InvoicesPage() {
               </div>
             );
           })()}
-          <DialogFooter><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
+          <DialogFooter className="px-5 pb-5"><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
         </DialogContent>
       </Dialog>
 
