@@ -27,9 +27,30 @@ function TicketsList() {
   useEffect(() => {
     let alive = true;
     account.listTickets({ limit: 50 })
-      .then((res) => { if (alive) setTickets((res.items || []).map(normalizeTicket)); })
-      .catch(() => { if (alive) setTickets([]); })
-      .finally(() => { if (alive) setLoading(false); });
+      .then(async (res) => {
+        if (!alive) return;
+        const list = (res.items || []).map(normalizeTicket);
+        setTickets(list);
+        setLoading(false);
+        // Hydrate real message counts from detail endpoint (list returns empty messages)
+        const detailed = await Promise.all(
+          list.map(async (tk) => {
+            try {
+              const d: any = await account.getTicket(tk.id);
+              const msgs = d?.ticket?.messages || d?.messages || [];
+              return { ...tk, messages: msgs.map((m: any) => ({
+                id: String(m.id),
+                from: m.from_type === "support" ? "support" : "client",
+                author: m.authorName || m.author || "",
+                text: m.text || "",
+                at: m.created_at || m.at || "",
+              })) };
+            } catch { return tk; }
+          })
+        );
+        if (alive) setTickets(detailed);
+      })
+      .catch(() => { if (alive) { setTickets([]); setLoading(false); } });
     return () => { alive = false; };
   }, []);
 
