@@ -83,7 +83,7 @@ function InvoicesPage() {
     if (found) { setViewing(found); return; }
     (async () => {
       try {
-        const r: any = await adminApi.invoices.get?.(id);
+        const r: any = await (adminApi.invoices as any).get?.(id);
         const i = r?.invoice || r?.data?.invoice || r?.data || r;
         if (i) {
           setViewing({
