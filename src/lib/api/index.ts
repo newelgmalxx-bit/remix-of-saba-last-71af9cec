@@ -87,18 +87,22 @@ export const cart = {
 export const checkout = {
   ...checkoutNew,
   submit: async (body: Parameters<typeof checkoutNew.create>[0]) => {
-    // Call /checkout directly so we can read the order data even when the
-    // server returns `success: false` (e.g. the order was created but a
-    // post-create cart cleanup step failed with "cart item not found").
+    // Call /checkout (or /checkout/cod) directly so we can read the order
+    // data even when the server returns `success: false` (e.g. the order
+    // was created but a post-create cart cleanup step failed).
     const { getToken, getLang, getSid, ApiError } = await import('./client');
+    const { normalizePaymentMethod } = await import('./checkout');
+    const method = normalizePaymentMethod(body.paymentMethod);
     const payload: any = {
-      paymentMethod: body.paymentMethod,
+      paymentMethod: method,
       contactName: body.contactName ?? body.contact?.name ?? '',
       contactEmail: body.contactEmail ?? body.contact?.email ?? '',
       contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
+      city: body.contactCity ?? body.contact?.city ?? body.city,
       contactCity: body.contactCity ?? body.contact?.city ?? body.city,
       contactAddress: body.contactAddress ?? body.contact?.address,
       notes: body.notes,
+      items: body.items,
     };
     const token = getToken();
     const headers: Record<string, string> = {
@@ -109,7 +113,8 @@ export const checkout = {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     else headers['X-Session-Id'] = getSid();
 
-    const res = await fetch('https://saba-design.com/api/checkout', {
+    const endpoint = method === 'cod' ? '/checkout/cod' : '/checkout/initiate';
+    const res = await fetch(`https://saba-design.com/api${endpoint}`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
