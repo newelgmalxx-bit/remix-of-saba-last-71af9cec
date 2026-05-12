@@ -1,5 +1,42 @@
 import React from "react";
 import sarLogo from "@/assets/sar.png";
+import { publicApi } from "@/lib/api";
+
+const SETTINGS_KEY = "saba_site_settings_v2";
+
+function readCachedCompany(): { company?: InvoiceCompany; logo?: string; invoiceLogo?: string } {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return {};
+    const s = JSON.parse(raw);
+    return { company: s?.company, logo: s?.logo, invoiceLogo: s?.invoiceLogo };
+  } catch { return {}; }
+}
+
+function useAutoCompany(data: InvoiceData): InvoiceData {
+  const [extra, setExtra] = React.useState(() => readCachedCompany());
+  React.useEffect(() => {
+    if (data.company && (data.invoiceLogo || data.logo || data.company.logo || data.company.invoiceLogo)) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res: any = await publicApi.getSiteSettings();
+        const d = res?.data ?? res;
+        if (!alive || !d) return;
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(d)); } catch {}
+        setExtra({ company: d.company, logo: d.logo, invoiceLogo: d.invoiceLogo });
+      } catch {}
+    })();
+    return () => { alive = false; };
+  }, [data]);
+  return {
+    ...data,
+    logo: data.logo ?? extra.logo,
+    invoiceLogo: data.invoiceLogo ?? extra.invoiceLogo,
+    company: { ...(extra.company || {}), ...(data.company || {}) },
+  };
+}
 
 export type InvoiceLine = {
   title: string;
