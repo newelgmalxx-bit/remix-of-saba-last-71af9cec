@@ -7,6 +7,7 @@ import {
   Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket, ExternalLink,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import logoImg from "@/assets/logo.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import flagSa from "@/assets/flag-sa.jpg";
@@ -15,6 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { toast } from "sonner";
 import { admin } from "@/lib/api/admin";
+import { admin as adminApi } from "@/lib/api";
+import { InvoiceDocument, type InvoiceData } from "@/components/invoice/InvoiceDocument";
+import { renderInvoiceToPdf } from "@/lib/renderInvoice";
+import { Download } from "lucide-react";
+import { paymentMethods } from "@/data/admin";
 
 type NavItem = { to: string; ar: string; en: string; icon: any; children?: { to: string; ar: string; en: string; icon: any }[] };
 
@@ -80,6 +86,50 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [invoiceModal, setInvoiceModal] = useState<InvoiceData | null>(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+
+  const payLabel = (v: string) => {
+    const m = paymentMethods.find((p) => p.value === v);
+    return m ? L(m.labelAr, m.labelEn) : v;
+  };
+
+  const openInvoiceModal = async (invoiceId: string) => {
+    setInvoiceLoading(true);
+    try {
+      const r: any = await adminApi.invoices.get(invoiceId);
+      const i: any = r?.invoice || r?.data?.invoice || r?.data || r;
+      if (!i) throw new Error("not found");
+      const itemsRaw: any[] = Array.isArray(i.items) ? i.items : [];
+      const items = itemsRaw.length > 0
+        ? itemsRaw.map((it: any) => ({
+            title: it.service_title || it.serviceTitle || it.title || it.desc || "—",
+            qty: Number(it.qty || 1),
+            price: Number(it.price) || 0,
+          }))
+        : [{ title: i.service || L("خدمات سابا ديزاين", "Saba Design Services"), qty: 1, price: +(Number(i.total || 0) / 1.15).toFixed(2) }];
+      const subtotal = +items.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2);
+      const total = Number(i.total) || +(subtotal * 1.15).toFixed(2);
+      const vat = +(total - subtotal).toFixed(2);
+      const status = i.status === "paid" ? "paid" : i.status === "void" ? "refunded" : "unpaid";
+      setInvoiceModal({
+        number: i.number || invoiceId,
+        date: ((i.createdAt || i.created_at || "") + "").slice(0, 10),
+        clientName: i.clientName || i.client_name || "",
+        clientEmail: i.clientEmail || i.client_email || "",
+        clientPhone: i.clientPhone || i.client_phone || "",
+        clientCity: i.clientCity || i.client_city || "",
+        paymentMethod: payLabel(i.paymentMethod || i.payment_method || ""),
+        paymentStatus: status,
+        items, subtotal, vat, total,
+        lang: dir === "rtl" ? "ar" : "en",
+      });
+    } catch {
+      toast.error(L("تعذّر تحميل الفاتورة", "Failed to load invoice"));
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
 
   const loadNotifs = async () => {
     setNotifLoading(true);
@@ -314,7 +364,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                           return;
                         }
                         if (invoiceMatch) {
-                          navigate({ to: "/admin/invoices" as any, search: { invoiceId: invoiceMatch[1] } as any });
+                          openInvoiceModal(invoiceMatch[1]);
                           return;
                         }
                         if (contactMatch) { navigate({ to: "/admin/clients" as any }); return; }
@@ -354,6 +404,35 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children ?? <Outlet />}</main>
       </div>
+
+      {/* Invoice popup (from notifications, anywhere in admin) */}
+      <Dialog open={!!invoiceModal || invoiceLoading} onOpenChange={(o) => { if (!o) { setInvoiceModal(null); setInvoiceLoading(false); } }}>
+        <DialogContent dir={dir} className="max-w-[860px] max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-5 pt-5">
+            <DialogTitle>{L("الفاتورة", "Invoice")} {invoiceModal && <span dir="ltr">#{invoiceModal.number}</span>}</DialogTitle>
+          </DialogHeader>
+          {invoiceLoading && !invoiceModal && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">{L("جارٍ التحميل...", "Loading...")}</div>
+          )}
+          {invoiceModal && (
+            <div className="space-y-4 px-5 pb-5">
+              <div className="overflow-x-auto rounded-xl border border-border bg-white">
+                <div style={{ transform: "scale(0.92)", transformOrigin: "top center" }}>
+                  <InvoiceDocument data={invoiceModal} />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <PrimaryButton onClick={() => renderInvoiceToPdf(invoiceModal)}>
+                  <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
+                </PrimaryButton>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="px-5 pb-5">
+            <GhostButton onClick={() => { setInvoiceModal(null); setInvoiceLoading(false); }}>{L("إغلاق", "Close")}</GhostButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
