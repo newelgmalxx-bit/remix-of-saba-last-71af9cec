@@ -12,6 +12,7 @@ import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "الفواتير | لوحة التحكم" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ invoiceId: typeof s.invoiceId === "string" ? s.invoiceId : undefined }),
   component: InvoicesPage,
 });
 
