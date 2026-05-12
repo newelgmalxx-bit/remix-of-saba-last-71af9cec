@@ -34,7 +34,7 @@ function TicketsList() {
         setLoading(false);
         // Hydrate real message counts from detail endpoint (list returns empty messages)
         const detailed = await Promise.all(
-          list.map(async (tk) => {
+          list.map(async (tk: Ticket) => {
             try {
               const d: any = await account.getTicket(tk.id);
               const msgs = d?.ticket?.messages || d?.messages || [];
