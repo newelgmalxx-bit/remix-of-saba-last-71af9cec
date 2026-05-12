@@ -47,7 +47,7 @@ function OrderDetail() {
   const { t, lang, dir } = useLang();
   const { orderId } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // navigation no longer needed; pay is inline
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
