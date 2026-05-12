@@ -137,15 +137,33 @@ function CheckoutPage() {
       } catch {}
       await clear();
       const isCod = payment === "cod";
-      // MyFatoorah (or any online gateway): redirect straight to the payment
-      // URL. The gateway will redirect back to /checkout/success?order=…&paymentId=…
-      // (or /checkout/failed?order=…) which we handle ourselves.
-      if (!isCod && res.paymentUrl) {
-        toast.success(lang === "ar" ? "جارٍ تحويلك لبوابة الدفع" : "Redirecting to payment");
-        window.location.href = res.paymentUrl;
+      // MyFatoorah (or any online gateway): redirect to the payment URL.
+      // If the create response didn't include one, ask the dedicated
+      // /checkout/myfatoorah endpoint to start a session for this order.
+      if (!isCod) {
+        let url = res.paymentUrl as string | null | undefined;
+        if (!url && res.orderId) {
+          try {
+            const init: any = await api.checkout.initiateMyfatoorah(res.orderId);
+            const d = init?.data ?? init ?? {};
+            url = d.paymentUrl ?? d.payment_url ?? d.invoiceURL ?? d.url ?? null;
+          } catch { /* ignore — fall through to success page */ }
+        }
+        if (url) {
+          toast.success(lang === "ar" ? "جارٍ تحويلك لبوابة الدفع" : "Redirecting to payment");
+          window.location.href = url;
+          return;
+        }
+        // No payment URL available — send user to the success screen
+        // (which will offer a "Pay now" button via /payment endpoint).
+        toast.message(lang === "ar" ? "تم إنشاء الطلب — أكمل الدفع" : "Order created — complete payment");
+        navigate({
+          to: "/checkout/success" as any,
+          search: { order: res.orderId, o: res.orderNumber } as any,
+        });
         return;
       }
-      // Cash on delivery (or no gateway URL): go straight to success screen.
+      // Cash on delivery: go straight to success screen.
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
       navigate({
         to: "/checkout/success" as any,
