@@ -364,7 +364,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                           return;
                         }
                         if (invoiceMatch) {
-                          navigate({ to: "/admin/invoices" as any, search: { invoiceId: invoiceMatch[1] } as any });
+                          openInvoiceModal(invoiceMatch[1]);
                           return;
                         }
                         if (contactMatch) { navigate({ to: "/admin/clients" as any }); return; }
