@@ -11,6 +11,7 @@ import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice"
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ orderId: typeof s.orderId === "string" ? s.orderId : undefined }),
   component: BookingsPage,
 });
 
