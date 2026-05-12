@@ -352,16 +352,9 @@ function BookingsPage() {
                     <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{b.date}</td>
                     <td className="px-3 py-3">
                       <button
-                        onClick={() => {
-                          if (b.paymentStatus !== "paid" && b.status !== "completed") {
-                            toast.error(L("لا يمكن إصدار الفاتورة قبل تأكيد الدفع", "Confirm payment before issuing the invoice"));
-                            return;
-                          }
-                          setViewing(b);
-                        }}
+                        onClick={() => setViewing(b)}
                         title={L("عرض الفاتورة", "View invoice")}
-                        disabled={b.paymentStatus !== "paid" && b.status !== "completed"}
-                        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${b.paymentStatus === "paid" || b.status === "completed" ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20" : "border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed"}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
                       >
                         <Eye className="h-3.5 w-3.5" />
                         {L("عرض الفاتورة", "View invoice")}
