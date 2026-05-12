@@ -70,6 +70,7 @@ export function PortfolioSection() {
             img: it.cover || it.image || undefined,
             dark: !it.cover && !it.image,
             span: SPANS[idx % SPANS.length],
+            link: it.link || it.url || "",
           };
         });
         setProjects(mapped);
