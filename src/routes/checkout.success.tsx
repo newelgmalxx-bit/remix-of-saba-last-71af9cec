@@ -5,16 +5,19 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
-import { account } from "@/lib/api";
+import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
     o: z.string().optional(),
+    order: z.string().optional(),
     orderId: z.string().optional(),
+    paymentId: z.string().optional(),
     payUrl: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "تم استلام طلبك | سابا ديزاين" }] }),
@@ -22,12 +25,36 @@ export const Route = createFileRoute("/checkout/success")({
 });
 
 function SuccessPage() {
-  const { o, orderId, payUrl } = Route.useSearch();
+  const { o, order: orderQ, orderId, paymentId, payUrl } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
-  const id = orderId || o;
+  const navigate = useNavigate();
+  const id = orderId || orderQ || o;
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(!!id);
+  const [loading, setLoading] = useState(!!id || !!paymentId);
+  const [verifying, setVerifying] = useState(!!paymentId);
+
+  // Verify MyFatoorah payment when we returned with a paymentId.
+  useEffect(() => {
+    if (!paymentId) return;
+    let alive = true;
+    setVerifying(true);
+    checkoutApi.verify(paymentId)
+      .then((res: any) => {
+        const data = res?.data ?? res ?? {};
+        if (!alive) return;
+        if (data.paid === false) {
+          navigate({
+            to: "/checkout/failed" as any,
+            search: { order: data.orderId || id } as any,
+            replace: true,
+          });
+        }
+      })
+      .catch(() => { /* fall through to order display */ })
+      .finally(() => { if (alive) setVerifying(false); });
+    return () => { alive = false; };
+  }, [paymentId, id, navigate]);
 
   useEffect(() => {
     if (!id) return;
