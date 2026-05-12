@@ -42,7 +42,7 @@ function AnalyticsPage() {
 
   const fmt = (n: any) => (typeof n === "number" ? n.toLocaleString(lang === "en" ? "en-US" : "ar-SA") : (n ?? "—"));
   const sources = (data?.sources ?? []).map((s: any) => ({ name: s.name, v: s.value ?? s.v ?? 0 }));
-  const weekly = (data?.weeklyTraffic ?? data?.visits ?? []).map((v: any) => ({ d: v.date ?? v.d, v: v.views ?? v.v ?? 0 }));
+  const weekly = (Array.isArray(data?.weeklyTraffic) ? data.weeklyTraffic : []).map((v: any) => ({ d: v.day ?? v.date ?? v.d, v: v.views ?? v.v ?? 0 }));
   const monthly = (data?.monthlyRevenue ?? []).map((m: any) => ({ m: m.month ?? m.m, v: m.revenue ?? m.v ?? 0 }));
   const topPages = data?.topPages ?? [];
   const topServices = data?.topServices ?? [];
@@ -132,7 +132,7 @@ function AnalyticsPage() {
               {topServices.map((s: any, i: number) => (
                 <li key={i} className="flex justify-between text-xs border-b border-border pb-2">
                   <span className="font-medium truncate">{s.title ?? s.name}</span>
-                  <span className="font-bold">{fmt(s.orders ?? s.count ?? 0)}</span>
+                  <span className="font-bold">{fmt(s.sold ?? s.orders ?? s.count ?? 0)}</span>
                 </li>
               ))}
             </ul>
