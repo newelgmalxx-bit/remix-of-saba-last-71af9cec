@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { services as servicesApi } from "@/lib/api";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
   MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
