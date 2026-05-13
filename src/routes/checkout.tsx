@@ -199,10 +199,26 @@ function CheckoutPage() {
         // so they always see their order details after checkout.
         const localOrderNumber = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
         try {
-          localStorage.setItem(
-            "saba_last_order",
-            JSON.stringify({ orderId: null, number: localOrderNumber, total, payment, items, info }),
-          );
+          useCheckoutStore.getState().setLastOrder({
+            orderId: null,
+            orderNumber: localOrderNumber,
+            total,
+            payment,
+            items: items.map((it) => ({
+              serviceSlug: it.serviceSlug,
+              serviceTitle: it.serviceTitle,
+              planId: it.planId,
+              planName: it.planName,
+              price: it.price,
+              qty: it.qty,
+            })),
+            info: {
+              name: info.name,
+              email: info.email,
+              phone: info.phone,
+              notes: info.notes || undefined,
+            },
+          });
         } catch {}
         await clear();
         toast.success(lang === "ar" ? "تم استلام طلبك" : "Order received");
