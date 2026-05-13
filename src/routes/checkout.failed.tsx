@@ -27,7 +27,7 @@ function CheckoutFailedPage() {
     if (!id) return;
     setRetrying(true);
     try {
-      const res: any = await account.payOrder(id, { paymentMethod: "myfatoorah" });
+      const res: any = await account.payOrder(id, { paymentMethod: "all" });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
