@@ -219,6 +219,7 @@ function UsersPage() {
                     </td>
                     <td className="px-3 py-3 text-muted-foreground">{u.email}</td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{u.phone}</td>
+                    <td className="px-3 py-3 text-muted-foreground">{(u as any).city || "—"}</td>
                     <td className="px-3 py-3"><Pill tone={r.t}>{r.l}</Pill></td>
                     <td className="px-3 py-3">
                       <button onClick={() => toggle(u)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.active ? "bg-emerald-500" : "bg-muted"}`}>
