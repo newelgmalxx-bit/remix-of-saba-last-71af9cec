@@ -73,9 +73,8 @@ async function request<T = any>(
   try { json = await res.json(); } catch { /* ignore */ }
 
   if (!res.ok || (json && json.success === false)) {
-    if (res.status === 401) {
-      removeToken();
-    }
+    // Note: do NOT auto-remove the token on 401 here — the auth layer
+    // tries /auth/refresh once before deciding the session is dead.
     throw new ApiError(res.status, json?.message || `Request failed (${res.status})`, json?.errors);
   }
 

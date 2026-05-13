@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 
 function LoginPage() {
-  const [tab, setTab] = useState<"email" | "phone">("email");
+  const [tab, setTab] = useState<"email" | "phone" | "otp">("email");
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
   const { t, dir, lang, toggle } = useLang();
@@ -32,6 +32,52 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  // Email OTP flow state
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpInfo, setOtpInfo] = useState<string | null>(null);
+
+  async function requestOtp() {
+    setError(null);
+    setOtpInfo(null);
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(otpEmail.trim())) {
+      setError(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await api.auth.requestEmailOtp({ email: otpEmail.trim() });
+      setOtpSent(true);
+      setOtpInfo(res?.message || (lang === "ar" ? "إذا كان البريد مسجلًا، ستصلك رسالة برمز الدخول" : "If your email is registered, an OTP has been sent"));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : (lang === "ar" ? "تعذر إرسال الرمز" : "Failed to send code"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function verifyOtp() {
+    setError(null);
+    if (!/^\d{4,8}$/.test(otpCode.trim())) {
+      setError(lang === "ar" ? "أدخل الرمز المكوّن من 6 أرقام" : "Enter the 6-digit code");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { user, token } = await api.auth.verifyEmailOtp({ email: otpEmail.trim(), otp: otpCode.trim() });
+      setToken(token);
+      await refresh();
+      toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
+      const isAdminUser = ["admin", "owner", "manager", "support"].includes(user.role);
+      navigate({ to: (redirectTo && !isAdminUser ? redirectTo : (isAdminUser ? "/admin" : "/account")) as any });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : (lang === "ar" ? "رمز غير صحيح" : "Invalid code"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,10 +144,10 @@ function LoginPage() {
             </div>
 
             {/* Tabs */}
-            <div className="mt-7 grid grid-cols-2 gap-2 rounded-2xl bg-secondary/40 p-1.5">
+            <div className="mt-7 grid grid-cols-3 gap-2 rounded-2xl bg-secondary/40 p-1.5">
               <button
                 onClick={() => setTab("email")}
-                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
                   tab === "email" ? "bg-white text-primary shadow-sm ring-1 ring-primary/30" : "text-muted-foreground"
                 }`}
               >
@@ -110,92 +156,166 @@ function LoginPage() {
               </button>
               <button
                 onClick={() => setTab("phone")}
-                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
                   tab === "phone" ? "bg-white text-primary shadow-sm ring-1 ring-primary/30" : "text-muted-foreground"
                 }`}
               >
                 <Phone className="h-4 w-4" />
                 {t("auth.tab.phone")}
               </button>
+              <button
+                onClick={() => { setTab("otp"); setOtpSent(false); setOtpCode(""); setOtpInfo(null); setError(null); }}
+                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                  tab === "otp" ? "bg-white text-primary shadow-sm ring-1 ring-primary/30" : "text-muted-foreground"
+                }`}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {lang === "ar" ? "رمز عبر البريد" : "Email OTP"}
+              </button>
             </div>
 
-            <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-              {error && (
-                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div className="flex-1">
-                    <div className="font-bold">{error}</div>
-                    {Object.keys(fieldErrors).length > 0 && (
-                      <ul className="mt-1 list-disc ps-5">
-                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
-                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
-                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
-                          )),
-                        )}
-                      </ul>
-                    )}
+            {tab !== "otp" ? (
+              <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+                {error && (
+                  <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-bold">{error}</div>
+                      {Object.keys(fieldErrors).length > 0 && (
+                        <ul className="mt-1 list-disc ps-5">
+                          {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                            (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                              <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                            )),
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <Field
+                  label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
+                  type={tab === "email" ? "email" : "tel"}
+                  placeholder={tab === "email" ? t("auth.emailPh") : t("auth.phonePh")}
+                  icon={tab === "email" ? <Mail className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+                  dirCtx={dir}
+                  value={identifier}
+                  onChange={setIdentifier}
+                />
+
+                <div className="text-start">
+                  <label className="mb-1.5 block text-xs font-bold text-foreground">{t("auth.password")}</label>
+                  <div className="relative">
+                    <span className={`pointer-events-none absolute inset-y-0 ${dir === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>
+                      <Lock className="h-4 w-4" />
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd((v) => !v)}
+                      className={`absolute inset-y-0 ${dir === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground transition hover:text-primary`}
+                      aria-label={t("auth.show")}
+                    >
+                      {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                    <input
+                      type={showPwd ? "text" : "password"}
+                      placeholder={t("auth.passwordPh")}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
                   </div>
                 </div>
-              )}
-              <Field
-                label={tab === "email" ? t("auth.tab.email") : t("auth.tab.phone")}
-                type={tab === "email" ? "email" : "tel"}
-                placeholder={tab === "email" ? t("auth.emailPh") : t("auth.phonePh")}
-                icon={tab === "email" ? <Mail className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-                dirCtx={dir}
-                value={identifier}
-                onChange={setIdentifier}
-              />
 
-              <div className="text-start">
-                <label className="mb-1.5 block text-xs font-bold text-foreground">{t("auth.password")}</label>
-                <div className="relative">
-                  <span className={`pointer-events-none absolute inset-y-0 ${dir === "rtl" ? "left-3" : "right-3"} flex items-center text-muted-foreground`}>
-                    <Lock className="h-4 w-4" />
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowPwd((v) => !v)}
-                    className={`absolute inset-y-0 ${dir === "rtl" ? "right-3" : "left-3"} flex items-center text-muted-foreground transition hover:text-primary`}
-                    aria-label={t("auth.show")}
-                  >
-                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                  <input
-                    type={showPwd ? "text" : "password"}
-                    placeholder={t("auth.passwordPh")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-10 py-3 text-start text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                <div className="flex items-center justify-between">
+                  <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">{t("auth.forgot")}</Link>
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
+                    <span>{t("auth.remember")}</span>
+                    <button
+                      type="button"
+                      onClick={() => setRemember(!remember)}
+                      className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                        remember ? "border-primary bg-primary text-white" : "border-border bg-white"
+                      }`}
+                    >
+                      {remember && <Check className="h-3 w-3" />}
+                    </button>
+                  </label>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">{t("auth.forgot")}</Link>
-                <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
-                  <span>{t("auth.remember")}</span>
-                  <button
-                    type="button"
-                    onClick={() => setRemember(!remember)}
-                    className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                      remember ? "border-primary bg-primary text-white" : "border-border bg-white"
-                    }`}
-                  >
-                    {remember && <Check className="h-3 w-3" />}
-                  </button>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70"
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70"
+                >
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
+                </button>
+              </form>
+            ) : (
+              <form
+                className="mt-6 space-y-5"
+                onSubmit={(e) => { e.preventDefault(); otpSent ? verifyOtp() : requestOtp(); }}
               >
-                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {submitting ? (lang === "ar" ? "جاري الدخول..." : "Signing in...") : t("auth.signIn")}
-              </button>
-            </form>
+                {error && (
+                  <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="font-bold">{error}</div>
+                  </div>
+                )}
+                {otpInfo && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 text-start">
+                    {otpInfo}
+                  </div>
+                )}
+                <Field
+                  label={t("auth.tab.email")}
+                  type="email"
+                  placeholder={t("auth.emailPh")}
+                  icon={<Mail className="h-4 w-4" />}
+                  dirCtx={dir}
+                  value={otpEmail}
+                  onChange={(v) => { setOtpEmail(v); if (otpSent) { setOtpSent(false); setOtpCode(""); } }}
+                />
+                {otpSent && (
+                  <div className="text-start">
+                    <label className="mb-1.5 block text-xs font-bold text-foreground">
+                      {lang === "ar" ? "رمز التحقق" : "Verification code"}
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={8}
+                      placeholder="••••••"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                      className="w-full rounded-xl border border-border bg-white px-4 py-3 text-center text-lg tracking-[0.5em] placeholder:text-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={requestOtp}
+                      disabled={submitting}
+                      className="mt-2 text-xs font-bold text-primary hover:underline disabled:opacity-60"
+                    >
+                      {lang === "ar" ? "إعادة إرسال الرمز" : "Resend code"}
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70"
+                >
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {submitting
+                    ? (lang === "ar" ? "جارٍ..." : "Working...")
+                    : otpSent
+                      ? (lang === "ar" ? "تأكيد الرمز" : "Verify code")
+                      : (lang === "ar" ? "إرسال الرمز" : "Send code")}
+                </button>
+              </form>
+            )}
 
             <div className="relative z-0 my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />

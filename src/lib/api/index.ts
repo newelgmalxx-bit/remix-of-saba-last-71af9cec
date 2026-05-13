@@ -38,10 +38,16 @@ export const auth = {
   },
   oauthGoogle: async (idToken: string) => {
     const res = await authNew.google(idToken);
-    return res.data;
+    return res.data; // { user, token, isNew? }
   },
   // Convenience kept for new callers.
   google: authNew.google,
+  requestEmailOtp: authNew.requestEmailOtp,
+  verifyEmailOtp: async (body: { email: string; otp: string }) => {
+    const res = await authNew.verifyEmailOtp(body);
+    return res.data; // { user, token }
+  },
+  refresh: authNew.refresh,
 };
 
 // ============================================================

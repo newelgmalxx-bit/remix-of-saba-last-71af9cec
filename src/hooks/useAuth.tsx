@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import api, { clearToken, getToken, setToken, ApiError } from "@/lib/api";
+import { auth as authApi } from "@/lib/api/auth";
 import type { User } from "@/lib/api";
 
 type AuthCtx = {
@@ -8,7 +9,7 @@ type AuthCtx = {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (creds: { phone?: string; email?: string; password: string }) => Promise<User>;
-  signup: (body: { name: string; email: string; phone: string; password: string }) => Promise<User>;
+  signup: (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -25,14 +26,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    try {
+    const tryMe = async () => {
       const { user } = await api.auth.me();
       setUser(user);
+    };
+    try {
+      await tryMe();
     } catch (e) {
-      // Only treat 401 as a real auth failure. 5xx / network = keep existing session.
       if (e instanceof ApiError && e.status === 401) {
-        clearToken();
-        setUser(null);
+        // Try one refresh round-trip before giving up.
+        try {
+          const r = await authApi.refresh();
+          if (r.data?.token) setToken(r.data.token);
+          await tryMe();
+        } catch (e2) {
+          if (e2 instanceof ApiError && e2.status === 401) {
+            clearToken();
+            setUser(null);
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn("auth refresh failed (non-401), keeping current session", e2);
+          }
+        }
       } else {
         // eslint-disable-next-line no-console
         console.warn("auth.me failed (non-401), keeping current session", e);
@@ -60,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user;
   }, []);
 
-  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string }) => {
+  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => {
     const { user, token } = await api.auth.signup(body);
     setToken(token);
     setUser(user);

@@ -1,31 +1,60 @@
 import { request, setToken, setUser, removeToken, getToken } from './client';
-import type { User, ApiResponse } from './types';
+import type {
+  User, ApiResponse, AuthResponse,
+  LoginPayload, RegisterPayload,
+  RequestOtpPayload, VerifyOtpPayload,
+} from './types';
+
+/**
+ * Backend may return either:
+ *   { success, message, data: { user, token, ... } }
+ * or a flattened:
+ *   { success, message, token, user, ... }
+ *
+ * Normalize both into ApiResponse<AuthResponse>.
+ */
+function normalizeAuth(res: any): ApiResponse<AuthResponse> {
+  const data = res?.data ?? res ?? {};
+  const user = data.user ?? res?.user;
+  const token = data.token ?? res?.token;
+  const isNew = data.isNew ?? res?.isNew;
+  return {
+    success: res?.success ?? true,
+    message: res?.message,
+    data: { user, token, isNew },
+  };
+}
+
+async function postAuth(path: string, body: any): Promise<ApiResponse<AuthResponse>> {
+  const raw = await request<any>(path, { method: 'POST', body: JSON.stringify(body) });
+  const res = normalizeAuth(raw);
+  if (res.data?.token) setToken(res.data.token);
+  if (res.data?.user) setUser(res.data.user);
+  return res;
+}
 
 export const auth = {
-  signup: async (body: { name: string; email: string; phone?: string; password: string }) => {
-    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/register', {
+  signup: (body: RegisterPayload) => postAuth('/auth/register', body),
+
+  login: (body: LoginPayload | { email?: string; phone?: string; emailOrPhone?: string; password: string }) => {
+    const emailOrPhone =
+      (body as any).emailOrPhone ?? (body as any).email ?? (body as any).phone ?? '';
+    return postAuth('/auth/login', { emailOrPhone, password: body.password });
+  },
+
+  /** Step 1: request a 6-digit OTP via email. */
+  requestEmailOtp: (body: RequestOtpPayload) =>
+    request<ApiResponse<{ ok?: boolean }>>('/auth/login/email/request-otp', {
       method: 'POST', body: JSON.stringify(body),
-    });
-    if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
-    return res;
-  },
+    }),
 
-  login: async (body: { email?: string; phone?: string; emailOrPhone?: string; password: string }) => {
-    const emailOrPhone = body.emailOrPhone ?? body.email ?? body.phone ?? '';
-    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/login', {
-      method: 'POST', body: JSON.stringify({ emailOrPhone, password: body.password }),
-    });
-    if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
-    return res;
-  },
+  /** Step 2: verify OTP and receive token + user. */
+  verifyEmailOtp: (body: VerifyOtpPayload) =>
+    postAuth('/auth/login/email/verify-otp', body),
 
-  google: async (idToken: string) => {
-    const res = await request<ApiResponse<{ user: User; token: string }>>('/auth/google', {
-      method: 'POST', body: JSON.stringify({ idToken }),
-    });
-    if (res.data?.token) { setToken(res.data.token); setUser(res.data.user); }
-    return res;
-  },
+  /** Google OAuth — accepts either idToken or credential field name. */
+  google: (idToken: string) =>
+    postAuth('/auth/oauth/google', { idToken, credential: idToken }),
 
   logout: async () => {
     if (getToken()) {
@@ -34,7 +63,21 @@ export const auth = {
     removeToken();
   },
 
-  me: () => request<ApiResponse<{ user: User }>>('/auth/me'),
+  me: async () => {
+    const raw = await request<any>('/auth/me');
+    const data = raw?.data ?? raw ?? {};
+    const user: User = data.user ?? raw?.user;
+    return { success: raw?.success ?? true, message: raw?.message, data: { user } } as ApiResponse<{ user: User }>;
+  },
+
+  /** Try to mint a new token from the existing one. */
+  refresh: async () => {
+    const raw = await request<any>('/auth/refresh', { method: 'POST' });
+    const res = normalizeAuth(raw);
+    if (res.data?.token) setToken(res.data.token);
+    if (res.data?.user) setUser(res.data.user);
+    return res;
+  },
 
   forgot: (email: string) =>
     request<ApiResponse<{ ok: boolean }>>('/auth/forgot-password', {
@@ -42,5 +85,7 @@ export const auth = {
     }),
 
   reset: (token: string, password: string) =>
-    request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password }) }),
+    request('/auth/reset-password', {
+      method: 'POST', body: JSON.stringify({ token, password }),
+    }),
 };
