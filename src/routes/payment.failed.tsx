@@ -1,16 +1,44 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { XCircle, RotateCcw, Home } from "lucide-react";
+import { XCircle, RotateCcw, Home, Wallet, Loader2, Package } from "lucide-react";
+import { z } from "zod";
+import { useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useLang } from "@/i18n/LanguageProvider";
+import { account } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/payment/failed")({
+  validateSearch: z.object({
+    order: z.string().optional(),
+  }),
   head: () => ({ meta: [{ title: "فشل الدفع | سابا ديزاين" }] }),
   component: PaymentFailedPage,
 });
 
 function PaymentFailedPage() {
   const { lang } = useLang();
+  const { order: orderId } = Route.useSearch();
+  const [retrying, setRetrying] = useState(false);
+
+  const retryPayment = async () => {
+    if (!orderId) return;
+    setRetrying(true);
+    try {
+      const res: any = await account.payOrder(orderId, { paymentMethod: "all" });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      toast.error(lang === "ar" ? "تعذر بدء الدفع" : "Could not start payment");
+    } catch {
+      toast.error(lang === "ar" ? "تعذر بدء الدفع" : "Could not start payment");
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
       <SiteHeader />
@@ -26,14 +54,43 @@ function PaymentFailedPage() {
             ? "حدث خطأ أثناء معالجة الدفع. يمكنك المحاولة مرة أخرى أو اختيار وسيلة دفع مختلفة."
             : "Something went wrong while processing your payment. Please try again or choose a different method."}
         </p>
+        {orderId && (
+          <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
+            <span className="text-sm text-muted-foreground">
+              {lang === "ar" ? "رقم الطلب" : "Order"}
+            </span>
+            <span className="text-base font-bold text-primary" dir="ltr">{orderId}</span>
+          </div>
+        )}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            to={"/cart" as any}
-            className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
-          >
-            <RotateCcw className="h-4 w-4" />
-            {lang === "ar" ? "حاول مرة أخرى" : "Try Again"}
-          </Link>
+          {orderId ? (
+            <button
+              onClick={retryPayment}
+              disabled={retrying}
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+            >
+              {retrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+              {lang === "ar" ? "أعد محاولة الدفع" : "Retry payment"}
+            </button>
+          ) : (
+            <Link
+              to={"/cart" as any}
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
+            >
+              <RotateCcw className="h-4 w-4" />
+              {lang === "ar" ? "حاول مرة أخرى" : "Try Again"}
+            </Link>
+          )}
+          {orderId && (
+            <Link
+              to={"/account/orders/$orderId" as any}
+              params={{ orderId } as any}
+              className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
+            >
+              <Package className="h-4 w-4" />
+              {lang === "ar" ? "تفاصيل الطلب" : "Order details"}
+            </Link>
+          )}
           <Link
             to={"/" as any}
             className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
