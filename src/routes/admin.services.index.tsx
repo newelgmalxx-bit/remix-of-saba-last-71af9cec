@@ -77,9 +77,9 @@ function ServicesPage() {
   useEffect(() => { fetchList(); }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    titleAr: "", titleEn: "", sku: "", category: "", price: "", originalPrice: "", slug: "",
-    subtitle: "", breadcrumb: "", bannerImage: "",
-    overviewDescription: "",
+    titleAr: "", titleEn: "", sku: "", category: "", categoryEn: "", price: "", originalPrice: "", slug: "",
+    subtitle: "", subtitleEn: "", breadcrumb: "", breadcrumbEn: "", bannerImage: "",
+    overviewDescription: "", overviewDescriptionEn: "",
     seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
     heroHighlights: ["", "", ""],
     overview: [
@@ -135,15 +135,20 @@ function ServicesPage() {
         titleAr: form.titleAr,
         titleEn: form.titleEn || form.titleAr,
         subtitleAr: form.subtitle || "",
-        subtitleEn: "",
+        subtitleEn: form.subtitleEn || "",
         category: form.category || "عام",
+        categoryEn: form.categoryEn || "",
         price: Number(form.price) || 0,
         originalPrice: form.originalPrice ? Number(form.originalPrice) : null,
         status: "draft",
         cover: form.bannerImage || null,
         bannerImage: form.bannerImage || null,
         overviewDescriptionAr: form.overviewDescription || "",
+        overviewDescriptionEn: form.overviewDescriptionEn || "",
+        overview_description_ar: form.overviewDescription || "",
+        overview_description_en: form.overviewDescriptionEn || "",
         breadcrumbAr: form.breadcrumb || form.titleAr,
+        breadcrumbEn: form.breadcrumbEn || form.titleEn || "",
       });
     } catch (e: any) {
       toast.error(e?.message || L("فشل إضافة الخدمة", "Failed to add service"));
@@ -314,8 +319,11 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">SKU
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">{L("التصنيف", "Category")}
+              <label className="text-xs font-bold space-y-1.5">{L("التصنيف (عربي)", "Category (Arabic)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5">{L("التصنيف (English)", "Category (English)")}
+                <input dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.categoryEn} onChange={(e) => setForm({ ...form, categoryEn: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5">{L("السعر (ر.س)", "Price (SAR)")}
                 <input type="number" dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
@@ -326,14 +334,23 @@ function ServicesPage() {
               <label className="text-xs font-bold space-y-1.5">{L("المعرّف (slug — اختياري)", "Identifier (slug — optional)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="auto" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5">{L("المسار (Breadcrumb)", "Path (Breadcrumb)")}
+              <label className="text-xs font-bold space-y-1.5">{L("المسار Breadcrumb (عربي)", "Breadcrumb (Arabic)")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.breadcrumb} onChange={(e) => setForm({ ...form, breadcrumb: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("الوصف المختصر", "Short Description")}
+              <label className="text-xs font-bold space-y-1.5">{L("المسار Breadcrumb (English)", "Breadcrumb (English)")}
+                <input dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.breadcrumbEn} onChange={(e) => setForm({ ...form, breadcrumbEn: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("الوصف المختصر (عربي)", "Short Description (Arabic)")}
                 <textarea rows={2} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("نظرة عامة عن الخدمة (وصف تفصيلي)", "Service Overview (detailed description)")}
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("الوصف المختصر (English)", "Short Description (English)")}
+                <textarea rows={2} dir="ltr" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.subtitleEn} onChange={(e) => setForm({ ...form, subtitleEn: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("نظرة عامة عن الخدمة (عربي)", "Service Overview (Arabic)")}
                 <textarea rows={4} placeholder={L("وصف تفصيلي يظهر في قسم نظرة عامة بصفحة الخدمة", "Detailed description shown in the overview section on the service page")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescription} onChange={(e) => setForm({ ...form, overviewDescription: e.target.value })} />
+              </label>
+              <label className="text-xs font-bold space-y-1.5 col-span-2">{L("نظرة عامة عن الخدمة (English)", "Service Overview (English)")}
+                <textarea rows={4} dir="ltr" placeholder="Detailed description shown in the overview section on the service page" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.overviewDescriptionEn} onChange={(e) => setForm({ ...form, overviewDescriptionEn: e.target.value })} />
               </label>
               <div className="text-xs font-bold space-y-1.5 col-span-2">
                 <div>{L("صورة البنر", "Banner Image")}</div>
