@@ -53,7 +53,7 @@ export function ServicesGrid() {
     <section className="bg-background py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">{t("services.kicker")}</span>
+          <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-primary">{t("services.kicker")}</span>
           <h2 className="mt-3 text-3xl font-extrabold text-foreground sm:text-4xl">
             {t("services.title")}
           </h2>
