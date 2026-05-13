@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
-import { Search, Filter, Package, Download, Eye, Loader2, CreditCard, CheckCircle2 } from "lucide-react";
+import { Search, Filter, Package, Download, Eye, Loader2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { statusLabels, formatCurrency, paymentName, type OrderStatus, type Order } from "@/data/account";
+import { statusLabels, formatCurrency, paymentName, paymentMethods, type OrderStatus, type Order, type PaymentMethod } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/account/orders/")({
   head: () => ({ meta: [{ title: "طلباتي | سابا ديزاين" }] }),
@@ -32,6 +33,7 @@ function OrdersList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [payOrderId, setPayOrderId] = useState<string | null>(null);
 
   const reload = () => {
     setLoading(true);
@@ -41,11 +43,11 @@ function OrdersList() {
       .finally(() => setLoading(false));
   };
 
-  const handlePayMyfatoorah = async (o: Order) => {
+  const handlePay = async (orderId: string, method: PaymentMethod) => {
     if (actionId) return;
-    setActionId(o.id);
+    setActionId(orderId);
     try {
-      const res: any = await account.payOrder(o.id, { paymentMethod: "myfatoorah" });
+      const res: any = await account.payOrder(orderId, { paymentMethod: method });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
       toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
@@ -53,22 +55,7 @@ function OrdersList() {
       toast.error(e?.message || (lang === "ar" ? "تعذّر بدء الدفع" : "Could not start payment"));
     } finally {
       setActionId(null);
-    }
-  };
-
-  const handleConfirmCod = async (o: Order) => {
-    if (actionId) return;
-    const ok = window.confirm(lang === "ar" ? "هل تم استلام المبلغ نقدًا؟" : "Confirm cash payment received?");
-    if (!ok) return;
-    setActionId(o.id);
-    try {
-      await account.payOrder(o.id, { paymentMethod: "cod" });
-      toast.success(lang === "ar" ? "تم تأكيد الدفع" : "Payment confirmed");
-      reload();
-    } catch (e: any) {
-      toast.error(e?.message || (lang === "ar" ? "تعذّر تأكيد الدفع" : "Could not confirm payment"));
-    } finally {
-      setActionId(null);
+      setPayOrderId(null);
     }
   };
 
@@ -165,14 +152,14 @@ function OrdersList() {
                     <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total, lang)}</div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
-                    {!o.paid && o.payment !== "cod" && (
+                    {!o.paid && (
                       <button
-                        onClick={() => handlePayMyfatoorah(o)}
+                        onClick={() => setPayOrderId(o.id)}
                         disabled={actionId === o.id}
                         className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                       >
                         {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                        {lang === "ar" ? "ادفع عبر ماي فاتورة" : "Pay via MyFatoorah"}
+                        {lang === "ar" ? "ادفع الآن" : "Pay now"}
                       </button>
                     )}
                     {o.paid && (
@@ -199,6 +186,40 @@ function OrdersList() {
           );
         })}
       </div>
+
+      <Dialog open={!!payOrderId} onOpenChange={(o) => !o && setPayOrderId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "اختر طريقة الدفع" : "Choose payment method"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "حدّد بوابة الدفع لإكمال طلبك." : "Pick a payment gateway to complete your order."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2">
+            {paymentMethods.filter((m) => m.id !== "cod").map((m) => {
+              const Icon = m.icon;
+              const isLoading = actionId === payOrderId;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => payOrderId && handlePay(payOrderId, m.id)}
+                  disabled={isLoading}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-background p-3 text-start transition hover:border-primary hover:bg-primary/5 disabled:opacity-60"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-6 object-contain" /> : <Icon className="h-5 w-5" />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="block text-sm font-bold text-foreground">{paymentName(m.id, lang)}</span>
+                    <span className="block text-xs text-muted-foreground">{m.desc}</span>
+                  </span>
+                  {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AccountLayout>
   );
 }
