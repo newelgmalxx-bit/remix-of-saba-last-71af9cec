@@ -21,7 +21,14 @@ export type User = {
 };
 
 export type AuthUser = User;
-export type AuthResponse = { user: User; token: string; isNew?: boolean };
+export type AuthResponse = {
+  user?: User;
+  token?: string;
+  isNew?: boolean;
+  requiresOtp?: boolean;
+  email?: string;
+  message?: string;
+};
 export type LoginPayload = { emailOrPhone: string; password: string };
 export type RegisterPayload = {
   name: string; email: string; phone?: string;
