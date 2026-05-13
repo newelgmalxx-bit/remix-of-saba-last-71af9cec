@@ -186,6 +186,40 @@ function OrdersList() {
           );
         })}
       </div>
+
+      <Dialog open={!!payOrderId} onOpenChange={(o) => !o && setPayOrderId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "اختر طريقة الدفع" : "Choose payment method"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "حدّد بوابة الدفع لإكمال طلبك." : "Pick a payment gateway to complete your order."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2">
+            {paymentMethods.filter((m) => m.id !== "cod").map((m) => {
+              const Icon = m.icon;
+              const isLoading = actionId === payOrderId;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => payOrderId && handlePay(payOrderId, m.id)}
+                  disabled={isLoading}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-background p-3 text-start transition hover:border-primary hover:bg-primary/5 disabled:opacity-60"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-6 object-contain" /> : <Icon className="h-5 w-5" />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="block text-sm font-bold text-foreground">{paymentName(m.id, lang)}</span>
+                    <span className="block text-xs text-muted-foreground">{m.desc}</span>
+                  </span>
+                  {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AccountLayout>
   );
 }
