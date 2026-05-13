@@ -100,11 +100,20 @@ function LoginPage() {
     }
     setSubmitting(true);
     try {
-      const user = await login(
+      const result = await login(
         tab === "email" ? { email: identifier, password } : { phone: identifier, password },
       );
+      if (result.requiresOtp) {
+        const emailForOtp = result.email || (tab === "email" ? identifier.trim() : "");
+        setOtpEmail(emailForOtp);
+        setOtpSent(true);
+        setOtpCode("");
+        setOtpInfo(result.message || (lang === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code has been sent to your email"));
+        setTab("otp");
+        return;
+      }
       toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
-      const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
+      const isAdmin = ["admin", "owner", "manager", "support"].includes(result.user.role);
       navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
     } catch (err) {
       const fallback = lang === "ar" ? "فشل تسجيل الدخول. تأكد من البريد وكلمة المرور." : "Login failed. Check your email and password.";
