@@ -5,12 +5,12 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
-import { account, checkout as checkoutApi } from "@/lib/api";
+import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
-import { useNavigate } from "@tanstack/react-router";
+import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -19,122 +19,79 @@ export const Route = createFileRoute("/checkout/success")({
     orderId: z.string().optional(),
     paymentId: z.string().optional(),
     payUrl: z.string().optional(),
+    paid: z.string().optional(),
+    cod: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "تم استلام طلبك | سابا ديزاين" }] }),
   component: SuccessPage,
 });
 
+function buildOrderFromStore(stored: any, fallbackId: string): Order {
+  const items = (stored.items || []).map((it: any, i: number) => ({
+    id: it.id || `i${i}`,
+    serviceSlug: it.serviceSlug || "",
+    serviceTitle: it.serviceTitle || "",
+    planName: it.planName || null,
+    price: Number(it.price) || 0,
+    qty: Number(it.qty) || 1,
+  }));
+  const subtotal = items.reduce((s: number, it: any) => s + it.price * it.qty, 0);
+  const vat = Math.round(subtotal * 0.15 * 100) / 100;
+  return {
+    id: stored.orderId || fallbackId || "",
+    number: stored.orderNumber || stored.number || "",
+    createdAt: new Date().toISOString().slice(0, 10),
+    status: "pending",
+    payment: stored.payment || "cod",
+    paid: false,
+    items,
+    subtotal,
+    vat,
+    total: stored.total ?? subtotal + vat,
+    couponDiscount: 0,
+    timeline: [],
+  } as Order;
+}
+
 function SuccessPage() {
-  const { o, order: orderQ, orderId, paymentId, payUrl } = Route.useSearch();
+  const { o, order: orderQ, orderId, payUrl, paid, cod } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const id = orderId || orderQ || o;
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(!!id || !!paymentId);
-  const [verifying, setVerifying] = useState(!!paymentId);
+  const [loading, setLoading] = useState(!!id);
 
-  // Verify MyFatoorah payment when we returned with a paymentId, then
-  // forward to the order summary page (paid or failed).
-  useEffect(() => {
-    if (!paymentId) {
-      // No paymentId — if we have an order id, just forward to the summary.
-      if (id) {
-        navigate({
-          to: "/order-summary/$orderId" as any,
-          params: { orderId: id } as any,
-          search: { o: orderQ || o } as any,
-          replace: true,
-        });
-      }
-      return;
-    }
-    let alive = true;
-    setVerifying(true);
-    checkoutApi.verify(paymentId)
-      .then((res: any) => {
-        const data = res?.data ?? res ?? {};
-        if (!alive) return;
-        const targetId = data.orderId || id;
-        if (data.paid === false) {
-          navigate({
-            to: "/checkout/failed" as any,
-            search: { order: targetId } as any,
-            replace: true,
-          });
-          return;
-        }
-        if (targetId) {
-          navigate({
-            to: "/order-summary/$orderId" as any,
-            params: { orderId: targetId } as any,
-            search: { o: data.orderNumber || orderQ || o, paid: 1 } as any,
-            replace: true,
-          });
-        }
-      })
-      .catch(() => { /* fall through to order display */ })
-      .finally(() => { if (alive) setVerifying(false); });
-    return () => { alive = false; };
-  }, [paymentId, id, orderQ, o, navigate]);
+  const isPaidFromUrl = paid === "1" || cod === "true";
 
   useEffect(() => {
     if (!id) return;
     let alive = true;
     setLoading(true);
 
-    const useCacheFallback = () => {
-      try {
-        const cached = JSON.parse(localStorage.getItem("saba_last_order") || "null");
-        if (!cached) return;
-        const items = (cached.items || []).map((it: any, i: number) => ({
-          id: it.id || `i${i}`,
-          serviceSlug: it.serviceSlug,
-          serviceTitle: it.serviceTitle,
-          planName: it.planName,
-          price: Number(it.price) || 0,
-          qty: Number(it.qty) || 1,
-        }));
-        const subtotal = items.reduce((s: number, it: any) => s + it.price * it.qty, 0);
-        const vat = Math.round(subtotal * 0.15);
-        const fallback: Order = {
-          id: id || cached.number,
-          number: cached.number || (o ?? ""),
-          createdAt: new Date().toISOString().slice(0, 10),
-          status: "pending",
-          payment: cached.payment || "cod",
-          paid: false,
-          items,
-          subtotal,
-          vat,
-          total: cached.total ?? subtotal + vat,
-          timeline: [],
-        };
-        if (alive) setOrder((prev) => prev ?? fallback);
-      } catch {}
-    };
-
     account.orderDetail(id)
       .then((res: any) => {
         const raw = res?.data?.order ?? res?.order ?? res;
         if (!alive || !raw) return;
         try {
-          setOrder(normalizeOrder(raw));
+          const normalized = normalizeOrder(raw);
+          setOrder(isPaidFromUrl ? { ...normalized, paid: true } : normalized);
         } catch {
-          useCacheFallback();
+          const stored = useCheckoutStore.getState().lastOrder;
+          if (stored) setOrder(buildOrderFromStore(stored, id));
         }
       })
       .catch(() => {
-        useCacheFallback();
+        const stored = useCheckoutStore.getState().lastOrder;
+        if (alive && stored) {
+          const built = buildOrderFromStore(stored, id);
+          setOrder(isPaidFromUrl ? { ...built, paid: true } : built);
+        }
       })
       .finally(() => {
-        if (!alive) return;
-        // Final safety net: if nothing arrived, try the cache anyway.
-        useCacheFallback();
-        setLoading(false);
+        if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, [id, o]);
+  }, [id, isPaidFromUrl]);
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -155,6 +112,11 @@ function SuccessPage() {
               <span className="text-base font-bold text-primary" dir="ltr">{order?.number || o}</span>
             </div>
           )}
+          {order?.paid && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
+              {lang === "ar" ? "تم الدفع" : "Paid"}
+            </div>
+          )}
           {order && !order.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
               {lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"}
@@ -170,7 +132,6 @@ function SuccessPage() {
 
         {order && (
           <div className="mt-8 space-y-5">
-            {/* Items */}
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
               <div className="space-y-3">
@@ -195,7 +156,6 @@ function SuccessPage() {
               </div>
             </section>
 
-            {/* Summary */}
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="text-base font-bold">{t("account.order.summary")}</h3>
               <div className="mt-4 space-y-2 text-sm">
@@ -230,7 +190,6 @@ function SuccessPage() {
               </div>
             </section>
 
-            {/* Actions */}
             <div className="flex flex-wrap items-center justify-center gap-3">
               {!order.paid && payUrl && (
                 <a
@@ -245,7 +204,7 @@ function SuccessPage() {
                 <button
                   onClick={async () => {
                     try {
-                      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+                      const res: any = await account.payOrder(order.id, { paymentMethod: "all" });
                       const url = res?.data?.paymentUrl || res?.paymentUrl;
                       if (url) { window.location.href = url; return; }
                     } catch {}
