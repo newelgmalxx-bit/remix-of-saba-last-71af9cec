@@ -198,6 +198,7 @@ function UsersPage() {
                 <th className="px-3 py-3 font-medium">{L("المستخدم", "User")}</th>
                 <th className="px-3 py-3 font-medium">{L("البريد", "Email")}</th>
                 <th className="px-3 py-3 font-medium">{L("الجوال", "Phone")}</th>
+                <th className="px-3 py-3 font-medium">{L("المدينة", "City")}</th>
                 <th className="px-3 py-3 font-medium">{L("الدور", "Role")}</th>
                 <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium">{L("انضم", "Joined")}</th>
