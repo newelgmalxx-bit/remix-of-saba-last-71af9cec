@@ -6,11 +6,29 @@ export type Price = {
 };
 
 export type User = {
-  id: string; name: string; email: string;
-  phone: string | null; city: string | null;
-  avatar: string | null; role: string;
-  language: string; createdAt: string;
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  city: string | null;
+  avatar: string | null;
+  role: string; // "admin" | "client" | legacy roles
+  status?: "active" | "banned" | string;
+  language: string | null;
+  authProvider?: string;
+  emailVerified?: boolean;
+  createdAt: string | null;
 };
+
+export type AuthUser = User;
+export type AuthResponse = { user: User; token: string; isNew?: boolean };
+export type LoginPayload = { emailOrPhone: string; password: string };
+export type RegisterPayload = {
+  name: string; email: string; phone?: string;
+  password: string; city?: string; language?: string;
+};
+export type RequestOtpPayload = { email: string };
+export type VerifyOtpPayload = { email: string; otp: string };
 
 export type ServiceListItem = {
   id: string; slug: string; sku: string;
