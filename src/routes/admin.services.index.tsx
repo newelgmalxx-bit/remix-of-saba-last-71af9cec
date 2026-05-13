@@ -77,9 +77,9 @@ function ServicesPage() {
   useEffect(() => { fetchList(); }, []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    titleAr: "", titleEn: "", sku: "", category: "", price: "", originalPrice: "", slug: "",
-    subtitle: "", breadcrumb: "", bannerImage: "",
-    overviewDescription: "",
+    titleAr: "", titleEn: "", sku: "", category: "", categoryEn: "", price: "", originalPrice: "", slug: "",
+    subtitle: "", subtitleEn: "", breadcrumb: "", breadcrumbEn: "", bannerImage: "",
+    overviewDescription: "", overviewDescriptionEn: "",
     seoTitle: "", seoDescription: "", seoKeywords: "", seoOgImage: "",
     heroHighlights: ["", "", ""],
     overview: [
