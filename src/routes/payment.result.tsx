@@ -153,8 +153,16 @@ function PaymentResultPage() {
       const k = normalize(search.status);
       setKind(k);
       setOrderNumber(search.order);
-      // If we have an order reference, always jump to the summary page
-      // regardless of payment status (paid / pending / failed).
+      // Failed/error → go to the dedicated failed page (never bounce to /cart).
+      if (k === "failed" || k === "error") {
+        navigate({
+          to: "/checkout/failed" as any,
+          search: { order: search.order, message: search.message } as any,
+          replace: true,
+        });
+        return;
+      }
+      // Success/pending with order ref → jump to summary.
       if (search.order) {
         navigate({
           to: "/checkout/success" as any,
