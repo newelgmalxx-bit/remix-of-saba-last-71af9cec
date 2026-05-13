@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, ChevronLeft, Lock, ShieldCheck, FileText, Loader2, AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -15,8 +15,18 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [{ title: "إتمام الطلب | سابا ديزاين" }],
   }),
-  component: CheckoutPage,
+  component: CheckoutShell,
 });
+
+function CheckoutShell() {
+  const location = useLocation();
+
+  if (location.pathname !== "/checkout") {
+    return <Outlet />;
+  }
+
+  return <CheckoutPage />;
+}
 
 function CheckoutPage() {
   const navigate = useNavigate();
