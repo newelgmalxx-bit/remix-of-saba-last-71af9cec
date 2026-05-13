@@ -152,14 +152,14 @@ function OrdersList() {
                     <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total, lang)}</div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
-                    {!o.paid && o.payment !== "cod" && (
+                    {!o.paid && (
                       <button
-                        onClick={() => handlePayMyfatoorah(o)}
+                        onClick={() => setPayOrderId(o.id)}
                         disabled={actionId === o.id}
                         className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                       >
                         {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                        {lang === "ar" ? "ادفع عبر ماي فاتورة" : "Pay via MyFatoorah"}
+                        {lang === "ar" ? "ادفع الآن" : "Pay now"}
                       </button>
                     )}
                     {o.paid && (
