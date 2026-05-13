@@ -12,6 +12,8 @@ export const Route = createFileRoute("/checkout/failed")({
   validateSearch: z.object({
     order: z.string().optional(),
     orderId: z.string().optional(),
+    paymentId: z.string().optional(),
+    Id: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "فشل الدفع | سابا ديزاين" }] }),
   component: CheckoutFailedPage,
@@ -27,7 +29,7 @@ function CheckoutFailedPage() {
     if (!id) return;
     setRetrying(true);
     try {
-      const res: any = await account.payOrder(id, { paymentMethod: "all" });
+      const res: any = await account.payOrder(id, { paymentMethod: "myfatoorah" });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
