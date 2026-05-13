@@ -18,10 +18,12 @@ function normalizeAuth(res: any): ApiResponse<AuthResponse> {
   const user = data.user ?? res?.user;
   const token = data.token ?? res?.token;
   const isNew = data.isNew ?? res?.isNew;
+  const requiresOtp = data.requiresOtp ?? res?.requiresOtp;
+  const email = data.email ?? res?.email;
   return {
     success: res?.success ?? true,
     message: res?.message,
-    data: { user, token, isNew },
+    data: { user, token, isNew, requiresOtp, email, message: res?.message },
   };
 }
 
