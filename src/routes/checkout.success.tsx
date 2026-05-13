@@ -171,7 +171,12 @@ function SuccessPage() {
               {lang === "ar" ? "تم الدفع" : "Paid"}
             </div>
           )}
-          {displayOrder && !displayOrder.paid && (
+          {displayOrder && !displayOrder.paid && codFlag && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
+              {lang === "ar" ? "الدفع عند الاستلام — لم يتم الدفع بعد" : "Cash on delivery — payment pending"}
+            </div>
+          )}
+          {displayOrder && !displayOrder.paid && !codFlag && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
               {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
             </div>
