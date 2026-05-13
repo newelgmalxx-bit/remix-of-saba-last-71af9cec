@@ -249,6 +249,7 @@ const adminLegacy = {
     setPaymentStatus: (id: string, paymentStatus: string) => a.updateOrderPaymentStatus(id, paymentStatus),
     setPaymentMethod: (id: string, paymentMethod: string) => a.updateOrderPaymentMethod(id, paymentMethod),
     addNote: (id: string, text: string) => a.addOrderNote(id, text),
+    remove: (id: string) => a.deleteOrder(id),
   },
   consultations: {
     list: async (q?: any) => {
