@@ -214,29 +214,31 @@ function SuccessPage() {
 
         {displayOrder && (
           <div className="mt-8 space-y-5">
-            <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-              <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
-              <div className="space-y-3">
-                {displayOrder.items.map((it) => (
-                  <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
-                        <FileText className="h-5 w-5" />
+            {displayOrder.items.length > 0 && (
+              <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
+                <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
+                <div className="space-y-3">
+                  {displayOrder.items.map((it) => (
+                    <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold line-clamp-1">{it.serviceTitle}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {t("account.order.plan")} {it.planName} • {t("account.order.qty")} <span data-ltr-number>{it.qty}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-bold line-clamp-1">{it.serviceTitle}</div>
-                        <p className="text-xs text-muted-foreground">
-                          {t("account.order.plan")} {it.planName} • {t("account.order.qty")} <span data-ltr-number>{it.qty}</span>
-                        </p>
+                      <div className="shrink-0 text-end">
+                        <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty, lang)}</div>
                       </div>
                     </div>
-                    <div className="shrink-0 text-end">
-                      <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty, lang)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="text-base font-bold">{t("account.order.summary")}</h3>
