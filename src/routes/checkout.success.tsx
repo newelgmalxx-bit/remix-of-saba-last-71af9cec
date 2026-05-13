@@ -26,72 +26,64 @@ export const Route = createFileRoute("/checkout/success")({
   component: SuccessPage,
 });
 
-function buildOrderFromStore(stored: any, fallbackId: string): Order {
-  const items = (stored.items || []).map((it: any, i: number) => ({
-    id: it.id || `i${i}`,
-    serviceSlug: it.serviceSlug || "",
-    serviceTitle: it.serviceTitle || "",
-    planName: it.planName || null,
-    price: Number(it.price) || 0,
-    qty: Number(it.qty) || 1,
-  }));
-  const subtotal = items.reduce((s: number, it: any) => s + it.price * it.qty, 0);
-  const vat = Math.round(subtotal * 0.15 * 100) / 100;
-  return {
-    id: stored.orderId || fallbackId || "",
-    number: stored.orderNumber || stored.number || "",
-    createdAt: new Date().toISOString().slice(0, 10),
-    status: "pending",
-    payment: stored.payment || "cod",
-    paid: false,
-    items,
-    subtotal,
-    vat,
-    total: stored.total ?? subtotal + vat,
-    couponDiscount: 0,
-    timeline: [],
-  } as Order;
-}
-
 function SuccessPage() {
-  const { o, order: orderQ, orderId, payUrl, paid, cod } = Route.useSearch();
+  const { o, order: orderQ, orderId, paymentId, Id, payUrl, paid, cod } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const id = orderId || orderQ || o;
+  const actualPaymentId = paymentId || Id;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
+  const [verifying, setVerifying] = useState(!!actualPaymentId);
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || cod === "true");
 
-  const isPaidFromUrl = paid === "1" || cod === "true";
+  // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
+  useEffect(() => {
+    if (!actualPaymentId) return;
+    let alive = true;
+    setVerifying(true);
+    checkoutApi.verify(actualPaymentId)
+      .then((res: any) => {
+        if (!alive) return;
+        const d = res?.data || res || {};
+        if (d.paid === false && (d.paymentStatus === "failed" || d.status === "cancelled")) {
+          navigate({
+            to: "/checkout/failed" as any,
+            search: { order: d.orderId || id } as any,
+            replace: true,
+          });
+          return;
+        }
+        if (d.paid === true) setPaidFlag(true);
+      })
+      .catch(() => { /* keep page rendering */ })
+      .finally(() => { if (alive) setVerifying(false); });
+    return () => { alive = false; };
+  }, [actualPaymentId, id, navigate]);
 
+  // Fetch order details
   useEffect(() => {
     if (!id) return;
     let alive = true;
     setLoading(true);
-
     account.orderDetail(id)
       .then((res: any) => {
         const raw = res?.data?.order ?? res?.order ?? res;
         if (!alive || !raw) return;
         try {
           const normalized = normalizeOrder(raw);
-          setOrder(isPaidFromUrl ? { ...normalized, paid: true } : normalized);
-        } catch {
-          const stored = useCheckoutStore.getState().lastOrder;
-          if (stored) setOrder(buildOrderFromStore(stored, id));
-        }
+          setOrder(normalized);
+        } catch { /* ignore */ }
       })
-      .catch(() => {
-        const stored = useCheckoutStore.getState().lastOrder;
-        if (alive && stored) {
-          const built = buildOrderFromStore(stored, id);
-          setOrder(isPaidFromUrl ? { ...built, paid: true } : built);
-        }
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+      .catch(() => { /* keep empty state, no redirects */ })
+      .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [id, isPaidFromUrl]);
+  }, [id]);
+
+  const displayOrder: Order | null = order
+    ? (paidFlag ? { ...order, paid: true, paymentStatus: "paid" } : order)
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
