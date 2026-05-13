@@ -54,6 +54,7 @@ export const admin = {
   confirmOrderPayment: (id: string) =>
     request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_status: 'paid', paymentStatus: 'paid' }) }),
   addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ note: text }) }),
+  deleteOrder: (id: string) => request(`/admin/orders/${id}`, { method: 'DELETE' }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
   updateBooking: (id: string, body: any) => request(`/admin/bookings/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
