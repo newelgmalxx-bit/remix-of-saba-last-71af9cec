@@ -149,6 +149,7 @@ function ServicesPage() {
         overview_description_en: form.overviewDescriptionEn || "",
         breadcrumbAr: form.breadcrumb || form.titleAr,
         breadcrumbEn: form.breadcrumbEn || form.titleEn || "",
+      });
     } catch (e: any) {
       toast.error(e?.message || L("فشل إضافة الخدمة", "Failed to add service"));
       return;
