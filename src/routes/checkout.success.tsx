@@ -128,8 +128,24 @@ function SuccessPage() {
 
   const baseOrder = order || fallbackOrder;
   const displayOrder: Order | null = baseOrder
-    ? (paidFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : baseOrder)
+    ? (paidFlag && !codFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : { ...baseOrder, paid: false, paymentStatus: "unpaid" })
     : null;
+
+  const handlePayNow = async () => {
+    if (!displayOrder) return;
+    setPaying(true);
+    setPayError(null);
+    try {
+      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: selectedGateway });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. اختر بوابة أخرى أو حاول لاحقًا." : "Could not get the payment URL. Choose another gateway or try later.");
+    } catch (e: any) {
+      setPayError(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
