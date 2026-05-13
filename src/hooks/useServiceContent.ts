@@ -35,8 +35,8 @@ async function refreshRemoteServices() {
         subtitleEn: s.subtitleEn || cur.subtitleEn,
         category: s.category || cur.category,
         bannerImage: (s as any).bannerImage || s.cover || cur.bannerImage,
-        price: amount != null ? String(amount) : cur.price,
-        originalPrice: originalAmount != null ? String(originalAmount) : cur.originalPrice,
+        price: amount != null ? formatPriceStr(amount) : cur.price,
+        originalPrice: originalAmount != null ? formatPriceStr(originalAmount) : cur.originalPrice,
         discountPercent: discountPercent != null ? Number(discountPercent) : cur.discountPercent,
       };
     }
