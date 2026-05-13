@@ -166,7 +166,7 @@ function ServiceEditorPage() {
     return () => { cancelled = true; };
   }, [slug]);
 
-  if (!base && !initial) {
+  if (!base && !initial && remoteLoaded && !title) {
     return (
       <AdminLayout title="خدمة غير موجودة">
         <PanelCard>
