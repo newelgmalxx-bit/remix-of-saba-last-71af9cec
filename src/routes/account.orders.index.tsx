@@ -165,7 +165,7 @@ function OrdersList() {
                     <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total, lang)}</div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
-                    {!o.paid && o.payment === "cod" && (
+                    {!o.paid && (
                       <button
                         onClick={() => handleConfirmCod(o)}
                         disabled={actionId === o.id}
