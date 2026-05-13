@@ -343,6 +343,7 @@ function LoginPage() {
                   }
                   try {
                     const { user, token } = await api.auth.oauthGoogle(idToken);
+                    if (!token || !user) throw new ApiError(500, "Invalid auth response");
                     setToken(token);
                     await refresh();
                     toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
