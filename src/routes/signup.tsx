@@ -164,6 +164,7 @@ function SignupPage() {
                   }
                   try {
                     const { token } = await api.auth.oauthGoogle(idToken);
+                    if (!token) throw new ApiError(500, "No token returned");
                     setToken(token);
                     await refresh();
                     toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
