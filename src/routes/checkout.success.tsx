@@ -153,22 +153,22 @@ function SuccessPage() {
               <div className="mt-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("account.order.subtotal")}</span>
-                  <span className="font-medium" data-ltr-number>{formatCurrency(order.subtotal, lang)}</span>
+                  <span className="font-medium" data-ltr-number>{formatCurrency(displayOrder.subtotal, lang)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("account.order.vat")}</span>
-                  <span className="font-medium" data-ltr-number>{formatCurrency(order.vat, lang)}</span>
+                  <span className="font-medium" data-ltr-number>{formatCurrency(displayOrder.vat, lang)}</span>
                 </div>
                 <div className="my-2 h-px bg-border" />
                 <div className="flex justify-between text-base font-bold">
                   <span>{t("account.order.total")}</span>
-                  <span className="text-primary" data-ltr-number>{formatCurrency(order.total, lang)}</span>
+                  <span className="text-primary" data-ltr-number>{formatCurrency(displayOrder.total, lang)}</span>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background p-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Receipt className="h-4 w-4 text-primary" />
-                  <span>{paymentName(order.payment, lang)}</span>
+                  <span>{paymentName(displayOrder.payment, lang)}</span>
                   {displayOrder.paid && (
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                       {t("account.orders.paid")}
