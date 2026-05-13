@@ -8,6 +8,15 @@ const KEY = "saba_service_overrides_v1";
 const REMOTE_KEY = "saba_service_remote_v1";
 const REMOTE_SLUGS_KEY = "saba_service_remote_slugs_v1";
 
+function formatPriceStr(v: any): string {
+  if (v == null || v === "") return "";
+  const n = Number(String(v).replace(/[^\d.\-]/g, ""));
+  if (!Number.isNaN(n) && Number.isFinite(n)) {
+    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n));
+  }
+  return String(v).replace(/[.,]0+$/, "");
+}
+
 async function refreshRemoteServices() {
   try {
     const res = await servicesApi.list();
