@@ -98,25 +98,25 @@ function SuccessPage() {
           </div>
           <h1 className="mt-6 text-3xl font-bold">{t("checkout.success.h1")}</h1>
           <p className="mt-2 max-w-md text-muted-foreground">{t("checkout.success.body")}</p>
-          {(order?.number || o) && (
+          {(displayOrder?.number || o) && (
             <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
               <span className="text-sm text-muted-foreground">{t("checkout.success.orderLabel")}</span>
-              <span className="text-base font-bold text-primary" dir="ltr">{order?.number || o}</span>
+              <span className="text-base font-bold text-primary" dir="ltr">{displayOrder?.number || o}</span>
             </div>
           )}
-          {order?.paid && (
+          {displayOrder?.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
               {lang === "ar" ? "تم الدفع" : "Paid"}
             </div>
           )}
-          {order && !order.paid && (
+          {displayOrder && !displayOrder.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
-              {lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"}
+              {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
             </div>
           )}
         </div>
 
-        {loading && (
+        {(loading || (verifying && !displayOrder)) && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-10 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
           </div>
