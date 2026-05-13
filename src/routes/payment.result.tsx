@@ -158,7 +158,7 @@ function PaymentResultPage() {
       if (search.order) {
         navigate({
           to: "/checkout/success" as any,
-          search: { o: search.order } as any,
+          search: { order: search.order, o: search.order } as any,
           replace: true,
         });
       }
