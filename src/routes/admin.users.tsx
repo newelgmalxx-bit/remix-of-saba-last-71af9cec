@@ -281,7 +281,7 @@ function UsersPage() {
           )}
           <DialogFooter className="gap-2 sm:gap-2">
             <GhostButton onClick={() => setOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
-            <PrimaryButton onClick={save} disabled={saving || loadingForm}>
+            <PrimaryButton onClick={saving || loadingForm ? () => {} : save}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (editId ? L("حفظ", "Save") : L("إضافة", "Add"))}
             </PrimaryButton>
           </DialogFooter>
