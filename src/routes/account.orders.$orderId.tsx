@@ -2,16 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
-  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet,
+  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet, Check,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, type Order } from "@/data/account";
+import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, paymentMethods, type Order, type PaymentMethod } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
+
+const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -52,18 +54,20 @@ function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [showGateways, setShowGateways] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [payError, setPayError] = useState<string | null>(null);
   const handlePayNow = async () => {
     if (!order || paying) return;
     setPaying(true);
+    setPayError(null);
     try {
-      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+      const res: any = await account.payOrder(order.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
-      const { toast } = await import("sonner");
-      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. اختر بوابة دفع أخرى أو حاول لاحقًا." : "Could not get payment URL. Choose another gateway or try later.");
     } catch (e: any) {
-      const { toast } = await import("sonner");
-      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+      setPayError(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
     } finally {
       setPaying(false);
     }
