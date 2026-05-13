@@ -252,7 +252,7 @@ function UsersPage() {
               <Lb label={L("البريد", "Email")}><input className={ic} type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} /></Lb>
               <Lb label={L("الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></Lb>
               <Lb label={L("المدينة", "City")}><input className={ic} value={f.city} onChange={e => setF({ ...f, city: e.target.value })} /></Lb>
-              <Lb label={L("رابط الصورة", "Avatar URL")} full><input className={ic} dir="ltr" value={f.avatar} onChange={e => setF({ ...f, avatar: e.target.value })} placeholder="https://..." /></Lb>
+              
               <Lb label={L("الدور", "Role")}>
                 <select className={ic} value={f.role} onChange={e => setF({ ...f, role: e.target.value as any })}>
                   <option value="admin">{L("مدير", "Admin")}</option>
