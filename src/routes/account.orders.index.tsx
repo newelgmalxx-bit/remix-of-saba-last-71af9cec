@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
-import { Search, Filter, Package, Download, Eye, Loader2 } from "lucide-react";
+import { Search, Filter, Package, Download, Eye, Loader2, CreditCard, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
 import { statusLabels, formatCurrency, paymentName, type OrderStatus, type Order } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
@@ -30,6 +31,46 @@ function OrdersList() {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const reload = () => {
+    setLoading(true);
+    account.listOrders({ status: filter === "all" ? undefined : filter, limit: 50 })
+      .then((res) => setOrders((res.items || []).map(normalizeOrder)))
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  };
+
+  const handlePayMyfatoorah = async (o: Order) => {
+    if (actionId) return;
+    setActionId(o.id);
+    try {
+      const res: any = await account.payOrder(o.id, { paymentMethod: "myfatoorah" });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء الدفع" : "Could not start payment"));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleConfirmCod = async (o: Order) => {
+    if (actionId) return;
+    const ok = window.confirm(lang === "ar" ? "هل تم استلام المبلغ نقدًا؟" : "Confirm cash payment received?");
+    if (!ok) return;
+    setActionId(o.id);
+    try {
+      await account.payOrder(o.id, { paymentMethod: "cod" });
+      toast.success(lang === "ar" ? "تم تأكيد الدفع" : "Payment confirmed");
+      reload();
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "تعذّر تأكيد الدفع" : "Could not confirm payment"));
+    } finally {
+      setActionId(null);
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -123,7 +164,27 @@ function OrdersList() {
                     <div className="text-xs text-muted-foreground">{t("account.orders.totalLabel")}</div>
                     <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total, lang)}</div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    {!o.paid && o.payment === "cod" && (
+                      <button
+                        onClick={() => handleConfirmCod(o)}
+                        disabled={actionId === o.id}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-full bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      >
+                        {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {lang === "ar" ? "تأكيد الدفع" : "Confirm payment"}
+                      </button>
+                    )}
+                    {!o.paid && o.payment !== "cod" && (
+                      <button
+                        onClick={() => handlePayMyfatoorah(o)}
+                        disabled={actionId === o.id}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
+                      >
+                        {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                        {lang === "ar" ? "ادفع عبر ماي فاتورة" : "Pay via MyFatoorah"}
+                      </button>
+                    )}
                     {o.paid && (
                       <button
                         onClick={() => downloadInvoice(o, user?.name || "")}

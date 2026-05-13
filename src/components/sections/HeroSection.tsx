@@ -20,7 +20,7 @@ export function HeroSection() {
               <Sparkles className="h-3.5 w-3.5" />
               <span>{t("hero.badge")}</span>
               <span className="text-foreground/30">•</span>
-              <span className="text-foreground/60">2026</span>
+              <span className="text-foreground/60">2021</span>
             </span>
 
             <h1 className="mt-6 text-4xl font-extrabold leading-[1.25] text-primary sm:text-5xl lg:text-[3.4rem]">
