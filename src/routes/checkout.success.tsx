@@ -34,10 +34,13 @@ function SuccessPage() {
   const navigate = useNavigate();
   const id = orderId || orderQ || o;
   const actualPaymentId = paymentId || Id;
+  const lastOrder = useCheckoutStore((s) => s.lastOrder);
+  // Strip optional surrounding quotes from search params (some gateways encode them).
+  const codFlag = (cod || "").replace(/^"|"$/g, "") === "true";
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [verifying, setVerifying] = useState(!!actualPaymentId);
-  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || cod === "true");
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || codFlag);
 
   // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
   useEffect(() => {
