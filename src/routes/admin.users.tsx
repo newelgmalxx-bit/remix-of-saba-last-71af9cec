@@ -73,7 +73,8 @@ function UsersPage() {
           role: (u.role as any) || "support",
           active: (u.status ?? "active") === "active",
           joinedAt: (u.createdAt || "").slice(0, 10) || "—",
-        }));
+          city: u.city ?? "",
+        } as AdminUser & { city: string }));
         if (items.length) setUsers(items);
       })
       .catch(() => {});
