@@ -85,7 +85,7 @@ export function SiteFooter() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} {t("footer.brand")}. {t("footer.rights")}</p>
+          <p>© 2021 {t("footer.brand")}. {t("footer.rights")}</p>
           <div className="flex items-center gap-5">
             <Link to={"/privacy" as any} className="hover:text-white">{t("footer.privacy")}</Link>
             <Link to={"/terms" as any} className="hover:text-white">{t("footer.terms")}</Link>
