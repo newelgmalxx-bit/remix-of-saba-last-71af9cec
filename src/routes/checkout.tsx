@@ -112,6 +112,7 @@ function CheckoutPage() {
       return;
     }
     setSubmitting(true);
+    let keepRedirectScreen = false;
     try {
       if (user) {
         try {
@@ -182,8 +183,9 @@ function CheckoutPage() {
           } catch { /* ignore — fall through to success page */ }
         }
         if (url) {
+          keepRedirectScreen = true;
           toast.success(lang === "ar" ? "جارٍ تحويلك لبوابة الدفع" : "Redirecting to payment");
-          window.location.href = url;
+          window.location.replace(url);
           return;
         }
         // No payment URL available — send user to success page (will offer Pay now).
@@ -246,7 +248,7 @@ function CheckoutPage() {
         return;
       }
     } finally {
-      setSubmitting(false);
+      if (!keepRedirectScreen) setSubmitting(false);
     }
   };
 
