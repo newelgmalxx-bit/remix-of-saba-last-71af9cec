@@ -152,7 +152,7 @@ function BookingsPage() {
     const prev = bookings;
     setBookings(bookings.filter(b => b.id !== id));
     try {
-      await adminApi.deleteOrder(id);
+      await adminApi.orders.remove(id);
       toast.success(L("تم الحذف", "Deleted"));
     } catch (e: any) {
       setBookings(prev);
