@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
+import { Check, CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
@@ -9,8 +9,10 @@ import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
-import { formatCurrency, paymentName, type Order, type PaymentMethod } from "@/data/account";
+import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
+
+const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -40,7 +42,11 @@ function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [verifying, setVerifying] = useState(!!actualPaymentId);
-  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || codFlag);
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1");
+  const [showGateways, setShowGateways] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
   useEffect(() => {
