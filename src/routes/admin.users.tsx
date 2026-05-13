@@ -1,9 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, PanelCard, PrimaryButton, Pill, GhostButton, StatCard } from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Edit, UserCheck, Users, Shield, ShieldCheck } from "lucide-react";
+import { Plus, Trash2, Edit, UserCheck, Users, Shield, ShieldCheck, Loader2 } from "lucide-react";
 import { adminUsers as initial, type AdminUser } from "@/data/admin";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
@@ -13,8 +23,30 @@ export const Route = createFileRoute("/admin/users")({
   component: UsersPage,
 });
 
-type Form = { name: string; email: string; phone: string; role: AdminUser["role"]; active: boolean; password: string };
-const empty: Form = { name: "", email: "", phone: "", role: "support", active: true, password: "" };
+type Form = {
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  avatar: string;
+  role: AdminUser["role"];
+  status: "active" | "suspended" | "pending";
+  language: "ar" | "en";
+  email_verified: boolean;
+  password: string;
+};
+const empty: Form = {
+  name: "",
+  email: "",
+  phone: "",
+  city: "",
+  avatar: "",
+  role: "support",
+  status: "active",
+  language: "ar",
+  email_verified: false,
+  password: "",
+};
 
 function UsersPage() {
   const { lang, dir } = useLang();
@@ -29,8 +61,11 @@ function UsersPage() {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [f, setF] = useState<Form>(empty);
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
 
-  useEffect(() => {
+  const reload = () => {
     adminApi.users.list()
       .then((d) => {
         const items: AdminUser[] = (d.items || []).map((u: any) => ({
@@ -42,35 +77,105 @@ function UsersPage() {
         if (items.length) setUsers(items);
       })
       .catch(() => {});
-  }, []);
+  };
+  useEffect(() => { reload(); }, []);
 
   const openAdd = () => { setEditId(null); setF(empty); setOpen(true); };
-  const openEdit = (u: AdminUser) => { setEditId(u.id); setF({ name: u.name, email: u.email, phone: u.phone, role: u.role, active: u.active, password: "" }); setOpen(true); };
+  const openEdit = async (u: AdminUser) => {
+    setEditId(u.id);
+    setF({ ...empty, name: u.name, email: u.email, phone: u.phone, role: u.role, status: u.active ? "active" : "suspended" });
+    setOpen(true);
+    setLoadingForm(true);
+    try {
+      const user: any = await adminApi.users.get(u.id);
+      if (user) {
+        setF({
+          name: user.name ?? u.name ?? "",
+          email: user.email ?? u.email ?? "",
+          phone: user.phone ?? u.phone ?? "",
+          city: user.city ?? "",
+          avatar: user.avatar ?? user.avatar_url ?? "",
+          role: (user.role as any) || u.role || "support",
+          status: (user.status as any) || (u.active ? "active" : "suspended"),
+          language: (user.language as any) || "ar",
+          email_verified: !!(user.email_verified ?? user.emailVerified),
+          password: "",
+        });
+      }
+    } catch {
+      toast.error(L("تعذر تحميل بيانات المستخدم", "Failed to load user data"));
+    } finally {
+      setLoadingForm(false);
+    }
+  };
 
   const save = async () => {
     if (!f.name || !f.email) { toast.error(L("الاسم والبريد مطلوبان", "Name and email are required")); return; }
+    setSaving(true);
     if (editId) {
-      setUsers(users.map(u => u.id === editId ? { ...u, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.active } : u));
-      adminApi.users.update(editId, { name: f.name, email: f.email, phone: f.phone }).catch(() => {});
-      adminApi.users.setRole(editId, f.role).catch(() => {});
-      toast.success(L("تم التحديث", "Updated"));
-    } else {
-      let id = "u" + Date.now();
+      const payload: any = {
+        name: f.name,
+        email: f.email,
+        phone: f.phone,
+        city: f.city,
+        avatar: f.avatar,
+        role: f.role,
+        status: f.status,
+        language: f.language,
+        email_verified: f.email_verified,
+      };
+      if (f.password) payload.password = f.password;
       try {
-        const res = await adminApi.users.invite({ name: f.name, email: f.email, role: f.role as any });
-        id = res.id;
-      } catch {}
-      setUsers([{ id, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.active, joinedAt: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA") }, ...users]);
-      toast.success(L("تم إضافة المستخدم", "User added"));
+        await adminApi.users.update(editId, payload);
+        setUsers(users.map(u => u.id === editId ? { ...u, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.status === "active" } : u));
+        toast.success(L("تم التحديث", "Updated"));
+        setOpen(false);
+        reload();
+      } catch (e: any) {
+        toast.error(e?.message || L("فشل الحفظ", "Save failed"));
+      } finally {
+        setSaving(false);
+      }
+    } else {
+      try {
+        const res: any = await adminApi.users.invite({ name: f.name, email: f.email, phone: f.phone, role: f.role, password: f.password });
+        const id = res?.id || res?.data?.id || "u" + Date.now();
+        setUsers([{ id, name: f.name, email: f.email, phone: f.phone, role: f.role, active: f.status === "active", joinedAt: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA") }, ...users]);
+        toast.success(L("تم إضافة المستخدم", "User added"));
+        setOpen(false);
+        reload();
+      } catch (e: any) {
+        toast.error(e?.message || L("فشل الإضافة", "Failed to add"));
+      } finally {
+        setSaving(false);
+      }
     }
-    setOpen(false);
   };
-  const remove = (id: string) => {
-    setUsers(users.filter(u => u.id !== id));
-    adminApi.users.remove(id).catch(() => {});
-    toast.success(L("تم الحذف", "Deleted"));
+
+  const doRemove = async (u: AdminUser) => {
+    const prev = users;
+    setUsers(users.filter(x => x.id !== u.id));
+    try {
+      await adminApi.users.remove(u.id);
+      toast.success(L("تم الحذف", "Deleted"));
+    } catch (e: any) {
+      setUsers(prev);
+      toast.error(e?.message || L("فشل الحذف", "Delete failed"));
+    } finally {
+      setConfirmDelete(null);
+    }
   };
-  const toggle = (id: string) => setUsers(users.map(u => u.id === id ? { ...u, active: !u.active } : u));
+
+  const toggle = async (u: AdminUser) => {
+    const next = !u.active;
+    setUsers(users.map(x => x.id === u.id ? { ...x, active: next } : x));
+    try {
+      await adminApi.users.setStatus(u.id, next ? "active" : "suspended");
+    } catch (e: any) {
+      setUsers(users.map(x => x.id === u.id ? { ...x, active: !next } : x));
+      toast.error(e?.message || L("فشل تحديث الحالة", "Status update failed"));
+    }
+  };
   const knobOn = dir === "rtl" ? "right-0.5" : "left-0.5";
   const knobOff = dir === "rtl" ? "right-5" : "left-5";
   const textAlign = dir === "rtl" ? "text-right" : "text-left";
@@ -114,7 +219,7 @@ function UsersPage() {
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{u.phone}</td>
                     <td className="px-3 py-3"><Pill tone={r.t}>{r.l}</Pill></td>
                     <td className="px-3 py-3">
-                      <button onClick={() => toggle(u.id)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.active ? "bg-emerald-500" : "bg-muted"}`}>
+                      <button onClick={() => toggle(u)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.active ? "bg-emerald-500" : "bg-muted"}`}>
                         <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${u.active ? knobOn : knobOff}`} />
                       </button>
                     </td>
@@ -122,7 +227,7 @@ function UsersPage() {
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => openEdit(u)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-primary"><Edit className="h-4 w-4" /></button>
-                        <button onClick={() => remove(u.id)} disabled={u.role === "owner"} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500 disabled:opacity-30"><Trash2 className="h-4 w-4" /></button>
+                        <button onClick={() => setConfirmDelete(u)} disabled={u.role === "owner"} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500 disabled:opacity-30"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -134,28 +239,69 @@ function UsersPage() {
       </PanelCard>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent dir={dir} className="max-w-lg">
+        <DialogContent dir={dir} className="max-w-2xl">
           <DialogHeader><DialogTitle>{editId ? L("تعديل مستخدم", "Edit User") : L("إضافة مستخدم جديد", "Add New User")}</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
-            <Lb label={L("الاسم", "Name")}><input className={ic} value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></Lb>
-            <Lb label={L("البريد", "Email")}><input className={ic} value={f.email} onChange={e => setF({ ...f, email: e.target.value })} /></Lb>
-            <Lb label={L("الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></Lb>
-            <Lb label={L("الدور", "Role")}>
-              <select className={ic} value={f.role} onChange={e => setF({ ...f, role: e.target.value as any })}>
-                <option value="admin">{L("مدير", "Admin")}</option><option value="manager">{L("مشرف", "Manager")}</option><option value="support">{L("دعم", "Support")}</option><option value="owner">{L("مالك", "Owner")}</option>
-              </select>
-            </Lb>
-            {!editId && <Lb label={L("كلمة المرور", "Password")} full><input type="password" className={ic} value={f.password} onChange={e => setF({ ...f, password: e.target.value })} /></Lb>}
-            <Lb label={L("الحالة", "Status")} full>
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={f.active} onChange={e => setF({ ...f, active: e.target.checked })} /> {L("نشط", "Active")}</label>
-            </Lb>
-          </div>
+          {loadingForm ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <Lb label={L("الاسم", "Name")}><input className={ic} value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></Lb>
+              <Lb label={L("البريد", "Email")}><input className={ic} type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} /></Lb>
+              <Lb label={L("الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></Lb>
+              <Lb label={L("المدينة", "City")}><input className={ic} value={f.city} onChange={e => setF({ ...f, city: e.target.value })} /></Lb>
+              <Lb label={L("رابط الصورة", "Avatar URL")} full><input className={ic} dir="ltr" value={f.avatar} onChange={e => setF({ ...f, avatar: e.target.value })} placeholder="https://..." /></Lb>
+              <Lb label={L("الدور", "Role")}>
+                <select className={ic} value={f.role} onChange={e => setF({ ...f, role: e.target.value as any })}>
+                  <option value="admin">{L("مدير", "Admin")}</option>
+                  <option value="manager">{L("مشرف", "Manager")}</option>
+                  <option value="support">{L("دعم", "Support")}</option>
+                  <option value="owner">{L("مالك", "Owner")}</option>
+                </select>
+              </Lb>
+              <Lb label={L("الحالة", "Status")}>
+                <select className={ic} value={f.status} onChange={e => setF({ ...f, status: e.target.value as any })}>
+                  <option value="active">{L("نشط", "Active")}</option>
+                  <option value="suspended">{L("موقوف", "Suspended")}</option>
+                  <option value="pending">{L("قيد المراجعة", "Pending")}</option>
+                </select>
+              </Lb>
+              <Lb label={L("اللغة", "Language")}>
+                <select className={ic} value={f.language} onChange={e => setF({ ...f, language: e.target.value as any })}>
+                  <option value="ar">{L("العربية", "Arabic")}</option>
+                  <option value="en">{L("الإنجليزية", "English")}</option>
+                </select>
+              </Lb>
+              <Lb label={editId ? L("كلمة مرور جديدة (اختياري)", "New password (optional)") : L("كلمة المرور", "Password")}>
+                <input type="password" className={ic} value={f.password} onChange={e => setF({ ...f, password: e.target.value })} />
+              </Lb>
+              <Lb label={L("البريد موثّق", "Email verified")} full>
+                <label className="inline-flex items-center gap-2"><input type="checkbox" checked={f.email_verified} onChange={e => setF({ ...f, email_verified: e.target.checked })} /> {L("نعم", "Yes")}</label>
+              </Lb>
+            </div>
+          )}
           <DialogFooter className="gap-2 sm:gap-2">
             <GhostButton onClick={() => setOpen(false)}>{L("إلغاء", "Cancel")}</GhostButton>
-            <PrimaryButton onClick={save}>{editId ? L("حفظ", "Save") : L("إضافة", "Add")}</PrimaryButton>
+            <PrimaryButton onClick={saving || loadingForm ? () => {} : save}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (editId ? L("حفظ", "Save") : L("إضافة", "Add"))}
+            </PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent dir={dir}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{L("تأكيد الحذف", "Confirm delete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {L(`هل تريد حذف المستخدم "${confirmDelete?.name ?? ""}"؟ لا يمكن التراجع عن هذه العملية.`, `Delete user "${confirmDelete?.name ?? ""}"? This cannot be undone.`)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{L("إلغاء", "Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmDelete && doRemove(confirmDelete)} className="bg-rose-500 hover:bg-rose-600">{L("حذف", "Delete")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
