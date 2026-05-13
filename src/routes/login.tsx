@@ -154,7 +154,7 @@ function LoginPage() {
             </div>
 
             {/* Tabs */}
-            <div className="mt-7 grid grid-cols-3 gap-2 rounded-2xl bg-secondary/40 p-1.5">
+            <div className="mt-7 grid grid-cols-2 gap-2 rounded-2xl bg-secondary/40 p-1.5">
               <button
                 onClick={() => setTab("email")}
                 className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
