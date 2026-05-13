@@ -259,20 +259,48 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </a>
               )}
-              {!displayOrder.paid && !payUrl && (
+              {!displayOrder.paid && !payUrl && !showGateways && (
                 <button
-                  onClick={async () => {
-                    try {
-                      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: "all" });
-                      const url = res?.data?.paymentUrl || res?.paymentUrl;
-                      if (url) { window.location.href = url; return; }
-                    } catch {}
-                  }}
+                  type="button"
+                  onClick={() => setShowGateways(true)}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
                 >
                   <Wallet className="h-4 w-4" />
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </button>
+              )}
+              {!displayOrder.paid && !payUrl && showGateways && (
+                <div className="w-full rounded-2xl border border-border bg-card p-4 text-start shadow-sm">
+                  <div className="mb-3 text-sm font-bold">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                      const Icon = m.icon;
+                      const active = selectedGateway === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setSelectedGateway(m.id)}
+                          className={`flex items-center gap-3 rounded-xl border p-3 text-sm font-bold transition ${active ? "border-primary bg-primary-light text-primary" : "border-border bg-background hover:border-primary/50"}`}
+                        >
+                          {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-12 object-contain" /> : <Icon className="h-5 w-5" />}
+                          <span className="flex-1">{m.name}</span>
+                          {active && <Check className="h-4 w-4" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {payError && <div className="mt-3 text-sm font-bold text-destructive">{payError}</div>}
+                  <button
+                    type="button"
+                    onClick={handlePayNow}
+                    disabled={paying}
+                    className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+                  >
+                    {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                    {lang === "ar" ? "المتابعة للدفع" : "Continue to payment"}
+                  </button>
+                </div>
               )}
               {displayOrder.paid && (
                 <button
