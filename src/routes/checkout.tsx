@@ -56,7 +56,7 @@ function CheckoutPage() {
     }
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !submitting) {
     return (
       <div className="flex min-h-screen flex-col bg-muted/30">
         <SiteHeader />
