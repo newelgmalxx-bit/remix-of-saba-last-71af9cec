@@ -9,7 +9,8 @@ import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
-import { formatCurrency, paymentName, type Order } from "@/data/account";
+import { formatCurrency, paymentName, type Order, type PaymentMethod } from "@/data/account";
+import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
