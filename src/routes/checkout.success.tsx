@@ -122,12 +122,12 @@ function SuccessPage() {
           </div>
         )}
 
-        {order && (
+        {displayOrder && (
           <div className="mt-8 space-y-5">
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
               <div className="space-y-3">
-                {order.items.map((it) => (
+                {displayOrder.items.map((it) => (
                   <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
@@ -169,7 +169,7 @@ function SuccessPage() {
                 <div className="flex items-center gap-2">
                   <Receipt className="h-4 w-4 text-primary" />
                   <span>{paymentName(order.payment, lang)}</span>
-                  {order.paid && (
+                  {displayOrder.paid && (
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                       {t("account.orders.paid")}
                     </span>
@@ -177,13 +177,13 @@ function SuccessPage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
-                  <span data-ltr-number>{order.createdAt}</span>
+                  <span data-ltr-number>{displayOrder.createdAt}</span>
                 </div>
               </div>
             </section>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {!order.paid && payUrl && (
+              {!displayOrder.paid && payUrl && (
                 <a
                   href={payUrl}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
@@ -192,11 +192,11 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </a>
               )}
-              {!order.paid && !payUrl && (
+              {!displayOrder.paid && !payUrl && (
                 <button
                   onClick={async () => {
                     try {
-                      const res: any = await account.payOrder(order.id, { paymentMethod: "all" });
+                      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: "all" });
                       const url = res?.data?.paymentUrl || res?.paymentUrl;
                       if (url) { window.location.href = url; return; }
                     } catch {}
@@ -207,9 +207,9 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </button>
               )}
-              {order.paid && (
+              {displayOrder.paid && (
                 <button
-                  onClick={() => downloadInvoice(order, user?.name || "")}
+                  onClick={() => downloadInvoice(displayOrder, user?.name || "")}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
                 >
                   <Download className="h-4 w-4" />
@@ -218,7 +218,7 @@ function SuccessPage() {
               )}
               <Link
                 to={"/account/orders/$orderId" as any}
-                params={{ orderId: order.id } as any}
+                params={{ orderId: displayOrder.id } as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
               >
                 <Package className="h-4 w-4" />
@@ -234,7 +234,7 @@ function SuccessPage() {
           </div>
         )}
 
-        {!loading && !order && (
+        {!loading && !displayOrder && (
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               to={"/account/orders" as any}
