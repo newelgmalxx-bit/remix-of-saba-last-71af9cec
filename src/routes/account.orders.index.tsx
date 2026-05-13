@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
-import { Search, Filter, Package, Download, Eye, Loader2, CreditCard, CheckCircle2 } from "lucide-react";
+import { Search, Filter, Package, Download, Eye, Loader2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { statusLabels, formatCurrency, paymentName, type OrderStatus, type Order } from "@/data/account";
+import { statusLabels, formatCurrency, paymentName, paymentMethods, type OrderStatus, type Order, type PaymentMethod } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/account/orders/")({
   head: () => ({ meta: [{ title: "طلباتي | سابا ديزاين" }] }),
