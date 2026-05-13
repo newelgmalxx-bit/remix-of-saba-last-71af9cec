@@ -9,6 +9,7 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError } from "@/lib/api";
 import { toast } from "sonner";
+import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
