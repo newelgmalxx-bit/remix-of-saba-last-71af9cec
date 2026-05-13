@@ -9,7 +9,8 @@ import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
-import { formatCurrency, paymentName, type Order } from "@/data/account";
+import { formatCurrency, paymentName, type Order, type PaymentMethod } from "@/data/account";
+import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -33,10 +34,13 @@ function SuccessPage() {
   const navigate = useNavigate();
   const id = orderId || orderQ || o;
   const actualPaymentId = paymentId || Id;
+  const lastOrder = useCheckoutStore((s) => s.lastOrder);
+  // Strip optional surrounding quotes from search params (some gateways encode them).
+  const codFlag = (cod || "").replace(/^"|"$/g, "") === "true";
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [verifying, setVerifying] = useState(!!actualPaymentId);
-  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || cod === "true");
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || codFlag);
 
   // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
   useEffect(() => {
@@ -81,8 +85,44 @@ function SuccessPage() {
     return () => { alive = false; };
   }, [id]);
 
-  const displayOrder: Order | null = order
-    ? (paidFlag ? { ...order, paid: true, paymentStatus: "paid" } : order)
+  // Fallback: rebuild a minimal Order from the lastOrder we saved before checkout
+  // so the user always sees their order summary even if the API fetch fails.
+  const fallbackOrder: Order | null = (() => {
+    if (order || !lastOrder) return null;
+    const matchesById = id && (lastOrder.orderId === id || lastOrder.orderNumber === id);
+    const matchesByNumber = o && lastOrder.orderNumber === o;
+    if (!matchesById && !matchesByNumber && id) return null;
+    const subtotal = lastOrder.items.reduce((s, it) => s + it.price * it.qty, 0);
+    const vat = +(subtotal * 0.15).toFixed(2);
+    const total = lastOrder.total || +(subtotal + vat).toFixed(2);
+    return {
+      id: lastOrder.orderId || lastOrder.orderNumber || "",
+      number: lastOrder.orderNumber || o || "",
+      createdAt: new Date().toISOString(),
+      status: "pending" as any,
+      payment: (lastOrder.payment || "cod") as PaymentMethod,
+      paid: paidFlag,
+      paymentStatus: paidFlag ? "paid" : "unpaid",
+      invoice: null,
+      items: lastOrder.items.map((it, i) => ({
+        id: it.id || `tmp-${i}`,
+        serviceSlug: it.serviceSlug,
+        serviceTitle: it.serviceTitle,
+        planId: it.planId || "",
+        planName: it.planName || "",
+        price: it.price,
+        qty: it.qty,
+      })) as any,
+      subtotal,
+      vat,
+      total,
+      timeline: [],
+    };
+  })();
+
+  const baseOrder = order || fallbackOrder;
+  const displayOrder: Order | null = baseOrder
+    ? (paidFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : baseOrder)
     : null;
 
   return (
@@ -116,7 +156,7 @@ function SuccessPage() {
           )}
         </div>
 
-        {(loading || (verifying && !displayOrder)) && (
+        {((loading && !displayOrder) || (verifying && !displayOrder)) && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-10 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
           </div>
