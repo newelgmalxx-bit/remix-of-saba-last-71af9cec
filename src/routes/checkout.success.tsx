@@ -1,16 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
-import { account } from "@/lib/api";
+import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
-import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -18,6 +17,7 @@ export const Route = createFileRoute("/checkout/success")({
     order: z.string().optional(),
     orderId: z.string().optional(),
     paymentId: z.string().optional(),
+    Id: z.string().optional(),
     payUrl: z.string().optional(),
     paid: z.string().optional(),
     cod: z.string().optional(),
@@ -26,72 +26,64 @@ export const Route = createFileRoute("/checkout/success")({
   component: SuccessPage,
 });
 
-function buildOrderFromStore(stored: any, fallbackId: string): Order {
-  const items = (stored.items || []).map((it: any, i: number) => ({
-    id: it.id || `i${i}`,
-    serviceSlug: it.serviceSlug || "",
-    serviceTitle: it.serviceTitle || "",
-    planName: it.planName || null,
-    price: Number(it.price) || 0,
-    qty: Number(it.qty) || 1,
-  }));
-  const subtotal = items.reduce((s: number, it: any) => s + it.price * it.qty, 0);
-  const vat = Math.round(subtotal * 0.15 * 100) / 100;
-  return {
-    id: stored.orderId || fallbackId || "",
-    number: stored.orderNumber || stored.number || "",
-    createdAt: new Date().toISOString().slice(0, 10),
-    status: "pending",
-    payment: stored.payment || "cod",
-    paid: false,
-    items,
-    subtotal,
-    vat,
-    total: stored.total ?? subtotal + vat,
-    couponDiscount: 0,
-    timeline: [],
-  } as Order;
-}
-
 function SuccessPage() {
-  const { o, order: orderQ, orderId, payUrl, paid, cod } = Route.useSearch();
+  const { o, order: orderQ, orderId, paymentId, Id, payUrl, paid, cod } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const id = orderId || orderQ || o;
+  const actualPaymentId = paymentId || Id;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
+  const [verifying, setVerifying] = useState(!!actualPaymentId);
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || cod === "true");
 
-  const isPaidFromUrl = paid === "1" || cod === "true";
+  // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
+  useEffect(() => {
+    if (!actualPaymentId) return;
+    let alive = true;
+    setVerifying(true);
+    checkoutApi.verify(actualPaymentId)
+      .then((res: any) => {
+        if (!alive) return;
+        const d = res?.data || res || {};
+        if (d.paid === false && (d.paymentStatus === "failed" || d.status === "cancelled")) {
+          navigate({
+            to: "/checkout/failed" as any,
+            search: { order: d.orderId || id } as any,
+            replace: true,
+          });
+          return;
+        }
+        if (d.paid === true) setPaidFlag(true);
+      })
+      .catch(() => { /* keep page rendering */ })
+      .finally(() => { if (alive) setVerifying(false); });
+    return () => { alive = false; };
+  }, [actualPaymentId, id, navigate]);
 
+  // Fetch order details
   useEffect(() => {
     if (!id) return;
     let alive = true;
     setLoading(true);
-
     account.orderDetail(id)
       .then((res: any) => {
         const raw = res?.data?.order ?? res?.order ?? res;
         if (!alive || !raw) return;
         try {
           const normalized = normalizeOrder(raw);
-          setOrder(isPaidFromUrl ? { ...normalized, paid: true } : normalized);
-        } catch {
-          const stored = useCheckoutStore.getState().lastOrder;
-          if (stored) setOrder(buildOrderFromStore(stored, id));
-        }
+          setOrder(normalized);
+        } catch { /* ignore */ }
       })
-      .catch(() => {
-        const stored = useCheckoutStore.getState().lastOrder;
-        if (alive && stored) {
-          const built = buildOrderFromStore(stored, id);
-          setOrder(isPaidFromUrl ? { ...built, paid: true } : built);
-        }
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+      .catch(() => { /* keep empty state, no redirects */ })
+      .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [id, isPaidFromUrl]);
+  }, [id]);
+
+  const displayOrder: Order | null = order
+    ? (paidFlag ? { ...order, paid: true, paymentStatus: "paid" } : order)
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -106,36 +98,36 @@ function SuccessPage() {
           </div>
           <h1 className="mt-6 text-3xl font-bold">{t("checkout.success.h1")}</h1>
           <p className="mt-2 max-w-md text-muted-foreground">{t("checkout.success.body")}</p>
-          {(order?.number || o) && (
+          {(displayOrder?.number || o) && (
             <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 shadow-sm">
               <span className="text-sm text-muted-foreground">{t("checkout.success.orderLabel")}</span>
-              <span className="text-base font-bold text-primary" dir="ltr">{order?.number || o}</span>
+              <span className="text-base font-bold text-primary" dir="ltr">{displayOrder?.number || o}</span>
             </div>
           )}
-          {order?.paid && (
+          {displayOrder?.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
               {lang === "ar" ? "تم الدفع" : "Paid"}
             </div>
           )}
-          {order && !order.paid && (
+          {displayOrder && !displayOrder.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
-              {lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"}
+              {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
             </div>
           )}
         </div>
 
-        {loading && (
+        {(loading || (verifying && !displayOrder)) && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-10 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
-        {order && (
+        {displayOrder && (
           <div className="mt-8 space-y-5">
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
               <div className="space-y-3">
-                {order.items.map((it) => (
+                {displayOrder.items.map((it) => (
                   <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
@@ -161,23 +153,23 @@ function SuccessPage() {
               <div className="mt-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("account.order.subtotal")}</span>
-                  <span className="font-medium" data-ltr-number>{formatCurrency(order.subtotal, lang)}</span>
+                  <span className="font-medium" data-ltr-number>{formatCurrency(displayOrder.subtotal, lang)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("account.order.vat")}</span>
-                  <span className="font-medium" data-ltr-number>{formatCurrency(order.vat, lang)}</span>
+                  <span className="font-medium" data-ltr-number>{formatCurrency(displayOrder.vat, lang)}</span>
                 </div>
                 <div className="my-2 h-px bg-border" />
                 <div className="flex justify-between text-base font-bold">
                   <span>{t("account.order.total")}</span>
-                  <span className="text-primary" data-ltr-number>{formatCurrency(order.total, lang)}</span>
+                  <span className="text-primary" data-ltr-number>{formatCurrency(displayOrder.total, lang)}</span>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background p-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Receipt className="h-4 w-4 text-primary" />
-                  <span>{paymentName(order.payment, lang)}</span>
-                  {order.paid && (
+                  <span>{paymentName(displayOrder.payment, lang)}</span>
+                  {displayOrder.paid && (
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                       {t("account.orders.paid")}
                     </span>
@@ -185,13 +177,13 @@ function SuccessPage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
-                  <span data-ltr-number>{order.createdAt}</span>
+                  <span data-ltr-number>{displayOrder.createdAt}</span>
                 </div>
               </div>
             </section>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {!order.paid && payUrl && (
+              {!displayOrder.paid && payUrl && (
                 <a
                   href={payUrl}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
@@ -200,11 +192,11 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </a>
               )}
-              {!order.paid && !payUrl && (
+              {!displayOrder.paid && !payUrl && (
                 <button
                   onClick={async () => {
                     try {
-                      const res: any = await account.payOrder(order.id, { paymentMethod: "all" });
+                      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: "all" });
                       const url = res?.data?.paymentUrl || res?.paymentUrl;
                       if (url) { window.location.href = url; return; }
                     } catch {}
@@ -215,9 +207,9 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </button>
               )}
-              {order.paid && (
+              {displayOrder.paid && (
                 <button
-                  onClick={() => downloadInvoice(order, user?.name || "")}
+                  onClick={() => downloadInvoice(displayOrder, user?.name || "")}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
                 >
                   <Download className="h-4 w-4" />
@@ -226,7 +218,7 @@ function SuccessPage() {
               )}
               <Link
                 to={"/account/orders/$orderId" as any}
-                params={{ orderId: order.id } as any}
+                params={{ orderId: displayOrder.id } as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold hover:bg-muted"
               >
                 <Package className="h-4 w-4" />
@@ -242,7 +234,7 @@ function SuccessPage() {
           </div>
         )}
 
-        {!loading && !order && (
+        {!loading && !displayOrder && (
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               to={"/account/orders" as any}
