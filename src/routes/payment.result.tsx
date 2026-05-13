@@ -74,7 +74,7 @@ function PaymentResultPage() {
         navigate({
           to: "/checkout/success" as any,
           search: {
-            order: d.orderId || id,
+            order: d.orderId || search.order,
             o: d.orderNumber,
             paid: d.paid === true ? "1" : undefined,
           } as any,
