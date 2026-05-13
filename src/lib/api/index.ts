@@ -317,9 +317,14 @@ const adminLegacy = {
       const r: any = await a.getUsers(q);
       return r.data;
     },
+    get: async (id: string) => {
+      const r: any = await a.getUser(id);
+      return r?.data?.user ?? r?.data ?? r;
+    },
     invite: (body: any) => a.inviteUser(body),
     update: (id: string, body: any) => a.updateUser(id, body),
     setRole: (id: string, role: string) => a.updateUserRole(id, role),
+    setStatus: (id: string, status: string) => a.updateUserStatus(id, status),
     remove: (id: string) => a.deleteUser(id),
   },
   settings: {
