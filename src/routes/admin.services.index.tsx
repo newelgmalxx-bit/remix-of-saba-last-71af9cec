@@ -135,16 +135,20 @@ function ServicesPage() {
         titleAr: form.titleAr,
         titleEn: form.titleEn || form.titleAr,
         subtitleAr: form.subtitle || "",
-        subtitleEn: "",
+        subtitleEn: form.subtitleEn || "",
         category: form.category || "عام",
+        categoryEn: form.categoryEn || "",
         price: Number(form.price) || 0,
         originalPrice: form.originalPrice ? Number(form.originalPrice) : null,
         status: "draft",
         cover: form.bannerImage || null,
         bannerImage: form.bannerImage || null,
         overviewDescriptionAr: form.overviewDescription || "",
+        overviewDescriptionEn: form.overviewDescriptionEn || "",
+        overview_description_ar: form.overviewDescription || "",
+        overview_description_en: form.overviewDescriptionEn || "",
         breadcrumbAr: form.breadcrumb || form.titleAr,
-      });
+        breadcrumbEn: form.breadcrumbEn || form.titleEn || "",
     } catch (e: any) {
       toast.error(e?.message || L("فشل إضافة الخدمة", "Failed to add service"));
       return;
