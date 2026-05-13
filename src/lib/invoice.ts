@@ -1,25 +1,39 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas-pro";
+import { toPng } from "html-to-image";
 import type { Order } from "@/data/account";
 import { paymentName } from "@/data/account";
 import type { InvoiceData } from "@/components/invoice/InvoiceDocument";
 
 /**
- * Render any DOM node into a single-page A4 PDF and trigger a download.
- * The node should be sized at A4 (~794x1123 @ 96dpi) for best results.
+ * Render any DOM node into a single-page A4 PDF.
+ * Uses html-to-image (SVG foreignObject) to preserve Arabic text shaping
+ * — html2canvas breaks Arabic ligatures by drawing glyphs without joining.
  */
 async function renderElementToPdf(node: HTMLElement): Promise<jsPDF> {
-  const canvas = await html2canvas(node, {
-    scale: 2,
-    useCORS: true,
+  const rect = node.getBoundingClientRect();
+  const width = Math.max(node.scrollWidth, Math.ceil(rect.width));
+  const height = Math.max(node.scrollHeight, Math.ceil(rect.height));
+  const imgData = await toPng(node, {
+    pixelRatio: 2,
+    cacheBust: true,
     backgroundColor: "#ffffff",
-    logging: false,
+    width,
+    height,
+    style: {
+      transform: "none",
+      margin: "0",
+    },
   });
-  const imgData = canvas.toDataURL("image/png");
+  const img = new Image();
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("Failed to load rendered invoice image"));
+    img.src = imgData;
+  });
   const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
-  const ratio = canvas.width / canvas.height;
+  const ratio = img.width / img.height;
   let w = pageW;
   let h = pageW / ratio;
   if (h > pageH) {
