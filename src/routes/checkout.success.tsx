@@ -85,8 +85,44 @@ function SuccessPage() {
     return () => { alive = false; };
   }, [id]);
 
-  const displayOrder: Order | null = order
-    ? (paidFlag ? { ...order, paid: true, paymentStatus: "paid" } : order)
+  // Fallback: rebuild a minimal Order from the lastOrder we saved before checkout
+  // so the user always sees their order summary even if the API fetch fails.
+  const fallbackOrder: Order | null = (() => {
+    if (order || !lastOrder) return null;
+    const matchesById = id && (lastOrder.orderId === id || lastOrder.orderNumber === id);
+    const matchesByNumber = o && lastOrder.orderNumber === o;
+    if (!matchesById && !matchesByNumber && id) return null;
+    const subtotal = lastOrder.items.reduce((s, it) => s + it.price * it.qty, 0);
+    const vat = +(subtotal * 0.15).toFixed(2);
+    const total = lastOrder.total || +(subtotal + vat).toFixed(2);
+    return {
+      id: lastOrder.orderId || lastOrder.orderNumber || "",
+      number: lastOrder.orderNumber || o || "",
+      createdAt: new Date().toISOString(),
+      status: "pending" as any,
+      payment: (lastOrder.payment || "cod") as PaymentMethod,
+      paid: paidFlag,
+      paymentStatus: paidFlag ? "paid" : "unpaid",
+      invoice: null,
+      items: lastOrder.items.map((it, i) => ({
+        id: it.id || `tmp-${i}`,
+        serviceSlug: it.serviceSlug,
+        serviceTitle: it.serviceTitle,
+        planId: it.planId || "",
+        planName: it.planName || "",
+        price: it.price,
+        qty: it.qty,
+      })) as any,
+      subtotal,
+      vat,
+      total,
+      timeline: [],
+    };
+  })();
+
+  const baseOrder = order || fallbackOrder;
+  const displayOrder: Order | null = baseOrder
+    ? (paidFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : baseOrder)
     : null;
 
   return (
