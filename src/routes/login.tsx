@@ -67,6 +67,7 @@ function LoginPage() {
     setSubmitting(true);
     try {
       const { user, token } = await api.auth.verifyEmailOtp({ email: otpEmail.trim(), otp: otpCode.trim() });
+      if (!token || !user) throw new ApiError(500, "Invalid OTP response");
       setToken(token);
       await refresh();
       toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
