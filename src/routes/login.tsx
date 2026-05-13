@@ -173,15 +173,6 @@ function LoginPage() {
                 <Phone className="h-4 w-4" />
                 {t("auth.tab.phone")}
               </button>
-              <button
-                onClick={() => { setTab("otp"); setOtpSent(false); setOtpCode(""); setOtpInfo(null); setError(null); }}
-                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                  tab === "otp" ? "bg-white text-primary shadow-sm ring-1 ring-primary/30" : "text-muted-foreground"
-                }`}
-              >
-                <ShieldCheck className="h-4 w-4" />
-                {lang === "ar" ? "رمز عبر البريد" : "Email OTP"}
-              </button>
             </div>
 
             {tab !== "otp" ? (
