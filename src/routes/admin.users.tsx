@@ -73,7 +73,8 @@ function UsersPage() {
           role: (u.role as any) || "support",
           active: (u.status ?? "active") === "active",
           joinedAt: (u.createdAt || "").slice(0, 10) || "—",
-        }));
+          city: u.city ?? "",
+        } as AdminUser & { city: string }));
         if (items.length) setUsers(items);
       })
       .catch(() => {});
@@ -197,6 +198,7 @@ function UsersPage() {
                 <th className="px-3 py-3 font-medium">{L("المستخدم", "User")}</th>
                 <th className="px-3 py-3 font-medium">{L("البريد", "Email")}</th>
                 <th className="px-3 py-3 font-medium">{L("الجوال", "Phone")}</th>
+                <th className="px-3 py-3 font-medium">{L("المدينة", "City")}</th>
                 <th className="px-3 py-3 font-medium">{L("الدور", "Role")}</th>
                 <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
                 <th className="px-3 py-3 font-medium">{L("انضم", "Joined")}</th>
@@ -217,6 +219,7 @@ function UsersPage() {
                     </td>
                     <td className="px-3 py-3 text-muted-foreground">{u.email}</td>
                     <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{u.phone}</td>
+                    <td className="px-3 py-3 text-muted-foreground">{(u as any).city || "—"}</td>
                     <td className="px-3 py-3"><Pill tone={r.t}>{r.l}</Pill></td>
                     <td className="px-3 py-3">
                       <button onClick={() => toggle(u)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.active ? "bg-emerald-500" : "bg-muted"}`}>
@@ -249,7 +252,7 @@ function UsersPage() {
               <Lb label={L("البريد", "Email")}><input className={ic} type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} /></Lb>
               <Lb label={L("الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></Lb>
               <Lb label={L("المدينة", "City")}><input className={ic} value={f.city} onChange={e => setF({ ...f, city: e.target.value })} /></Lb>
-              <Lb label={L("رابط الصورة", "Avatar URL")} full><input className={ic} dir="ltr" value={f.avatar} onChange={e => setF({ ...f, avatar: e.target.value })} placeholder="https://..." /></Lb>
+              
               <Lb label={L("الدور", "Role")}>
                 <select className={ic} value={f.role} onChange={e => setF({ ...f, role: e.target.value as any })}>
                   <option value="admin">{L("مدير", "Admin")}</option>
