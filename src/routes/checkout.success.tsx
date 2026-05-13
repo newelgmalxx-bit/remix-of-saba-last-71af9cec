@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
+import { Check, CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
@@ -9,8 +9,10 @@ import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
-import { formatCurrency, paymentName, type Order, type PaymentMethod } from "@/data/account";
+import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
+
+const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -40,7 +42,11 @@ function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [verifying, setVerifying] = useState(!!actualPaymentId);
-  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1" || codFlag);
+  const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1");
+  const [showGateways, setShowGateways] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
   useEffect(() => {
@@ -88,7 +94,25 @@ function SuccessPage() {
   // Fallback: rebuild a minimal Order from the lastOrder we saved before checkout
   // so the user always sees their order summary even if the API fetch fails.
   const fallbackOrder: Order | null = (() => {
-    if (order || !lastOrder) return null;
+    if (order) return null;
+    if (!lastOrder) {
+      if (!id && !o) return null;
+      return {
+        id: id || o || "",
+        number: o || id || "",
+        createdAt: new Date().toISOString(),
+        status: "pending" as any,
+        payment: codFlag ? "cod" : "mayfatoorah",
+        paid: false,
+        paymentStatus: "unpaid",
+        invoice: null,
+        items: [],
+        subtotal: 0,
+        vat: 0,
+        total: 0,
+        timeline: [],
+      };
+    }
     const matchesById = id && (lastOrder.orderId === id || lastOrder.orderNumber === id);
     const matchesByNumber = o && lastOrder.orderNumber === o;
     if (!matchesById && !matchesByNumber && id) return null;
@@ -121,9 +145,30 @@ function SuccessPage() {
   })();
 
   const baseOrder = order || fallbackOrder;
-  const displayOrder: Order | null = baseOrder
-    ? (paidFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : baseOrder)
-    : null;
+  const displayOrder: Order | null = baseOrder ? (() => {
+    const effectivePaid = codFlag ? false : (paidFlag || baseOrder.paid);
+    return {
+      ...baseOrder,
+      paid: effectivePaid,
+      paymentStatus: effectivePaid ? "paid" : "unpaid",
+    };
+  })() : null;
+
+  const handlePayNow = async () => {
+    if (!displayOrder) return;
+    setPaying(true);
+    setPayError(null);
+    try {
+      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: selectedGateway });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. اختر بوابة أخرى أو حاول لاحقًا." : "Could not get the payment URL. Choose another gateway or try later.");
+    } catch (e: any) {
+      setPayError(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -149,7 +194,12 @@ function SuccessPage() {
               {lang === "ar" ? "تم الدفع" : "Paid"}
             </div>
           )}
-          {displayOrder && !displayOrder.paid && (
+          {displayOrder && !displayOrder.paid && codFlag && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
+              {lang === "ar" ? "الدفع عند الاستلام — لم يتم الدفع بعد" : "Cash on delivery — payment pending"}
+            </div>
+          )}
+          {displayOrder && !displayOrder.paid && !codFlag && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
               {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
             </div>
@@ -164,29 +214,31 @@ function SuccessPage() {
 
         {displayOrder && (
           <div className="mt-8 space-y-5">
-            <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-              <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
-              <div className="space-y-3">
-                {displayOrder.items.map((it) => (
-                  <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
-                        <FileText className="h-5 w-5" />
+            {displayOrder.items.length > 0 && (
+              <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
+                <h3 className="mb-4 text-base font-bold">{t("account.order.items")}</h3>
+                <div className="space-y-3">
+                  {displayOrder.items.map((it) => (
+                    <div key={it.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light text-primary">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold line-clamp-1">{it.serviceTitle}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {t("account.order.plan")} {it.planName} • {t("account.order.qty")} <span data-ltr-number>{it.qty}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-bold line-clamp-1">{it.serviceTitle}</div>
-                        <p className="text-xs text-muted-foreground">
-                          {t("account.order.plan")} {it.planName} • {t("account.order.qty")} <span data-ltr-number>{it.qty}</span>
-                        </p>
+                      <div className="shrink-0 text-end">
+                        <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty, lang)}</div>
                       </div>
                     </div>
-                    <div className="shrink-0 text-end">
-                      <div className="text-sm font-bold text-primary" data-ltr-number>{formatCurrency(it.price * it.qty, lang)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
               <h3 className="text-base font-bold">{t("account.order.summary")}</h3>
@@ -232,20 +284,48 @@ function SuccessPage() {
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </a>
               )}
-              {!displayOrder.paid && !payUrl && (
+              {!displayOrder.paid && !payUrl && !showGateways && (
                 <button
-                  onClick={async () => {
-                    try {
-                      const res: any = await account.payOrder(displayOrder.id, { paymentMethod: "all" });
-                      const url = res?.data?.paymentUrl || res?.paymentUrl;
-                      if (url) { window.location.href = url; return; }
-                    } catch {}
-                  }}
+                  type="button"
+                  onClick={() => setShowGateways(true)}
                   className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
                 >
                   <Wallet className="h-4 w-4" />
                   {lang === "ar" ? "ادفع الآن" : "Pay now"}
                 </button>
+              )}
+              {!displayOrder.paid && !payUrl && showGateways && (
+                <div className="w-full rounded-2xl border border-border bg-card p-4 text-start shadow-sm">
+                  <div className="mb-3 text-sm font-bold">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                      const Icon = m.icon;
+                      const active = selectedGateway === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setSelectedGateway(m.id)}
+                          className={`flex items-center gap-3 rounded-xl border p-3 text-sm font-bold transition ${active ? "border-primary bg-primary-light text-primary" : "border-border bg-background hover:border-primary/50"}`}
+                        >
+                          {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-12 object-contain" /> : <Icon className="h-5 w-5" />}
+                          <span className="flex-1">{m.name}</span>
+                          {active && <Check className="h-4 w-4" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {payError && <div className="mt-3 text-sm font-bold text-destructive">{payError}</div>}
+                  <button
+                    type="button"
+                    onClick={handlePayNow}
+                    disabled={paying}
+                    className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dark px-6 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+                  >
+                    {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                    {lang === "ar" ? "المتابعة للدفع" : "Continue to payment"}
+                  </button>
+                </div>
               )}
               {displayOrder.paid && (
                 <button
