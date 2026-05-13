@@ -26,14 +26,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    try {
+    const tryMe = async () => {
       const { user } = await api.auth.me();
       setUser(user);
+    };
+    try {
+      await tryMe();
     } catch (e) {
-      // Only treat 401 as a real auth failure. 5xx / network = keep existing session.
       if (e instanceof ApiError && e.status === 401) {
-        clearToken();
-        setUser(null);
+        // Try one refresh round-trip before giving up.
+        try {
+          const r = await authApi.refresh();
+          if (r.data?.token) setToken(r.data.token);
+          await tryMe();
+        } catch (e2) {
+          if (e2 instanceof ApiError && e2.status === 401) {
+            clearToken();
+            setUser(null);
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn("auth refresh failed (non-401), keeping current session", e2);
+          }
+        }
       } else {
         // eslint-disable-next-line no-console
         console.warn("auth.me failed (non-401), keeping current session", e);
