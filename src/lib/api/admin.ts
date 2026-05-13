@@ -39,14 +39,20 @@ export const admin = {
     return request(`/admin/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
   },
   // Dedicated payment endpoint: PUT /admin/orders/{id}/payment  body: { payment_method, payment_status }
-  updateOrderPayment: (id: string, body: { payment_method?: string; payment_status?: string }) =>
-    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify(body) }),
+  updateOrderPayment: (id: string, body: { payment_method?: string; payment_status?: string; paymentMethod?: string; paymentStatus?: string }) => {
+    const payload: Record<string, any> = {};
+    const method = body.payment_method ?? body.paymentMethod;
+    const status = body.payment_status ?? body.paymentStatus;
+    if (method != null) { payload.payment_method = method; payload.paymentMethod = method; }
+    if (status != null) { payload.payment_status = status; payload.paymentStatus = status; }
+    return request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify(payload) });
+  },
   updateOrderPaymentStatus: (id: string, paymentStatus: string) =>
-    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_status: paymentStatus }) }),
+    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_status: paymentStatus, paymentStatus }) }),
   updateOrderPaymentMethod: (id: string, paymentMethod: string) =>
-    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_method: paymentMethod }) }),
+    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_method: paymentMethod, paymentMethod }) }),
   confirmOrderPayment: (id: string) =>
-    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_status: 'paid' }) }),
+    request(`/admin/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ payment_status: 'paid', paymentStatus: 'paid' }) }),
   addOrderNote: (id: string, text: string) => request(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify({ note: text }) }),
 
   getBookings: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/bookings${q ? '?' + q : ''}`); },
