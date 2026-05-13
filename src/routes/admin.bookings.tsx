@@ -398,7 +398,7 @@ function BookingsPage() {
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex gap-1">
-                        <button onClick={() => openEdit(b)} title={L("تعديل", "Edit")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-foreground/70"><Pencil className="h-4 w-4" /></button>
+                        
                         <button onClick={() => remove(b.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </td>
