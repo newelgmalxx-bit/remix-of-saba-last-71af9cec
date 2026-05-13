@@ -308,7 +308,7 @@ function PaymentResultPage() {
           {kind === "failed" && (
             <>
               <Link
-                to={"/cart" as any}
+                to={"/checkout" as any}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
               >
                 <RotateCcw className="h-4 w-4" />
