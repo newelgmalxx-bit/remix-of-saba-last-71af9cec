@@ -1,16 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Package, Download, FileText, Loader2, Receipt, Calendar, Wallet } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
-import { account } from "@/lib/api";
+import { account, checkout as checkoutApi } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
-import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -18,6 +17,7 @@ export const Route = createFileRoute("/checkout/success")({
     order: z.string().optional(),
     orderId: z.string().optional(),
     paymentId: z.string().optional(),
+    Id: z.string().optional(),
     payUrl: z.string().optional(),
     paid: z.string().optional(),
     cod: z.string().optional(),
