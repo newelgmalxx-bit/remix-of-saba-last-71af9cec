@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import api, { clearToken, getToken, setToken, ApiError } from "@/lib/api";
+import { auth as authApi } from "@/lib/api/auth";
 import type { User } from "@/lib/api";
 
 type AuthCtx = {
