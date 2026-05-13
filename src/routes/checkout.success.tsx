@@ -94,7 +94,25 @@ function SuccessPage() {
   // Fallback: rebuild a minimal Order from the lastOrder we saved before checkout
   // so the user always sees their order summary even if the API fetch fails.
   const fallbackOrder: Order | null = (() => {
-    if (order || !lastOrder) return null;
+    if (order) return null;
+    if (!lastOrder) {
+      if (!id && !o) return null;
+      return {
+        id: id || o || "",
+        number: o || id || "",
+        createdAt: new Date().toISOString(),
+        status: "pending" as any,
+        payment: codFlag ? "cod" : "mayfatoorah",
+        paid: false,
+        paymentStatus: "unpaid",
+        invoice: null,
+        items: [],
+        subtotal: 0,
+        vat: 0,
+        total: 0,
+        timeline: [],
+      };
+    }
     const matchesById = id && (lastOrder.orderId === id || lastOrder.orderNumber === id);
     const matchesByNumber = o && lastOrder.orderNumber === o;
     if (!matchesById && !matchesByNumber && id) return null;
@@ -127,9 +145,14 @@ function SuccessPage() {
   })();
 
   const baseOrder = order || fallbackOrder;
-  const displayOrder: Order | null = baseOrder
-    ? (paidFlag && !codFlag ? { ...baseOrder, paid: true, paymentStatus: "paid" } : { ...baseOrder, paid: false, paymentStatus: "unpaid" })
-    : null;
+  const displayOrder: Order | null = baseOrder ? (() => {
+    const effectivePaid = codFlag ? false : (paidFlag || baseOrder.paid);
+    return {
+      ...baseOrder,
+      paid: effectivePaid,
+      paymentStatus: effectivePaid ? "paid" : "unpaid",
+    };
+  })() : null;
 
   const handlePayNow = async () => {
     if (!displayOrder) return;
