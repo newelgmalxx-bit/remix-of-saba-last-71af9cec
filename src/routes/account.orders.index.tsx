@@ -31,6 +31,46 @@ function OrdersList() {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const reload = () => {
+    setLoading(true);
+    account.listOrders({ status: filter === "all" ? undefined : filter, limit: 50 })
+      .then((res) => setOrders((res.items || []).map(normalizeOrder)))
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  };
+
+  const handlePayMyfatoorah = async (o: Order) => {
+    if (actionId) return;
+    setActionId(o.id);
+    try {
+      const res: any = await account.payOrder(o.id, { paymentMethod: "myfatoorah" });
+      const url = res?.data?.paymentUrl || res?.paymentUrl;
+      if (url) { window.location.href = url; return; }
+      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء الدفع" : "Could not start payment"));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleConfirmCod = async (o: Order) => {
+    if (actionId) return;
+    const ok = window.confirm(lang === "ar" ? "هل تم استلام المبلغ نقدًا؟" : "Confirm cash payment received?");
+    if (!ok) return;
+    setActionId(o.id);
+    try {
+      await account.payOrder(o.id, { paymentMethod: "cod" });
+      toast.success(lang === "ar" ? "تم تأكيد الدفع" : "Payment confirmed");
+      reload();
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "ar" ? "تعذّر تأكيد الدفع" : "Could not confirm payment"));
+    } finally {
+      setActionId(null);
+    }
+  };
 
   useEffect(() => {
     let alive = true;
