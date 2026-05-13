@@ -156,7 +156,7 @@ function SuccessPage() {
           )}
         </div>
 
-        {(loading || (verifying && !displayOrder)) && (
+        {((loading && !displayOrder) || (verifying && !displayOrder)) && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-10 text-center">
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
           </div>
