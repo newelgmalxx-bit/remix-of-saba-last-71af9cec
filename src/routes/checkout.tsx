@@ -57,13 +57,16 @@ function CheckoutPage() {
   };
 
   if (submitting) {
+    const isCod = payment === "cod";
     return (
       <div className="flex min-h-screen flex-col bg-muted/30">
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <h1 className="mt-6 text-xl font-bold">
-            {lang === "ar" ? "جارٍ تحويلك لبوابة الدفع..." : "Redirecting to payment gateway..."}
+            {isCod
+              ? (lang === "ar" ? "جارٍ تأكيد طلبك..." : "Confirming your order...")
+              : (lang === "ar" ? "جارٍ تحويلك لبوابة الدفع..." : "Redirecting to payment gateway...")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {lang === "ar" ? "من فضلك لا تغلق هذه الصفحة." : "Please do not close this page."}
