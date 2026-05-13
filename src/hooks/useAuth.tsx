@@ -3,12 +3,16 @@ import api, { clearToken, getToken, setToken, ApiError } from "@/lib/api";
 import { auth as authApi } from "@/lib/api/auth";
 import type { User } from "@/lib/api";
 
+type LoginResult =
+  | { user: User; token: string; requiresOtp?: false }
+  | { user: null; token: null; requiresOtp: true; email?: string; message?: string };
+
 type AuthCtx = {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (creds: { phone?: string; email?: string; password: string }) => Promise<User>;
+  login: (creds: { phone?: string; email?: string; password: string }) => Promise<LoginResult>;
   signup: (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
