@@ -115,9 +115,11 @@ export const admin = {
   },
 
   getUsers: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/users${q ? '?' + q : ''}`); },
+  getUser: (id: string) => request<ApiResponse<{ user: any }>>(`/admin/users/${id}`),
   inviteUser: (body: any) => request('/admin/users', { method: 'POST', body: JSON.stringify(body) }),
   updateUser: (id: string, body: any) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   updateUserRole: (id: string, role: string) => request(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify({ role }) }),
+  updateUserStatus: (id: string, status: string) => request(`/admin/users/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   deleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
 
   getSettings: (group: string) => request(group === 'site' ? `/settings` : `/admin/settings`),
