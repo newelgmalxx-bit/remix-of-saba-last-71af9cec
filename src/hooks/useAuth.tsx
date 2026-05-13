@@ -9,7 +9,7 @@ type AuthCtx = {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (creds: { phone?: string; email?: string; password: string }) => Promise<User>;
-  signup: (body: { name: string; email: string; phone: string; password: string }) => Promise<User>;
+  signup: (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
