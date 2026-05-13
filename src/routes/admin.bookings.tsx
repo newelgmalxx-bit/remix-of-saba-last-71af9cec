@@ -141,11 +141,39 @@ function BookingsPage() {
   };
 
   const openEdit = (b: AdminBooking) => { setEditing(b); setEditForm({ ...b }); };
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editing) return;
-    setBookings(bookings.map(b => b.id === editing.id ? { ...b, ...editForm } as AdminBooking : b));
-    toast.success(L("تم تحديث الطلب", "Order updated"));
-    setEditing(null);
+    const id = editing.id;
+    const prev = bookings;
+    // Optimistic update
+    setBookings(bookings.map(b => b.id === id ? { ...b, ...editForm } as AdminBooking : b));
+    try {
+      // 1) Core fields → PUT /admin/orders/{id}
+      const corePayload: any = {};
+      if (editForm.client !== undefined) { corePayload.contact_name = editForm.client; corePayload.contactName = editForm.client; }
+      if (editForm.email !== undefined) { corePayload.contact_email = editForm.email; corePayload.contactEmail = editForm.email; }
+      if (editForm.phone !== undefined) { corePayload.contact_phone = editForm.phone; corePayload.contactPhone = editForm.phone; }
+      if (editForm.city !== undefined) { corePayload.contact_city = editForm.city; corePayload.contactCity = editForm.city; }
+      if (editForm.service !== undefined) { corePayload.service = editForm.service; corePayload.service_title = editForm.service; }
+      if (editForm.total !== undefined) { corePayload.total = Number(editForm.total); }
+      if (Object.keys(corePayload).length) {
+        await adminApi.updateOrder(id, corePayload);
+      }
+      // 2) Status → PUT /admin/orders/{id}/status
+      if (editForm.status && editForm.status !== editing.status) {
+        await adminApi.updateOrderStatus(id, { status: editForm.status });
+      }
+      // 3) Payment method → PUT /admin/orders/{id}/payment
+      if (editForm.payment && editForm.payment !== editing.payment) {
+        await adminApi.updateOrderPaymentMethod(id, editForm.payment);
+      }
+      toast.success(L("تم تحديث الطلب", "Order updated"));
+      setEditing(null);
+      reloadBookings();
+    } catch (e: any) {
+      setBookings(prev);
+      toast.error(e?.message || L("تعذر تحديث الطلب", "Failed to update order"));
+    }
   };
   const remove = async (id: string) => {
     if (!window.confirm(L("هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع.", "Are you sure you want to delete this order? This cannot be undone."))) return;
