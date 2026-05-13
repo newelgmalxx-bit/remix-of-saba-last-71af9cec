@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user;
   }, []);
 
-  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string }) => {
+  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => {
     const { user, token } = await api.auth.signup(body);
     setToken(token);
     setUser(user);
