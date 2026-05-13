@@ -147,9 +147,17 @@ function BookingsPage() {
     toast.success(L("تم تحديث الطلب", "Order updated"));
     setEditing(null);
   };
-  const remove = (id: string) => {
+  const remove = async (id: string) => {
+    if (!window.confirm(L("هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع.", "Are you sure you want to delete this order? This cannot be undone."))) return;
+    const prev = bookings;
     setBookings(bookings.filter(b => b.id !== id));
-    toast.success(L("تم الحذف", "Deleted"));
+    try {
+      await adminApi.deleteOrder(id);
+      toast.success(L("تم الحذف", "Deleted"));
+    } catch (e: any) {
+      setBookings(prev);
+      toast.error(e?.message || L("تعذر الحذف", "Failed to delete"));
+    }
   };
 
   const isCod = (p: string) => {
