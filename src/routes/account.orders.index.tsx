@@ -164,7 +164,27 @@ function OrdersList() {
                     <div className="text-xs text-muted-foreground">{t("account.orders.totalLabel")}</div>
                     <div className="text-lg font-bold text-primary" data-ltr-number>{formatCurrency(o.total, lang)}</div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    {!o.paid && o.payment === "cod" && (
+                      <button
+                        onClick={() => handleConfirmCod(o)}
+                        disabled={actionId === o.id}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-full bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      >
+                        {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {lang === "ar" ? "تأكيد الدفع" : "Confirm payment"}
+                      </button>
+                    )}
+                    {!o.paid && o.payment !== "cod" && (
+                      <button
+                        onClick={() => handlePayMyfatoorah(o)}
+                        disabled={actionId === o.id}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
+                      >
+                        {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                        {lang === "ar" ? "ادفع عبر ماي فاتورة" : "Pay via MyFatoorah"}
+                      </button>
+                    )}
                     {o.paid && (
                       <button
                         onClick={() => downloadInvoice(o, user?.name || "")}
