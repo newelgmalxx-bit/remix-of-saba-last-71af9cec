@@ -79,6 +79,15 @@ function write(plans: Plan[]) {
   window.dispatchEvent(new Event("saba:plans"));
 }
 
+function formatPriceStr(v: any): string {
+  if (v == null || v === "") return "";
+  const n = Number(String(v).replace(/[^\d.\-]/g, ""));
+  if (!Number.isNaN(n) && Number.isFinite(n)) {
+    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n));
+  }
+  return String(v).replace(/[.,]0+$/, "");
+}
+
 function fromApi(p: any): Plan {
   const amount = p?.price?.amount ?? p?.price ?? p?.priceAmount ?? 0;
   const original = p?.price?.originalAmount ?? p?.originalPrice ?? p?.original_price ?? null;
@@ -101,8 +110,8 @@ function fromApi(p: any): Plan {
     id: String(p.id ?? `p_${Math.random().toString(36).slice(2)}`),
     name: nameAr || nameEn || "",
     nameEn: nameEn || nameAr || "",
-    price: amount != null ? String(amount) : "",
-    originalPrice: original != null ? String(original) : undefined,
+    price: amount != null ? formatPriceStr(amount) : "",
+    originalPrice: original != null ? formatPriceStr(original) : undefined,
     featured: !!(p.highlighted ?? p.featured ?? p.is_featured),
     badge: badgeAr,
     badgeEn,

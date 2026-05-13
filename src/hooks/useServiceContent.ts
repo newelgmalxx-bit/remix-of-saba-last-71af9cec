@@ -8,6 +8,15 @@ const KEY = "saba_service_overrides_v1";
 const REMOTE_KEY = "saba_service_remote_v1";
 const REMOTE_SLUGS_KEY = "saba_service_remote_slugs_v1";
 
+function formatPriceStr(v: any): string {
+  if (v == null || v === "") return "";
+  const n = Number(String(v).replace(/[^\d.\-]/g, ""));
+  if (!Number.isNaN(n) && Number.isFinite(n)) {
+    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n));
+  }
+  return String(v).replace(/[.,]0+$/, "");
+}
+
 async function refreshRemoteServices() {
   try {
     const res = await servicesApi.list();
@@ -35,8 +44,8 @@ async function refreshRemoteServices() {
         subtitleEn: s.subtitleEn || cur.subtitleEn,
         category: s.category || cur.category,
         bannerImage: (s as any).bannerImage || s.cover || cur.bannerImage,
-        price: amount != null ? String(amount) : cur.price,
-        originalPrice: originalAmount != null ? String(originalAmount) : cur.originalPrice,
+        price: amount != null ? formatPriceStr(amount) : cur.price,
+        originalPrice: originalAmount != null ? formatPriceStr(originalAmount) : cur.originalPrice,
         discountPercent: discountPercent != null ? Number(discountPercent) : cur.discountPercent,
       };
     }
