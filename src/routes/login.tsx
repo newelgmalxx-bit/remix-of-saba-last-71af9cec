@@ -32,6 +32,52 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  // Email OTP flow state
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpInfo, setOtpInfo] = useState<string | null>(null);
+
+  async function requestOtp() {
+    setError(null);
+    setOtpInfo(null);
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(otpEmail.trim())) {
+      setError(lang === "ar" ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await api.auth.requestEmailOtp({ email: otpEmail.trim() });
+      setOtpSent(true);
+      setOtpInfo(res?.message || (lang === "ar" ? "إذا كان البريد مسجلًا، ستصلك رسالة برمز الدخول" : "If your email is registered, an OTP has been sent"));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : (lang === "ar" ? "تعذر إرسال الرمز" : "Failed to send code"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function verifyOtp() {
+    setError(null);
+    if (!/^\d{4,8}$/.test(otpCode.trim())) {
+      setError(lang === "ar" ? "أدخل الرمز المكوّن من 6 أرقام" : "Enter the 6-digit code");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { user, token } = await api.auth.verifyEmailOtp({ email: otpEmail.trim(), otp: otpCode.trim() });
+      setToken(token);
+      await refresh();
+      toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
+      const isAdminUser = ["admin", "owner", "manager", "support"].includes(user.role);
+      navigate({ to: (redirectTo && !isAdminUser ? redirectTo : (isAdminUser ? "/admin" : "/account")) as any });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : (lang === "ar" ? "رمز غير صحيح" : "Invalid code"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
