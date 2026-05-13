@@ -2,16 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Package, Download, MessageSquarePlus, ChevronLeft, ChevronRight, Calendar, CreditCard,
-  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet,
+  CheckCircle2, Circle, FileText, Receipt, Loader2, Wallet, Check,
 } from "lucide-react";
 import { AccountLayout, StatusBadge } from "@/components/account/AccountLayout";
-import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, type Order } from "@/data/account";
+import { statusLabels, statusFlow, formatCurrency, paymentName, paymentIcon, paymentMethods, type Order, type PaymentMethod } from "@/data/account";
 import { downloadInvoice } from "@/lib/invoice";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
+
+const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -52,18 +54,20 @@ function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [showGateways, setShowGateways] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [payError, setPayError] = useState<string | null>(null);
   const handlePayNow = async () => {
     if (!order || paying) return;
     setPaying(true);
+    setPayError(null);
     try {
-      const res: any = await account.payOrder(order.id, { paymentMethod: order.payment || "myfatoorah" });
+      const res: any = await account.payOrder(order.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
-      const { toast } = await import("sonner");
-      toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
+      setPayError(lang === "ar" ? "تعذّر الحصول على رابط الدفع. اختر بوابة دفع أخرى أو حاول لاحقًا." : "Could not get payment URL. Choose another gateway or try later.");
     } catch (e: any) {
-      const { toast } = await import("sonner");
-      toast.error(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
+      setPayError(e?.message || (lang === "ar" ? "تعذّر بدء عملية الدفع" : "Could not start payment"));
     } finally {
       setPaying(false);
     }
@@ -266,15 +270,46 @@ function OrderDetail() {
                 <div className="text-xs text-muted-foreground">{order.paid ? t("account.order.paid") : t("account.order.awaitingPayment")}</div>
               </div>
             </div>
-            {!order.paid && order.status !== "cancelled" && (
+            {!order.paid && order.status !== "cancelled" && !showGateways && (
               <button
-                onClick={handlePayNow}
-                disabled={paying}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+                onClick={() => setShowGateways(true)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95"
               >
-                {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                <Wallet className="h-4 w-4" />
                 {lang === "ar" ? "ادفع الآن" : "Pay now"}
               </button>
+            )}
+            {!order.paid && order.status !== "cancelled" && showGateways && (
+              <div className="mt-3 space-y-3">
+                <div className="text-xs font-bold text-muted-foreground">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
+                <div className="grid gap-2">
+                  {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                    const Icon = m.icon;
+                    const active = selectedGateway === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setSelectedGateway(m.id)}
+                        className={`flex items-center gap-3 rounded-xl border p-3 text-sm font-bold transition ${active ? "border-primary bg-primary-light text-primary" : "border-border bg-background hover:border-primary/50"}`}
+                      >
+                        {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-12 object-contain" /> : <Icon className="h-5 w-5" />}
+                        <span className="flex-1 text-start">{m.name}</span>
+                        {active && <Check className="h-4 w-4" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                {payError && <div className="text-sm font-bold text-destructive">{payError}</div>}
+                <button
+                  onClick={handlePayNow}
+                  disabled={paying}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-60"
+                >
+                  {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                  {lang === "ar" ? "المتابعة للدفع" : "Continue to payment"}
+                </button>
+              </div>
             )}
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
