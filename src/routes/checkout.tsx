@@ -9,6 +9,7 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError } from "@/lib/api";
 import { toast } from "sonner";
+import { useCheckoutStore } from "@/store/checkoutStore";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -130,16 +131,30 @@ function CheckoutPage() {
         })),
       });
       try {
-        localStorage.setItem(
-          "saba_last_order",
-          JSON.stringify({ orderId: res.orderId, number: res.orderNumber, total, payment, items, info }),
-        );
+        useCheckoutStore.getState().setLastOrder({
+          orderId: res.orderId,
+          orderNumber: res.orderNumber,
+          total,
+          payment,
+          items: items.map((it) => ({
+            serviceSlug: it.serviceSlug,
+            serviceTitle: it.serviceTitle,
+            planId: it.planId,
+            planName: it.planName,
+            price: it.price,
+            qty: it.qty,
+          })),
+          info: {
+            name: info.name,
+            email: info.email,
+            phone: info.phone,
+            notes: info.notes || undefined,
+          },
+        });
       } catch {}
       await clear();
       const isCod = payment === "cod";
       // MyFatoorah (or any online gateway): redirect to the payment URL.
-      // If the create response didn't include one, ask the dedicated
-      // /checkout/myfatoorah endpoint to start a session for this order.
       if (!isCod) {
         let url = res.paymentUrl as string | null | undefined;
         if (!url && res.orderId) {
@@ -154,22 +169,19 @@ function CheckoutPage() {
           window.location.href = url;
           return;
         }
-        // No payment URL available — send user to the order summary
-        // (which will offer a "Pay now" button via /payment endpoint).
+        // No payment URL available — send user to success page (will offer Pay now).
         toast.message(lang === "ar" ? "تم إنشاء الطلب — أكمل الدفع" : "Order created — complete payment");
         navigate({
-          to: "/order-summary/$orderId" as any,
-          params: { orderId: res.orderId } as any,
-          search: { o: res.orderNumber } as any,
+          to: "/checkout/success" as any,
+          search: { order: res.orderId, o: res.orderNumber } as any,
         });
         return;
       }
-      // Cash on delivery: go straight to order summary.
+      // Cash on delivery: go straight to success page.
       toast.success(lang === "ar" ? "تم استلام طلبك بنجاح" : "Order placed successfully");
       navigate({
-        to: "/order-summary/$orderId" as any,
-        params: { orderId: res.orderId } as any,
-        search: { o: res.orderNumber } as any,
+        to: "/checkout/success" as any,
+        search: { order: res.orderId, o: res.orderNumber, cod: "true" } as any,
       });
     } catch (err) {
       // Auth errors and validation errors should still surface to the user.
@@ -187,10 +199,26 @@ function CheckoutPage() {
         // so they always see their order details after checkout.
         const localOrderNumber = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
         try {
-          localStorage.setItem(
-            "saba_last_order",
-            JSON.stringify({ orderId: null, number: localOrderNumber, total, payment, items, info }),
-          );
+          useCheckoutStore.getState().setLastOrder({
+            orderId: null,
+            orderNumber: localOrderNumber,
+            total,
+            payment,
+            items: items.map((it) => ({
+              serviceSlug: it.serviceSlug,
+              serviceTitle: it.serviceTitle,
+              planId: it.planId,
+              planName: it.planName,
+              price: it.price,
+              qty: it.qty,
+            })),
+            info: {
+              name: info.name,
+              email: info.email,
+              phone: info.phone,
+              notes: info.notes || undefined,
+            },
+          });
         } catch {}
         await clear();
         toast.success(lang === "ar" ? "تم استلام طلبك" : "Order received");
