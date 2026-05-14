@@ -643,7 +643,7 @@ export const dict = {
   "svcDetail.badge.available": { ar: "متاحة الآن", en: "Available now" },
   "svcDetail.badge.pro": { ar: "خدمة احترافية", en: "Professional service" },
   "svcDetail.rating.count": { ar: "(+180 تقييم)", en: "(180+ reviews)" },
-  "svcDetail.price.from": { ar: "يبدأ من", en: "Starts from" },
+  "svcDetail.price.from": { ar: "", en: "" },
   "svcDetail.price.vat": { ar: "شامل ضريبة القيمة المضافة", en: "VAT included" },
   "svcDetail.allPlans": { ar: "كل الباقات", en: "All plans" },
   "svcDetail.orderNow": { ar: "اطلب الآن", en: "Order now" },
