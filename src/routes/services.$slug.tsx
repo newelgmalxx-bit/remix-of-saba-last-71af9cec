@@ -17,6 +17,7 @@ import { useCart } from "@/hooks/useCart";
 import { useFavorite } from "@/components/sections/ServicesGrid";
 import { SarIcon } from "@/components/ui/SarIcon";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { useAllReviews } from "@/hooks/useAllReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
