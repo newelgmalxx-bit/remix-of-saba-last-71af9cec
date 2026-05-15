@@ -139,11 +139,12 @@ function ServiceDetailPage() {
   const startingPrice = svcPriceStr
     ? parseInt(String(svcPriceStr).replace(/[^\d]/g, ""), 10) || 0
     : startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
+  // Only consider an "original price" when the service itself defines one — do
+  // not fall back to plan pricing, otherwise a strike-through old price shows
+  // on every service even when the admin didn't set one.
   const startingOriginal = svcOriginalStr
     ? parseInt(String(svcOriginalStr).replace(/[^\d]/g, ""), 10) || 0
-    : startingPlan?.originalPrice
-      ? parseInt(startingPlan.originalPrice.replace(/[^\d]/g, ""), 10) || 0
-      : 0;
+    : 0;
   const startingDiscount =
     service.discountPercent != null && service.discountPercent > 0
       ? service.discountPercent
@@ -151,7 +152,7 @@ function ServiceDetailPage() {
         ? Math.round(((startingOriginal - startingPrice) / startingOriginal) * 100)
         : 0;
   const displayPrice = svcPriceStr ?? startingPlan?.price ?? "—";
-  const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
+  const displayOriginal = svcOriginalStr;
   const heroImg = service.bannerImage || servicesHero;
   const handleAddToCart = () => {
     if (!isAuthenticated) {
@@ -282,7 +283,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* Overview */}
-        <section className="py-12">
+        <section className="py-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -312,7 +313,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* What you get */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -337,7 +338,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* How we work */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-8 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
               <div className={startAlign}>
@@ -368,7 +369,7 @@ function ServiceDetailPage() {
         <PortfolioSection />
 
         {/* Stats */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -388,7 +389,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* Testimonials */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -401,7 +402,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* FAQ */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -428,7 +429,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* Reviews */}
-        <section className="pb-12">
+        <section className="pb-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8">
               <div className={startAlign}>
@@ -492,7 +493,7 @@ function ServiceDetailPage() {
         </section>
 
         {/* CTA */}
-        <section className="pb-20">
+        <section className="pb-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary to-primary-dark px-8 py-12 text-center shadow-lg">
               <div className="pointer-events-none absolute -top-20 -right-10 h-60 w-60 rounded-full bg-white/5 blur-3xl" />
