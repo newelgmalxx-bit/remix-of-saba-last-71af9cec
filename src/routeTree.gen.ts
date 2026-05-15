@@ -39,6 +39,7 @@ import { Route as AdminSiteRouteImport } from './routes/admin.site'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminSeoRouteImport } from './routes/admin.seo'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
@@ -215,6 +216,11 @@ const AdminSeoRoute = AdminSeoRouteImport.update({
   path: '/seo',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -369,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
@@ -425,6 +432,7 @@ export interface FileRoutesByTo {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/site': typeof AdminSiteRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/services': typeof AdminServicesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteWithChildren
@@ -541,6 +550,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/seo'
     | '/admin/settings'
     | '/admin/site'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/portfolio'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
@@ -928,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reports': {
       id: '/admin/reports'
       path: '/reports'
@@ -1150,6 +1169,7 @@ interface AdminRouteChildren {
   AdminPlansRoute: typeof AdminPlansRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSeoRoute: typeof AdminSeoRoute
   AdminServicesRoute: typeof AdminServicesRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
@@ -1171,6 +1191,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPlansRoute: AdminPlansRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
   AdminSeoRoute: AdminSeoRoute,
   AdminServicesRoute: AdminServicesRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRouteWithChildren,

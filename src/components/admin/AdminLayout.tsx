@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, CalendarCheck, FileText, Users, Image as ImageIcon,
   BarChart3, FileSpreadsheet, Building2, Search, Target, CreditCard, Link2,
   UserCheck, Settings, ChevronDown, Bell, LogOut, Menu, User, Palette, Plug, Tag,
-  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket, ExternalLink,
+  Users2, BellRing, CheckCircle2, AlertCircle, ShoppingBag, LifeBuoy, Ticket, ExternalLink, Star,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -32,6 +32,7 @@ const navGroups: (NavItem | "sep")[] = [
   
   { to: "/admin/clients", ar: "العملاء", en: "Clients", icon: Users },
   { to: "/admin/tickets", ar: "التذاكر", en: "Tickets", icon: LifeBuoy },
+  { to: "/admin/reviews", ar: "التقييمات", en: "Reviews", icon: Star },
   // { to: "/admin/coupons", ar: "الكوبونات", en: "Coupons", icon: Ticket },
   { to: "/admin/portfolio", ar: "أعمالنا", en: "Portfolio", icon: ImageIcon },
   { to: "/admin/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
