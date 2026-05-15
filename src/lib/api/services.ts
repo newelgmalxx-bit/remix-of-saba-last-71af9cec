@@ -11,15 +11,16 @@ export const services = {
     request<ApiResponse<{ service: ServiceFull }>>(`/services/${slug}`),
 };
 
-// Reviews are listed publicly by service id. Use account.createReview for posting.
+// Public reviews. List by serviceSlug (or all). Create requires auth.
 export const reviews = {
-  list: (serviceId: string) =>
-    request<ApiResponse<any>>(`/reviews/${serviceId}`),
-  create: (serviceId: string, body: { rating: number; comment?: string }) =>
-    request('/account/reviews', {
-      method: 'POST',
-      body: JSON.stringify({ serviceId, rating: body.rating, comment: body.comment ?? '' }),
-    }),
+  list: (params?: { serviceSlug?: string; limit?: number }) => {
+    const q = params ? new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])
+    ).toString() : '';
+    return request<ApiResponse<{ items: any[]; average?: number; total?: number }>>(`/reviews${q ? '?' + q : ''}`);
+  },
+  create: (body: { serviceSlug: string; rating: number; text: string }) =>
+    request('/account/reviews', { method: 'POST', body: JSON.stringify(body) }),
 };
 
 // Favorites are keyed by service id per spec.
