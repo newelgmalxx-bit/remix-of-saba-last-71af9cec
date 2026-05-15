@@ -77,7 +77,7 @@ export function ServiceCard({
   slug, title, desc, banner, category, price, originalPrice, discountPercent,
 }: { slug: string; title: string; desc: string; banner?: string; category?: string; price?: string; originalPrice?: string; discountPercent?: number }) {
   const { t } = useLang();
-  const { rating, count } = getRatingFor(slug);
+  const { average, count } = useReviewsSummary(slug);
   const { fav, toggle } = useFavorite(slug);
   const computedDiscount =
     discountPercent != null
