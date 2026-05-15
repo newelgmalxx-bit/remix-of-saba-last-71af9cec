@@ -21,61 +21,54 @@ export const Route = createFileRoute("/portfolio")({
   }),
 });
 
-type CatKey = "all" | "web" | "apps" | "brand" | "social" | "marketing";
-
-const categories: { key: CatKey; tKey: TKey }[] = [
-  { key: "all", tKey: "portfolioPage.cat.all" },
-  { key: "web", tKey: "portfolioPage.cat.web" },
-  { key: "apps", tKey: "portfolioPage.cat.apps" },
-  { key: "brand", tKey: "portfolioPage.cat.brand" },
-  { key: "social", tKey: "portfolioPage.cat.social" },
-  { key: "marketing", tKey: "portfolioPage.cat.marketing" },
-];
-
 type Project = {
   id: string;
   title: string;
   client: string;
-  category: Exclude<CatKey, "all">;
-  tag: string;
+  category: string;
+  catLabel: string;
   img: string;
   year: string;
   featured?: boolean;
 };
 
-const arCategoryToKey: Record<string, Exclude<CatKey, "all">> = {
-  "ويب": "web",
-  "تطبيقات موبايل": "apps",
-  "هوية بصرية": "brand",
-  "تصميم واجهات": "brand",
-  "سوشيال ميديا": "social",
-  "تسويق": "marketing",
-  "فيديو": "social",
-  "أخرى": "web",
+const catLabelsEn: Record<string, string> = {
+  "ويب": "Web",
+  "تطوير ويب": "Web Development",
+  "تطبيقات موبايل": "Mobile Apps",
+  "هوية بصرية": "Branding",
+  "تصميم واجهات": "UI/UX Design",
+  "سوشيال ميديا": "Social Media",
+  "تسويق": "Marketing",
+  "فيديو": "Video",
+  "أخرى": "Other",
+};
+
+const categoryIconFor = (cat: string) => {
+  if (/(ويب|web)/i.test(cat)) return Layout;
+  if (/(تطبيق|app|mobile)/i.test(cat)) return Smartphone;
+  if (/(هوية|brand)/i.test(cat)) return Palette;
+  if (/(واجه|ui|ux)/i.test(cat)) return Layout;
+  if (/(سوشيال|social|فيديو|video)/i.test(cat)) return Sparkles;
+  if (/(تسويق|market|ads)/i.test(cat)) return Megaphone;
+  return TagIcon;
 };
 
 function mapApiItem(it: any, lang: "ar" | "en"): Project {
-  const rawCat: string = it.category ?? "";
-  const catKey = arCategoryToKey[rawCat] ?? "web";
+  const rawCat: string = (it.category ?? "").toString().trim();
+  const labelAr = rawCat || "أخرى";
+  const labelEn = catLabelsEn[rawCat] || rawCat || "Other";
   return {
     id: String(it.id ?? it._id ?? Math.random()),
     title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
     client: it.client ?? "",
-    category: catKey,
-    tag: rawCat || "Project",
+    category: rawCat,
+    catLabel: lang === "en" ? labelEn : labelAr,
     img: it.cover || it.image || "",
     year: it.year ?? String(new Date().getFullYear()),
     featured: !!it.featured,
   };
 }
-
-const categoryIcons: Record<Exclude<CatKey, "all">, typeof Layout> = {
-  web: Layout,
-  apps: Smartphone,
-  brand: Palette,
-  social: Sparkles,
-  marketing: Megaphone,
-};
 
 function PortfolioPage() {
   const { t, dir, lang } = useLang();
