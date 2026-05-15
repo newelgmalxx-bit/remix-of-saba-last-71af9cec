@@ -17,6 +17,7 @@ import { useCart } from "@/hooks/useCart";
 import { useFavorite } from "@/components/sections/ServicesGrid";
 import { SarIcon } from "@/components/ui/SarIcon";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { useAllReviews } from "@/hooks/useAllReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
@@ -125,7 +126,8 @@ function ServiceDetailPage() {
     ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
     : defaultSteps);
   const stats = service.stats && service.stats.length ? service.stats : defaultStats;
-  const realTestimonials = reviews.map((r) => ({ name: r.userName, role: "", text: r.comment }));
+  const allReviews = useAllReviews();
+  const realTestimonials = allReviews.map((r) => ({ name: r.userName, role: "", text: r.comment }));
   const testimonials = realTestimonials.length
     ? realTestimonials
     : (service.testimonials && service.testimonials.length ? service.testimonials : defaultTestimonials);
