@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { reviews as reviewsApi } from "@/lib/api/services";
+import { refreshReviewsSummary } from "@/hooks/useReviewsSummary";
 
 export type ServiceReview = {
   id: string;
