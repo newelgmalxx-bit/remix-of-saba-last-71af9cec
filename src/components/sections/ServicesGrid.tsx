@@ -2,19 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ImageIcon, Star, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAllServices } from "@/hooks/useServiceContent";
+import { useReviewsSummary } from "@/hooks/useReviewsSummary";
 import servicesHero from "@/assets/services-hero.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
 const FAV_KEY = "saba_service_favorites_v1";
-
-function getRatingFor(slug: string): { rating: number; count: number } {
-  let h = 0;
-  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
-  const rating = 4.3 + ((h % 70) / 100); // 4.30 - 4.99
-  const count = 38 + (h % 480); // 38 - 517
-  return { rating: Math.round(rating * 10) / 10, count };
-}
 
 function readFavs(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
