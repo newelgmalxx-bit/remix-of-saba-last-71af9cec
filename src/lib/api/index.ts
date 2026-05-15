@@ -370,6 +370,8 @@ const adminLegacy = {
       return r?.data ?? r;
     },
     setStatus: (id: string, status: string) => a.updateReviewStatus(id, status),
+    approve: (id: string) => a.approveReview(id),
+    reject: (id: string) => a.rejectReview(id),
     remove: (id: string) => a.deleteReview(id),
   },
   siteSettings: async () => {
