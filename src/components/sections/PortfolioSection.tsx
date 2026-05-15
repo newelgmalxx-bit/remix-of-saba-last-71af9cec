@@ -1,24 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/i18n/LanguageProvider";
-import type { TKey } from "@/i18n/translations";
 import { publicApi } from "@/lib/api/public";
 
-const tabs: { key: TKey; cats: string[] }[] = [
-  { key: "portfolio.tab.all", cats: [] },
-  { key: "portfolio.tab.web", cats: ["تطوير ويب", "ويب"] },
-  { key: "portfolio.tab.apps", cats: ["تطبيقات موبايل"] },
-  { key: "portfolio.tab.brand", cats: ["هوية بصرية"] },
-  { key: "portfolio.tab.ui", cats: ["تصميم واجهات"] },
-];
-
 type Project = {
+  id: string;
   title: { ar: string; en: string };
   cat: string;
   catLabel: { ar: string; en: string };
   brand: string;
-  year: string;
   tags: string[];
   img?: string;
   dark?: boolean;
@@ -44,11 +35,12 @@ const catLabelsEn: Record<string, string> = {
   "سوشيال ميديا": "Social Media",
   "تسويق": "Marketing",
   "فيديو": "Video",
+  "أخرى": "Other",
 };
 
 export function PortfolioSection() {
   const { t, lang, dir } = useLang();
-  const [active, setActive] = useState(tabs[0]);
+  const [active, setActive] = useState<string>("__all__");
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -60,13 +52,13 @@ export function PortfolioSection() {
         const mapped: Project[] = items.map((it: any, idx: number) => {
           const ar = it.titleAr || it.titleEn || "";
           const en = it.titleEn || it.titleAr || "";
-          const cat = it.category || "";
+          const cat = (it.category || "").toString().trim();
           return {
+            id: String(it.id ?? it._id ?? idx),
             title: { ar, en },
             cat,
-            catLabel: { ar: cat, en: catLabelsEn[cat] || cat },
-            brand: (it.client || en || ar).toString().toUpperCase(),
-            year: it.year || String(new Date().getFullYear()),
+            catLabel: { ar: cat || "أخرى", en: catLabelsEn[cat] || cat || "Other" },
+            brand: (en || ar).toString().toUpperCase(),
             tags: Array.isArray(it.tech) ? it.tech.slice(0, 3) : [],
             img: it.cover || it.image || undefined,
             dark: !it.cover && !it.image,
@@ -80,9 +72,17 @@ export function PortfolioSection() {
     return () => { cancelled = true; };
   }, []);
 
-  const filtered = active.cats.length === 0
-    ? projects
-    : projects.filter((p) => active.cats.includes(p.cat));
+  const cats = useMemo(() => {
+    const set = new Map<string, { ar: string; en: string }>();
+    projects.forEach((p) => {
+      if (!p.cat) return;
+      if (!set.has(p.cat)) set.set(p.cat, p.catLabel);
+    });
+    return Array.from(set.entries()).map(([key, label]) => ({ key, label }));
+  }, [projects]);
+
+  const filtered = active === "__all__" ? projects : projects.filter((p) => p.cat === active);
+
   return (
     <section className="bg-secondary/40 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -95,17 +95,27 @@ export function PortfolioSection() {
             <div className="mt-3 h-1 w-16 rounded-full bg-primary/70" />
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {tabs.map((tab) => (
+            <button
+              onClick={() => setActive("__all__")}
+              className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                active === "__all__"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-white text-foreground/70 hover:text-primary"
+              }`}
+            >
+              {t("portfolio.tab.all")}
+            </button>
+            {cats.map((c) => (
               <button
-                key={tab.key}
-                onClick={() => setActive(tab)}
+                key={c.key}
+                onClick={() => setActive(c.key)}
                 className={`rounded-full px-4 py-2 text-xs font-bold transition ${
-                  active.key === tab.key
+                  active === c.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-white text-foreground/70 hover:text-primary"
                 }`}
               >
-                {t(tab.key)}
+                {c.label[lang]}
               </button>
             ))}
           </div>
@@ -120,7 +130,7 @@ export function PortfolioSection() {
               : {};
             return (
             <Tag
-              key={p.brand}
+              key={p.id}
               {...linkProps}
               className={`group relative block overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${p.span} ${hasLink ? "cursor-pointer" : ""}`}
             >

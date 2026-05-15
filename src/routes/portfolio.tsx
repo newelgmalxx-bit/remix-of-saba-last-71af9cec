@@ -6,10 +6,9 @@ import portfolioBg from "@/assets/portfolio-bg.jpg";
 import {
   ArrowLeft, ChevronLeft, ExternalLink, Sparkles, Layout, Smartphone,
   Megaphone, Palette, Search, Star, Award, Briefcase,
-  Users, Globe2, Eye,
+  Users, Globe2, Eye, Tag as TagIcon,
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
-import type { TKey } from "@/i18n/translations";
 import { publicApi } from "@/lib/api/public";
 
 export const Route = createFileRoute("/portfolio")({
@@ -22,65 +21,58 @@ export const Route = createFileRoute("/portfolio")({
   }),
 });
 
-type CatKey = "all" | "web" | "apps" | "brand" | "social" | "marketing";
-
-const categories: { key: CatKey; tKey: TKey }[] = [
-  { key: "all", tKey: "portfolioPage.cat.all" },
-  { key: "web", tKey: "portfolioPage.cat.web" },
-  { key: "apps", tKey: "portfolioPage.cat.apps" },
-  { key: "brand", tKey: "portfolioPage.cat.brand" },
-  { key: "social", tKey: "portfolioPage.cat.social" },
-  { key: "marketing", tKey: "portfolioPage.cat.marketing" },
-];
-
 type Project = {
   id: string;
   title: string;
   client: string;
-  category: Exclude<CatKey, "all">;
-  tag: string;
+  category: string;
+  catLabel: string;
   img: string;
   year: string;
   featured?: boolean;
 };
 
-const arCategoryToKey: Record<string, Exclude<CatKey, "all">> = {
-  "ويب": "web",
-  "تطبيقات موبايل": "apps",
-  "هوية بصرية": "brand",
-  "تصميم واجهات": "brand",
-  "سوشيال ميديا": "social",
-  "تسويق": "marketing",
-  "فيديو": "social",
-  "أخرى": "web",
+const catLabelsEn: Record<string, string> = {
+  "ويب": "Web",
+  "تطوير ويب": "Web Development",
+  "تطبيقات موبايل": "Mobile Apps",
+  "هوية بصرية": "Branding",
+  "تصميم واجهات": "UI/UX Design",
+  "سوشيال ميديا": "Social Media",
+  "تسويق": "Marketing",
+  "فيديو": "Video",
+  "أخرى": "Other",
+};
+
+const categoryIconFor = (cat: string) => {
+  if (/(ويب|web)/i.test(cat)) return Layout;
+  if (/(تطبيق|app|mobile)/i.test(cat)) return Smartphone;
+  if (/(هوية|brand)/i.test(cat)) return Palette;
+  if (/(واجه|ui|ux)/i.test(cat)) return Layout;
+  if (/(سوشيال|social|فيديو|video)/i.test(cat)) return Sparkles;
+  if (/(تسويق|market|ads)/i.test(cat)) return Megaphone;
+  return TagIcon;
 };
 
 function mapApiItem(it: any, lang: "ar" | "en"): Project {
-  const rawCat: string = it.category ?? "";
-  const catKey = arCategoryToKey[rawCat] ?? "web";
+  const rawCat: string = (it.category ?? "").toString().trim();
+  const labelAr = rawCat || "أخرى";
+  const labelEn = catLabelsEn[rawCat] || rawCat || "Other";
   return {
     id: String(it.id ?? it._id ?? Math.random()),
     title: lang === "en" ? (it.titleEn || it.titleAr || "") : (it.titleAr || it.titleEn || ""),
     client: it.client ?? "",
-    category: catKey,
-    tag: rawCat || "Project",
+    category: rawCat,
+    catLabel: lang === "en" ? labelEn : labelAr,
     img: it.cover || it.image || "",
     year: it.year ?? String(new Date().getFullYear()),
     featured: !!it.featured,
   };
 }
 
-const categoryIcons: Record<Exclude<CatKey, "all">, typeof Layout> = {
-  web: Layout,
-  apps: Smartphone,
-  brand: Palette,
-  social: Sparkles,
-  marketing: Megaphone,
-};
-
 function PortfolioPage() {
   const { t, dir, lang } = useLang();
-  const [activeCat, setActiveCat] = useState<CatKey>("all");
+  const [activeCat, setActiveCat] = useState<string>("__all__");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -98,8 +90,17 @@ function PortfolioPage() {
     return () => { cancelled = true; };
   }, [lang]);
 
+  const dynamicCats = useMemo(() => {
+    const map = new Map<string, string>();
+    projects.forEach((p) => {
+      if (!p.category) return;
+      if (!map.has(p.category)) map.set(p.category, p.catLabel);
+    });
+    return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+  }, [projects]);
+
   const filtered = useMemo(
-    () => (activeCat === "all" ? projects : projects.filter((p) => p.category === activeCat)),
+    () => (activeCat === "__all__" ? projects : projects.filter((p) => p.category === activeCat)),
     [activeCat, projects],
   );
 
@@ -185,7 +186,17 @@ function PortfolioPage() {
 
             {/* Tabs */}
             <div className="mt-10 flex flex-wrap justify-center gap-2">
-              {categories.map((c) => {
+              <button
+                onClick={() => setActiveCat("__all__")}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                  activeCat === "__all__"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-secondary/60 text-foreground/70 hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                {t("portfolioPage.cat.all")}
+              </button>
+              {dynamicCats.map((c) => {
                 const active = activeCat === c.key;
                 return (
                   <button
@@ -197,7 +208,7 @@ function PortfolioPage() {
                         : "bg-secondary/60 text-foreground/70 hover:bg-primary/10 hover:text-primary"
                     }`}
                   >
-                    {t(c.tKey)}
+                    {c.label}
                   </button>
                 );
               })}
@@ -206,9 +217,9 @@ function PortfolioPage() {
             {/* Grid */}
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
-                const CatIcon = categoryIcons[p.category];
+                const CatIcon = categoryIconFor(p.category);
                 const projectTitle = p.title;
-                const catLabel = t(`portfolioPage.cat.${p.category}` as TKey);
+                const catLabel = p.catLabel;
                 return (
                   <article
                     key={p.id}
@@ -224,7 +235,7 @@ function PortfolioPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       <div className={`absolute top-3 flex gap-2 ${dir === "rtl" ? "right-3" : "left-3"}`}>
                         <span className="rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary backdrop-blur">
-                          {p.tag}
+                          {catLabel}
                         </span>
                         {p.featured && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-bold text-amber-950">
