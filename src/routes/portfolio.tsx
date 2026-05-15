@@ -217,9 +217,9 @@ function PortfolioPage() {
             {/* Grid */}
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
-                const CatIcon = categoryIcons[p.category];
+                const CatIcon = categoryIconFor(p.category);
                 const projectTitle = p.title;
-                const catLabel = t(`portfolioPage.cat.${p.category}` as TKey);
+                const catLabel = p.catLabel;
                 return (
                   <article
                     key={p.id}
@@ -235,7 +235,7 @@ function PortfolioPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       <div className={`absolute top-3 flex gap-2 ${dir === "rtl" ? "right-3" : "left-3"}`}>
                         <span className="rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary backdrop-blur">
-                          {p.tag}
+                          {catLabel}
                         </span>
                         {p.featured && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-bold text-amber-950">
