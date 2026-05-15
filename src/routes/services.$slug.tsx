@@ -512,7 +512,7 @@ function ServiceDetailPage() {
 
 function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean | Promise<boolean> }) {
   const { t, dir } = useLang();
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const startAlign = dir === "rtl" ? "text-right" : "text-left";
@@ -534,7 +534,7 @@ function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; o
     if (ok) {
       toast.success(t("svcDetail.reviews.thanks"));
       setComment("");
-      setRating(5);
+      setRating(0);
     } else {
       toast.error(dir === "rtl" ? "تعذر إرسال التقييم" : "Failed to submit review");
     }
