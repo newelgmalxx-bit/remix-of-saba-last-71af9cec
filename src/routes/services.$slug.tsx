@@ -507,7 +507,7 @@ function ServiceDetailPage() {
   );
 }
 
-function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean }) {
+function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean | Promise<boolean> }) {
   const { t, dir } = useLang();
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
@@ -525,13 +525,15 @@ function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; o
     );
   }
 
-  const submit = () => {
+  const submit = async () => {
     if (rating < 1) return;
-    const ok = onSubmit(rating, comment.trim());
+    const ok = await onSubmit(rating, comment.trim());
     if (ok) {
       toast.success(t("svcDetail.reviews.thanks"));
       setComment("");
       setRating(5);
+    } else {
+      toast.error(dir === "rtl" ? "تعذر إرسال التقييم" : "Failed to submit review");
     }
   };
 
