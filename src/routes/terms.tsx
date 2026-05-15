@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { FileText, ChevronLeft } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
