@@ -243,8 +243,7 @@ function PortfolioPage() {
                       </div>
                     </div>
                     <div className={`p-5 ${dir === "rtl" ? "text-right" : "text-left"}`}>
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span>{p.year}</span>
+                      <div className={`flex items-center text-[11px] text-muted-foreground ${dir === "rtl" ? "justify-end" : "justify-start"}`}>
                         <span className="inline-flex items-center gap-1.5">
                           <CatIcon className="h-3.5 w-3.5 text-primary" />
                           {catLabel}
@@ -253,7 +252,6 @@ function PortfolioPage() {
                       <h3 className="mt-2 text-base font-bold text-foreground transition group-hover:text-primary">
                         {projectTitle}
                       </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">{t("portfolioPage.client")} {p.client}</p>
                     </div>
                   </article>
                 );
