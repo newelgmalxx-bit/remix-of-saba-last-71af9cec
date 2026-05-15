@@ -32,6 +32,7 @@ const navGroups: (NavItem | "sep")[] = [
   
   { to: "/admin/clients", ar: "العملاء", en: "Clients", icon: Users },
   { to: "/admin/tickets", ar: "التذاكر", en: "Tickets", icon: LifeBuoy },
+  { to: "/admin/reviews", ar: "التقييمات", en: "Reviews", icon: Star },
   // { to: "/admin/coupons", ar: "الكوبونات", en: "Coupons", icon: Ticket },
   { to: "/admin/portfolio", ar: "أعمالنا", en: "Portfolio", icon: ImageIcon },
   { to: "/admin/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
