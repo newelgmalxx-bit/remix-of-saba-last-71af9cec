@@ -512,7 +512,7 @@ function ServiceDetailPage() {
 
 function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean | Promise<boolean> }) {
   const { t, dir } = useLang();
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const startAlign = dir === "rtl" ? "text-right" : "text-left";
