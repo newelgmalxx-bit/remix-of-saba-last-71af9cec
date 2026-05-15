@@ -2,19 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ImageIcon, Star, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAllServices } from "@/hooks/useServiceContent";
+import { useReviewsSummary } from "@/hooks/useReviewsSummary";
 import servicesHero from "@/assets/services-hero.png";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
 const FAV_KEY = "saba_service_favorites_v1";
-
-function getRatingFor(slug: string): { rating: number; count: number } {
-  let h = 0;
-  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
-  const rating = 4.3 + ((h % 70) / 100); // 4.30 - 4.99
-  const count = 38 + (h % 480); // 38 - 517
-  return { rating: Math.round(rating * 10) / 10, count };
-}
 
 function readFavs(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
@@ -84,7 +77,7 @@ export function ServiceCard({
   slug, title, desc, banner, category, price, originalPrice, discountPercent,
 }: { slug: string; title: string; desc: string; banner?: string; category?: string; price?: string; originalPrice?: string; discountPercent?: number }) {
   const { t } = useLang();
-  const { rating, count } = getRatingFor(slug);
+  const { average, count } = useReviewsSummary(slug);
   const { fav, toggle } = useFavorite(slug);
   const computedDiscount =
     discountPercent != null
@@ -132,10 +125,10 @@ export function ServiceCard({
         <h3 className="text-base font-extrabold text-foreground">{title}</h3>
         <div className="mt-2 flex items-center justify-center gap-1.5 text-xs">
           <span className="text-muted-foreground">({count})</span>
-          <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
+          {count > 0 && <span className="font-bold text-foreground">{average.toFixed(1)}</span>}
           <div className="flex items-center gap-0.5 text-amber-500">
             {[0,1,2,3,4].map((i) => (
-              <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(rating) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
+              <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(average) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
             ))}
           </div>
         </div>
