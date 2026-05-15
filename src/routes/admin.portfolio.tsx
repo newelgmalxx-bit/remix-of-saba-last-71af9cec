@@ -147,7 +147,6 @@ function PortfolioPage() {
                 <th className="px-3 py-3 font-medium">{L("العمل", "Project")}</th>
                 <th className="px-3 py-3 font-medium">{L("التصنيف", "Category")}</th>
                 <th className="px-3 py-3 font-medium">{L("التقنيات", "Tech")}</th>
-                <th className="px-3 py-3 font-medium">{L("السنة", "Year")}</th>
                 <th className="px-3 py-3 font-medium">{L("الظهور", "Visibility")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
