@@ -7,13 +7,17 @@ type LoginResult =
   | { user: User; token: string; requiresOtp?: false }
   | { user: null; token: null; requiresOtp: true; email?: string; message?: string };
 
+type SignupResult =
+  | { user: User; token: string; requiresOtp?: false }
+  | { user: null; token: null; requiresOtp: true; email?: string; message?: string };
+
 type AuthCtx = {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (creds: { phone?: string; email?: string; password: string }) => Promise<LoginResult>;
-  signup: (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => Promise<User>;
+  signup: (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => Promise<SignupResult>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -85,12 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { user: data.user, token: data.token };
   }, []);
 
-  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }) => {
-    const { user, token } = await api.auth.signup(body);
-    if (!token || !user) throw new ApiError(500, "Invalid auth response");
-    setToken(token);
-    setUser(user);
-    return user;
+  const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }): Promise<SignupResult> => {
+    const data = await api.auth.signup(body);
+    if (data?.requiresOtp) {
+      return { user: null, token: null, requiresOtp: true, email: data.email, message: data.message };
+    }
+    if (!data?.token || !data?.user) throw new ApiError(500, "Invalid auth response");
+    setToken(data.token);
+    setUser(data.user);
+    return { user: data.user, token: data.token };
   }, []);
 
   const logout = useCallback(async () => {

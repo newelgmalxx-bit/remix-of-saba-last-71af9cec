@@ -54,6 +54,16 @@ export const auth = {
   verifyEmailOtp: (body: VerifyOtpPayload) =>
     postAuth('/auth/login/email/verify-otp', body),
 
+  /** Register flow: verify OTP sent after /auth/register. */
+  verifyRegisterOtp: (body: VerifyOtpPayload) =>
+    postAuth('/auth/register/verify-otp', body),
+
+  /** Register flow: resend OTP (rate-limited 60s). */
+  resendRegisterOtp: (body: RequestOtpPayload) =>
+    request<ApiResponse<{ ok?: boolean }>>('/auth/register/resend-otp', {
+      method: 'POST', body: JSON.stringify(body),
+    }),
+
   /** Google OAuth — accepts either idToken or credential field name. */
   google: (idToken: string) =>
     postAuth('/auth/oauth/google', { idToken, credential: idToken }),

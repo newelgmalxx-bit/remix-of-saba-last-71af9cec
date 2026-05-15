@@ -24,6 +24,69 @@ function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  // OTP state for register flow
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpInfo, setOtpInfo] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  function startCooldown() {
+    setResendCooldown(60);
+    const iv = setInterval(() => {
+      setResendCooldown((s) => {
+        if (s <= 1) { clearInterval(iv); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+  }
+
+  async function verifyOtp() {
+    setError(null);
+    if (!/^\d{4,8}$/.test(otpCode.trim())) {
+      setError(lang === "ar" ? "أدخل الرمز المكوّن من 6 أرقام" : "Enter the 6-digit code");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { user, token } = await api.auth.verifyRegisterOtp({ email: otpEmail.trim(), otp: otpCode.trim() });
+      if (!token || !user) throw new ApiError(500, "Invalid OTP response");
+      setToken(token);
+      await refresh();
+      toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
+      navigate({ to: "/account" });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) setError(lang === "ar" ? "رمز غير صحيح أو منتهي الصلاحية" : "Invalid or expired code");
+        else if (err.status === 429) setError(lang === "ar" ? "تجاوزت عدد المحاولات، اطلب رمزًا جديدًا" : "Too many attempts, request a new code");
+        else setError(err.message || (lang === "ar" ? "تعذر تأكيد الرمز" : "Verification failed"));
+      } else {
+        setError(lang === "ar" ? "تعذر تأكيد الرمز" : "Verification failed");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendOtp() {
+    if (resendCooldown > 0) return;
+    setError(null);
+    setOtpInfo(null);
+    setSubmitting(true);
+    try {
+      await api.auth.resendRegisterOtp({ email: otpEmail.trim() });
+      setOtpInfo(lang === "ar" ? "تم إرسال رمز جديد إلى بريدك" : "A new code has been sent to your email");
+      startCooldown();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 429) {
+        setError(lang === "ar" ? "انتظر قبل طلب رمز آخر" : "Please wait before requesting another code");
+      } else {
+        setError(err instanceof ApiError ? err.message : (lang === "ar" ? "تعذر إرسال الرمز" : "Failed to send code"));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +110,16 @@ function SignupPage() {
     }
     setSubmitting(true);
     try {
-      await signup({ name, phone, email, password: pwd });
+      const result = await signup({ name, phone, email, password: pwd });
+      if (result.requiresOtp) {
+        const emailForOtp = result.email || email.trim();
+        setOtpEmail(emailForOtp);
+        setOtpCode("");
+        setOtpInfo(result.message || (lang === "ar" ? "أدخل رمز OTP المرسل إلى بريدك لإتمام التسجيل" : "Enter the OTP sent to your email to complete sign up"));
+        setOtpStep(true);
+        startCooldown();
+        return;
+      }
       toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
       navigate({ to: "/account" });
     } catch (err) {
@@ -89,64 +161,122 @@ function SignupPage() {
               <div className={`mt-3 h-0.5 w-16 rounded-full bg-primary ${dir === "rtl" ? "mr-0 ml-auto" : "ml-0 mr-auto"}`} />
             </div>
 
-            <form className="mt-7 space-y-5" onSubmit={onSubmit}>
-              {error && (
-                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div className="flex-1">
+            {!otpStep ? (
+              <form className="mt-7 space-y-5" onSubmit={onSubmit}>
+                {error && (
+                  <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-bold">{error}</div>
+                      {Object.keys(fieldErrors).length > 0 && (
+                        <ul className="mt-1 list-disc ps-5">
+                          {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
+                            (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
+                              <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
+                            )),
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} value={name} onChange={setName} />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label={t("auth.tab.phone")} type="tel" placeholder={t("auth.phonePh")} icon={<Phone className="h-4 w-4" />} dirCtx={dir} value={phone} onChange={setPhone} />
+                  <Field label={t("auth.tab.email")} type="email" placeholder={t("auth.emailPh")} icon={<Mail className="h-4 w-4" />} dirCtx={dir} value={email} onChange={setEmail} />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <SelectField label={t("auth.region")} placeholder={t("auth.regionPh")} icon={<MapPin className="h-4 w-4" />} kind="region" dirCtx={dir} t={t} />
+                  <SelectField label={t("auth.preferredLang")} placeholder={t("auth.preferredLangPh")} icon={<Globe className="h-4 w-4" />} kind="lang" dirCtx={dir} t={t} />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <PasswordField label={t("auth.password")} show={show1} onToggle={() => setShow1(!show1)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd} onChange={setPwd} />
+                  <PasswordField label={t("auth.confirmPassword")} show={show2} onToggle={() => setShow2(!show2)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd2} onChange={setPwd2} />
+                </div>
+
+                <label className="flex cursor-pointer items-center justify-start gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setAgree(!agree)}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                      agree ? "border-primary bg-primary text-white" : "border-border bg-white"
+                    }`}
+                  >
+                    {agree && <Check className="h-3 w-3" />}
+                  </button>
+                  <span className="text-muted-foreground">
+                    {t("auth.agree.lead")}{" "}
+                    <Link to={"/privacy" as any} className="font-bold text-primary hover:underline">{t("auth.agree.privacy")}</Link>
+                    {" "}{t("auth.agree.and")}{" "}
+                    <Link to={"/terms" as any} className="font-bold text-primary hover:underline">{t("auth.agree.terms")}</Link>
+                  </span>
+                </label>
+
+                <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {submitting ? (lang === "ar" ? "جاري الإنشاء..." : "Creating...") : t("auth.signupBtn")}
+                </button>
+              </form>
+            ) : (
+              <form className="mt-7 space-y-5" onSubmit={(e) => { e.preventDefault(); verifyOtp(); }}>
+                {error && (
+                  <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="font-bold">{error}</div>
-                    {Object.keys(fieldErrors).length > 0 && (
-                      <ul className="mt-1 list-disc ps-5">
-                        {Object.entries(fieldErrors).flatMap(([f, msgs]) =>
-                          (Array.isArray(msgs) ? msgs : [String(msgs)]).map((m, i) => (
-                            <li key={`${f}-${i}`}><span className="font-semibold">{f}:</span> {m}</li>
-                          )),
-                        )}
-                      </ul>
-                    )}
+                  </div>
+                )}
+                {otpInfo && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 text-start">
+                    {otpInfo}
+                  </div>
+                )}
+                <div className="text-start text-xs text-muted-foreground">
+                  {lang === "ar" ? "تم إرسال الرمز إلى" : "Code sent to"}{" "}
+                  <span className="font-bold text-foreground" dir="ltr">{otpEmail}</span>
+                </div>
+                <div className="text-start">
+                  <label className="mb-1.5 block text-xs font-bold text-foreground">
+                    {lang === "ar" ? "رمز التحقق" : "Verification code"}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={8}
+                    placeholder="••••••"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-center text-lg tracking-[0.5em] placeholder:text-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <div className="mt-2 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={resendOtp}
+                      disabled={submitting || resendCooldown > 0}
+                      className="text-xs font-bold text-primary hover:underline disabled:opacity-60 disabled:no-underline"
+                    >
+                      {resendCooldown > 0
+                        ? (lang === "ar" ? `إعادة الإرسال خلال ${resendCooldown}ث` : `Resend in ${resendCooldown}s`)
+                        : (lang === "ar" ? "إعادة إرسال الرمز" : "Resend code")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setOtpStep(false); setError(null); setOtpInfo(null); }}
+                      className="text-xs font-bold text-muted-foreground hover:text-foreground"
+                    >
+                      {lang === "ar" ? "تعديل البيانات" : "Edit details"}
+                    </button>
                   </div>
                 </div>
-              )}
-              <Field label={t("auth.name")} type="text" placeholder={t("auth.namePh")} icon={<User className="h-4 w-4" />} dirCtx={dir} value={name} onChange={setName} />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label={t("auth.tab.phone")} type="tel" placeholder={t("auth.phonePh")} icon={<Phone className="h-4 w-4" />} dirCtx={dir} value={phone} onChange={setPhone} />
-                <Field label={t("auth.tab.email")} type="email" placeholder={t("auth.emailPh")} icon={<Mail className="h-4 w-4" />} dirCtx={dir} value={email} onChange={setEmail} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <SelectField label={t("auth.region")} placeholder={t("auth.regionPh")} icon={<MapPin className="h-4 w-4" />} kind="region" dirCtx={dir} t={t} />
-                <SelectField label={t("auth.preferredLang")} placeholder={t("auth.preferredLangPh")} icon={<Globe className="h-4 w-4" />} kind="lang" dirCtx={dir} t={t} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <PasswordField label={t("auth.password")} show={show1} onToggle={() => setShow1(!show1)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd} onChange={setPwd} />
-                <PasswordField label={t("auth.confirmPassword")} show={show2} onToggle={() => setShow2(!show2)} dirCtx={dir} ph={t("auth.passwordPh")} value={pwd2} onChange={setPwd2} />
-              </div>
-
-              <label className="flex cursor-pointer items-center justify-start gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setAgree(!agree)}
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
-                    agree ? "border-primary bg-primary text-white" : "border-border bg-white"
-                  }`}
-                >
-                  {agree && <Check className="h-3 w-3" />}
+                <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {submitting ? (lang === "ar" ? "جارٍ التأكيد..." : "Verifying...") : (lang === "ar" ? "تأكيد وإنشاء الحساب" : "Verify & create account")}
                 </button>
-                <span className="text-muted-foreground">
-                  {t("auth.agree.lead")}{" "}
-                  <Link to={"/privacy" as any} className="font-bold text-primary hover:underline">{t("auth.agree.privacy")}</Link>
-                  {" "}{t("auth.agree.and")}{" "}
-                  <Link to={"/terms" as any} className="font-bold text-primary hover:underline">{t("auth.agree.terms")}</Link>
-                </span>
-              </label>
-
-              <button type="submit" disabled={submitting} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-dark disabled:opacity-70">
-                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {submitting ? (lang === "ar" ? "جاري الإنشاء..." : "Creating...") : t("auth.signupBtn")}
-              </button>
-            </form>
+              </form>
+            )}
 
             <div className="my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
