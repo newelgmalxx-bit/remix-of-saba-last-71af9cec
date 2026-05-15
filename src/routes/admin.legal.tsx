@@ -4,26 +4,53 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
+import { Trash2, ArrowDown, ArrowUp, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/admin/legal")({
   head: () => ({ meta: [{ title: "الصفحات القانونية | لوحة التحكم" }] }),
   component: LegalPagesAdmin,
 });
 
-type LegalState = {
-  legalPrivacyTitle?: string;
-  legalPrivacySubtitle?: string;
-  legalPrivacyContent?: string;
-  legalTermsTitle?: string;
-  legalTermsSubtitle?: string;
-  legalTermsContent?: string;
-  legalLastUpdated?: string;
+type Section = {
+  titleAr?: string;
+  titleEn?: string;
+  bodyAr?: string;
+  bodyEn?: string;
 };
+
+type LegalPage = {
+  badgeAr?: string;
+  badgeEn?: string;
+  titleAr?: string;
+  titleEn?: string;
+  subtitleAr?: string;
+  subtitleEn?: string;
+  lastUpdatedAr?: string;
+  lastUpdatedEn?: string;
+  sections?: Section[];
+};
+
+type LegalState = {
+  legalPrivacy?: LegalPage;
+  legalTerms?: LegalPage;
+};
+
+const emptyPage = (): LegalPage => ({
+  badgeAr: "",
+  badgeEn: "",
+  titleAr: "",
+  titleEn: "",
+  subtitleAr: "",
+  subtitleEn: "",
+  lastUpdatedAr: "",
+  lastUpdatedEn: "",
+  sections: [],
+});
 
 function LegalPagesAdmin() {
   const { lang } = useLang();
   const L = (a: string, e: string) => (lang === "en" ? e : a);
-  const [s, setS] = useState<LegalState>({});
+  const [s, setS] = useState<LegalState>({ legalPrivacy: emptyPage(), legalTerms: emptyPage() });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<"privacy" | "terms">("privacy");
@@ -34,13 +61,8 @@ function LegalPagesAdmin() {
         const raw: any = await adminApi.settings.get<any>("site");
         const data = raw?.items ?? raw?.settings?.site ?? raw?.site ?? raw ?? {};
         setS({
-          legalPrivacyTitle: data.legalPrivacyTitle || "",
-          legalPrivacySubtitle: data.legalPrivacySubtitle || "",
-          legalPrivacyContent: data.legalPrivacyContent || "",
-          legalTermsTitle: data.legalTermsTitle || "",
-          legalTermsSubtitle: data.legalTermsSubtitle || "",
-          legalTermsContent: data.legalTermsContent || "",
-          legalLastUpdated: data.legalLastUpdated || "",
+          legalPrivacy: { ...emptyPage(), ...(data.legalPrivacy || {}) },
+          legalTerms: { ...emptyPage(), ...(data.legalTerms || {}) },
         });
       } catch (e: any) {
         toast.error(e?.message || L("تعذر التحميل", "Load failed"));
@@ -62,15 +84,53 @@ function LegalPagesAdmin() {
     }
   };
 
-  const set = (k: keyof LegalState) => (v: string) => setS((cur) => ({ ...cur, [k]: v }));
+  const key: "legalPrivacy" | "legalTerms" = tab === "privacy" ? "legalPrivacy" : "legalTerms";
+  const page = s[key] || emptyPage();
 
-  const ic = "w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
+  const setPage = (patch: Partial<LegalPage>) =>
+    setS((cur) => ({ ...cur, [key]: { ...(cur[key] || emptyPage()), ...patch } }));
+
+  const setSections = (next: Section[]) => setPage({ sections: next });
+
+  const addSection = () =>
+    setSections([...(page.sections || []), { titleAr: "", titleEn: "", bodyAr: "", bodyEn: "" }]);
+
+  const removeSection = (i: number) => setSections((page.sections || []).filter((_, idx) => idx !== i));
+
+  const moveSection = (i: number, dir: -1 | 1) => {
+    const arr = [...(page.sections || [])];
+    const j = i + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    setSections(arr);
+  };
+
+  const updateSection = (i: number, patch: Partial<Section>) => {
+    const arr = [...(page.sections || [])];
+    arr[i] = { ...arr[i], ...patch };
+    setSections(arr);
+  };
+
+  const ic =
+    "w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
+
+  if (loading) {
+    return (
+      <AdminLayout title={L("الصفحات القانونية", "Legal pages")}>
+        <div className="py-20 text-center text-sm text-foreground/60">{L("جارٍ التحميل...", "Loading...")}</div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout
       title={L("الصفحات القانونية", "Legal pages")}
       subtitle={L("تعديل سياسة الخصوصية والشروط والأحكام", "Edit privacy policy and terms & conditions")}
-      action={<PrimaryButton onClick={save}>{saving ? L("جارٍ الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}
+      action={
+        <PrimaryButton onClick={save}>
+          {saving ? L("جارٍ الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}
+        </PrimaryButton>
+      }
     >
       <div className="mb-4 flex gap-2">
         <button
@@ -89,78 +149,91 @@ function LegalPagesAdmin() {
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {tab === "privacy" ? (
-          <>
-            <PanelCard title={L("بيانات الصفحة", "Page details")}>
-              <div className="space-y-3">
-                <Field label={L("عنوان الصفحة", "Page title")}>
-                  <input className={ic} value={s.legalPrivacyTitle || ""} onChange={(e) => set("legalPrivacyTitle")(e.target.value)} placeholder={L("سياسة الخصوصية", "Privacy Policy")} />
-                </Field>
-                <Field label={L("نص توضيحي قصير", "Short subtitle")}>
-                  <input className={ic} value={s.legalPrivacySubtitle || ""} onChange={(e) => set("legalPrivacySubtitle")(e.target.value)} />
-                </Field>
-                <Field label={L("تاريخ آخر تحديث (نص)", "Last updated (text)")}>
-                  <input className={ic} value={s.legalLastUpdated || ""} onChange={(e) => set("legalLastUpdated")(e.target.value)} placeholder="2025-01-01" />
-                </Field>
-              </div>
-            </PanelCard>
-            <PanelCard title={L("محتوى الصفحة (HTML)", "Page content (HTML)")}>
-              <p className="mb-2 text-xs text-foreground/60">{L("يمكنك استخدام HTML بسيط مثل <h2> و<p> و<a> و<ul>.", "You can use simple HTML like <h2>, <p>, <a>, <ul>.")}</p>
-              <textarea
-                className={`${ic} font-mono`}
-                rows={20}
-                dir="ltr"
-                value={s.legalPrivacyContent || ""}
-                onChange={(e) => set("legalPrivacyContent")(e.target.value)}
-                placeholder="<h2>المقدمة</h2>\n<p>...</p>"
-              />
-            </PanelCard>
-          </>
-        ) : (
-          <>
-            <PanelCard title={L("بيانات الصفحة", "Page details")}>
-              <div className="space-y-3">
-                <Field label={L("عنوان الصفحة", "Page title")}>
-                  <input className={ic} value={s.legalTermsTitle || ""} onChange={(e) => set("legalTermsTitle")(e.target.value)} placeholder={L("الشروط والأحكام", "Terms & Conditions")} />
-                </Field>
-                <Field label={L("نص توضيحي قصير", "Short subtitle")}>
-                  <input className={ic} value={s.legalTermsSubtitle || ""} onChange={(e) => set("legalTermsSubtitle")(e.target.value)} />
-                </Field>
-                <Field label={L("تاريخ آخر تحديث (نص)", "Last updated (text)")}>
-                  <input className={ic} value={s.legalLastUpdated || ""} onChange={(e) => set("legalLastUpdated")(e.target.value)} placeholder="2025-01-01" />
-                </Field>
-              </div>
-            </PanelCard>
-            <PanelCard title={L("محتوى الصفحة (HTML)", "Page content (HTML)")}>
-              <p className="mb-2 text-xs text-foreground/60">{L("يمكنك استخدام HTML بسيط مثل <h2> و<p> و<a> و<ul>.", "You can use simple HTML like <h2>, <p>, <a>, <ul>.")}</p>
-              <textarea
-                className={`${ic} font-mono`}
-                rows={20}
-                dir="ltr"
-                value={s.legalTermsContent || ""}
-                onChange={(e) => set("legalTermsContent")(e.target.value)}
-                placeholder="<h2>القبول بالشروط</h2>\n<p>...</p>"
-              />
-            </PanelCard>
-          </>
-        )}
-      </div>
+      {/* Header card */}
+      <PanelCard title={L("الترويسة (الهيدر)", "Header")}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label={L("الشارة (عربي)", "Badge (Arabic)")}>
+            <input className={ic} value={page.badgeAr || ""} onChange={(e) => setPage({ badgeAr: e.target.value })} />
+          </Field>
+          <Field label={L("الشارة (إنجليزي)", "Badge (English)")}>
+            <input className={ic} value={page.badgeEn || ""} onChange={(e) => setPage({ badgeEn: e.target.value })} />
+          </Field>
+          <Field label={L("العنوان (عربي)", "Title (Arabic)")}>
+            <input className={ic} value={page.titleAr || ""} onChange={(e) => setPage({ titleAr: e.target.value })} />
+          </Field>
+          <Field label={L("العنوان (إنجليزي)", "Title (English)")}>
+            <input className={ic} value={page.titleEn || ""} onChange={(e) => setPage({ titleEn: e.target.value })} />
+          </Field>
+          <Field label={L("النبذة (عربي)", "Subtitle (Arabic)")}>
+            <textarea className={ic} rows={2} value={page.subtitleAr || ""} onChange={(e) => setPage({ subtitleAr: e.target.value })} />
+          </Field>
+          <Field label={L("النبذة (إنجليزي)", "Subtitle (English)")}>
+            <textarea className={ic} rows={2} value={page.subtitleEn || ""} onChange={(e) => setPage({ subtitleEn: e.target.value })} />
+          </Field>
+          <Field label={L("آخر تحديث (عربي)", "Last updated (Arabic)")}>
+            <input className={ic} value={page.lastUpdatedAr || ""} onChange={(e) => setPage({ lastUpdatedAr: e.target.value })} />
+          </Field>
+          <Field label={L("آخر تحديث (إنجليزي)", "Last updated (English)")}>
+            <input className={ic} value={page.lastUpdatedEn || ""} onChange={(e) => setPage({ lastUpdatedEn: e.target.value })} />
+          </Field>
+        </div>
+      </PanelCard>
 
-      {/* Live preview */}
+      {/* Sections card */}
       <div className="mt-6">
-        <PanelCard title={L("معاينة مباشرة", "Live preview")}>
-          <div className="rounded-2xl border border-border/60 bg-white p-6">
-            <h2 className="mb-2 text-2xl font-extrabold">
-              {tab === "privacy" ? (s.legalPrivacyTitle || L("سياسة الخصوصية", "Privacy Policy")) : (s.legalTermsTitle || L("الشروط والأحكام", "Terms & Conditions"))}
-            </h2>
-            {(tab === "privacy" ? s.legalPrivacySubtitle : s.legalTermsSubtitle) && (
-              <p className="mb-4 text-sm text-foreground/70">{tab === "privacy" ? s.legalPrivacySubtitle : s.legalTermsSubtitle}</p>
+        <PanelCard
+          title={L("الأقسام", "Sections")}
+          action={
+            <button
+              type="button"
+              onClick={addSection}
+              className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-primary/90"
+            >
+              <Plus className="h-3.5 w-3.5" /> {L("إضافة قسم", "Add section")}
+            </button>
+          }
+        >
+          <p className="mb-4 text-xs text-foreground/60">
+            {L("كل قسم يظهر في الصفحة بعنوان ونص.", "Each section appears on the page with a title and body.")}
+          </p>
+          <div className="space-y-4">
+            {(page.sections || []).length === 0 && (
+              <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-foreground/50">
+                {L("لا توجد أقسام بعد. اضغط إضافة قسم.", "No sections yet. Click Add section.")}
+              </div>
             )}
-            <div
-              className="prose prose-sm max-w-none text-foreground/80"
-              dangerouslySetInnerHTML={{ __html: (tab === "privacy" ? s.legalPrivacyContent : s.legalTermsContent) || `<p class="text-foreground/40">${L("لا يوجد محتوى بعد", "No content yet")}</p>` }}
-            />
+            {(page.sections || []).map((sec, i) => (
+              <div key={i} className="rounded-2xl border border-border/60 bg-background/40 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-xs font-bold text-primary">#{i + 1} {L("قسم", "Section")}</span>
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => moveSection(i, -1)} className="rounded-lg border border-border/60 p-1.5 hover:bg-muted" title={L("لأعلى", "Up")}>
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button type="button" onClick={() => moveSection(i, 1)} className="rounded-lg border border-border/60 p-1.5 hover:bg-muted" title={L("لأسفل", "Down")}>
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                    <button type="button" onClick={() => removeSection(i)} className="rounded-lg border border-red-200 p-1.5 text-red-600 hover:bg-red-50" title={L("حذف", "Delete")}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label={L("العنوان (عربي)", "Title (Arabic)")}>
+                    <input className={ic} value={sec.titleAr || ""} onChange={(e) => updateSection(i, { titleAr: e.target.value })} />
+                  </Field>
+                  <Field label={L("العنوان (إنجليزي)", "Title (English)")}>
+                    <input className={ic} value={sec.titleEn || ""} onChange={(e) => updateSection(i, { titleEn: e.target.value })} />
+                  </Field>
+                  <Field label={L("النص (عربي)", "Body (Arabic)")}>
+                    <textarea className={ic} rows={5} value={sec.bodyAr || ""} onChange={(e) => updateSection(i, { bodyAr: e.target.value })} />
+                  </Field>
+                  <Field label={L("النص (إنجليزي)", "Body (English)")}>
+                    <textarea className={ic} rows={5} value={sec.bodyEn || ""} onChange={(e) => updateSection(i, { bodyEn: e.target.value })} />
+                  </Field>
+                </div>
+              </div>
+            ))}
           </div>
         </PanelCard>
       </div>
