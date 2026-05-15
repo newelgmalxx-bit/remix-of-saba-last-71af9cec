@@ -169,7 +169,6 @@ function PortfolioPage() {
                   </td>
                   <td className="px-3 py-3"><Pill tone="primary">{i.category}</Pill></td>
                   <td className="px-3 py-3 text-[11px] text-muted-foreground">{(i.tech ?? []).slice(0, 3).join(lang === "en" ? ", " : "، ")}</td>
-                  <td className="px-3 py-3 text-xs" data-ltr-number>{i.year ?? "—"}</td>
                   <td className="px-3 py-3">
                     <button onClick={() => toggle(i.id)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${i.visible ? "bg-primary" : "bg-muted"}`}>
                       <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${i.visible ? knobOn : knobOff}`} />
