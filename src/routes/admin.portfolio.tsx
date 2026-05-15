@@ -203,9 +203,6 @@ function PortfolioPage() {
                   {portfolioCategories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </label>
-              <label className="text-xs font-bold space-y-1.5 block">{L("السنة", "Year")}
-                <input dir="ltr" inputMode="numeric" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
-              </label>
               <div className="col-span-2 space-y-2">
                 <div className="text-xs font-bold">{L("صورة الغلاف", "Cover Image")}</div>
                 <div className="flex flex-wrap gap-2">
