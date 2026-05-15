@@ -19,6 +19,12 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   const { t, dir } = useLang();
+  const settings = useSiteSettings() as any;
+  const customTitle = settings.legalTermsTitle as string | undefined;
+  const customSubtitle = settings.legalTermsSubtitle as string | undefined;
+  const customContent = settings.legalTermsContent as string | undefined;
+  const customDate = settings.legalLastUpdated as string | undefined;
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
@@ -28,25 +34,34 @@ function TermsPage() {
             <div className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
               <FileText className="h-3.5 w-3.5" /> {t("legal.terms.badge")}
             </div>
-            <h1 className="text-3xl font-extrabold sm:text-4xl">{t("legal.terms.title")}</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-white/85">{t("legal.terms.subtitle")}</p>
-            <p className="mt-2 text-[11px] text-white/70">{t("legal.lastUpdatedDate")}</p>
+            <h1 className="text-3xl font-extrabold sm:text-4xl">{customTitle || t("legal.terms.title")}</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-white/85">{customSubtitle || t("legal.terms.subtitle")}</p>
+            <p className="mt-2 text-[11px] text-white/70">{customDate || t("legal.lastUpdatedDate")}</p>
           </div>
         </section>
 
         <section className="py-14">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-6 rounded-3xl border border-border/60 bg-white p-8 text-start shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-10">
-              <Section title={t("legal.terms.s1.t")}>{t("legal.terms.s1.b")}</Section>
-              <Section title={t("legal.terms.s2.t")}>{t("legal.terms.s2.b")}</Section>
-              <Section title={t("legal.terms.s3.t")}>{t("legal.terms.s3.b")}</Section>
-              <Section title={t("legal.terms.s4.t")}>{t("legal.terms.s4.b")}</Section>
-              <Section title={t("legal.terms.s5.t")}>{t("legal.terms.s5.b")}</Section>
-              <Section title={t("legal.terms.s6.t")}>{t("legal.terms.s6.b")}</Section>
-              <Section title={t("legal.terms.s7.t")}>{t("legal.terms.s7.b")}</Section>
-              <Section title={t("legal.terms.s8.t")}>{t("legal.terms.s8.b")}</Section>
-              <Section title={t("legal.terms.s9.t")}>{t("legal.terms.s9.b")}</Section>
-              <Section title={t("legal.terms.s10.t")}>{t("legal.terms.s10.b")}</Section>
+              {customContent ? (
+                <div
+                  className="prose prose-sm max-w-none text-foreground/80 [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-extrabold [&_h2]:text-foreground [&_p]:mb-3 [&_p]:text-sm [&_p]:leading-8 [&_a]:font-bold [&_a]:text-primary hover:[&_a]:underline [&_ul]:list-disc [&_ul]:ps-5 [&_li]:mb-1"
+                  dangerouslySetInnerHTML={{ __html: customContent }}
+                />
+              ) : (
+                <>
+                  <Section title={t("legal.terms.s1.t")}>{t("legal.terms.s1.b")}</Section>
+                  <Section title={t("legal.terms.s2.t")}>{t("legal.terms.s2.b")}</Section>
+                  <Section title={t("legal.terms.s3.t")}>{t("legal.terms.s3.b")}</Section>
+                  <Section title={t("legal.terms.s4.t")}>{t("legal.terms.s4.b")}</Section>
+                  <Section title={t("legal.terms.s5.t")}>{t("legal.terms.s5.b")}</Section>
+                  <Section title={t("legal.terms.s6.t")}>{t("legal.terms.s6.b")}</Section>
+                  <Section title={t("legal.terms.s7.t")}>{t("legal.terms.s7.b")}</Section>
+                  <Section title={t("legal.terms.s8.t")}>{t("legal.terms.s8.b")}</Section>
+                  <Section title={t("legal.terms.s9.t")}>{t("legal.terms.s9.b")}</Section>
+                  <Section title={t("legal.terms.s10.t")}>{t("legal.terms.s10.b")}</Section>
+                </>
+              )}
 
               <div className="mt-2 flex justify-end">
                 <Link to={"/privacy" as any} className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
