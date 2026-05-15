@@ -125,7 +125,10 @@ function ServiceDetailPage() {
     ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
     : defaultSteps);
   const stats = service.stats && service.stats.length ? service.stats : defaultStats;
-  const testimonials = service.testimonials && service.testimonials.length ? service.testimonials : defaultTestimonials;
+  const realTestimonials = reviews.map((r) => ({ name: r.userName, role: "", text: r.comment }));
+  const testimonials = realTestimonials.length
+    ? realTestimonials
+    : (service.testimonials && service.testimonials.length ? service.testimonials : defaultTestimonials);
   const faqs = service.faqs && service.faqs.length ? service.faqs : defaultFaqs;
 
   const startingPlan = plans[0];
