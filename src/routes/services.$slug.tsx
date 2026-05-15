@@ -534,7 +534,7 @@ function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; o
     if (ok) {
       toast.success(t("svcDetail.reviews.thanks"));
       setComment("");
-      setRating(5);
+      setRating(0);
     } else {
       toast.error(dir === "rtl" ? "تعذر إرسال التقييم" : "Failed to submit review");
     }
