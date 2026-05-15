@@ -533,7 +533,7 @@ function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; o
       setComment("");
       setRating(5);
     } else {
-      toast.error(t("common.error") || "حدث خطأ");
+      toast.error(dir === "rtl" ? "تعذر إرسال التقييم" : "Failed to submit review");
     }
   };
 
