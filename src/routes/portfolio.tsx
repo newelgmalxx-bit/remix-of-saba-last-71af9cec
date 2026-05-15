@@ -72,7 +72,7 @@ function mapApiItem(it: any, lang: "ar" | "en"): Project {
 
 function PortfolioPage() {
   const { t, dir, lang } = useLang();
-  const [activeCat, setActiveCat] = useState<CatKey>("all");
+  const [activeCat, setActiveCat] = useState<string>("__all__");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,8 +90,17 @@ function PortfolioPage() {
     return () => { cancelled = true; };
   }, [lang]);
 
+  const dynamicCats = useMemo(() => {
+    const map = new Map<string, string>();
+    projects.forEach((p) => {
+      if (!p.category) return;
+      if (!map.has(p.category)) map.set(p.category, p.catLabel);
+    });
+    return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+  }, [projects]);
+
   const filtered = useMemo(
-    () => (activeCat === "all" ? projects : projects.filter((p) => p.category === activeCat)),
+    () => (activeCat === "__all__" ? projects : projects.filter((p) => p.category === activeCat)),
     [activeCat, projects],
   );
 
