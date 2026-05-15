@@ -6,10 +6,9 @@ import portfolioBg from "@/assets/portfolio-bg.jpg";
 import {
   ArrowLeft, ChevronLeft, ExternalLink, Sparkles, Layout, Smartphone,
   Megaphone, Palette, Search, Star, Award, Briefcase,
-  Users, Globe2, Eye,
+  Users, Globe2, Eye, Tag as TagIcon,
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
-import type { TKey } from "@/i18n/translations";
 import { publicApi } from "@/lib/api/public";
 
 export const Route = createFileRoute("/portfolio")({
