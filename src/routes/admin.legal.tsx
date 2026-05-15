@@ -70,7 +70,7 @@ function LegalPagesAdmin() {
     <AdminLayout
       title={L("الصفحات القانونية", "Legal pages")}
       subtitle={L("تعديل سياسة الخصوصية والشروط والأحكام", "Edit privacy policy and terms & conditions")}
-      action={<PrimaryButton onClick={save} disabled={saving || loading}>{saving ? L("جارٍ الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}
+      action={<PrimaryButton onClick={save}>{saving ? L("جارٍ الحفظ...", "Saving...") : L("حفظ التغييرات", "Save Changes")}</PrimaryButton>}
     >
       <div className="mb-4 flex gap-2">
         <button
