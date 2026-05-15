@@ -147,7 +147,6 @@ function PortfolioPage() {
                 <th className="px-3 py-3 font-medium">{L("العمل", "Project")}</th>
                 <th className="px-3 py-3 font-medium">{L("التصنيف", "Category")}</th>
                 <th className="px-3 py-3 font-medium">{L("التقنيات", "Tech")}</th>
-                <th className="px-3 py-3 font-medium">{L("السنة", "Year")}</th>
                 <th className="px-3 py-3 font-medium">{L("الظهور", "Visibility")}</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
@@ -170,7 +169,6 @@ function PortfolioPage() {
                   </td>
                   <td className="px-3 py-3"><Pill tone="primary">{i.category}</Pill></td>
                   <td className="px-3 py-3 text-[11px] text-muted-foreground">{(i.tech ?? []).slice(0, 3).join(lang === "en" ? ", " : "، ")}</td>
-                  <td className="px-3 py-3 text-xs" data-ltr-number>{i.year ?? "—"}</td>
                   <td className="px-3 py-3">
                     <button onClick={() => toggle(i.id)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${i.visible ? "bg-primary" : "bg-muted"}`}>
                       <span className={`absolute inline-block h-5 w-5 rounded-full bg-white shadow transition ${i.visible ? knobOn : knobOff}`} />
@@ -205,9 +203,6 @@ function PortfolioPage() {
                   {portfolioCategories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </label>
-              <label className="text-xs font-bold space-y-1.5 block">{L("السنة", "Year")}
-                <input dir="ltr" inputMode="numeric" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
-              </label>
               <div className="col-span-2 space-y-2">
                 <div className="text-xs font-bold">{L("صورة الغلاف", "Cover Image")}</div>
                 <div className="flex flex-wrap gap-2">
@@ -222,9 +217,6 @@ function PortfolioPage() {
               {form.cover && <img loading="lazy" decoding="async" src={form.cover} alt={L("معاينة", "Preview")} className="col-span-2 h-40 w-full rounded-lg object-cover border border-border" />}
               <label className="text-xs font-bold space-y-1.5 block col-span-2">{L("وصف العمل", "Description")}
                 <textarea rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              </label>
-              <label className="text-xs font-bold space-y-1.5 block">{L("العميل", "Client")}
-                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} />
               </label>
               <label className="text-xs font-bold space-y-1.5 block">{L("الرابط", "Link")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />

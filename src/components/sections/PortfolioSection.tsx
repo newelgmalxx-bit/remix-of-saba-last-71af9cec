@@ -136,16 +136,12 @@ export function PortfolioSection() {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-              <span className="absolute left-4 top-4 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white/90 backdrop-blur">
-                {p.year}
-              </span>
               <span className="absolute right-4 top-4 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
                 {p.catLabel[lang]}
               </span>
 
               <div className={`absolute inset-x-4 bottom-4 text-white ${dir === "rtl" ? "text-right" : "text-left"}`}>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-white/70">{p.brand}</div>
-                <h3 className="mt-1 text-base font-extrabold">{p.title[lang]}</h3>
+                <h3 className="text-base font-extrabold">{p.title[lang]}</h3>
                 <div className={`mt-2 flex flex-wrap gap-1.5 ${dir === "rtl" ? "justify-end" : "justify-start"}`}>
                   {p.tags.map((tag) => (
                     <span key={tag} className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">
