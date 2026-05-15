@@ -507,7 +507,7 @@ function ServiceDetailPage() {
   );
 }
 
-function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean }) {
+function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; onSubmit: (rating: number, comment: string) => boolean | Promise<boolean> }) {
   const { t, dir } = useLang();
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
