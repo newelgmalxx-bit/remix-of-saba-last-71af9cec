@@ -70,6 +70,7 @@ function ServiceDetailPage() {
   const { fav, toggle: toggleFav } = useFavorite(slug);
   const { isAuthenticated } = useAuth();
   const { reviews, summary, addReview } = useServiceReviews(slug);
+  const allReviews = useAllReviews();
 
   const startAlign = dir === "rtl" ? "text-right" : "text-left";
   const arrowFlip = dir === "ltr" ? "rotate-180" : "";
