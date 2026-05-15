@@ -51,6 +51,7 @@ export function useServiceReviews(slug: string) {
     try {
       await reviewsApi.create({ serviceSlug: slug, rating, text: comment.trim() });
       await load();
+      refreshReviewsSummary();
       return true;
     } catch {
       return false;
