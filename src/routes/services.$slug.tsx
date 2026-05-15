@@ -139,11 +139,12 @@ function ServiceDetailPage() {
   const startingPrice = svcPriceStr
     ? parseInt(String(svcPriceStr).replace(/[^\d]/g, ""), 10) || 0
     : startingPlan ? parseInt(startingPlan.price.replace(/[^\d]/g, ""), 10) || 0 : 0;
+  // Only consider an "original price" when the service itself defines one — do
+  // not fall back to plan pricing, otherwise a strike-through old price shows
+  // on every service even when the admin didn't set one.
   const startingOriginal = svcOriginalStr
     ? parseInt(String(svcOriginalStr).replace(/[^\d]/g, ""), 10) || 0
-    : startingPlan?.originalPrice
-      ? parseInt(startingPlan.originalPrice.replace(/[^\d]/g, ""), 10) || 0
-      : 0;
+    : 0;
   const startingDiscount =
     service.discountPercent != null && service.discountPercent > 0
       ? service.discountPercent
@@ -151,7 +152,7 @@ function ServiceDetailPage() {
         ? Math.round(((startingOriginal - startingPrice) / startingOriginal) * 100)
         : 0;
   const displayPrice = svcPriceStr ?? startingPlan?.price ?? "—";
-  const displayOriginal = svcOriginalStr ?? startingPlan?.originalPrice;
+  const displayOriginal = svcOriginalStr;
   const heroImg = service.bannerImage || servicesHero;
   const handleAddToCart = () => {
     if (!isAuthenticated) {
