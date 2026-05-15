@@ -145,8 +145,10 @@ export const admin = {
   updateTicketStatus: (id: string, status: string) => request(`/admin/tickets/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   updateTicketPriority: (id: string, priority: string) => request(`/admin/tickets/${id}`, { method: 'PUT', body: JSON.stringify({ priority }) }),
 
-  getReviews: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request(`/admin/reviews${q ? '?' + q : ''}`); },
+  getReviews: (p?: any) => { const q = p ? new URLSearchParams(p).toString() : ''; return request<ApiResponse<{ items: any[]; total?: number; page?: number; pages?: number }>>(`/admin/reviews${q ? '?' + q : ''}`); },
   updateReviewStatus: (id: string, status: string) => request(`/admin/reviews/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  approveReview: (id: string) => request(`/admin/reviews/${id}/approve`, { method: 'PUT' }),
+  rejectReview: (id: string) => request(`/admin/reviews/${id}/reject`, { method: 'PUT' }),
   deleteReview: (id: string) => request(`/admin/reviews/${id}`, { method: 'DELETE' }),
 
   // Site settings — public GET via /settings, admin update via /admin/settings.
