@@ -24,6 +24,69 @@ function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  // OTP state for register flow
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpInfo, setOtpInfo] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  function startCooldown() {
+    setResendCooldown(60);
+    const iv = setInterval(() => {
+      setResendCooldown((s) => {
+        if (s <= 1) { clearInterval(iv); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+  }
+
+  async function verifyOtp() {
+    setError(null);
+    if (!/^\d{4,8}$/.test(otpCode.trim())) {
+      setError(lang === "ar" ? "أدخل الرمز المكوّن من 6 أرقام" : "Enter the 6-digit code");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { user, token } = await api.auth.verifyRegisterOtp({ email: otpEmail.trim(), otp: otpCode.trim() });
+      if (!token || !user) throw new ApiError(500, "Invalid OTP response");
+      setToken(token);
+      await refresh();
+      toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
+      navigate({ to: "/account" });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) setError(lang === "ar" ? "رمز غير صحيح أو منتهي الصلاحية" : "Invalid or expired code");
+        else if (err.status === 429) setError(lang === "ar" ? "تجاوزت عدد المحاولات، اطلب رمزًا جديدًا" : "Too many attempts, request a new code");
+        else setError(err.message || (lang === "ar" ? "تعذر تأكيد الرمز" : "Verification failed"));
+      } else {
+        setError(lang === "ar" ? "تعذر تأكيد الرمز" : "Verification failed");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendOtp() {
+    if (resendCooldown > 0) return;
+    setError(null);
+    setOtpInfo(null);
+    setSubmitting(true);
+    try {
+      await api.auth.resendRegisterOtp({ email: otpEmail.trim() });
+      setOtpInfo(lang === "ar" ? "تم إرسال رمز جديد إلى بريدك" : "A new code has been sent to your email");
+      startCooldown();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 429) {
+        setError(lang === "ar" ? "انتظر قبل طلب رمز آخر" : "Please wait before requesting another code");
+      } else {
+        setError(err instanceof ApiError ? err.message : (lang === "ar" ? "تعذر إرسال الرمز" : "Failed to send code"));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +110,16 @@ function SignupPage() {
     }
     setSubmitting(true);
     try {
-      await signup({ name, phone, email, password: pwd });
+      const result = await signup({ name, phone, email, password: pwd });
+      if (result.requiresOtp) {
+        const emailForOtp = result.email || email.trim();
+        setOtpEmail(emailForOtp);
+        setOtpCode("");
+        setOtpInfo(result.message || (lang === "ar" ? "أدخل رمز OTP المرسل إلى بريدك لإتمام التسجيل" : "Enter the OTP sent to your email to complete sign up"));
+        setOtpStep(true);
+        startCooldown();
+        return;
+      }
       toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
       navigate({ to: "/account" });
     } catch (err) {
