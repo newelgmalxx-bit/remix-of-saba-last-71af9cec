@@ -16,9 +16,13 @@ export const publicApi = {
   sendContact: (body: { name: string; email: string; phone?: string; service?: string; budget?: string; message: string }) =>
     request<ApiResponse<{ ok: boolean }>>('/contact', { method: 'POST', body: JSON.stringify(body) }),
 
-  // Public reviews list keyed by service id.
-  getReviews: (serviceId: string) =>
-    request<ApiResponse<{ items: any[] }>>(`/reviews/${serviceId}`),
+  // Public reviews list. Pass serviceSlug to filter, or omit to fetch all published.
+  getReviews: (params?: { serviceSlug?: string; limit?: number }) => {
+    const q = params ? new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])
+    ).toString() : '';
+    return request<ApiResponse<{ items: any[]; average?: number; total?: number }>>(`/reviews${q ? '?' + q : ''}`);
+  },
 
   // Public bookings endpoint.
   createBooking: (body: { name: string; email: string; phone?: string; date?: string; time?: string; notes?: string; serviceId?: string }) =>
