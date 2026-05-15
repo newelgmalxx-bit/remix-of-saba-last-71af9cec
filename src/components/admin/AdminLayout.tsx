@@ -42,6 +42,7 @@ const navGroups: (NavItem | "sep")[] = [
   { to: "/admin/seo", ar: "إعدادات SEO", en: "SEO settings", icon: Search },
   { to: "/admin/partner", ar: "إعدادات API الشريك", en: "Partner API", icon: Link2 },
   { to: "/admin/tracking", ar: "التتبع والبكسلات", en: "Tracking & Pixels", icon: Target },
+  { to: "/admin/legal", ar: "الصفحات القانونية", en: "Legal pages", icon: FileText },
   "sep",
   { to: "/admin/users", ar: "إدارة المستخدمين", en: "Users", icon: UserCheck },
   "sep",
