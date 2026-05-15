@@ -125,10 +125,10 @@ export function ServiceCard({
         <h3 className="text-base font-extrabold text-foreground">{title}</h3>
         <div className="mt-2 flex items-center justify-center gap-1.5 text-xs">
           <span className="text-muted-foreground">({count})</span>
-          <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
+          {count > 0 && <span className="font-bold text-foreground">{average.toFixed(1)}</span>}
           <div className="flex items-center gap-0.5 text-amber-500">
             {[0,1,2,3,4].map((i) => (
-              <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(rating) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
+              <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(average) ? "fill-amber-500" : "fill-none text-amber-300"}`} />
             ))}
           </div>
         </div>
