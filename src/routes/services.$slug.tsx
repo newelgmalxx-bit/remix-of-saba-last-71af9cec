@@ -525,13 +525,15 @@ function ReviewForm({ isAuthenticated, onSubmit }: { isAuthenticated: boolean; o
     );
   }
 
-  const submit = () => {
+  const submit = async () => {
     if (rating < 1) return;
-    const ok = onSubmit(rating, comment.trim());
+    const ok = await onSubmit(rating, comment.trim());
     if (ok) {
       toast.success(t("svcDetail.reviews.thanks"));
       setComment("");
       setRating(5);
+    } else {
+      toast.error(t("common.error") || "حدث خطأ");
     }
   };
 
