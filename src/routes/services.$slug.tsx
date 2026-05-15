@@ -205,7 +205,7 @@ function ServiceDetailPage() {
                     <Star key={k} className={`h-3.5 w-3.5 ${k < Math.round(summary.average) ? "fill-current" : "fill-none"}`} />
                   ))}
                 </div>
-                <span className="font-bold text-foreground" data-ltr-number>{summary.average.toFixed(1)}</span>
+                {summary.count > 0 && <span className="font-bold text-foreground" data-ltr-number>{summary.average.toFixed(1)}</span>}
                 <span>({summary.count})</span>
                 <button
                   type="button"
