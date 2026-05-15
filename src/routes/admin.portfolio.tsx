@@ -218,9 +218,6 @@ function PortfolioPage() {
               <label className="text-xs font-bold space-y-1.5 block col-span-2">{L("وصف العمل", "Description")}
                 <textarea rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </label>
-              <label className="text-xs font-bold space-y-1.5 block">{L("العميل", "Client")}
-                <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} />
-              </label>
               <label className="text-xs font-bold space-y-1.5 block">{L("الرابط", "Link")}
                 <input className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
               </label>
