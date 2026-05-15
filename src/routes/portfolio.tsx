@@ -186,7 +186,17 @@ function PortfolioPage() {
 
             {/* Tabs */}
             <div className="mt-10 flex flex-wrap justify-center gap-2">
-              {categories.map((c) => {
+              <button
+                onClick={() => setActiveCat("__all__")}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                  activeCat === "__all__"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-secondary/60 text-foreground/70 hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                {t("portfolioPage.cat.all")}
+              </button>
+              {dynamicCats.map((c) => {
                 const active = activeCat === c.key;
                 return (
                   <button
@@ -198,7 +208,7 @@ function PortfolioPage() {
                         : "bg-secondary/60 text-foreground/70 hover:bg-primary/10 hover:text-primary"
                     }`}
                   >
-                    {t(c.tKey)}
+                    {c.label}
                   </button>
                 );
               })}
