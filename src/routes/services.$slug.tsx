@@ -70,6 +70,7 @@ function ServiceDetailPage() {
   const { fav, toggle: toggleFav } = useFavorite(slug);
   const { isAuthenticated } = useAuth();
   const { reviews, summary, addReview } = useServiceReviews(slug);
+  const allReviews = useAllReviews();
 
   const startAlign = dir === "rtl" ? "text-right" : "text-left";
   const arrowFlip = dir === "ltr" ? "rotate-180" : "";
@@ -126,7 +127,6 @@ function ServiceDetailPage() {
     ? service.steps.map((s, i) => ({ n: i + 1, icon: stepIcons[i % stepIcons.length], title: s.title }))
     : defaultSteps);
   const stats = service.stats && service.stats.length ? service.stats : defaultStats;
-  const allReviews = useAllReviews();
   const realTestimonials = allReviews.map((r) => ({ name: r.userName, role: "", text: r.comment }));
   const testimonials = realTestimonials.length
     ? realTestimonials
