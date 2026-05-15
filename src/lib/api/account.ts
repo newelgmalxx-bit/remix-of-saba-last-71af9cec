@@ -82,7 +82,7 @@ export const account = {
     request<ApiResponse<{ invoice: any }>>(`/account/invoices/${id}`),
 
   // ----- Reviews (auth) -----
-  createReview: (body: { serviceId: string; rating: number; comment?: string }) =>
+  createReview: (body: { serviceSlug: string; rating: number; text: string }) =>
     request<ApiResponse<{ review: any }>>('/account/reviews', {
       method: 'POST', body: JSON.stringify(body),
     }),
