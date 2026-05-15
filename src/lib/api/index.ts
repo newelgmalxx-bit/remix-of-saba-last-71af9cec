@@ -47,6 +47,11 @@ export const auth = {
     const res = await authNew.verifyEmailOtp(body);
     return res.data; // { user, token }
   },
+  verifyRegisterOtp: async (body: { email: string; otp: string }) => {
+    const res = await authNew.verifyRegisterOtp(body);
+    return res.data; // { user, token }
+  },
+  resendRegisterOtp: authNew.resendRegisterOtp,
   refresh: authNew.refresh,
 };
 
