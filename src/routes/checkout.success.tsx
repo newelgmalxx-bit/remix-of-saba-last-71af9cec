@@ -191,7 +191,11 @@ function SuccessPage() {
           )}
           {displayOrder?.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
-              {lang === "ar" ? "تم الدفع" : "Paid"}
+              {displayOrder.payment === "tamara"
+                ? (lang === "ar" ? "تم تأكيد الدفع عبر تمارا" : "Confirmed via Tamara")
+                : displayOrder.payment === "myfatoorah"
+                ? (lang === "ar" ? "تم الدفع عبر ماي فاتورة" : "Paid via MyFatoorah")
+                : (lang === "ar" ? "تم الدفع" : "Paid")}
             </div>
           )}
           {displayOrder && !displayOrder.paid && codFlag && (
@@ -201,7 +205,13 @@ function SuccessPage() {
           )}
           {displayOrder && !displayOrder.paid && !codFlag && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
-              {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
+              {verifying
+                ? (displayOrder.payment === "tamara"
+                    ? (lang === "ar" ? "جارٍ التحقق من تمارا..." : "Verifying with Tamara...")
+                    : (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment..."))
+                : (displayOrder.payment === "tamara"
+                    ? (lang === "ar" ? "بانتظار إتمام الدفع عبر تمارا" : "Awaiting Tamara payment")
+                    : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"))}
             </div>
           )}
         </div>
