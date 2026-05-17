@@ -6,7 +6,7 @@ import applePayLogo from "@/assets/pay-applepay.png";
 import visaLogo from "@/assets/pay-visa.webp";
 import mastercardLogo from "@/assets/pay-mastercard.png";
 
-export type PaymentMethod = "tabby" | "tamara" | "mayfatoorah" | "cod";
+export type PaymentMethod = "tabby" | "tamara" | "myfatoorah" | "cod";
 
 export const paymentMethods: {
   id: PaymentMethod;
@@ -16,11 +16,13 @@ export const paymentMethods: {
   logo?: string;
   brands?: { name: string; logo?: string; icon?: LucideIcon }[];
   badge?: string;
+  comingSoon?: boolean;
+  disabled?: boolean;
 }[] = [
   {
-    id: "mayfatoorah",
+    id: "myfatoorah",
     name: "ماي فاتورة",
-    desc: "فيزا، ماستر كارد، وApple Pay",
+    desc: "فيزا، ماستر كارد، مدى، وApple Pay",
     icon: Banknote,
     badge: "الأكثر استخداماً",
     brands: [
@@ -29,9 +31,9 @@ export const paymentMethods: {
       { name: "Apple Pay", logo: applePayLogo },
     ],
   },
-  { id: "cod", name: "الدفع عند الاستلام", desc: "ادفع بعد استلام الخدمة", icon: Truck },
-  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo },
   { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
+  { id: "cod", name: "الدفع عند الاستلام", desc: "ادفع بعد استلام الخدمة", icon: Truck },
+  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, comingSoon: true, disabled: true },
 ];
 
 export type OrderStatus =
@@ -211,15 +213,17 @@ export const formatCurrency = (n: number, lang: "ar" | "en" = "ar") => {
   return new Intl.NumberFormat(locale, { style: "decimal", maximumFractionDigits: 0 }).format(n) + suffix;
 };
 
-export const paymentName = (p: PaymentMethod, lang: "ar" | "en" = "ar") => {
+export const paymentName = (p: PaymentMethod | string, lang: "ar" | "en" = "ar") => {
+  // Accept legacy "mayfatoorah" spelling coming from older API records.
+  const key = (p === ("mayfatoorah" as any) ? "myfatoorah" : p) as PaymentMethod;
   const en: Record<PaymentMethod, string> = {
     tabby: "Tabby",
     tamara: "Tamara",
-    mayfatoorah: "MyFatoorah",
+    myfatoorah: "MyFatoorah",
     cod: "Cash on delivery",
   };
-  if (lang === "en") return en[p] ?? p;
-  return paymentMethods.find((m) => m.id === p)?.name ?? p;
+  if (lang === "en") return en[key] ?? String(p);
+  return paymentMethods.find((m) => m.id === key)?.name ?? String(p);
 };
 
 export const paymentIcon = (p: PaymentMethod): LucideIcon =>
