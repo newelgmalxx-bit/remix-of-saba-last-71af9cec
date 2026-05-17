@@ -298,7 +298,7 @@ function SuccessPage() {
                 <div className="w-full rounded-2xl border border-border bg-card p-4 text-start shadow-sm">
                   <div className="mb-3 text-sm font-bold">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
                       const Icon = m.icon;
                       const active = selectedGateway === m.id;
                       return (

@@ -283,7 +283,7 @@ function OrderDetail() {
               <div className="mt-3 space-y-3">
                 <div className="text-xs font-bold text-muted-foreground">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
                 <div className="grid gap-2">
-                  {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                  {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
                     const Icon = m.icon;
                     const active = selectedGateway === m.id;
                     return (
