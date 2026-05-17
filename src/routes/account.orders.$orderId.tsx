@@ -13,7 +13,7 @@ import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -55,7 +55,7 @@ function OrderDetail() {
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   const [showGateways, setShowGateways] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
   const [payError, setPayError] = useState<string | null>(null);
   const handlePayNow = async () => {
     if (!order || paying) return;
@@ -283,7 +283,7 @@ function OrderDetail() {
               <div className="mt-3 space-y-3">
                 <div className="text-xs font-bold text-muted-foreground">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
                 <div className="grid gap-2">
-                  {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                  {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
                     const Icon = m.icon;
                     const active = selectedGateway === m.id;
                     return (

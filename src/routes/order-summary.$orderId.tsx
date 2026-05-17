@@ -18,7 +18,7 @@ import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentName, type Order } from "@/data/account";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/order-summary/$orderId")({
   validateSearch: z.object({
@@ -51,7 +51,7 @@ function OrderSummaryPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [info, setInfo] = useState<CachedInfo | null>(null);
   const [showGateways, setShowGateways] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
@@ -353,7 +353,7 @@ function OrderSummaryPage() {
                         {lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}
                       </div>
                       <div className="grid gap-2">
-                        {paymentMethods.filter(m => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                        {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
                           const Icon = m.icon;
                           const active = selectedGateway === m.id;
                           return (

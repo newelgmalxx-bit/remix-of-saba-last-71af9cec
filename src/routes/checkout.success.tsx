@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -44,7 +44,7 @@ function SuccessPage() {
   const [verifying, setVerifying] = useState(!!actualPaymentId);
   const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1");
   const [showGateways, setShowGateways] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
@@ -102,7 +102,7 @@ function SuccessPage() {
         number: o || id || "",
         createdAt: new Date().toISOString(),
         status: "pending" as any,
-        payment: codFlag ? "cod" : "mayfatoorah",
+        payment: codFlag ? "cod" : "myfatoorah",
         paid: false,
         paymentStatus: "unpaid",
         invoice: null,
@@ -191,7 +191,11 @@ function SuccessPage() {
           )}
           {displayOrder?.paid && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800">
-              {lang === "ar" ? "تم الدفع" : "Paid"}
+              {displayOrder.payment === "tamara"
+                ? (lang === "ar" ? "تم تأكيد الدفع عبر تمارا" : "Confirmed via Tamara")
+                : displayOrder.payment === "myfatoorah"
+                ? (lang === "ar" ? "تم الدفع عبر ماي فاتورة" : "Paid via MyFatoorah")
+                : (lang === "ar" ? "تم الدفع" : "Paid")}
             </div>
           )}
           {displayOrder && !displayOrder.paid && codFlag && (
@@ -201,7 +205,13 @@ function SuccessPage() {
           )}
           {displayOrder && !displayOrder.paid && !codFlag && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-4 py-1.5 text-xs font-bold text-amber-800">
-              {verifying ? (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment...") : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending")}
+              {verifying
+                ? (displayOrder.payment === "tamara"
+                    ? (lang === "ar" ? "جارٍ التحقق من تمارا..." : "Verifying with Tamara...")
+                    : (lang === "ar" ? "جارٍ التحقق من الدفع..." : "Verifying payment..."))
+                : (displayOrder.payment === "tamara"
+                    ? (lang === "ar" ? "بانتظار إتمام الدفع عبر تمارا" : "Awaiting Tamara payment")
+                    : (lang === "ar" ? "لم يتم الدفع بعد" : "Payment pending"))}
             </div>
           )}
         </div>
@@ -298,7 +308,7 @@ function SuccessPage() {
                 <div className="w-full rounded-2xl border border-border bg-card p-4 text-start shadow-sm">
                   <div className="mb-3 text-sm font-bold">{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</div>
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id)).map((m) => {
+                    {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
                       const Icon = m.icon;
                       const active = selectedGateway === m.id;
                       return (
