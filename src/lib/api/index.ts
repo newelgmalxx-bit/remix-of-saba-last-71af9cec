@@ -102,7 +102,8 @@ export const checkout = {
     // data even when the server returns `success: false` (e.g. the order
     // was created but a post-create cart cleanup step failed).
     const { getToken, getLang, getSid, ApiError } = await import('./client');
-    const method = body.paymentMethod;
+    // Backend accepts only "myfatoorah" or "cod"; Tamara flows through MyFatoorah.
+    const method: 'myfatoorah' | 'cod' = body.paymentMethod === 'cod' ? 'cod' : 'myfatoorah';
     const payload: any = {
       paymentMethod: method,
       contactName: body.contactName ?? body.contact?.name ?? '',
