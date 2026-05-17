@@ -13,20 +13,13 @@ export type PaymentMethodInfo = {
 // Static fallback if /checkout/payment-methods is unavailable.
 export const PAYMENT_METHODS: PaymentMethodInfo[] = [
   { id: 'myfatoorah', name: 'MyFatoorah', type: 'gateway' },
+  { id: 'tamara', name: 'Tamara', type: 'bnpl' },
   { id: 'cod', name: 'Cash on Delivery', type: 'cod' },
 ];
 
-// Normalize any UI-side payment id to a backend-accepted value.
-// Backend accepts ONLY "myfatoorah" or "cod". Anything else (mada, visa,
-// numeric MyFatoorah method ids, the legacy "mayfatoorah" typo) is treated
-// as the MyFatoorah gateway.
-export function normalizePaymentMethod(id: string | null | undefined): 'myfatoorah' | 'cod' {
-  return id === 'cod' ? 'cod' : 'myfatoorah';
-}
-
 type CheckoutBody = {
   contact?: { name?: string; email?: string; phone: string; city?: string; address?: string };
-  paymentMethod: 'myfatoorah' | 'cod' | string;
+  paymentMethod: 'myfatoorah' | 'tamara' | 'cod' | string;
   notes?: string;
   contactName?: string;
   contactEmail?: string;
@@ -40,7 +33,7 @@ type CheckoutBody = {
 
 function buildPayload(body: CheckoutBody) {
   return {
-    paymentMethod: normalizePaymentMethod(body.paymentMethod),
+    paymentMethod: body.paymentMethod,
     contactName: body.contactName ?? body.contact?.name ?? '',
     contactEmail: body.contactEmail ?? body.contact?.email ?? '',
     contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
