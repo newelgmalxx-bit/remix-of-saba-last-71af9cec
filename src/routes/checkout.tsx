@@ -391,18 +391,28 @@ function CheckoutPage() {
                     {paymentMethods.map((m) => {
                       const Icon = m.icon;
                       const active = payment === m.id;
+                      const isDisabled = !!m.disabled;
                       return (
                         <button
                           key={m.id}
-                          onClick={() => setPayment(m.id)}
+                          onClick={() => !isDisabled && setPayment(m.id)}
                           type="button"
+                          disabled={isDisabled}
+                          aria-disabled={isDisabled}
                           className={`relative text-right rounded-2xl border-2 p-4 transition-all ${
-                            active
+                            isDisabled
+                              ? "border-border bg-muted/40 cursor-not-allowed opacity-60"
+                              : active
                               ? "border-primary bg-primary/5 shadow-[0_10px_30px_-15px_rgba(30,91,148,0.5)]"
                               : "border-border bg-card hover:border-primary/50"
                           }`}
                         >
-                          {m.badge && (
+                          {m.comingSoon && (
+                            <span className="absolute -top-2 right-4 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-amber-950">
+                              {lang === "en" ? "Coming soon" : "قريباً"}
+                            </span>
+                          )}
+                          {!m.comingSoon && m.badge && (
                             <span className="absolute -top-2 right-4 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-amber-950">
                               {m.badge}
                             </span>
