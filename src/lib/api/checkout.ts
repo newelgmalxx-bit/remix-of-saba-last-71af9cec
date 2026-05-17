@@ -17,6 +17,14 @@ export const PAYMENT_METHODS: PaymentMethodInfo[] = [
   { id: 'cod', name: 'Cash on Delivery', type: 'cod' },
 ];
 
+// Map UI payment id to a backend-accepted gateway value.
+// Backend currently accepts only "myfatoorah" or "cod". Tamara is offered to
+// the user as a separate option but flows through the MyFatoorah aggregator,
+// which exposes Tamara as an installment method on the hosted page.
+function toBackendMethod(id: string | null | undefined): 'myfatoorah' | 'cod' {
+  return id === 'cod' ? 'cod' : 'myfatoorah';
+}
+
 type CheckoutBody = {
   contact?: { name?: string; email?: string; phone: string; city?: string; address?: string };
   paymentMethod: 'myfatoorah' | 'tamara' | 'cod' | string;
@@ -33,7 +41,7 @@ type CheckoutBody = {
 
 function buildPayload(body: CheckoutBody) {
   return {
-    paymentMethod: body.paymentMethod,
+    paymentMethod: toBackendMethod(body.paymentMethod),
     contactName: body.contactName ?? body.contact?.name ?? '',
     contactEmail: body.contactEmail ?? body.contact?.email ?? '',
     contactPhone: body.contactPhone ?? body.contact?.phone ?? body.phone ?? '',
