@@ -13,7 +13,7 @@ import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
@@ -55,7 +55,7 @@ function OrderDetail() {
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   const [showGateways, setShowGateways] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
   const [payError, setPayError] = useState<string | null>(null);
   const handlePayNow = async () => {
     if (!order || paying) return;
