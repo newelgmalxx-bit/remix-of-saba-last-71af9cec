@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["mayfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
@@ -44,7 +44,7 @@ function SuccessPage() {
   const [verifying, setVerifying] = useState(!!actualPaymentId);
   const [paidFlag, setPaidFlag] = useState<boolean>(paid === "1");
   const [showGateways, setShowGateways] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("mayfatoorah");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
@@ -102,7 +102,7 @@ function SuccessPage() {
         number: o || id || "",
         createdAt: new Date().toISOString(),
         status: "pending" as any,
-        payment: codFlag ? "cod" : "mayfatoorah",
+        payment: codFlag ? "cod" : "myfatoorah",
         paid: false,
         paymentStatus: "unpaid",
         invoice: null,
