@@ -55,12 +55,12 @@ function SuccessPage() {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
-  // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
+  // Verify gateway payment if we have a payment/order reference from the redirect.
   useEffect(() => {
     if (!actualPaymentId) return;
     let alive = true;
     setVerifying(true);
-    checkoutApi.verify(actualPaymentId)
+    checkoutApi.verify(actualPaymentId, normalizedProvider ? { provider: normalizedProvider, orderId: tamaraOrderRef } : undefined)
       .then((res: any) => {
         if (!alive) return;
         const d = res?.data || res || {};
@@ -77,7 +77,7 @@ function SuccessPage() {
       .catch(() => { /* keep page rendering */ })
       .finally(() => { if (alive) setVerifying(false); });
     return () => { alive = false; };
-  }, [actualPaymentId, id, navigate]);
+  }, [actualPaymentId, id, navigate, normalizedProvider, tamaraOrderRef]);
 
   // Fetch order details
   useEffect(() => {
