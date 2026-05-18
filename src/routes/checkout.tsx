@@ -226,38 +226,10 @@ function CheckoutPage() {
         if (err.errors) setFieldErrors(err.errors as any);
         toast.error(error || (lang === "ar" ? "فشل إتمام الطلب" : "Checkout failed"));
       } else {
-        // For any other backend issue (cart sync, server error, network),
-        // still take the user to the order summary page with local data
-        // so they always see their order details after checkout.
-        const localOrderNumber = `LOCAL-${Date.now().toString(36).toUpperCase()}`;
-        try {
-          useCheckoutStore.getState().setLastOrder({
-            orderId: null,
-            orderNumber: localOrderNumber,
-            total,
-            payment,
-            items: items.map((it) => ({
-              serviceSlug: it.serviceSlug,
-              serviceTitle: it.serviceTitle,
-              planId: it.planId,
-              planName: it.planName,
-              price: it.price,
-              qty: it.qty,
-            })),
-            info: {
-              name: info.name,
-              email: info.email,
-              phone: info.phone,
-              notes: info.notes || undefined,
-            },
-          });
-        } catch {}
-        await clear();
-        toast.success(lang === "ar" ? "تم استلام طلبك" : "Order received");
-        navigate({
-          to: "/checkout/success" as any,
-          search: { o: localOrderNumber } as any,
-        });
+        // Surface the real backend error — do NOT fabricate a local order number.
+        const msg = (err as any)?.message || (lang === "ar" ? "تعذّر إتمام الطلب. حاول مرة أخرى." : "Could not complete the order. Please try again.");
+        setError(msg);
+        toast.error(msg);
         return;
       }
     } finally {
