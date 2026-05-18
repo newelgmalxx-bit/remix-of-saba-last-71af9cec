@@ -127,7 +127,11 @@ export const checkout = {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     else headers['X-Session-Id'] = getSid();
 
-    const endpoint = method === 'cod' ? '/checkout/cod' : '/checkout/initiate';
+    const endpoint = method === 'cod'
+      ? '/checkout/cod'
+      : method === 'tamara'
+      ? '/checkout'
+      : '/checkout/initiate';
     const res = await fetch(`https://saba-design.com/api${endpoint}`, {
       method: 'POST',
       headers,
