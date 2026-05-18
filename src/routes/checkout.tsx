@@ -185,10 +185,10 @@ function CheckoutPage() {
       } catch {}
       await clear();
       const isCod = payment === "cod";
-      // MyFatoorah (or any online gateway): redirect to the payment URL.
+      // Online gateways: redirect to the payment URL returned by that provider.
       if (!isCod) {
         let url = res.paymentUrl as string | null | undefined;
-        if (!url && res.orderId) {
+        if (!url && res.orderId && payment === "myfatoorah") {
           try {
             const init: any = await api.checkout.initiateMyfatoorah(res.orderId);
             const d = init?.data ?? init ?? {};
