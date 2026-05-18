@@ -18,11 +18,11 @@ export const PAYMENT_METHODS: PaymentMethodInfo[] = [
 ];
 
 // Map UI payment id to a backend-accepted gateway value.
-// Backend currently accepts only "myfatoorah" or "cod". Tamara is offered to
-// the user as a separate option but flows through the MyFatoorah aggregator,
-// which exposes Tamara as an installment method on the hosted page.
-function toBackendMethod(id: string | null | undefined): 'myfatoorah' | 'cod' {
-  return id === 'cod' ? 'cod' : 'myfatoorah';
+// Backend accepts "myfatoorah", "tamara", or "cod" as independent providers.
+function toBackendMethod(id: string | null | undefined): 'myfatoorah' | 'tamara' | 'cod' {
+  if (id === 'cod') return 'cod';
+  if (id === 'tamara') return 'tamara';
+  return 'myfatoorah';
 }
 
 type CheckoutBody = {
