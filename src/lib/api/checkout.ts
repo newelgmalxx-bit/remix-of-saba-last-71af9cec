@@ -66,11 +66,11 @@ export const checkout = {
   create: (body: CheckoutBody) =>
     request<CheckoutResponse>('/checkout', { method: 'POST', body: JSON.stringify(buildPayload(body)) }),
 
-  // POST /checkout/initiate — alias used for online (MyFatoorah) checkout.
+  // POST /checkout/initiate — alias used for online checkout.
   initiate: (body: CheckoutBody) =>
     request<CheckoutResponse>('/checkout/initiate', {
       method: 'POST',
-      body: JSON.stringify(buildPayload({ ...body, paymentMethod: 'myfatoorah' })),
+      body: JSON.stringify(buildPayload(body)),
     }),
 
   // POST /checkout/cod — Cash on Delivery checkout.
