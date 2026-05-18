@@ -196,7 +196,7 @@ function OrdersList() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
-            {paymentMethods.filter((m) => m.id !== "cod" && !m.disabled).map((m) => {
+            {paymentMethods.filter((m) => m.id === "myfatoorah").map((m) => {
               const Icon = m.icon;
               const isLoading = actionId === payOrderId;
               return (

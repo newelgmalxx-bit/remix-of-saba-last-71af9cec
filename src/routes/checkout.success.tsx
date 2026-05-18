@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah"];
 
 export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({
