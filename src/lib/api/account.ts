@@ -68,9 +68,10 @@ export const account = {
   // POST /account/orders/{id}/pay  body: { paymentMethod }
   // Returns: { paymentUrl, orderId, orderNumber }
   payOrder: (id: string, body?: { paymentMethod?: string }) => {
-    // Backend only accepts "myfatoorah" or "cod" for repaying an existing order.
+    // Backend accepts "myfatoorah", "tamara", or "cod" for repaying an order.
     const m = body?.paymentMethod;
-    const method: 'myfatoorah' | 'cod' = m === 'cod' ? 'cod' : 'myfatoorah';
+    const method: 'myfatoorah' | 'tamara' | 'cod' =
+      m === 'cod' ? 'cod' : m === 'tamara' ? 'tamara' : 'myfatoorah';
     return request<ApiResponse<{ paymentUrl: string; orderId: string; orderNumber: string }>>(
       `/account/orders/${id}/pay`,
       { method: 'POST', body: JSON.stringify({ paymentMethod: method }) },
