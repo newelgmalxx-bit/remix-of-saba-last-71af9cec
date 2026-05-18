@@ -140,7 +140,7 @@ export const checkout = {
     let json: any = null;
     try { json = await res.json(); } catch {}
     const data = json?.data ?? json ?? {};
-    const orderId = data.orderId ?? data.order_id ?? data.order?.id;
+    const orderId = data.orderId ?? data.order_id ?? data.tamaraOrderId ?? data.tamara_order_id ?? data.order?.id;
     const orderNumber = data.orderNumber ?? data.order_number ?? data.order?.number ?? data.order?.orderNumber;
     const paymentUrl = data.checkout_url ?? data.checkoutUrl ?? data.paymentUrl ?? data.payment_url ?? data.invoiceURL ?? data.invoice_url ?? data.url ?? data.order?.checkout_url ?? data.order?.checkoutUrl ?? data.order?.paymentUrl ?? data.order?.payment_url ?? null;
 
