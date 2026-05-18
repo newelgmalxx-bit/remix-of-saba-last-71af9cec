@@ -13,7 +13,7 @@ import { account } from "@/lib/api";
 import { normalizeOrder } from "@/lib/api/normalize";
 import { useAuth } from "@/hooks/useAuth";
 
-const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah"];
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: () => ({ meta: [{ title: "تفاصيل الطلب | سابا ديزاين" }] }),
