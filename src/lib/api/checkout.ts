@@ -92,9 +92,12 @@ export const checkout = {
       method: 'POST', body: JSON.stringify({ orderId }),
     }),
 
-  // GET /checkout/verify?paymentId=xxx — MyFatoorah return verification.
-  verify: (paymentId: string) =>
-    request<ApiResponse<{
+  // GET /checkout/verify — verify provider redirects/callbacks.
+  verify: (paymentId: string, opts?: { provider?: 'myfatoorah' | 'tamara'; orderId?: string }) => {
+    const qs = new URLSearchParams({ paymentId });
+    if (opts?.provider) qs.set('provider', opts.provider);
+    if (opts?.orderId) qs.set('orderId', opts.orderId);
+    return request<ApiResponse<{
       orderId: string;
       orderNumber: string;
       paid: boolean;
@@ -102,7 +105,8 @@ export const checkout = {
       status?: 'confirmed' | 'pending' | 'cancelled';
       invoiceId?: string | null;
       paymentId?: string | null;
-    }>>(`/checkout/verify?paymentId=${encodeURIComponent(paymentId)}`),
+    }>>(`/checkout/verify?${qs.toString()}`);
+  },
 
   // Legacy alias kept for older callers.
   callback: (paymentId: string) =>
