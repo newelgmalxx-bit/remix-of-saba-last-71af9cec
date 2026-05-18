@@ -67,11 +67,14 @@ export const account = {
   // Re-pay an existing unpaid order.
   // POST /account/orders/{id}/pay  body: { paymentMethod }
   // Returns: { paymentUrl, orderId, orderNumber }
-  payOrder: (id: string, body?: { paymentMethod?: string }) =>
-    request<ApiResponse<{ paymentUrl: string; orderId: string; orderNumber: string }>>(
+  payOrder: (id: string, body?: { paymentMethod?: string }) => {
+    const m = body?.paymentMethod;
+    const method = m === 'cod' ? 'cod' : m === 'tamara' ? 'tamara' : 'myfatoorah';
+    return request<ApiResponse<{ paymentUrl: string; orderId: string; orderNumber: string }>>(
       `/account/orders/${id}/pay`,
-      { method: 'POST', body: JSON.stringify({ paymentMethod: body?.paymentMethod === 'cod' ? 'cod' : 'myfatoorah' }) },
-    ),
+      { method: 'POST', body: JSON.stringify({ paymentMethod: method }) },
+    );
+  },
 
   // ----- Invoices (auth) -----
   invoices: (params?: { page?: number }) => {
