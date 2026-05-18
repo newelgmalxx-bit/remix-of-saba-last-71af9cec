@@ -25,7 +25,7 @@ function PaymentFailedPage() {
     if (!orderId) return;
     setRetrying(true);
     try {
-      const res: any = await account.payOrder(orderId, { paymentMethod: "all" });
+      const res: any = await account.payOrder(orderId, { paymentMethod: "myfatoorah" });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) {
         window.location.href = url;
