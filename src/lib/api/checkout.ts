@@ -57,6 +57,12 @@ type CheckoutResponse = ApiResponse<{
   orderId: string;
   orderNumber: string;
   paymentUrl?: string | null;
+  checkoutUrl?: string | null;
+  checkout_url?: string | null;
+  checkoutId?: string | null;
+  checkout_id?: string | null;
+  tamaraOrderId?: string | null;
+  tamara_order_id?: string | null;
   invoiceId?: string | null;
   order?: Order;
 }>;
@@ -66,11 +72,11 @@ export const checkout = {
   create: (body: CheckoutBody) =>
     request<CheckoutResponse>('/checkout', { method: 'POST', body: JSON.stringify(buildPayload(body)) }),
 
-  // POST /checkout/initiate — alias used for online (MyFatoorah) checkout.
+  // POST /checkout/initiate — alias used for online checkout.
   initiate: (body: CheckoutBody) =>
     request<CheckoutResponse>('/checkout/initiate', {
       method: 'POST',
-      body: JSON.stringify(buildPayload({ ...body, paymentMethod: 'myfatoorah' })),
+      body: JSON.stringify(buildPayload(body)),
     }),
 
   // POST /checkout/cod — Cash on Delivery checkout.
@@ -86,9 +92,12 @@ export const checkout = {
       method: 'POST', body: JSON.stringify({ orderId }),
     }),
 
-  // GET /checkout/verify?paymentId=xxx — MyFatoorah return verification.
-  verify: (paymentId: string) =>
-    request<ApiResponse<{
+  // GET /checkout/verify — verify provider redirects/callbacks.
+  verify: (paymentId: string, opts?: { provider?: 'myfatoorah' | 'tamara'; orderId?: string }) => {
+    const qs = new URLSearchParams({ paymentId });
+    if (opts?.provider) qs.set('provider', opts.provider);
+    if (opts?.orderId) qs.set('orderId', opts.orderId);
+    return request<ApiResponse<{
       orderId: string;
       orderNumber: string;
       paid: boolean;
@@ -96,7 +105,8 @@ export const checkout = {
       status?: 'confirmed' | 'pending' | 'cancelled';
       invoiceId?: string | null;
       paymentId?: string | null;
-    }>>(`/checkout/verify?paymentId=${encodeURIComponent(paymentId)}`),
+    }>>(`/checkout/verify?${qs.toString()}`);
+  },
 
   // Legacy alias kept for older callers.
   callback: (paymentId: string) =>

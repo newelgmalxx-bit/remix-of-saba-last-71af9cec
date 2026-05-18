@@ -21,6 +21,11 @@ export const Route = createFileRoute("/checkout/success")({
     orderId: z.string().optional(),
     paymentId: z.string().optional(),
     Id: z.string().optional(),
+    provider: z.string().optional(),
+    order_id: z.string().optional(),
+    checkout_id: z.string().optional(),
+    checkoutId: z.string().optional(),
+    tamaraOrderId: z.string().optional(),
     payUrl: z.string().optional(),
     paid: z.string().optional(),
     cod: z.string().optional(),
@@ -30,12 +35,14 @@ export const Route = createFileRoute("/checkout/success")({
 });
 
 function SuccessPage() {
-  const { o, order: orderQ, orderId, paymentId, Id, payUrl, paid, cod } = Route.useSearch();
+  const { o, order: orderQ, orderId, paymentId, Id, provider, order_id, checkout_id, checkoutId, tamaraOrderId, payUrl, paid, cod } = Route.useSearch();
   const { t, lang } = useLang();
   const { user } = useAuth();
   const navigate = useNavigate();
   const id = orderId || orderQ || o;
-  const actualPaymentId = paymentId || Id;
+  const normalizedProvider = provider === "tamara" ? "tamara" : provider === "myfatoorah" ? "myfatoorah" : undefined;
+  const tamaraOrderRef = tamaraOrderId || order_id || id;
+  const actualPaymentId = paymentId || Id || checkout_id || checkoutId || (normalizedProvider === "tamara" ? tamaraOrderRef : undefined);
   const lastOrder = useCheckoutStore((s) => s.lastOrder);
   // Strip optional surrounding quotes from search params (some gateways encode them).
   const codFlag = (cod || "").replace(/^"|"$/g, "") === "true";
@@ -48,12 +55,12 @@ function SuccessPage() {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
-  // Verify MyFatoorah payment if we have a paymentId/Id from gateway redirect
+  // Verify gateway payment if we have a payment/order reference from the redirect.
   useEffect(() => {
     if (!actualPaymentId) return;
     let alive = true;
     setVerifying(true);
-    checkoutApi.verify(actualPaymentId)
+    checkoutApi.verify(actualPaymentId, normalizedProvider ? { provider: normalizedProvider, orderId: tamaraOrderRef } : undefined)
       .then((res: any) => {
         if (!alive) return;
         const d = res?.data || res || {};
@@ -70,7 +77,7 @@ function SuccessPage() {
       .catch(() => { /* keep page rendering */ })
       .finally(() => { if (alive) setVerifying(false); });
     return () => { alive = false; };
-  }, [actualPaymentId, id, navigate]);
+  }, [actualPaymentId, id, navigate, normalizedProvider, tamaraOrderRef]);
 
   // Fetch order details
   useEffect(() => {
