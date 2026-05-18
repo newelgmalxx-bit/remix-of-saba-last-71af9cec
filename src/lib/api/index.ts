@@ -142,7 +142,7 @@ export const checkout = {
     const data = json?.data ?? json ?? {};
     const orderId = data.orderId ?? data.order_id ?? data.order?.id;
     const orderNumber = data.orderNumber ?? data.order_number ?? data.order?.number ?? data.order?.orderNumber;
-    const paymentUrl = data.paymentUrl ?? data.payment_url ?? data.invoiceURL ?? data.invoice_url ?? data.url ?? data.order?.paymentUrl ?? data.order?.payment_url ?? null;
+    const paymentUrl = data.checkout_url ?? data.checkoutUrl ?? data.paymentUrl ?? data.payment_url ?? data.invoiceURL ?? data.invoice_url ?? data.url ?? data.order?.checkout_url ?? data.order?.checkoutUrl ?? data.order?.paymentUrl ?? data.order?.payment_url ?? null;
 
     // If the order was actually created, treat it as success regardless of
     // the `success` flag or any cleanup-side errors.
