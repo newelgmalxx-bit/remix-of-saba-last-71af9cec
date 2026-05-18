@@ -15,6 +15,11 @@ export const Route = createFileRoute("/payment/result")({
     order: z.string().optional(),
     pid: z.string().optional(),
     paymentId: z.string().optional(),
+    provider: z.string().optional(),
+    order_id: z.string().optional(),
+    checkout_id: z.string().optional(),
+    checkoutId: z.string().optional(),
+    tamaraOrderId: z.string().optional(),
     message: z.string().optional(),
   }),
   head: () => ({ meta: [{ title: "نتيجة الدفع | سابا ديزاين" }] }),
@@ -36,7 +41,9 @@ function PaymentResultPage() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const ar = lang === "ar";
-  const paymentId = search.paymentId || search.pid;
+  const normalizedProvider = search.provider === "tamara" ? "tamara" : search.provider === "myfatoorah" ? "myfatoorah" : undefined;
+  const tamaraOrderRef = search.tamaraOrderId || search.order_id || search.order;
+  const paymentId = search.paymentId || search.pid || search.checkout_id || search.checkoutId || (normalizedProvider === "tamara" ? tamaraOrderRef : undefined);
 
   // Initial kind: if we have a paymentId we always start in `pending` and verify.
   const [kind, setKind] = useState<StatusKind>(() =>
@@ -62,7 +69,7 @@ function PaymentResultPage() {
     if (!paymentId) return "error";
     setVerifying(true);
     try {
-      const res = await api.checkout.verify(paymentId);
+      const res = await api.checkout.verify(paymentId, normalizedProvider ? { provider: normalizedProvider, orderId: tamaraOrderRef } : undefined);
       const d: any = res?.data || {};
       if (d.orderNumber) setOrderNumber(d.orderNumber);
       if (d.orderId) setOrderId(d.orderId);
