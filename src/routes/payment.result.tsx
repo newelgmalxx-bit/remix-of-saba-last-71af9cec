@@ -108,7 +108,7 @@ function PaymentResultPage() {
     } finally {
       setVerifying(false);
     }
-  }, [paymentId, ar, navigate]);
+  }, [paymentId, ar, navigate, normalizedProvider, tamaraOrderRef]);
 
   const runVerification = useCallback(async () => {
     if (!paymentId) return;
