@@ -57,6 +57,12 @@ type CheckoutResponse = ApiResponse<{
   orderId: string;
   orderNumber: string;
   paymentUrl?: string | null;
+  checkoutUrl?: string | null;
+  checkout_url?: string | null;
+  checkoutId?: string | null;
+  checkout_id?: string | null;
+  tamaraOrderId?: string | null;
+  tamara_order_id?: string | null;
   invoiceId?: string | null;
   order?: Order;
 }>;
