@@ -101,6 +101,7 @@ export type AdminClient = {
   id: string; name: string; email: string; phone: string; orders: number;
   totalSpent: number; segment: "vip" | "regular" | "new"; joinedAt: string;
   region?: string; city?: string; language?: string; address?: string; notes?: string;
+  avatar?: string; role?: string; status?: string; authProvider?: string; updatedAt?: string;
 };
 
 export const adminClients: AdminClient[] = [
