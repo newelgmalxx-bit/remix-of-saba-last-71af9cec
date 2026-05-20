@@ -192,6 +192,43 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     if (tp.includes("user") || tp.includes("client")) return "/admin/clients";
     return "";
   };
+
+  const goToAdminTarget = (target: string) => {
+    if (!target) return;
+    if (/^https?:\/\//i.test(target)) {
+      window.open(target, "_blank");
+      return;
+    }
+
+    let path = target;
+    let orderId = "";
+    try {
+      const url = new URL(target, window.location.origin);
+      path = url.pathname;
+      orderId = url.searchParams.get("orderId") || url.searchParams.get("order_id") || url.searchParams.get("id") || "";
+    } catch { /* keep raw target */ }
+
+    const orderMatch = path.match(/^\/admin\/orders(?:\/([^/?#]+))?\/?$/);
+    const invoiceMatch = path.match(/^\/admin\/invoices\/([^/?#]+)/);
+    const contactMatch = path.match(/^\/admin\/contact-messages\//);
+
+    if (orderMatch) {
+      const resolvedOrderId = orderId || orderMatch[1];
+      if (resolvedOrderId) navigate({ to: "/admin/bookings" as any, search: { orderId: resolvedOrderId } as any });
+      else navigate({ to: "/admin/bookings" as any });
+      return;
+    }
+    if (invoiceMatch) {
+      openInvoiceModal(invoiceMatch[1]);
+      return;
+    }
+    if (contactMatch) {
+      navigate({ to: "/admin/clients" as any });
+      return;
+    }
+    navigate({ to: target as any });
+  };
+
   const fmtTime = (t: string) => {
     if (!t) return "";
     const d = new Date(t);
@@ -355,22 +392,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
                         }
                         setNotifOpen(false);
                         const target = n.link || inferLink(n);
-                        if (!target) return;
-                        if (/^https?:\/\//i.test(target)) { window.open(target, "_blank"); return; }
-                        // Special handling for backend notification link patterns
-                        const orderMatch = target.match(/^\/admin\/orders\/([^/?#]+)/);
-                        const invoiceMatch = target.match(/^\/admin\/invoices\/([^/?#]+)/);
-                        const contactMatch = target.match(/^\/admin\/contact-messages\//);
-                        if (orderMatch) {
-                          navigate({ to: "/admin/bookings" as any, search: { orderId: orderMatch[1] } as any });
-                          return;
-                        }
-                        if (invoiceMatch) {
-                          openInvoiceModal(invoiceMatch[1]);
-                          return;
-                        }
-                        if (contactMatch) { navigate({ to: "/admin/clients" as any }); return; }
-                        navigate({ to: target as any });
+                        goToAdminTarget(target);
                       };
                       return (
                         <div key={n.id} onClick={handleClick} className={`flex gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}>
