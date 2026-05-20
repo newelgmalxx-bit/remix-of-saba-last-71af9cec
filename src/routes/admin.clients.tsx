@@ -346,9 +346,13 @@ function ClientsPage() {
           {viewing && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 pb-3 border-b border-border">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
-                  {viewing.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
-                </div>
+                {viewing.avatar ? (
+                  <img src={viewing.avatar} alt={viewing.name} className="h-14 w-14 rounded-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
+                    {viewing.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+                  </div>
+                )}
                 <div>
                   <div className="font-bold text-base">{viewing.name}</div>
                   <Pill tone={segMap[viewing.segment].t}>{segMap[viewing.segment].l}</Pill>
@@ -356,12 +360,14 @@ function ClientsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Info icon={Mail} label={L("البريد", "Email")} value={viewing.email} />
-                <Info icon={Phone} label={L("الجوال", "Phone")} value={viewing.phone} ltr />
+                <Info icon={Phone} label={L("الجوال", "Phone")} value={viewing.phone || "—"} ltr />
                 <Info icon={MapPin} label={L("المدينة", "City")} value={viewing.city ?? "—"} />
-                <Info icon={MapPin} label={L("المنطقة", "Region")} value={viewing.region ?? "—"} />
-                <Info icon={Globe} label={L("اللغة", "Language")} value={viewing.language ?? "—"} />
-                <Info icon={MapPin} label={L("العنوان", "Address")} value={viewing.address ?? "—"} />
-                <Info icon={Calendar} label={L("الانضمام", "Joined")} value={viewing.joinedAt} />
+                <Info icon={Calendar} label={L("الانضمام", "Joined")} value={viewing.joinedAt} ltr />
+                {viewing.language && <Info icon={Globe} label={L("اللغة", "Language")} value={viewing.language} />}
+                {viewing.role && <Info icon={UserCog} label={L("الدور", "Role")} value={viewing.role} />}
+                {viewing.status && <Info icon={Shield} label={L("الحالة", "Status")} value={viewing.status} />}
+                {viewing.authProvider && <Info icon={KeyRound} label={L("طريقة الدخول", "Auth Provider")} value={viewing.authProvider} />}
+                {viewing.updatedAt && <Info icon={Clock} label={L("آخر تحديث", "Last Update")} value={viewing.updatedAt} ltr />}
                 <Info icon={ShoppingBag} label={L("عدد الطلبات", "Orders")} value={String(viewing.orders)} ltr />
                 <Info icon={Star} label={L("إجمالي الإنفاق", "Total Spent")} value={fmtSAR(viewing.totalSpent)} ltr />
               </div>
