@@ -110,8 +110,13 @@ function ClientsPage() {
           orders: a.orders || Number(c.orders) || 0,
           totalSpent: a.spent || Number(c.totalSpent) || 0,
           segment: (c.segment as any) || "new",
-          joinedAt: (c.joinedAt || "").slice(0, 10) || "—",
+          joinedAt: (c.joinedAt || c.created_at || c.createdAt || "").toString().slice(0, 10) || "—",
           city: c.city ?? undefined,
+          avatar: c.avatar ?? undefined,
+          role: c.role ?? undefined,
+          status: c.status ?? undefined,
+          authProvider: c.auth_provider ?? c.authProvider ?? undefined,
+          updatedAt: (c.updated_at ?? c.updatedAt ?? "").toString().slice(0, 10) || undefined,
         };
       });
       setClients(items);
