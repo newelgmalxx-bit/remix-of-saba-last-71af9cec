@@ -213,7 +213,9 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
     const contactMatch = path.match(/^\/admin\/contact-messages\//);
 
     if (orderMatch) {
-      navigate({ to: "/admin/bookings" as any, search: orderId || orderMatch[1] ? { orderId: orderId || orderMatch[1] } as any : undefined });
+      const resolvedOrderId = orderId || orderMatch[1];
+      if (resolvedOrderId) navigate({ to: "/admin/bookings" as any, search: { orderId: resolvedOrderId } as any });
+      else navigate({ to: "/admin/bookings" as any });
       return;
     }
     if (invoiceMatch) {

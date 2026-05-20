@@ -45,6 +45,7 @@ import { Route as AdminPortfolioRouteImport } from './routes/admin.portfolio'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminPaymentRouteImport } from './routes/admin.payment'
 import { Route as AdminPartnerRouteImport } from './routes/admin.partner'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLegalRouteImport } from './routes/admin.legal'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
@@ -63,6 +64,7 @@ import { Route as AdminSettingsNotificationsRouteImport } from './routes/admin.s
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin.settings.appearance'
 import { Route as AdminServicesSlugRouteImport } from './routes/admin.services.$slug'
+import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as AccountTicketsNewRouteImport } from './routes/account.tickets.new'
 import { Route as AccountTicketsTicketIdRouteImport } from './routes/account.tickets.$ticketId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
@@ -247,6 +249,11 @@ const AdminPartnerRoute = AdminPartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLegalRoute = AdminLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
@@ -339,6 +346,11 @@ const AdminServicesSlugRoute = AdminServicesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => AdminServicesRoute,
 } as any)
+const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
+  id: '/$orderId',
+  path: '/$orderId',
+  getParentRoute: () => AdminOrdersRoute,
+} as any)
 const AccountTicketsNewRoute = AccountTicketsNewRouteImport.update({
   id: '/account/tickets/new',
   path: '/account/tickets/new',
@@ -377,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -402,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
@@ -435,6 +449,7 @@ export interface FileRoutesByTo {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -459,6 +474,7 @@ export interface FileRoutesByTo {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
@@ -494,6 +510,7 @@ export interface FileRoutesById {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/partner': typeof AdminPartnerRoute
   '/admin/payment': typeof AdminPaymentRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -519,6 +536,7 @@ export interface FileRoutesById {
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
   '/account/tickets/$ticketId': typeof AccountTicketsTicketIdRoute
   '/account/tickets/new': typeof AccountTicketsNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/services/$slug': typeof AdminServicesSlugRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
@@ -555,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/invoices'
     | '/admin/legal'
+    | '/admin/orders'
     | '/admin/partner'
     | '/admin/payment'
     | '/admin/plans'
@@ -580,6 +599,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/orders/$orderId'
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
@@ -613,6 +633,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/invoices'
     | '/admin/legal'
+    | '/admin/orders'
     | '/admin/partner'
     | '/admin/payment'
     | '/admin/plans'
@@ -637,6 +658,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/orders/$orderId'
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
@@ -671,6 +693,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/invoices'
     | '/admin/legal'
+    | '/admin/orders'
     | '/admin/partner'
     | '/admin/payment'
     | '/admin/plans'
@@ -696,6 +719,7 @@ export interface FileRouteTypes {
     | '/account/orders/$orderId'
     | '/account/tickets/$ticketId'
     | '/account/tickets/new'
+    | '/admin/orders/$orderId'
     | '/admin/services/$slug'
     | '/admin/settings/appearance'
     | '/admin/settings/integrations'
@@ -994,6 +1018,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPartnerRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/legal': {
       id: '/admin/legal'
       path: '/legal'
@@ -1120,6 +1151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesSlugRouteImport
       parentRoute: typeof AdminServicesRoute
     }
+    '/admin/orders/$orderId': {
+      id: '/admin/orders/$orderId'
+      path: '/$orderId'
+      fullPath: '/admin/orders/$orderId'
+      preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+      parentRoute: typeof AdminOrdersRoute
+    }
     '/account/tickets/new': {
       id: '/account/tickets/new'
       path: '/account/tickets/new'
@@ -1143,6 +1181,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminOrdersRouteChildren {
+  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
+}
+
+const AdminOrdersRouteChildren: AdminOrdersRouteChildren = {
+  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
+}
+
+const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
+  AdminOrdersRouteChildren,
+)
 
 interface AdminServicesRouteChildren {
   AdminServicesSlugRoute: typeof AdminServicesSlugRoute
@@ -1184,6 +1234,7 @@ interface AdminRouteChildren {
   AdminClientsRoute: typeof AdminClientsRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminLegalRoute: typeof AdminLegalRoute
+  AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminPartnerRoute: typeof AdminPartnerRoute
   AdminPaymentRoute: typeof AdminPaymentRoute
   AdminPlansRoute: typeof AdminPlansRoute
@@ -1207,6 +1258,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminClientsRoute: AdminClientsRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminLegalRoute: AdminLegalRoute,
+  AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminPartnerRoute: AdminPartnerRoute,
   AdminPaymentRoute: AdminPaymentRoute,
   AdminPlansRoute: AdminPlansRoute,
