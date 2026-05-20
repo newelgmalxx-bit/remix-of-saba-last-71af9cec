@@ -72,7 +72,7 @@ function UsersPage() {
           id: u.id, name: u.name, email: u.email, phone: u.phone ?? "",
           role: (u.role as any) || "support",
           active: (u.status ?? "active") === "active",
-          joinedAt: (u.createdAt || "").slice(0, 10) || "—",
+          joinedAt: (u.createdAt || u.created_at || u.joinedAt || "").toString().slice(0, 10) || "—",
           city: u.city ?? "",
         } as AdminUser & { city: string }));
         if (items.length) setUsers(items);
