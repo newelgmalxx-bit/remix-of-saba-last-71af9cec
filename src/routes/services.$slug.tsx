@@ -538,6 +538,57 @@ function ServiceDetailPage() {
         </section>
       </main>
       <SiteFooter />
+
+      <Dialog open={tamaraOpen} onOpenChange={setTamaraOpen}>
+        <DialogContent dir={dir} className="max-w-lg overflow-hidden border-0 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-100 p-0">
+          <div className="p-6 sm:p-8">
+            <h3 className="text-center text-xl font-extrabold text-foreground">
+              {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
+            </h3>
+            <div className="mt-5 rounded-2xl bg-white p-6 text-center shadow-sm">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div className="mt-3 text-base font-extrabold text-foreground">
+                {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
+              </div>
+              <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                {lang === "ar"
+                  ? "ادفع جزء من المبلغ الحين والباقي على دفعتين خلال شهرين."
+                  : "Pay part now and the rest in two installments over two months."}
+              </p>
+            </div>
+
+            <div className="my-6 h-px bg-border/60" />
+
+            <div className="text-center text-sm font-bold text-foreground">
+              {lang === "ar" ? "ليش أدفع تمارا؟" : "Why pay with Tamara?"}
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              <div className="flex flex-col items-center gap-2">
+                <Smile className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "مرنة" : "Flexible"}</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <CreditCard className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">
+                  {lang === "ar" ? "متوافقة مع الشريعة الإسلامية" : "Shariah-compliant"}
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <ShieldCheck className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "بدون رسوم تأخير" : "No late fees"}</span>
+              </div>
+            </div>
+
+            <p className="mt-6 text-center text-[11px] leading-6 text-muted-foreground">
+              {lang === "ar"
+                ? <>(1) قد يختلف توافر وتفاصيل خطط الدفع المقدمة حسب قيمة طلبك وسجلك لدى تمارا (2) تطبق <span className="underline">الشروط والأحكام</span> (3) تمارا موافقة لتعاليم <span className="underline">الشريعة الإسلامية</span> (4) متاح للعملاء في السعودية (5) خطط الدفع النهائية المقدمة لك قد تختلف حسب سجلك الائتماني</>
+                : "Availability and details of payment plans may vary based on your order value and Tamara record. Terms apply."}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
