@@ -257,6 +257,33 @@ function ServiceDetailPage() {
                 </div>
               </div>
 
+              {startingPrice > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTamaraOpen(true)}
+                  className="mt-4 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between gap-3" dir={dir}>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground">
+                        {lang === "ar"
+                          ? <>أو قسم فاتورتك على 3 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>
+                          : <>Or split into 3 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>}
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {lang === "ar" ? "بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية " : "No late fees, Shariah-compliant "}
+                        <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-200 via-pink-200 to-purple-200 px-3 py-1.5 text-[11px] font-extrabold text-foreground">
+                      tamara
+                    </span>
+                  </div>
+                </button>
+              )}
+
+
+
               <div className="mt-5 rounded-2xl border border-border/60 bg-secondary/30 p-4">
                 <div className="mb-3 text-xs font-bold text-foreground">{t("svcDetail.highlights")}</div>
                 <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
