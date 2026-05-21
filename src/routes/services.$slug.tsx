@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { services as servicesApi } from "@/lib/api";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send, Smile, CreditCard, Wallet,
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -43,6 +44,7 @@ function ServiceDetailPage() {
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const [remoteDetail, setRemoteDetail] = useState<any>(null);
+  const [tamaraOpen, setTamaraOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -254,6 +256,33 @@ function ServiceDetailPage() {
                   </button>
                 </div>
               </div>
+
+              {startingPrice > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTamaraOpen(true)}
+                  className="mt-4 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between gap-3" dir={dir}>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground">
+                        {lang === "ar"
+                          ? <>أو قسم فاتورتك على 3 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>
+                          : <>Or split into 3 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>}
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {lang === "ar" ? "بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية " : "No late fees, Shariah-compliant "}
+                        <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-200 via-pink-200 to-purple-200 px-3 py-1.5 text-[11px] font-extrabold text-foreground">
+                      tamara
+                    </span>
+                  </div>
+                </button>
+              )}
+
+
 
               <div className="mt-5 rounded-2xl border border-border/60 bg-secondary/30 p-4">
                 <div className="mb-3 text-xs font-bold text-foreground">{t("svcDetail.highlights")}</div>
@@ -509,6 +538,57 @@ function ServiceDetailPage() {
         </section>
       </main>
       <SiteFooter />
+
+      <Dialog open={tamaraOpen} onOpenChange={setTamaraOpen}>
+        <DialogContent dir={dir} className="max-w-lg overflow-hidden border-0 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-100 p-0">
+          <div className="p-6 sm:p-8">
+            <h3 className="text-center text-xl font-extrabold text-foreground">
+              {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
+            </h3>
+            <div className="mt-5 rounded-2xl bg-white p-6 text-center shadow-sm">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div className="mt-3 text-base font-extrabold text-foreground">
+                {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
+              </div>
+              <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                {lang === "ar"
+                  ? "ادفع جزء من المبلغ الحين والباقي على دفعتين خلال شهرين."
+                  : "Pay part now and the rest in two installments over two months."}
+              </p>
+            </div>
+
+            <div className="my-6 h-px bg-border/60" />
+
+            <div className="text-center text-sm font-bold text-foreground">
+              {lang === "ar" ? "ليش أدفع تمارا؟" : "Why pay with Tamara?"}
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              <div className="flex flex-col items-center gap-2">
+                <Smile className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "مرنة" : "Flexible"}</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <CreditCard className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">
+                  {lang === "ar" ? "متوافقة مع الشريعة الإسلامية" : "Shariah-compliant"}
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <ShieldCheck className="h-7 w-7 text-foreground/70" />
+                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "بدون رسوم تأخير" : "No late fees"}</span>
+              </div>
+            </div>
+
+            <p className="mt-6 text-center text-[11px] leading-6 text-muted-foreground">
+              {lang === "ar"
+                ? <>(1) قد يختلف توافر وتفاصيل خطط الدفع المقدمة حسب قيمة طلبك وسجلك لدى تمارا (2) تطبق <span className="underline">الشروط والأحكام</span> (3) تمارا موافقة لتعاليم <span className="underline">الشريعة الإسلامية</span> (4) متاح للعملاء في السعودية (5) خطط الدفع النهائية المقدمة لك قد تختلف حسب سجلك الائتماني</>
+                : "Availability and details of payment plans may vary based on your order value and Tamara record. Terms apply."}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
