@@ -267,8 +267,8 @@ function ServiceDetailPage() {
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-bold text-foreground">
                         {lang === "ar"
-                          ? <>أو قسم فاتورتك على 3 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>
-                          : <>Or split into 3 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Math.ceil(startingPrice / 3)} <SarIcon className="h-[0.8em]" /></span></>}
+                          ? <>أو قسم فاتورتك على 3 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 3).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>
+                          : <>Or split into 3 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 3).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>}
                       </div>
                       <div className="mt-1 text-[11px] text-muted-foreground">
                         {lang === "ar" ? "بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية " : "No late fees, Shariah-compliant "}
