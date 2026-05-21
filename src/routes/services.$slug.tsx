@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { services as servicesApi } from "@/lib/api";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Check, Star, ShoppingCart, Zap, Truck, Clock, Award,
-  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send,
+  MessageSquare, ScanSearch, Wrench, RefreshCw, ShieldCheck, Heart, Send, Smile, CreditCard, Wallet,
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
