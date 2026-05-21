@@ -44,6 +44,7 @@ function ServiceDetailPage() {
   const { slug } = Route.useParams();
   const live = useServiceContent(slug);
   const [remoteDetail, setRemoteDetail] = useState<any>(null);
+  const [tamaraOpen, setTamaraOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
