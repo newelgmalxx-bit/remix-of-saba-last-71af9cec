@@ -699,10 +699,10 @@ function ServiceDetailPage() {
             </button>
 
             <div className="mt-4 flex items-center justify-center gap-2 opacity-80">
-              <img src="/src/assets/pay-applepay.png" alt="Apple Pay" className="h-5 w-auto object-contain" />
-              <img src="/src/assets/pay-mastercard.png" alt="Mastercard" className="h-5 w-auto object-contain" />
-              <img src="/src/assets/pay-mada.png" alt="Mada" className="h-5 w-auto object-contain" />
-              <img src="/src/assets/pay-visa.webp" alt="Visa" className="h-5 w-auto object-contain" />
+              <img src={payApplePay} alt="Apple Pay" className="h-5 w-auto object-contain" />
+              <img src={payMastercard} alt="Mastercard" className="h-5 w-auto object-contain" />
+              <img src={payMada} alt="Mada" className="h-5 w-auto object-contain" />
+              <img src={payVisa} alt="Visa" className="h-5 w-auto object-contain" />
             </div>
           </div>
         </DialogContent>
