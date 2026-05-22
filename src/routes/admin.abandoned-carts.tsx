@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/abandoned-carts")({
   component: AbandonedCartsPage,
 });
 
-type CartItem = { servicetitle?: string; planname?: string | null; qty: number; price: number };
+type CartItem = { serviceTitle?: string; servicetitle?: string; planName?: string | null; planname?: string | null; qty: number; price: number; lineTotal?: number };
 type Cart = {
   cart_id: string;
   customer_name: string;
@@ -22,7 +22,8 @@ type Cart = {
   item_count: number;
   total_qty: number;
   subtotal: number;
-  updatedat: string;
+  updated_at?: string;
+  updatedat?: string;
   items: CartItem[];
 };
 
