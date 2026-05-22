@@ -171,7 +171,7 @@ function AbandonedCartsPage() {
                       </td>
                       <td className="px-3 py-3"><Pill tone="emerald">{c.item_count}</Pill></td>
                       <td className="px-3 py-3 font-bold text-emerald-700" data-ltr-number>{fmtSARNumber(Number(c.subtotal) || 0)} {L("ريال", "SAR")}</td>
-                      <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{fmtDate(c.updatedat)}</td>
+                      <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{fmtDate(c.updated_at || c.updatedat || "")}</td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           <button onClick={() => setViewing(c)} title={L("عرض التفاصيل", "View details")} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted text-primary">
