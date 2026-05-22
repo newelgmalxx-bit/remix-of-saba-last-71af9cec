@@ -45,6 +45,7 @@ function ServiceDetailPage() {
   const live = useServiceContent(slug);
   const [remoteDetail, setRemoteDetail] = useState<any>(null);
   const [tamaraOpen, setTamaraOpen] = useState(false);
+  const [tabbyOpen, setTabbyOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -260,8 +261,33 @@ function ServiceDetailPage() {
               {startingPrice > 0 && (
                 <button
                   type="button"
-                  onClick={() => setTamaraOpen(true)}
+                  onClick={() => setTabbyOpen(true)}
                   className="mt-4 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between gap-3" dir={dir}>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground">
+                        {lang === "ar"
+                          ? <>أو قسم فاتورتك على 4 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>
+                          : <>Or split into 4 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>}
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {lang === "ar" ? "بدون رسوم أو فوائد " : "No fees, no interest "}
+                        <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center justify-center rounded-md bg-[#3bea93] px-3 py-1.5 text-[11px] font-extrabold text-foreground">
+                      tabby
+                    </span>
+                  </div>
+                </button>
+              )}
+
+              {startingPrice > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTamaraOpen(true)}
+                  className="mt-3 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-3" dir={dir}>
                     <div className="min-w-0 flex-1">
@@ -585,6 +611,51 @@ function ServiceDetailPage() {
               {lang === "ar"
                 ? <>(1) قد يختلف توافر وتفاصيل خطط الدفع المقدمة حسب قيمة طلبك وسجلك لدى تمارا (2) تطبق <span className="underline">الشروط والأحكام</span> (3) تمارا موافقة لتعاليم <span className="underline">الشريعة الإسلامية</span> (4) متاح للعملاء في السعودية (5) خطط الدفع النهائية المقدمة لك قد تختلف حسب سجلك الائتماني</>
                 : "Availability and details of payment plans may vary based on your order value and Tamara record. Terms apply."}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={tabbyOpen} onOpenChange={setTabbyOpen}>
+        <DialogContent dir={dir} className="max-w-lg overflow-hidden border-0 bg-white p-0">
+          <div className="p-6 sm:p-8">
+            <h3 className="text-center text-xl font-extrabold text-foreground">
+              {lang === "ar" ? "ادفع على راحتك" : "Pay at your pace"}
+            </h3>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              {lang === "ar" ? "قسّم مشترياتك حتى 4 دفعات" : "Split your purchase into 4 payments"}
+            </p>
+            <div className="mt-5 rounded-2xl bg-[#3bea93]/10 p-6 text-center">
+              <div className="mx-auto inline-flex items-center justify-center rounded-md bg-[#3bea93] px-4 py-1.5 text-xs font-extrabold text-foreground">
+                tabby
+              </div>
+              <div className="mt-4 text-base font-extrabold text-foreground">
+                {lang === "ar" ? "4 دفعات بقيمة" : "4 payments of"}{" "}
+                <span dir="ltr" className="inline-flex items-baseline gap-1">
+                  {Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" />
+                </span>
+              </div>
+              <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                {lang === "ar" ? "بدون رسوم أو فوائد." : "No fees, no interest."}
+              </p>
+            </div>
+
+            <div className="my-6 h-px bg-border/60" />
+
+            <div className="text-center text-sm font-bold text-foreground">
+              {lang === "ar" ? "آلية الاستخدام" : "How it works"}
+            </div>
+            <ol className="mt-4 space-y-3 text-xs text-foreground/80">
+              <li className="flex items-start gap-2"><span className="font-bold text-primary">1</span> {lang === "ar" ? "اختر تابي عند الدفع لتعيين خطة دفع" : "Choose Tabby at checkout to set a payment plan"}</li>
+              <li className="flex items-start gap-2"><span className="font-bold text-primary">2</span> {lang === "ar" ? "أدخل بياناتك وأضف بطاقة الصراف أو الائتمان" : "Enter your details and add your debit or credit card"}</li>
+              <li className="flex items-start gap-2"><span className="font-bold text-primary">3</span> {lang === "ar" ? "حسب صحة الدفع التي اخترتها، قد تحتاج إلى سداد دفعة مقدمة أولاً" : "Depending on the plan, you may need to pay an upfront amount"}</li>
+              <li className="flex items-start gap-2"><span className="font-bold text-primary">4</span> {lang === "ar" ? "سيرسل لك تذكير عند استحقاق دفعتك القادمة" : "We'll remind you when your next payment is due"}</li>
+            </ol>
+
+            <p className="mt-6 text-center text-[11px] leading-6 text-muted-foreground">
+              {lang === "ar"
+                ? "مدفوعات متوافقة مع أحكام الشريعة الإسلامية. خيارات الدفع لدينا هي معايير التمويل الإسلامي."
+                : "Shariah-compliant payments. Terms apply."}
             </p>
           </div>
         </DialogContent>

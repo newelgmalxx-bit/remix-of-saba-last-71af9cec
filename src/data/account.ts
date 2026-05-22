@@ -33,7 +33,7 @@ export const paymentMethods: {
   },
   { id: "tamara", name: "تمارا", desc: "ادفع بعد 30 يوم أو على 3 دفعات", icon: Wallet, logo: tamaraLogo },
   { id: "cod", name: "الدفع عند الاستلام", desc: "ادفع بعد استلام الخدمة", icon: Truck },
-  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo, comingSoon: true, disabled: true },
+  { id: "tabby", name: "تابي", desc: "قسّمها على 4 دفعات بدون فوائد", icon: Wallet, logo: tabbyLogo },
 ];
 
 export type OrderStatus =

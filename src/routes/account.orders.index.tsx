@@ -25,6 +25,8 @@ const filters: { id: OrderStatus | "all"; key: TKey }[] = [
   { id: "cancelled", key: "account.orders.filter.cancelled" },
 ];
 
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
+
 function OrdersList() {
   const { t, lang, dir } = useLang();
   const { user } = useAuth();
@@ -32,30 +34,22 @@ function OrdersList() {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionId, setActionId] = useState<string | null>(null);
-  const [payOrderId, setPayOrderId] = useState<string | null>(null);
+  const [payOrderState, setPayOrderState] = useState<Order | null>(null);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
+  const [paying, setPaying] = useState(false);
 
-  const reload = () => {
-    setLoading(true);
-    account.listOrders({ status: filter === "all" ? undefined : filter, limit: 50 })
-      .then((res) => setOrders((res.items || []).map(normalizeOrder)))
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
-  };
-
-  const handlePay = async (orderId: string, method: PaymentMethod) => {
-    if (actionId) return;
-    setActionId(orderId);
+  const handlePayNow = async () => {
+    if (!payOrderState || paying) return;
+    setPaying(true);
     try {
-      const res: any = await account.payOrder(orderId, { paymentMethod: method });
+      const res: any = await account.payOrder(payOrderState.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
       toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
     } catch (e: any) {
       toast.error(e?.message || (lang === "ar" ? "تعذّر بدء الدفع" : "Could not start payment"));
     } finally {
-      setActionId(null);
-      setPayOrderId(null);
+      setPaying(false);
     }
   };
 
@@ -154,11 +148,10 @@ function OrdersList() {
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     {!o.paid && (
                       <button
-                        onClick={() => setPayOrderId(o.id)}
-                        disabled={actionId === o.id}
+                        onClick={() => { setSelectedGateway("myfatoorah"); setPayOrderState(o); }}
                         className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
                       >
-                        {actionId === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                        <CreditCard className="h-4 w-4" />
                         {lang === "ar" ? "ادفع الآن" : "Pay now"}
                       </button>
                     )}
@@ -187,37 +180,48 @@ function OrdersList() {
         })}
       </div>
 
-      <Dialog open={!!payOrderId} onOpenChange={(o) => !o && setPayOrderId(null)}>
+      <Dialog open={!!payOrderState} onOpenChange={(o) => { if (!o) { setPayOrderState(null); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{lang === "ar" ? "اختر طريقة الدفع" : "Choose payment method"}</DialogTitle>
+            <DialogTitle>{lang === "ar" ? "اختر بوابة الدفع" : "Choose a payment gateway"}</DialogTitle>
             <DialogDescription>
               {lang === "ar" ? "حدّد بوابة الدفع لإكمال طلبك." : "Pick a payment gateway to complete your order."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
-            {paymentMethods.filter((m) => m.id === "myfatoorah").map((m) => {
+            {paymentMethods.filter((m) => GATEWAY_METHODS.includes(m.id) && !m.disabled).map((m) => {
               const Icon = m.icon;
-              const isLoading = actionId === payOrderId;
+              const active = selectedGateway === m.id;
               return (
                 <button
                   key={m.id}
-                  onClick={() => payOrderId && handlePay(payOrderId, m.id)}
-                  disabled={isLoading}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-background p-3 text-start transition hover:border-primary hover:bg-primary/5 disabled:opacity-60"
+                  type="button"
+                  onClick={() => setSelectedGateway(m.id)}
+                  className={`flex items-center gap-3 rounded-xl border p-3 text-start transition ${active ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/50"}`}
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    {m.logo ? <img src={m.logo} alt={m.name} className="h-6 w-6 object-contain" /> : <Icon className="h-5 w-5" />}
+                  <span className="flex h-10 w-12 items-center justify-center overflow-hidden rounded-lg bg-white border border-border p-1">
+                    {m.logo ? <img src={m.logo} alt={m.name} className="max-h-7 w-auto object-contain" /> : <Icon className="h-5 w-5 text-primary" />}
                   </span>
                   <span className="flex-1">
                     <span className="block text-sm font-bold text-foreground">{paymentName(m.id, lang)}</span>
                     <span className="block text-xs text-muted-foreground">{m.desc}</span>
                   </span>
-                  {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  <span className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${active ? "border-primary bg-primary" : "border-border"}`}>
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </span>
                 </button>
               );
             })}
           </div>
+          <button
+            type="button"
+            onClick={handlePayNow}
+            disabled={paying}
+            className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-sm font-bold text-primary-foreground hover:opacity-95 disabled:opacity-60"
+          >
+            {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+            {lang === "ar" ? "المتابعة للدفع" : "Continue to payment"}
+          </button>
         </DialogContent>
       </Dialog>
     </AccountLayout>

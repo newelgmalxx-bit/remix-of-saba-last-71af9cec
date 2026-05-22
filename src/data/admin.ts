@@ -80,6 +80,8 @@ export const bookingStatusMap: Record<AdminBooking["status"], { label: string; t
 export const paymentMethods: { value: string; labelAr: string; labelEn: string; aliases?: string[] }[] = [
   { value: "cod", labelAr: "الدفع عند الاستلام", labelEn: "Cash on delivery", aliases: ["cash", "كاش"] },
   { value: "myfatoorah", labelAr: "ماي فاتورة", labelEn: "MyFatoorah", aliases: ["mayfatoorah", "my_fatoorah", "ماي فاتورة"] },
+  { value: "tabby", labelAr: "تابي", labelEn: "Tabby", aliases: ["tabby", "تابي"] },
+  { value: "tamara", labelAr: "تمارا", labelEn: "Tamara", aliases: ["tamara", "تمارا"] },
 ];
 
 export type AdminInvoice = {

@@ -8,7 +8,7 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { account } from "@/lib/api";
 import { toast } from "sonner";
 
-type PayMethod = "myfatoorah" | "tamara" | "cod";
+type PayMethod = "myfatoorah" | "tabby" | "tamara" | "cod";
 
 export const Route = createFileRoute("/payment/failed")({
   validateSearch: z.object({
@@ -57,6 +57,7 @@ function PaymentFailedPage() {
 
   const methods: { id: PayMethod; label: string }[] = [
     { id: "myfatoorah", label: ar ? "بطاقة / MyFatoorah" : "Card / MyFatoorah" },
+    { id: "tabby", label: ar ? "تابي — قسّمها على 4" : "Tabby — Split in 4" },
     { id: "tamara", label: ar ? "تمارا — قسّمها" : "Tamara — Split it" },
     { id: "cod", label: ar ? "الدفع عند الاستلام" : "Cash on Delivery" },
   ];
