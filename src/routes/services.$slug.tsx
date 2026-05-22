@@ -568,48 +568,53 @@ function ServiceDetailPage() {
       <SiteFooter />
 
       <Dialog open={tamaraOpen} onOpenChange={setTamaraOpen}>
-        <DialogContent dir={dir} className="max-w-lg overflow-hidden border-0 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-100 p-0">
-          <div className="p-6 sm:p-8">
-            <h3 className="text-center text-xl font-extrabold text-foreground">
+        <DialogContent dir={dir} className="max-w-md overflow-hidden border-0 p-0">
+          <div className="relative p-6 sm:p-7" style={{ background: "linear-gradient(135deg, #fde4cf 0%, #ffd1d9 40%, #e7d4f5 100%)" }}>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-2xl">👋</span>
+              <img src={tamaraLogo} alt="tamara" className="h-7 w-auto object-contain" />
+            </div>
+            <h3 className="mt-4 text-center text-base font-extrabold text-foreground">
               {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
             </h3>
-            <div className="mt-5 rounded-2xl bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto inline-flex items-center justify-center">
-                <img src={tamaraLogo} alt="tamara" className="h-10 w-auto object-contain" />
+
+            <div className="mt-5 rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-black/5">
+              <div className="flex items-center justify-center gap-2">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-rose-500 text-white text-xs font-bold">3</span>
+                <div className="text-sm font-extrabold text-foreground">
+                  {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
+                </div>
               </div>
-              <div className="mt-3 text-base font-extrabold text-foreground">
-                {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
-              </div>
-              <p className="mt-1 text-xs leading-6 text-muted-foreground">
+              <p className="mt-2 text-[11px] leading-6 text-muted-foreground">
                 {lang === "ar"
                   ? "ادفع جزء من المبلغ الحين والباقي على دفعتين خلال شهرين."
                   : "Pay part now and the rest in two installments over two months."}
               </p>
             </div>
 
-            <div className="my-6 h-px bg-border/60" />
+            <div className="my-5 h-px bg-black/10" />
 
-            <div className="text-center text-sm font-bold text-foreground">
+            <div className="text-center text-sm font-extrabold text-foreground">
               {lang === "ar" ? "ليش أدفع تمارا؟" : "Why pay with Tamara?"}
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-center">
               <div className="flex flex-col items-center gap-2">
-                <Smile className="h-7 w-7 text-foreground/70" />
-                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "مرنة" : "Flexible"}</span>
+                <Smile className="h-6 w-6 text-foreground/80" strokeWidth={1.5} />
+                <span className="text-[11px] text-foreground/80">{lang === "ar" ? "مرنة" : "Flexible"}</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <CreditCard className="h-7 w-7 text-foreground/70" />
-                <span className="text-[11px] text-muted-foreground">
+                <CreditCard className="h-6 w-6 text-foreground/80" strokeWidth={1.5} />
+                <span className="text-[11px] leading-4 text-foreground/80">
                   {lang === "ar" ? "متوافقة مع الشريعة الإسلامية" : "Shariah-compliant"}
                 </span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <ShieldCheck className="h-7 w-7 text-foreground/70" />
-                <span className="text-[11px] text-muted-foreground">{lang === "ar" ? "بدون رسوم تأخير" : "No late fees"}</span>
+                <Clock className="h-6 w-6 text-foreground/80" strokeWidth={1.5} />
+                <span className="text-[11px] text-foreground/80">{lang === "ar" ? "بدون رسوم تأخير" : "No late fees"}</span>
               </div>
             </div>
 
-            <p className="mt-6 text-center text-[11px] leading-6 text-muted-foreground">
+            <p className="mt-6 text-center text-[10px] leading-5 text-foreground/60">
               {lang === "ar"
                 ? <>(1) قد يختلف توافر وتفاصيل خطط الدفع المقدمة حسب قيمة طلبك وسجلك لدى تمارا (2) تطبق <span className="underline">الشروط والأحكام</span> (3) تمارا موافقة لتعاليم <span className="underline">الشريعة الإسلامية</span> (4) متاح للعملاء في السعودية (5) خطط الدفع النهائية المقدمة لك قد تختلف حسب سجلك الائتماني</>
                 : "Availability and details of payment plans may vary based on your order value and Tamara record. Terms apply."}
@@ -619,46 +624,82 @@ function ServiceDetailPage() {
       </Dialog>
 
       <Dialog open={tabbyOpen} onOpenChange={setTabbyOpen}>
-        <DialogContent dir={dir} className="max-w-lg overflow-hidden border-0 bg-white p-0">
-          <div className="p-6 sm:p-8">
-            <h3 className="text-center text-xl font-extrabold text-foreground">
-              {lang === "ar" ? "ادفع على راحتك" : "Pay at your pace"}
-            </h3>
-            <p className="mt-1 text-center text-xs text-muted-foreground">
-              {lang === "ar" ? "قسّم مشترياتك حتى 4 دفعات" : "Split your purchase into 4 payments"}
-            </p>
-            <div className="mt-5 rounded-2xl bg-[#3bea93]/10 p-6 text-center">
-              <div className="mx-auto inline-flex items-center justify-center">
-                <img src={tabbyLogo} alt="tabby" className="h-10 w-auto object-contain" />
-              </div>
-              <div className="mt-4 text-base font-extrabold text-foreground">
-                {lang === "ar" ? "4 دفعات بقيمة" : "4 payments of"}{" "}
-                <span dir="ltr" className="inline-flex items-baseline gap-1">
-                  {Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" />
-                </span>
-              </div>
-              <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                {lang === "ar" ? "بدون رسوم أو فوائد." : "No fees, no interest."}
-              </p>
+        <DialogContent dir={dir} className="max-w-sm overflow-hidden border-0 bg-white p-0">
+          <div className="px-5 pb-5 pt-5">
+            <div className="flex items-center justify-end">
+              <img src={tabbyLogo} alt="tabby" className="h-7 w-auto object-contain" />
             </div>
 
-            <div className="my-6 h-px bg-border/60" />
-
-            <div className="text-center text-sm font-bold text-foreground">
-              {lang === "ar" ? "آلية الاستخدام" : "How it works"}
+            <div className="relative mt-4 overflow-hidden rounded-2xl">
+              <div className="aspect-[16/10] w-full bg-gradient-to-br from-purple-700 via-purple-900 to-slate-900" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+                <div className="text-xl font-extrabold">{lang === "ar" ? "ادفع على راحتك" : "Pay at your pace"}</div>
+                <div className="mt-1 text-xs text-white/90">{lang === "ar" ? "قسّم مشترياتك حق 4 دفعات" : "Split your purchase into 4 payments"}</div>
+              </div>
             </div>
-            <ol className="mt-4 space-y-3 text-xs text-foreground/80">
-              <li className="flex items-start gap-2"><span className="font-bold text-primary">1</span> {lang === "ar" ? "اختر تابي عند الدفع لتعيين خطة دفع" : "Choose Tabby at checkout to set a payment plan"}</li>
-              <li className="flex items-start gap-2"><span className="font-bold text-primary">2</span> {lang === "ar" ? "أدخل بياناتك وأضف بطاقة الصراف أو الائتمان" : "Enter your details and add your debit or credit card"}</li>
-              <li className="flex items-start gap-2"><span className="font-bold text-primary">3</span> {lang === "ar" ? "حسب صحة الدفع التي اخترتها، قد تحتاج إلى سداد دفعة مقدمة أولاً" : "Depending on the plan, you may need to pay an upfront amount"}</li>
-              <li className="flex items-start gap-2"><span className="font-bold text-primary">4</span> {lang === "ar" ? "سيرسل لك تذكير عند استحقاق دفعتك القادمة" : "We'll remind you when your next payment is due"}</li>
-            </ol>
 
-            <p className="mt-6 text-center text-[11px] leading-6 text-muted-foreground">
-              {lang === "ar"
-                ? "مدفوعات متوافقة مع أحكام الشريعة الإسلامية. خيارات الدفع لدينا هي معايير التمويل الإسلامي."
-                : "Shariah-compliant payments. Terms apply."}
-            </p>
+            <div className="mt-4 space-y-2">
+              <div className="rounded-xl border border-border bg-white p-3">
+                <div className="flex items-center justify-between" dir={dir}>
+                  <div className="text-xs font-bold text-foreground">{lang === "ar" ? "3 دفعات" : "3 payments"}</div>
+                  <div className="text-xs font-extrabold text-foreground" dir="ltr">
+                    {Number((startingPrice / 3).toFixed(2))} <SarIcon className="h-[0.8em]" />/{lang === "ar" ? "شهر" : "mo"}
+                  </div>
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">{lang === "ar" ? "بلا رسوم أو فوائد." : "No fees, no interest."}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-white p-3">
+                <div className="flex items-center justify-between" dir={dir}>
+                  <div className="text-xs font-bold text-foreground">{lang === "ar" ? "4 دفعات" : "4 payments"}</div>
+                  <div className="text-xs font-extrabold text-foreground" dir="ltr">
+                    {Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" />/{lang === "ar" ? "شهر" : "mo"}
+                  </div>
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">{lang === "ar" ? "بدون فوائد، يشمل 5.67% رسوم معالجة شهرية." : "No interest, includes monthly processing fee."}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-xl bg-white p-3 ring-1 ring-border">
+              <div className="text-center text-sm font-extrabold text-foreground">{lang === "ar" ? "آلية الاستخدام" : "How it works"}</div>
+              <ol className="mt-3 space-y-2 text-[11px] text-foreground/80">
+                <li className="flex items-start gap-2"><span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#3bea93]/30 text-[10px] font-bold text-foreground">1</span> {lang === "ar" ? "اخترِ تابي عند الدفع لتعيين خطة دفع" : "Choose Tabby at checkout"}</li>
+                <li className="flex items-start gap-2"><span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#3bea93]/30 text-[10px] font-bold text-foreground">2</span> {lang === "ar" ? "أدخل بياناتك وأضف بطاقة الصراف أو الائتمان" : "Enter your details and add a card"}</li>
+                <li className="flex items-start gap-2"><span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#3bea93]/30 text-[10px] font-bold text-foreground">3</span> {lang === "ar" ? "حسب خطة الدفع التي اخترتها، قد تحتاج إلى سداد دفعة مقدمة أولاً" : "You may need to pay an upfront amount"}</li>
+                <li className="flex items-start gap-2"><span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#3bea93]/30 text-[10px] font-bold text-foreground">4</span> {lang === "ar" ? "سيرسل لك تذكير عند استحقاق دفعتك القادمة" : "We'll remind you of upcoming payments"}</li>
+              </ol>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-border">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#3bea93]/20"><ShieldCheck className="h-4 w-4 text-emerald-700" /></span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-bold text-foreground">{lang === "ar" ? "مدفوعات متوافقة مع أحكام الشريعة" : "Shariah-compliant payments"}</div>
+                  <div className="text-[10px] text-muted-foreground">{lang === "ar" ? "تتوافق خياراتنا للدفع مع معايير التمويل الإسلامي." : "Aligned with Islamic finance standards."}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-border">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-purple-100"><ShieldCheck className="h-4 w-4 text-purple-700" /></span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-bold text-foreground">{lang === "ar" ? "تسوّق بأمان مع تابي" : "Shop safely with Tabby"}</div>
+                  <div className="text-[10px] text-muted-foreground">{lang === "ar" ? "يفعّل برنامج حماية المشتري للمشتريات." : "Buyer protection enabled."}</div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTabbyOpen(false)}
+              className="mt-4 h-11 w-full rounded-full bg-[#1d1f2b] text-sm font-bold text-white hover:bg-[#0f1018]"
+            >
+              {lang === "ar" ? "تابع التسوق" : "Continue shopping"}
+            </button>
+
+            <div className="mt-4 flex items-center justify-center gap-2 opacity-80">
+              <img src="/src/assets/pay-applepay.png" alt="Apple Pay" className="h-5 w-auto object-contain" />
+              <img src="/src/assets/pay-mastercard.png" alt="Mastercard" className="h-5 w-auto object-contain" />
+              <img src="/src/assets/pay-mada.png" alt="Mada" className="h-5 w-auto object-contain" />
+              <img src="/src/assets/pay-visa.webp" alt="Visa" className="h-5 w-auto object-contain" />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
