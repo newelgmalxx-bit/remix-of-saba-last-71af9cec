@@ -147,7 +147,7 @@ function AbandonedCartsPage() {
               <tbody>
                 {carts.map((c) => {
                   const initials = (c.customer_name || "?").trim().charAt(0).toUpperCase();
-                  const firstProduct = c.items?.[0]?.servicetitle || "—";
+                  const firstProduct = c.items?.[0]?.serviceTitle || c.items?.[0]?.servicetitle || "—";
                   const extra = (c.items?.length || 0) - 1;
                   return (
                     <tr key={c.cart_id} className="border-b border-border hover:bg-muted/40">
