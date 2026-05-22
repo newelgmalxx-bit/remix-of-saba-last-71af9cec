@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/abandoned-carts")({
   component: AbandonedCartsPage,
 });
 
-type CartItem = { servicetitle?: string; planname?: string | null; qty: number; price: number };
+type CartItem = { serviceTitle?: string; servicetitle?: string; planName?: string | null; planname?: string | null; qty: number; price: number; lineTotal?: number };
 type Cart = {
   cart_id: string;
   customer_name: string;
@@ -22,7 +22,8 @@ type Cart = {
   item_count: number;
   total_qty: number;
   subtotal: number;
-  updatedat: string;
+  updated_at?: string;
+  updatedat?: string;
   items: CartItem[];
 };
 
@@ -50,10 +51,12 @@ function AbandonedCartsPage() {
     setLoading(true);
     adminApi.getAbandonedCarts({ page, limit, search })
       .then((res: any) => {
-        const data: Cart[] = res?.data || [];
+        // API can wrap as { data: { data, total, totalPages } } or { data, total, totalPages }
+        const payload = res?.data?.data ? res.data : res;
+        const data: Cart[] = payload?.data || [];
         setCarts(data);
-        setTotal(Number(res?.total) || data.length);
-        setTotalPages(Number(res?.totalPages) || 1);
+        setTotal(Number(payload?.total) || data.length);
+        setTotalPages(Number(payload?.totalPages) || 1);
       })
       .catch(() => {
         setCarts([]); setTotal(0); setTotalPages(1);
@@ -144,7 +147,7 @@ function AbandonedCartsPage() {
               <tbody>
                 {carts.map((c) => {
                   const initials = (c.customer_name || "?").trim().charAt(0).toUpperCase();
-                  const firstProduct = c.items?.[0]?.servicetitle || "—";
+                  const firstProduct = c.items?.[0]?.serviceTitle || c.items?.[0]?.servicetitle || "—";
                   const extra = (c.items?.length || 0) - 1;
                   return (
                     <tr key={c.cart_id} className="border-b border-border hover:bg-muted/40">
@@ -168,7 +171,7 @@ function AbandonedCartsPage() {
                       </td>
                       <td className="px-3 py-3"><Pill tone="emerald">{c.item_count}</Pill></td>
                       <td className="px-3 py-3 font-bold text-emerald-700" data-ltr-number>{fmtSARNumber(Number(c.subtotal) || 0)} {L("ريال", "SAR")}</td>
-                      <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{fmtDate(c.updatedat)}</td>
+                      <td className="px-3 py-3 text-xs text-muted-foreground" data-ltr-number>{fmtDate(c.updated_at || c.updatedat || "")}</td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           <button onClick={() => setViewing(c)} title={L("عرض التفاصيل", "View details")} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted text-primary">
@@ -239,8 +242,8 @@ function AbandonedCartsPage() {
                   <tbody>
                     {viewing.items.map((it, i) => (
                       <tr key={i} className="border-t border-border">
-                        <td className="px-3 py-2">{it.servicetitle || "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{it.planname || "—"}</td>
+                        <td className="px-3 py-2">{it.serviceTitle || it.servicetitle || "—"}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{it.planName || it.planname || "—"}</td>
                         <td className="px-3 py-2" data-ltr-number>{it.qty}</td>
                         <td className="px-3 py-2" data-ltr-number>{fmtSARNumber(Number(it.price) || 0)} {L("ريال", "SAR")}</td>
                         <td className="px-3 py-2 font-bold text-emerald-700" data-ltr-number>{fmtSARNumber((Number(it.price) || 0) * (Number(it.qty) || 0))} {L("ريال", "SAR")}</td>
