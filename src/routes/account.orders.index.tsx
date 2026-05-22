@@ -25,6 +25,8 @@ const filters: { id: OrderStatus | "all"; key: TKey }[] = [
   { id: "cancelled", key: "account.orders.filter.cancelled" },
 ];
 
+const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
+
 function OrdersList() {
   const { t, lang, dir } = useLang();
   const { user } = useAuth();
@@ -32,30 +34,22 @@ function OrdersList() {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionId, setActionId] = useState<string | null>(null);
-  const [payOrderId, setPayOrderId] = useState<string | null>(null);
+  const [payOrderState, setPayOrderState] = useState<Order | null>(null);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentMethod>("myfatoorah");
+  const [paying, setPaying] = useState(false);
 
-  const reload = () => {
-    setLoading(true);
-    account.listOrders({ status: filter === "all" ? undefined : filter, limit: 50 })
-      .then((res) => setOrders((res.items || []).map(normalizeOrder)))
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
-  };
-
-  const handlePay = async (orderId: string, method: PaymentMethod) => {
-    if (actionId) return;
-    setActionId(orderId);
+  const handlePayNow = async () => {
+    if (!payOrderState || paying) return;
+    setPaying(true);
     try {
-      const res: any = await account.payOrder(orderId, { paymentMethod: method });
+      const res: any = await account.payOrder(payOrderState.id, { paymentMethod: selectedGateway });
       const url = res?.data?.paymentUrl || res?.paymentUrl;
       if (url) { window.location.href = url; return; }
       toast.error(lang === "ar" ? "تعذّر الحصول على رابط الدفع" : "Could not get payment URL");
     } catch (e: any) {
       toast.error(e?.message || (lang === "ar" ? "تعذّر بدء الدفع" : "Could not start payment"));
     } finally {
-      setActionId(null);
-      setPayOrderId(null);
+      setPaying(false);
     }
   };
 
