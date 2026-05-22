@@ -29,6 +29,7 @@ const navGroups: (NavItem | "sep")[] = [
   { to: "/admin/services", ar: "الخدمات", en: "Services", icon: Package },
   { to: "/admin/plans", ar: "الباقات", en: "Plans", icon: Tag },
   { to: "/admin/bookings", ar: "الطلبات", en: "Orders", icon: CalendarCheck },
+  { to: "/admin/abandoned-carts", ar: "السلات المتروكة", en: "Abandoned Carts", icon: ShoppingBag },
   
   { to: "/admin/clients", ar: "العملاء", en: "Clients", icon: Users },
   { to: "/admin/tickets", ar: "التذاكر", en: "Tickets", icon: LifeBuoy },
