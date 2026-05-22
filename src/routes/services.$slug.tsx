@@ -11,6 +11,8 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import servicesHero from "@/assets/services-hero.png";
+import tabbyLogo from "@/assets/tabby-logo.webp";
+import tamaraLogo from "@/assets/tamara-logo.webp";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
@@ -276,8 +278,8 @@ function ServiceDetailPage() {
                         <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
                       </div>
                     </div>
-                    <span className="inline-flex items-center justify-center rounded-md bg-[#3bea93] px-3 py-1.5 text-[11px] font-extrabold text-foreground">
-                      tabby
+                    <span className="inline-flex items-center justify-center overflow-hidden rounded-md">
+                      <img src={tabbyLogo} alt="tabby" className="h-7 w-auto object-contain" />
                     </span>
                   </div>
                 </button>
@@ -301,8 +303,8 @@ function ServiceDetailPage() {
                         <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
                       </div>
                     </div>
-                    <span className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-200 via-pink-200 to-purple-200 px-3 py-1.5 text-[11px] font-extrabold text-foreground">
-                      tamara
+                    <span className="inline-flex items-center justify-center overflow-hidden rounded-md">
+                      <img src={tamaraLogo} alt="tamara" className="h-7 w-auto object-contain" />
                     </span>
                   </div>
                 </button>
@@ -572,8 +574,8 @@ function ServiceDetailPage() {
               {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
             </h3>
             <div className="mt-5 rounded-2xl bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500">
-                <Wallet className="h-5 w-5" />
+              <div className="mx-auto inline-flex items-center justify-center">
+                <img src={tamaraLogo} alt="tamara" className="h-10 w-auto object-contain" />
               </div>
               <div className="mt-3 text-base font-extrabold text-foreground">
                 {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
@@ -626,8 +628,8 @@ function ServiceDetailPage() {
               {lang === "ar" ? "قسّم مشترياتك حتى 4 دفعات" : "Split your purchase into 4 payments"}
             </p>
             <div className="mt-5 rounded-2xl bg-[#3bea93]/10 p-6 text-center">
-              <div className="mx-auto inline-flex items-center justify-center rounded-md bg-[#3bea93] px-4 py-1.5 text-xs font-extrabold text-foreground">
-                tabby
+              <div className="mx-auto inline-flex items-center justify-center">
+                <img src={tabbyLogo} alt="tabby" className="h-10 w-auto object-contain" />
               </div>
               <div className="mt-4 text-base font-extrabold text-foreground">
                 {lang === "ar" ? "4 دفعات بقيمة" : "4 payments of"}{" "}

@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Banknote, CreditCard, Wallet, Truck, Smartphone } from "lucide-react";
-import tabbyLogo from "@/assets/pay-tabby.webp";
-import tamaraLogo from "@/assets/pay-tamara.png";
+import tabbyLogo from "@/assets/tabby-logo.webp";
+import tamaraLogo from "@/assets/tamara-logo.webp";
 import applePayLogo from "@/assets/pay-applepay.png";
 import visaLogo from "@/assets/pay-visa.webp";
 import mastercardLogo from "@/assets/pay-mastercard.png";
