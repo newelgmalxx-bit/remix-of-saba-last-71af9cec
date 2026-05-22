@@ -261,8 +261,33 @@ function ServiceDetailPage() {
               {startingPrice > 0 && (
                 <button
                   type="button"
-                  onClick={() => setTamaraOpen(true)}
+                  onClick={() => setTabbyOpen(true)}
                   className="mt-4 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between gap-3" dir={dir}>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground">
+                        {lang === "ar"
+                          ? <>أو قسم فاتورتك على 4 دفعات بقيمة <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>
+                          : <>Or split into 4 payments of <span dir="ltr" className="inline-flex items-baseline gap-1">{Number((startingPrice / 4).toFixed(2))} <SarIcon className="h-[0.8em]" /></span></>}
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {lang === "ar" ? "بدون رسوم أو فوائد " : "No fees, no interest "}
+                        <span className="font-bold text-primary underline">{lang === "ar" ? "اعرف أكثر" : "Learn more"}</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center justify-center rounded-md bg-[#3bea93] px-3 py-1.5 text-[11px] font-extrabold text-foreground">
+                      tabby
+                    </span>
+                  </div>
+                </button>
+              )}
+
+              {startingPrice > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTamaraOpen(true)}
+                  className="mt-3 w-full rounded-2xl border border-border/60 bg-white p-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-3" dir={dir}>
                     <div className="min-w-0 flex-1">
