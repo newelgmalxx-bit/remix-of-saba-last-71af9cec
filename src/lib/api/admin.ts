@@ -172,4 +172,16 @@ export const admin = {
   // Contact messages (admin)
   getContactMessages: () => request<ApiResponse<{ items: any[] }>>('/admin/contact-messages'),
   updateContactMessage: (id: string, body: any) => request(`/admin/contact-messages/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+
+  // Abandoned carts (admin)
+  getAbandonedCarts: (p?: { page?: number; limit?: number; search?: string }) => {
+    const clean: Record<string, string> = {};
+    if (p) for (const [k, v] of Object.entries(p)) {
+      if (v !== undefined && v !== null && v !== '') clean[k] = String(v);
+    }
+    const q = new URLSearchParams(clean).toString();
+    return request<{ success: boolean; data: any[]; total: number; page: number; totalPages: number }>(`/admin/abandoned-carts${q ? '?' + q : ''}`);
+  },
+  remindAbandonedCart: (cartId: string) =>
+    request<{ success: boolean; message: string; email?: string }>(`/admin/abandoned-carts/${cartId}/remind`, { method: 'POST' }),
 };
