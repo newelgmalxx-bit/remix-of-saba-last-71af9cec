@@ -51,6 +51,7 @@ import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAbandonedCartsRouteImport } from './routes/admin.abandoned-carts'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountFavoritesRouteImport } from './routes/account.favorites'
 import { Route as AdminTicketsIndexRouteImport } from './routes/admin.tickets.index'
@@ -279,6 +280,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAbandonedCartsRoute = AdminAbandonedCartsRouteImport.update({
+  id: '/abandoned-carts',
+  path: '/abandoned-carts',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountProfileRoute = AccountProfileRouteImport.update({
   id: '/account/profile',
   path: '/account/profile',
@@ -384,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/abandoned-carts': typeof AdminAbandonedCartsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/abandoned-carts': typeof AdminAbandonedCartsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
@@ -505,6 +513,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/account/favorites': typeof AccountFavoritesRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/abandoned-carts': typeof AdminAbandonedCartsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
@@ -568,6 +577,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/account/favorites'
     | '/account/profile'
+    | '/admin/abandoned-carts'
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/clients'
@@ -628,6 +638,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/account/favorites'
     | '/account/profile'
+    | '/admin/abandoned-carts'
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/clients'
@@ -688,6 +699,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/account/favorites'
     | '/account/profile'
+    | '/admin/abandoned-carts'
     | '/admin/analytics'
     | '/admin/bookings'
     | '/admin/clients'
@@ -1060,6 +1072,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/abandoned-carts': {
+      id: '/admin/abandoned-carts'
+      path: '/abandoned-carts'
+      fullPath: '/admin/abandoned-carts'
+      preLoaderRoute: typeof AdminAbandonedCartsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/profile': {
       id: '/account/profile'
       path: '/account/profile'
@@ -1229,6 +1248,7 @@ const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAbandonedCartsRoute: typeof AdminAbandonedCartsRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminClientsRoute: typeof AdminClientsRoute
@@ -1253,6 +1273,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAbandonedCartsRoute: AdminAbandonedCartsRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminClientsRoute: AdminClientsRoute,
