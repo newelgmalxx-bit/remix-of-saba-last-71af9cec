@@ -51,10 +51,12 @@ function AbandonedCartsPage() {
     setLoading(true);
     adminApi.getAbandonedCarts({ page, limit, search })
       .then((res: any) => {
-        const data: Cart[] = res?.data || [];
+        // API can wrap as { data: { data, total, totalPages } } or { data, total, totalPages }
+        const payload = res?.data?.data ? res.data : res;
+        const data: Cart[] = payload?.data || [];
         setCarts(data);
-        setTotal(Number(res?.total) || data.length);
-        setTotalPages(Number(res?.totalPages) || 1);
+        setTotal(Number(payload?.total) || data.length);
+        setTotalPages(Number(payload?.totalPages) || 1);
       })
       .catch(() => {
         setCarts([]); setTotal(0); setTotalPages(1);
