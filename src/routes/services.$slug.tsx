@@ -574,8 +574,8 @@ function ServiceDetailPage() {
               {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
             </h3>
             <div className="mt-5 rounded-2xl bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500">
-                <Wallet className="h-5 w-5" />
+              <div className="mx-auto inline-flex items-center justify-center">
+                <img src={tamaraLogo} alt="tamara" className="h-10 w-auto object-contain" />
               </div>
               <div className="mt-3 text-base font-extrabold text-foreground">
                 {lang === "ar" ? "قسّمها على 3 دفعات" : "Split into 3 payments"}
