@@ -12,6 +12,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import servicesHero from "@/assets/services-hero.png";
 import tabbyLogo from "@/assets/tabby-logo.webp";
+import tabbyHero from "@/assets/tabby-hero.jpg";
 import tamaraLogo from "@/assets/tamara-logo.webp";
 import payApplePay from "@/assets/pay-applepay.png";
 import payMastercard from "@/assets/pay-mastercard.png";
