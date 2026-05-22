@@ -242,8 +242,8 @@ function AbandonedCartsPage() {
                   <tbody>
                     {viewing.items.map((it, i) => (
                       <tr key={i} className="border-t border-border">
-                        <td className="px-3 py-2">{it.servicetitle || "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{it.planname || "—"}</td>
+                        <td className="px-3 py-2">{it.serviceTitle || it.servicetitle || "—"}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{it.planName || it.planname || "—"}</td>
                         <td className="px-3 py-2" data-ltr-number>{it.qty}</td>
                         <td className="px-3 py-2" data-ltr-number>{fmtSARNumber(Number(it.price) || 0)} {L("ريال", "SAR")}</td>
                         <td className="px-3 py-2 font-bold text-emerald-700" data-ltr-number>{fmtSARNumber((Number(it.price) || 0) * (Number(it.qty) || 0))} {L("ريال", "SAR")}</td>
