@@ -12,6 +12,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import servicesHero from "@/assets/services-hero.png";
 import tabbyLogo from "@/assets/tabby-logo.webp";
+import tabbyHero from "@/assets/tabby-hero.jpg";
 import tamaraLogo from "@/assets/tamara-logo.webp";
 import payApplePay from "@/assets/pay-applepay.png";
 import payMastercard from "@/assets/pay-mastercard.png";
@@ -635,12 +636,14 @@ function ServiceDetailPage() {
             </div>
 
             <div className="relative mt-4 overflow-hidden rounded-2xl">
-              <div className="aspect-[16/10] w-full bg-gradient-to-br from-purple-700 via-purple-900 to-slate-900" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+              <img src={tabbyHero} alt="" className="aspect-[16/10] w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-center text-white">
                 <div className="text-xl font-extrabold">{lang === "ar" ? "ادفع على راحتك" : "Pay at your pace"}</div>
                 <div className="mt-1 text-xs text-white/90">{lang === "ar" ? "قسّم مشترياتك حق 4 دفعات" : "Split your purchase into 4 payments"}</div>
               </div>
             </div>
+
 
             <div className="mt-4 space-y-2">
               <div className="rounded-xl border border-border bg-white p-3">
