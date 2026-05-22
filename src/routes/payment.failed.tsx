@@ -8,7 +8,7 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { account } from "@/lib/api";
 import { toast } from "sonner";
 
-type PayMethod = "myfatoorah" | "tamara" | "cod";
+type PayMethod = "myfatoorah" | "tabby" | "tamara" | "cod";
 
 export const Route = createFileRoute("/payment/failed")({
   validateSearch: z.object({
