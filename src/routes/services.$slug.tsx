@@ -45,6 +45,7 @@ function ServiceDetailPage() {
   const live = useServiceContent(slug);
   const [remoteDetail, setRemoteDetail] = useState<any>(null);
   const [tamaraOpen, setTamaraOpen] = useState(false);
+  const [tabbyOpen, setTabbyOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
