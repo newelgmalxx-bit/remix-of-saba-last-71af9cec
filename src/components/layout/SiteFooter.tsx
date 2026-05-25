@@ -93,7 +93,8 @@ export function SiteFooter() {
           <p>© 2021 {t("footer.brand")}. {t("footer.rights")}</p>
           <div className="flex items-center gap-2 sm:gap-3">
             {[
-              { src: payVisa, alt: "Visa & Mastercard" },
+              { src: payVisa, alt: "Visa" },
+              { src: payMastercard, alt: "Mastercard" },
               { src: payMada, alt: "mada" },
               { src: payStcpay, alt: "STC Pay" },
               { src: payTabby, alt: "Tabby" },
