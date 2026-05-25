@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import payVisa from "@/assets/pay-visa.webp";
+import payMastercard from "@/assets/pay-mastercard.png";
 import payMada from "@/assets/pay-mada.webp";
 import payStcpay from "@/assets/pay-stcpay.webp";
 import payTabby from "@/assets/pay-tabby.webp";
@@ -93,7 +94,8 @@ export function SiteFooter() {
           <p>© 2021 {t("footer.brand")}. {t("footer.rights")}</p>
           <div className="flex items-center gap-2 sm:gap-3">
             {[
-              { src: payVisa, alt: "Visa & Mastercard" },
+              { src: payVisa, alt: "Visa" },
+              { src: payMastercard, alt: "Mastercard" },
               { src: payMada, alt: "mada" },
               { src: payStcpay, alt: "STC Pay" },
               { src: payTabby, alt: "Tabby" },
