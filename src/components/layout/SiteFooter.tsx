@@ -1,6 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
+import payVisa from "@/assets/pay-visa.webp";
+import payMada from "@/assets/pay-mada.webp";
+import payStcpay from "@/assets/pay-stcpay.webp";
+import payTabby from "@/assets/pay-tabby.webp";
+import payTamara from "@/assets/pay-tamara.webp";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -84,8 +89,21 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
           <p>© 2021 {t("footer.brand")}. {t("footer.rights")}</p>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {[
+              { src: payVisa, alt: "Visa & Mastercard" },
+              { src: payMada, alt: "mada" },
+              { src: payStcpay, alt: "STC Pay" },
+              { src: payTabby, alt: "Tabby" },
+              { src: payTamara, alt: "Tamara" },
+            ].map((p) => (
+              <span key={p.alt} className="flex h-8 items-center justify-center rounded-md bg-white px-2 shadow-sm">
+                <img src={p.src} alt={p.alt} className="h-5 w-auto object-contain" loading="lazy" />
+              </span>
+            ))}
+          </div>
           <div className="flex items-center gap-5">
             <Link to={"/privacy" as any} className="hover:text-white">{t("footer.privacy")}</Link>
             <Link to={"/terms" as any} className="hover:text-white">{t("footer.terms")}</Link>
