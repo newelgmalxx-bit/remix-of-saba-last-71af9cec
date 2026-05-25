@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Music2 } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import payVisa from "@/assets/pay-visa.webp";
+import payMastercard from "@/assets/pay-mastercard.png";
 import payMada from "@/assets/pay-mada.webp";
 import payStcpay from "@/assets/pay-stcpay.webp";
 import payTabby from "@/assets/pay-tabby.webp";
