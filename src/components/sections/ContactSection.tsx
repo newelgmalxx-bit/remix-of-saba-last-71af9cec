@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Youtube, Music2, Clock3, Sparkles, Send, Loader2 } from "lucide-react";
+import { Phone, Mail, MessageCircle, MapPin, Clock, Instagram, Twitter, Linkedin, Facebook, Youtube, Music2, Ghost, Clock3, Sparkles, Send, Loader2 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { contact as contactApi } from "@/lib/api";
 import { toast } from "sonner";
