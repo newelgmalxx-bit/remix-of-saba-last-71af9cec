@@ -82,17 +82,15 @@ export function ContactSection() {
               </div>
             )}
 
-            {(site.instagram || site.twitter || site.linkedin || site.facebook || site.youtube || site.tiktok) && (
+            {(site.instagram || site.tiktok || site.snapchat || site.whatsapp) && (
               <div className="mt-6">
                 <p className="text-[11px] text-white/70">{t("contactForm.info.follow")}</p>
                 <div className="mt-3 flex items-center gap-2">
                   {([
                     [site.instagram, Instagram],
-                    [site.twitter, Twitter],
-                    [site.linkedin, Linkedin],
-                    [site.facebook, Facebook],
-                    [site.youtube, Youtube],
                     [site.tiktok, Music2],
+                    [site.snapchat, Ghost],
+                    [site.whatsapp ? waHref(site.whatsapp) : undefined, MessageCircle],
                   ] as const).filter(([u]) => !!u).map(([u, Icon], i) => (
                     <a
                       key={i}
