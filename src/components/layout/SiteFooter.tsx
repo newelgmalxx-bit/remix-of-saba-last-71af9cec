@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Linkedin, Music2 } from "lucide-react";
+import { Phone, Mail, MapPin, Instagram, Music2, Ghost, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo-white.png";
 import payVisa from "@/assets/pay-visa.webp";
 import payMastercard from "@/assets/pay-mastercard.png";
@@ -9,17 +9,16 @@ import payTabby from "@/assets/pay-tabby.webp";
 import payTamara from "@/assets/pay-tamara.webp";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSettings, waHref } from "@/hooks/useSiteSettings";
 
 export function SiteFooter() {
   const { t } = useLang();
   const site = useSiteSettings();
   const socials = ([
-    [site.facebook, Facebook],
     [site.instagram, Instagram],
-    [site.twitter, Twitter],
-    [site.linkedin, Linkedin],
     [site.tiktok, Music2],
+    [site.snapchat, Ghost],
+    [waHref(site.whatsapp), MessageCircle],
   ] as const).filter(([u]) => !!u);
   return (
     <footer className="bg-primary-dark text-white">
