@@ -139,46 +139,70 @@ export function mergeService(slug: string, override?: ServiceOverride, lang: "ar
       faqs: o.faqs?.map((f) => ({ q: pick(f.q, f.qEn), a: pick(f.a, f.aEn) })),
     } as ServiceContent;
   }
-  if (!o) return base;
+  // Built-in English overlay shipped with the base content (services.ts → i18n.en).
+  // Applied only when active language is English and the user override hasn't supplied an EN value.
+  const baseEn = en ? base.i18n?.en : undefined;
+  const o2 = o ?? {};
   return {
     ...base,
-    title: en ? (o.titleEn || o.title || base.title) : (o.title ?? base.title),
-    subtitle: en ? (o.subtitleEn || o.subtitle || base.subtitle) : (o.subtitle ?? base.subtitle),
-    category: en ? (o.categoryEn || o.category || base.category) : (o.category ?? base.category),
-    breadcrumb: en ? (o.breadcrumbEn || o.breadcrumb || base.breadcrumb) : (o.breadcrumb ?? base.breadcrumb),
-    heroHighlights: en && o.heroHighlightsEn?.length ? o.heroHighlightsEn : (o.heroHighlights ?? base.heroHighlights),
-    bannerImage: o.bannerImage ?? base.bannerImage,
-    price: o.price ?? base.price,
-    originalPrice: o.originalPrice ?? base.originalPrice,
-    discountPercent: o.discountPercent ?? base.discountPercent,
-    overviewDescription: en ? (o.overviewDescriptionEn || o.overviewDescription || base.overviewDescription) : (o.overviewDescription ?? base.overviewDescription),
-    seo: { ...(base.seo ?? {}), ...(o.seo ?? {}) },
-    overview: o.overview
+    title: en ? (o2.titleEn || baseEn?.title || o2.title || base.title) : (o2.title ?? base.title),
+    subtitle: en ? (o2.subtitleEn || baseEn?.subtitle || o2.subtitle || base.subtitle) : (o2.subtitle ?? base.subtitle),
+    category: en ? (o2.categoryEn || baseEn?.category || o2.category || base.category) : (o2.category ?? base.category),
+    breadcrumb: en ? (o2.breadcrumbEn || baseEn?.breadcrumb || o2.breadcrumb || base.breadcrumb) : (o2.breadcrumb ?? base.breadcrumb),
+    heroHighlights: en
+      ? (o2.heroHighlightsEn?.length ? o2.heroHighlightsEn : (baseEn?.heroHighlights?.length ? baseEn.heroHighlights : (o2.heroHighlights ?? base.heroHighlights)))
+      : (o2.heroHighlights ?? base.heroHighlights),
+    bannerImage: o2.bannerImage ?? base.bannerImage,
+    price: o2.price ?? base.price,
+    originalPrice: o2.originalPrice ?? base.originalPrice,
+    discountPercent: o2.discountPercent ?? base.discountPercent,
+    overviewDescription: en ? (o2.overviewDescriptionEn || baseEn?.overviewDescription || o2.overviewDescription || base.overviewDescription) : (o2.overviewDescription ?? base.overviewDescription),
+    seo: { ...(base.seo ?? {}), ...(o2.seo ?? {}) },
+    overview: o2.overview
       ? base.overview.map((b, i) => ({
           ...b,
-          title: en ? (o.overview![i]?.titleEn || o.overview![i]?.title || b.title) : (o.overview![i]?.title ?? b.title),
-          desc: en ? (o.overview![i]?.descEn || o.overview![i]?.desc || b.desc) : (o.overview![i]?.desc ?? b.desc),
+          title: en ? (o2.overview![i]?.titleEn || baseEn?.overview?.[i]?.title || o2.overview![i]?.title || b.title) : (o2.overview![i]?.title ?? b.title),
+          desc: en ? (o2.overview![i]?.descEn || baseEn?.overview?.[i]?.desc || o2.overview![i]?.desc || b.desc) : (o2.overview![i]?.desc ?? b.desc),
         }))
-      : base.overview,
-    benefits: o.benefits
+      : base.overview.map((b, i) => ({
+          ...b,
+          title: en ? (baseEn?.overview?.[i]?.title || b.title) : b.title,
+          desc: en ? (baseEn?.overview?.[i]?.desc || b.desc) : b.desc,
+        })),
+    benefits: o2.benefits
       ? base.benefits.map((b, i) => ({
           ...b,
-          title: en ? (o.benefits![i]?.titleEn || o.benefits![i]?.title || b.title) : (o.benefits![i]?.title ?? b.title),
-          desc: en ? (o.benefits![i]?.descEn || o.benefits![i]?.desc || b.desc) : (o.benefits![i]?.desc ?? b.desc),
+          title: en ? (o2.benefits![i]?.titleEn || baseEn?.benefits?.[i]?.title || o2.benefits![i]?.title || b.title) : (o2.benefits![i]?.title ?? b.title),
+          desc: en ? (o2.benefits![i]?.descEn || baseEn?.benefits?.[i]?.desc || o2.benefits![i]?.desc || b.desc) : (o2.benefits![i]?.desc ?? b.desc),
         }))
-      : base.benefits,
-    plans: o.plans ?? base.plans,
-    steps: o.steps ? o.steps.map((s) => ({ title: en ? (s.titleEn || s.title) : s.title })) : base.steps,
-    stats: o.stats ? o.stats.map((s) => ({ v: s.v, l: en ? (s.lEn || s.l) : s.l })) : base.stats,
-    testimonials: o.testimonials
-      ? o.testimonials.map((tt) => ({
-          name: en ? (tt.nameEn || tt.name) : tt.name,
-          role: en ? (tt.roleEn || tt.role) : tt.role,
-          text: en ? (tt.textEn || tt.text) : tt.text,
+      : base.benefits.map((b, i) => ({
+          ...b,
+          title: en ? (baseEn?.benefits?.[i]?.title || b.title) : b.title,
+          desc: en ? (baseEn?.benefits?.[i]?.desc || b.desc) : b.desc,
+        })),
+    plans: o2.plans
+      ? o2.plans.map((p, i) => ({
+          ...p,
+          feats: en ? (p.featsEn?.length ? p.featsEn : (baseEn?.plans?.[i]?.feats ?? p.feats)) : p.feats,
+        }))
+      : base.plans.map((p, i) => ({
+          ...p,
+          feats: en && baseEn?.plans?.[i]?.feats ? baseEn.plans[i].feats! : p.feats,
+        })),
+    steps: o2.steps ? o2.steps.map((s, i) => ({ title: en ? (s.titleEn || baseEn?.steps?.[i]?.title || s.title) : s.title })) : base.steps,
+    stats: o2.stats ? o2.stats.map((s, i) => ({ v: s.v, l: en ? (s.lEn || baseEn?.stats?.[i]?.l || s.l) : s.l })) : base.stats,
+    testimonials: o2.testimonials
+      ? o2.testimonials.map((tt, i) => ({
+          name: en ? (tt.nameEn || baseEn?.testimonials?.[i]?.name || tt.name) : tt.name,
+          role: en ? (tt.roleEn || baseEn?.testimonials?.[i]?.role || tt.role) : tt.role,
+          text: en ? (tt.textEn || baseEn?.testimonials?.[i]?.text || tt.text) : tt.text,
         }))
       : base.testimonials,
-    faqs: o.faqs
-      ? o.faqs.map((f) => ({ q: en ? (f.qEn || f.q) : f.q, a: en ? (f.aEn || f.a) : f.a }))
+    faqs: o2.faqs
+      ? o2.faqs.map((f, i) => ({
+          q: en ? (f.qEn || baseEn?.faqs?.[i]?.q || f.q) : f.q,
+          a: en ? (f.aEn || baseEn?.faqs?.[i]?.a || f.a) : f.a,
+        }))
       : base.faqs,
   };
 }
