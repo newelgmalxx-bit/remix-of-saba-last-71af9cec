@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import portfolioBg from "@/assets/portfolio-bg.jpg";
+import portfolioBg from "@/assets/about-bg.webp";
 import {
   ArrowLeft, ChevronLeft, ExternalLink, Sparkles, Layout, Smartphone,
   Megaphone, Palette, Search, Star, Award, Briefcase,
@@ -248,7 +248,11 @@ function PortfolioPage() {
                       <img
                         src={p.img}
                         alt={projectTitle}
+                        width={640}
+                        height={480}
                         loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
