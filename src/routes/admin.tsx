@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminShell } from "@/components/admin/AdminLayout";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم | سابا ديزاين" }] }),
-  component: AdminShell,
+  component: lazyRouteComponent(() => import("@/pages/routes/admin"), "AdminShell"),
 });
