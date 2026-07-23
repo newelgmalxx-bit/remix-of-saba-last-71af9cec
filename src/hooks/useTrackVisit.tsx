@@ -16,24 +16,37 @@ function classifySource(referrer: string): string {
   }
 }
 
+function runIdle(cb: () => void) {
+  if (typeof window === "undefined") return;
+  const w = window as any;
+  const start = () => {
+    if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 4000 });
+    else setTimeout(cb, 2000);
+  };
+  if (document.readyState === "complete") start();
+  else window.addEventListener("load", start, { once: true });
+}
+
 export function useTrackVisit() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (path.startsWith("/admin")) return;
-    const referrer = document.referrer || "";
-    const body = JSON.stringify({
-      path,
-      referrer: referrer || null,
-      source: classifySource(referrer),
-      sessionId: getSid(),
-      userAgent: navigator.userAgent,
+    runIdle(() => {
+      const referrer = document.referrer || "";
+      const body = JSON.stringify({
+        path,
+        referrer: referrer || null,
+        source: classifySource(referrer),
+        sessionId: getSid(),
+        userAgent: navigator.userAgent,
+      });
+      fetch(`${BASE}/track`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Session-Id": getSid() },
+        body,
+        keepalive: true,
+      }).catch(() => {});
     });
-    fetch(`${BASE}/track`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Session-Id": getSid() },
-      body,
-      keepalive: true,
-    }).catch((e) => console.warn("[track] failed", e?.message));
   }, [path]);
 }

@@ -42,6 +42,12 @@ export function usePageTracking() {
       }
     };
 
-    track();
+    const w = window as any;
+    const schedule = () => {
+      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(() => void track(), { timeout: 4000 });
+      else setTimeout(() => void track(), 2000);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
   }, [path, search]);
 }
