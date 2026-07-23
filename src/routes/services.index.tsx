@@ -10,7 +10,7 @@ import { useAllServices } from "@/hooks/useServiceContent";
 import { ServiceCard } from "@/components/sections/ServicesGrid";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
-import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 
 const tabs: { key: TKey; cat: string }[] = [
   { key: "servicesPage.tab.all", cat: "الكل" },
@@ -189,11 +189,17 @@ export const Route = createFileRoute("/services/")({
     const seo = buildSeo({
       title: "خدمات تصميم وتطوير المواقع والتطبيقات | سابا ديزاين",
       description:
-        "حلول رقمية متكاملة: تصميم وتطوير المواقع، تطبيقات الجوال، المتاجر الإلكترونية، الهوية البصرية، التسويق الرقمي، السيو، وإدارة السوشيال ميديا — أسعار تنافسية وجودة عالية.",
+        "خدمات تصميم وتطوير المواقع، تطبيقات الجوال، المتاجر الإلكترونية، الهوية البصرية، التسويق الرقمي والسيو بأسعار تنافسية.",
       keywords:
         "خدمات تصميم مواقع، تطوير تطبيقات، متجر إلكتروني، هوية بصرية، تسويق رقمي، سوشيال ميديا، سيو، السعودية",
       path: "/services",
     });
+    const faqPairs = [
+      { q: "كم يستغرق تنفيذ الموقع؟", a: "عادةً من أسبوعين إلى ستة أسابيع حسب حجم المشروع ومتطلباته." },
+      { q: "هل تقدمون دعم بعد التسليم؟", a: "نعم، نوفر دعمًا فنيًا وصيانة دورية بعد إطلاق المشروع." },
+      { q: "هل التصميم متوافق مع الجوال؟", a: "جميع تصاميمنا Responsive وتعمل على جميع الأجهزة والمتصفحات." },
+      { q: "ما هي طرق الدفع المتاحة؟", a: "نقبل جميع البطاقات الائتمانية، مدى، Apple Pay، STC Pay، تابي وتمارا." },
+    ];
     return {
       meta: seo.meta,
       links: seo.links,
@@ -207,6 +213,7 @@ export const Route = createFileRoute("/services/")({
             ])
           ),
         },
+        { type: "application/ld+json", children: JSON.stringify(faqJsonLd(faqPairs)) },
       ],
     };
   },

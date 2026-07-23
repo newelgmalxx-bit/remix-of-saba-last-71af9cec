@@ -29,6 +29,7 @@ import { useAllReviews } from "@/hooks/useAllReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
+import { buildSeo, breadcrumbJsonLd, serviceJsonLd, SITE } from "@/lib/seo";
 
 const workTabKeys: TKey[] = [
   "svcDetail.works.tab.all",
@@ -852,22 +853,42 @@ function TestimonialsSlider({ testimonials }: { testimonials: { name: string; ro
 export const Route = createFileRoute("/services/$slug")({
   head: ({ params }) => {
     const s = serviceMap[params.slug];
-    const t = s?.seo?.title || (s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين");
-    const d = s?.seo?.description || s?.subtitle || "حلول رقمية متكاملة لنمو أعمالك.";
-    const k = s?.seo?.keywords;
-    const img = s?.seo?.ogImage || s?.bannerImage;
-    const meta: Array<Record<string, string>> = [
-      { title: t },
-      { name: "description", content: d },
-      { property: "og:title", content: t },
-      { property: "og:description", content: d },
+    const title = s?.seo?.title || (s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين");
+    const description = s?.seo?.description || s?.subtitle || "حلول رقمية متكاملة لنمو أعمالك.";
+    const keywords = s?.seo?.keywords;
+    const image = s?.seo?.ogImage || s?.bannerImage;
+    const seo = buildSeo({
+      title,
+      description,
+      keywords,
+      image,
+      path: `/services/${params.slug}`,
+      type: "product",
+    });
+    const scripts = [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          breadcrumbJsonLd([
+            { name: "الرئيسية", path: "/" },
+            { name: "الخدمات", path: "/services" },
+            { name: s?.title || params.slug, path: `/services/${params.slug}` },
+          ])
+        ),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          serviceJsonLd({
+            name: s?.title || params.slug,
+            description,
+            url: `${SITE.url}/services/${params.slug}`,
+            image,
+          })
+        ),
+      },
     ];
-    if (k) meta.push({ name: "keywords", content: k });
-    if (img) {
-      meta.push({ property: "og:image", content: img });
-      meta.push({ name: "twitter:image", content: img });
-    }
-    return { meta };
+    return { meta: seo.meta, links: seo.links, scripts };
   },
   component: ServiceDetailPage,
 });
