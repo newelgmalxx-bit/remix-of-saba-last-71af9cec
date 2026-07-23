@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { ServicesGrid } from "@/components/sections/ServicesGrid";
-import { PortfolioSection } from "@/components/sections/PortfolioSection";
-import { StatsBanner } from "@/components/sections/StatsBanner";
-import { WhyUsSection } from "@/components/sections/WhyUsSection";
-import { CtaBanner } from "@/components/sections/CtaBanner";
 import { buildSeo, organizationJsonLd, websiteJsonLd, localBusinessJsonLd } from "@/lib/seo";
+
+const ServicesGrid = lazy(() => import("@/components/sections/ServicesGrid").then((m) => ({ default: m.ServicesGrid })));
+const PortfolioSection = lazy(() => import("@/components/sections/PortfolioSection").then((m) => ({ default: m.PortfolioSection })));
+const StatsBanner = lazy(() => import("@/components/sections/StatsBanner").then((m) => ({ default: m.StatsBanner })));
+const WhyUsSection = lazy(() => import("@/components/sections/WhyUsSection").then((m) => ({ default: m.WhyUsSection })));
+const CtaBanner = lazy(() => import("@/components/sections/CtaBanner").then((m) => ({ default: m.CtaBanner })));
+const SiteFooter = lazy(() => import("@/components/layout/SiteFooter").then((m) => ({ default: m.SiteFooter })));
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -38,14 +40,56 @@ function Index() {
       <SiteHeader />
       <main className="flex-1">
         <HeroSection />
-        <ServicesGrid />
-        <PortfolioSection />
-        <StatsBanner />
-        <WhyUsSection />
-        <CtaBanner />
+        <DeferredHomeContent>
+          <Suspense fallback={<div className="min-h-[420px] bg-background" />}>
+            <ServicesGrid />
+            <PortfolioSection />
+            <StatsBanner />
+            <WhyUsSection />
+            <CtaBanner />
+          </Suspense>
+        </DeferredHomeContent>
       </main>
-      <SiteFooter />
+      <DeferredHomeContent minHeight="min-h-[360px]">
+        <Suspense fallback={<div className="min-h-[360px] bg-primary-dark" />}>
+          <SiteFooter />
+        </Suspense>
+      </DeferredHomeContent>
     </div>
   );
+}
+
+function DeferredHomeContent({ children, minHeight = "min-h-[520px]" }: { children: ReactNode; minHeight?: string }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (show) return;
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      const id = window.setTimeout(() => setShow(true), 7000);
+      return () => window.clearTimeout(id);
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShow(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    const id = window.setTimeout(() => {
+      setShow(true);
+      observer.disconnect();
+    }, 8000);
+    return () => {
+      window.clearTimeout(id);
+      observer.disconnect();
+    };
+  }, [show]);
+
+  return <div ref={ref} className={show ? undefined : minHeight}>{show ? children : null}</div>;
 }
 
