@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tryMe = async () => {
       const res = await authApi.me();
       const user = res.data?.user;
-      setUser(user);
+      setUser(user ?? null);
     };
     try {
       await tryMe();
