@@ -67,7 +67,7 @@ export function SiteFooter() {
         />
 
         <div>
-          <h4 className="mb-5 text-lg font-bold">{t("footer.contactUs")}</h4>
+          <h3 className="mb-5 text-lg font-bold">{t("footer.contactUs")}</h3>
           <ul className="space-y-3">
             {([
               site.phone ? { Icon: Phone, text: site.phone } : null,
@@ -122,7 +122,7 @@ function FooterCol({ titleKey, links }: { titleKey: TKey; links: { key: TKey; to
   const { t } = useLang();
   return (
     <div>
-      <h4 className="mb-5 text-lg font-bold">{t(titleKey)}</h4>
+      <h3 className="mb-5 text-lg font-bold">{t(titleKey)}</h3>
       <ul className="space-y-3 text-base text-white/85">
         {links.map((l) => (
           <li key={l.key}>

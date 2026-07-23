@@ -63,21 +63,34 @@ function normalize(d: any): SiteSettings {
   };
 }
 
+function runIdle(cb: () => void) {
+  if (typeof window === "undefined") return;
+  const w = window as any;
+  const start = () => {
+    if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 4000 });
+    else setTimeout(cb, 2000);
+  };
+  if (document.readyState === "complete") start();
+  else window.addEventListener("load", start, { once: true });
+}
+
 export function useSiteSettings(): SiteSettings {
   const [settings, setSettings] = useState<SiteSettings>(read);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res: any = await publicApi.getSiteSettings();
-        const d = res?.data ?? res;
-        const next = normalize(d);
-        if (Object.keys(next).length) {
-          setSettings(next);
-          if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(next));
-        }
-      } catch {}
-    })();
+    runIdle(() => {
+      (async () => {
+        try {
+          const res: any = await publicApi.getSiteSettings();
+          const d = res?.data ?? res;
+          const next = normalize(d);
+          if (Object.keys(next).length) {
+            setSettings(next);
+            if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(next));
+          }
+        } catch {}
+      })();
+    });
   }, []);
 
   return settings;
