@@ -45,30 +45,39 @@ export function PortfolioSection() {
 
   useEffect(() => {
     let cancelled = false;
-    publicApi.getPortfolio()
-      .then((res: any) => {
-        if (cancelled) return;
-        const items = res?.data?.items ?? res?.items ?? [];
-        const mapped: Project[] = items.map((it: any, idx: number) => {
-          const ar = it.titleAr || it.titleEn || "";
-          const en = it.titleEn || it.titleAr || "";
-          const cat = (it.category || "").toString().trim();
-          return {
-            id: String(it.id ?? it._id ?? idx),
-            title: { ar, en },
-            cat,
-            catLabel: { ar: cat || "أخرى", en: catLabelsEn[cat] || cat || "Other" },
-            brand: (en || ar).toString().toUpperCase(),
-            tags: Array.isArray(it.tech) ? it.tech.slice(0, 3) : [],
-            img: it.cover || it.image || undefined,
-            dark: !it.cover && !it.image,
-            span: SPANS[idx % SPANS.length],
-            link: it.link || it.url || "",
-          };
-        });
-        setProjects(mapped);
-      })
-      .catch(() => { if (!cancelled) setProjects([]); });
+    const load = () => {
+      publicApi.getPortfolio()
+        .then((res: any) => {
+          if (cancelled) return;
+          const items = res?.data?.items ?? res?.items ?? [];
+          const mapped: Project[] = items.map((it: any, idx: number) => {
+            const ar = it.titleAr || it.titleEn || "";
+            const en = it.titleEn || it.titleAr || "";
+            const cat = (it.category || "").toString().trim();
+            return {
+              id: String(it.id ?? it._id ?? idx),
+              title: { ar, en },
+              cat,
+              catLabel: { ar: cat || "أخرى", en: catLabelsEn[cat] || cat || "Other" },
+              brand: (en || ar).toString().toUpperCase(),
+              tags: Array.isArray(it.tech) ? it.tech.slice(0, 3) : [],
+              img: it.cover || it.image || undefined,
+              dark: !it.cover && !it.image,
+              span: SPANS[idx % SPANS.length],
+              link: it.link || it.url || "",
+            };
+          });
+          setProjects(mapped);
+        })
+        .catch(() => { if (!cancelled) setProjects([]); });
+    };
+    const w = window as any;
+    const start = () => {
+      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(load, { timeout: 4000 });
+      else setTimeout(load, 1500);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
     return () => { cancelled = true; };
   }, []);
 

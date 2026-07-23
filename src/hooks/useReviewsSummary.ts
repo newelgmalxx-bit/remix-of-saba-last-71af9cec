@@ -42,9 +42,17 @@ async function loadAll(): Promise<Map<string, ReviewSummary>> {
 export function useReviewsSummary(slug: string): ReviewSummary {
   const [, force] = useState(0);
   useEffect(() => {
-    if (!cache) loadAll();
     const fn = () => force((n) => n + 1);
     listeners.add(fn);
+    if (!cache) {
+      const w = window as any;
+      const start = () => {
+        if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(() => void loadAll(), { timeout: 4000 });
+        else setTimeout(() => void loadAll(), 2000);
+      };
+      if (document.readyState === "complete") start();
+      else window.addEventListener("load", start, { once: true });
+    }
     return () => { listeners.delete(fn); };
   }, []);
   return cache?.get(slug) || { average: 0, count: 0 };

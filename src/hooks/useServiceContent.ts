@@ -233,20 +233,26 @@ export function useAllServices(): ServiceContent[] {
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
     window.addEventListener("storage", fn);
-    refreshRemoteServices();
+    const w = window as any;
+    const start = () => {
+      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(() => void refreshRemoteServices(), { timeout: 4000 });
+      else setTimeout(() => void refreshRemoteServices(), 1500);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
     return () => {
       window.removeEventListener("saba:service-overrides", fn);
       window.removeEventListener("storage", fn);
     };
   }, []);
-  // DB is the only source of truth. Until the remote list arrives we render
-  // nothing (avoids hydration mismatch + flashing old placeholder data).
-  if (!mounted || typeof window === "undefined") return [];
+  if (typeof window === "undefined") return [];
   let remoteSlugs: string[] = [];
   try {
     const raw = localStorage.getItem(REMOTE_SLUGS_KEY);
     if (raw) remoteSlugs = JSON.parse(raw);
   } catch {}
+  // Fallback to static service map so we can render immediately (before mount) instead of blank.
+  if (remoteSlugs.length === 0) remoteSlugs = Object.keys(serviceMap);
   return remoteSlugs
     .map((s) => mergeService(s, undefined, lang))
     .filter((x): x is ServiceContent => !!x);
