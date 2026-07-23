@@ -43,7 +43,7 @@ export function SiteHeader() {
   useEffect(() => {
     if (actionsReady) return;
     const reveal = () => setActionsReady(true);
-    const id = window.setTimeout(reveal, 2600);
+    const id = window.setTimeout(reveal, 9000);
     window.addEventListener("pointerdown", reveal, { once: true, passive: true });
     window.addEventListener("keydown", reveal, { once: true });
     return () => {
