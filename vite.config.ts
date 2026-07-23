@@ -10,7 +10,7 @@ export default defineConfig({
       target: "react",
       autoCodeSplitting: true,
       codeSplittingOptions: {
-        defaultBehavior: [["component", "head"], ["errorComponent"], ["notFoundComponent"]],
+        defaultBehavior: [["component"], ["errorComponent"], ["notFoundComponent"]],
       },
     }),
     react(),
