@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useLang } from "@/i18n/LanguageProvider";
 import api, { ApiError } from "@/lib/api";
-import { buildSeo } from "@/lib/seo";
+import { buildSeo } from "@/lib/seo-lite";
 
 type StatusKind = "success" | "pending" | "failed" | "error";
 

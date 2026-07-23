@@ -29,7 +29,7 @@ import { useAllReviews } from "@/hooks/useAllReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
-import { buildSeo, breadcrumbJsonLd, serviceJsonLd, SITE } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd, serviceJsonLd, SITE } from "@/lib/seo-lite";
 import { serviceSeoMap } from "@/data/serviceSeo";
 
 const workTabKeys: TKey[] = [
