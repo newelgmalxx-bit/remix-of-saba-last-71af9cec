@@ -1,8 +1,9 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
-import { MaintenanceScreen } from "./MaintenanceScreen";
-import { type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
+
+const MaintenanceScreen = lazy(() => import("./MaintenanceScreen").then((m) => ({ default: m.MaintenanceScreen })));
 
 /** Gates the entire app behind maintenance mode flag from site settings.
  *  Admins and admin routes (and login) bypass the gate. */
@@ -21,7 +22,7 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
     path.startsWith("/reset-password");
 
   if (maintenance && !bypass) {
-    return <MaintenanceScreen lang={lang} />;
+    return <Suspense fallback={null}><MaintenanceScreen lang={lang} /></Suspense>;
   }
   return <>{children}</>;
 }

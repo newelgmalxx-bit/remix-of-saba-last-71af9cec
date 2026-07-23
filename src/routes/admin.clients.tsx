@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
 import { Users, Star, TrendingUp, ShoppingBag, Search, Plus, MoreHorizontal, Eye, Mail, Trash2, Phone, MapPin, Calendar, Globe, Shield, UserCog, KeyRound, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { fmtSAR, type AdminClient } from "@/data/admin";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
+
+const ClientGrowthChart = lazy(() => import("@/components/admin/AnalyticsCharts").then((m) => ({ default: m.ClientGrowthChart })));
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "العملاء | لوحة التحكم" }] }),
@@ -226,16 +227,9 @@ function ClientsPage() {
           {growthSeries.length === 0 ? (
             <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
           ) : (
-          <ResponsiveContainer>
-            <BarChart data={growthSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
-              <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
-              <YAxis stroke="#7c8aa0" fontSize={12} />
-              <Tooltip />
-              <Bar dataKey="r" name={L("عائدون", "Returning")} fill="#1E5B94" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="n" name={L("جدد", "New")} fill="#9bc4e8" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            <Suspense fallback={<div className="h-full animate-pulse rounded-xl bg-muted" />}>
+              <ClientGrowthChart data={growthSeries} returningLabel={L("عائدون", "Returning")} newLabel={L("جدد", "New")} />
+            </Suspense>
           )}
         </div>
       </PanelCard>

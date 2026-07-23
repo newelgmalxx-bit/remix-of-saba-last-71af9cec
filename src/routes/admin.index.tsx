@@ -2,15 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard, Pill } from "@/components/admin/AdminLayout";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
 import { bookingStatusMap, fmtSAR } from "@/data/admin";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { admin as adminApi, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "@tanstack/react-router";
-import {
-  ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip,
-  PieChart, Pie, Cell,
-} from "recharts";
 import { useLang } from "@/i18n/LanguageProvider";
+
+const RevenueAreaChart = lazy(() => import("@/components/admin/DashboardCharts").then((m) => ({ default: m.RevenueAreaChart })));
+const CategoryPieChart = lazy(() => import("@/components/admin/DashboardCharts").then((m) => ({ default: m.CategoryPieChart })));
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "لوحة التحكم | سابا ديزاين" }] }),
@@ -260,21 +259,9 @@ function AdminDashboard() {
             {filteredRevenue.length === 0 ? (
               <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
             ) : (
-            <ResponsiveContainer>
-              <AreaChart data={filteredRevenue}>
-                <defs>
-                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1E5B94" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#1E5B94" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
-                <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
-                <YAxis stroke="#7c8aa0" fontSize={12} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e3ebf3" }} />
-                <Area type="monotone" dataKey="v" stroke="#1E5B94" strokeWidth={2.5} fill="url(#rev)" />
-              </AreaChart>
-            </ResponsiveContainer>
+              <Suspense fallback={<div className="h-full animate-pulse rounded-xl bg-muted" />}>
+                <RevenueAreaChart data={filteredRevenue} />
+              </Suspense>
             )}
           </div>
         </PanelCard>
@@ -284,13 +271,9 @@ function AdminDashboard() {
             {byCat.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">{L("لا توجد بيانات", "No data")}</div>
             ) : (
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie data={byCat} dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={3}>
-                  {byCat.map((s, i) => <Cell key={i} fill={s.color} />)}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+              <Suspense fallback={<div className="h-full animate-pulse rounded-xl bg-muted" />}>
+                <CategoryPieChart data={byCat} />
+              </Suspense>
             )}
           </div>
           <ul className="mt-3 space-y-1.5">

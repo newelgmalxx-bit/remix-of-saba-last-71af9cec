@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout, StatCard, PanelCard } from "@/components/admin/AdminLayout";
 import { Eye, MousePointerClick, TrendingUp, Clock, ShoppingCart, DollarSign, Users, Activity } from "lucide-react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { admin as adminApi } from "@/lib/api";
 import { fmtSAR } from "@/data/admin";
+
+const WeeklyTrafficChart = lazy(() => import("@/components/admin/AnalyticsCharts").then((m) => ({ default: m.WeeklyTrafficChart })));
+const MonthlyRevenueChart = lazy(() => import("@/components/admin/AnalyticsCharts").then((m) => ({ default: m.MonthlyRevenueChart })));
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "التحليلات | لوحة التحكم" }] }),
@@ -78,15 +80,9 @@ function AnalyticsPage() {
             {weekly.length === 0 || weekly.every((d: any) => !d.v) ? (
               <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
             ) : (
-              <ResponsiveContainer>
-                <LineChart data={weekly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
-                  <XAxis dataKey="d" stroke="#7c8aa0" fontSize={12} />
-                  <YAxis stroke="#7c8aa0" fontSize={12} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="v" stroke="#1E5B94" strokeWidth={3} dot={{ r: 4, fill: "#1E5B94" }} />
-                </LineChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<div className="h-full animate-pulse rounded-xl bg-muted" />}>
+                <WeeklyTrafficChart data={weekly} />
+              </Suspense>
             )}
           </div>
         </PanelCard>
@@ -154,15 +150,9 @@ function AnalyticsPage() {
           {monthly.length === 0 || monthly.every((d: any) => !d.v) ? (
             <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{L("لا توجد بيانات بعد", "No data yet")}</div>
           ) : (
-            <ResponsiveContainer>
-              <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e3ebf3" />
-                <XAxis dataKey="m" stroke="#7c8aa0" fontSize={12} />
-                <YAxis stroke="#7c8aa0" fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="v" fill="#1E5B94" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<div className="h-full animate-pulse rounded-xl bg-muted" />}>
+              <MonthlyRevenueChart data={monthly} />
+            </Suspense>
           )}
         </div>
       </PanelCard>
