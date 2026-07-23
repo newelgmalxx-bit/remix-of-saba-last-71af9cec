@@ -4,16 +4,23 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { FileText, ChevronLeft } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "الشروط والأحكام | سابا ديزاين" },
-      { name: "description", content: "الشروط والأحكام التي تحكم استخدامك خدمات سابا ديزاين." },
-      { property: "og:title", content: "الشروط والأحكام | سابا ديزاين" },
-      { property: "og:description", content: "اطلع على شروط وأحكام استخدام خدمات سابا ديزاين." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "الشروط والأحكام | سابا ديزاين",
+      description: "تعرف على شروط وأحكام استخدام خدمات سابا ديزاين الرقمية، حقوق العملاء، آلية الطلب، الدفع، التسليم والدعم.",
+      path: "/terms",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbJsonLd([{ name: "الرئيسية", path: "/" }, { name: "الشروط والأحكام", path: "/terms" }])) },
+      ],
+    };
+  },
   component: TermsPage,
 });
 

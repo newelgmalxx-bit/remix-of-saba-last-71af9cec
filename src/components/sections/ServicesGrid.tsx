@@ -3,7 +3,7 @@ import { ArrowLeft, ImageIcon, Star, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAllServices } from "@/hooks/useServiceContent";
 import { useReviewsSummary } from "@/hooks/useReviewsSummary";
-import servicesHero from "@/assets/services-hero.png";
+import servicesHero from "@/assets/services-hero.webp";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
 
@@ -94,6 +94,9 @@ export function ServiceCard({
             src={banner}
             alt={title}
             loading="lazy"
+            width={640}
+            height={400}
+            decoding="async"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (

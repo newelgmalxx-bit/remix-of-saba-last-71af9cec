@@ -5,11 +5,13 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
 import { formatCurrency } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
+import { buildSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({
-    meta: [{ title: "سلة المشتريات | سابا ديزاين" }, { name: "description", content: "راجع طلباتك وأكمل عملية الشراء." }],
-  }),
+  head: () => {
+    const seo = buildSeo({ title: "سلة المشتريات | سابا ديزاين", description: "راجع خدماتك المختارة وأكمل طلبك من سابا ديزاين بأمان.", path: "/cart", noindex: true });
+    return { meta: seo.meta, links: seo.links };
+  },
   component: CartPage,
 });
 

@@ -8,10 +8,10 @@ import {
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo.webp";
 import { useLang } from "@/i18n/LanguageProvider";
-import flagSa from "@/assets/flag-sa.jpg";
-import flagUs from "@/assets/flag-us.jpg";
+import flagSa from "@/assets/flag-sa.webp";
+import flagUs from "@/assets/flag-us.webp";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { toast } from "sonner";
@@ -258,7 +258,7 @@ export function AdminLayout({ children, title, subtitle, action }: { children: R
       {/* Sidebar */}
       <aside className={`${mobileOpen ? "translate-x-0" : (dir === "rtl" ? "translate-x-full" : "-translate-x-full")} lg:translate-x-0 fixed lg:sticky top-0 ${dir === "rtl" ? "right-0 border-l" : "left-0 border-r"} z-40 h-screen w-72 shrink-0 border-border bg-card transition-transform overflow-y-auto`}>
         <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-          <img src={logoImg} alt="سابا ديزاين" className="h-9 w-auto object-contain" />
+          <img src={logoImg} alt="سابا ديزاين" width={120} height={64} decoding="async" className="h-9 w-auto object-contain" />
           <div className="text-[11px] text-muted-foreground">{L("لوحة التحكم", "Admin panel")}</div>
         </div>
         <nav className="p-3 space-y-1 pb-10">

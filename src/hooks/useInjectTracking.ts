@@ -30,11 +30,27 @@ function injectRawHTML(html: string, target: HTMLElement, slot: string) {
 
 let injected = false;
 
+function runWhenIdle(callback: () => void) {
+  const start = () => {
+    const w = window as Window &
+      typeof globalThis & {
+        requestIdleCallback?: (cb: () => void, options?: { timeout?: number }) => number;
+      };
+    if (typeof w.requestIdleCallback === "function") {
+      w.requestIdleCallback(callback, { timeout: 3500 });
+    } else {
+      globalThis.setTimeout(callback, 1800);
+    }
+  };
+  if (document.readyState === "complete") start();
+  else window.addEventListener("load", start, { once: true });
+}
+
 export function useInjectTracking() {
   useEffect(() => {
     if (injected || typeof window === "undefined") return;
     injected = true;
-    (async () => {
+    runWhenIdle(() => void (async () => {
       try {
         const res = await fetch(`${BASE}/tracking`, { headers: { Accept: "application/json" } });
         if (!res.ok) return;
@@ -46,6 +62,6 @@ export function useInjectTracking() {
       } catch {
         /* tracking endpoint unavailable — silently skip */
       }
-    })();
+    })());
   }, []);
 }

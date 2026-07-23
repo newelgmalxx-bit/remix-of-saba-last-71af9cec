@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useLang } from "@/i18n/LanguageProvider";
 import api, { ApiError } from "@/lib/api";
+import { buildSeo } from "@/lib/seo";
 
 type StatusKind = "success" | "pending" | "failed" | "error";
 
@@ -22,7 +23,10 @@ export const Route = createFileRoute("/payment/result")({
     tamaraOrderId: z.string().optional(),
     message: z.string().optional(),
   }),
-  head: () => ({ meta: [{ title: "نتيجة الدفع | سابا ديزاين" }] }),
+  head: () => {
+    const seo = buildSeo({ title: "نتيجة الدفع | سابا ديزاين", description: "تابع حالة عملية الدفع الخاصة بطلبك لدى سابا ديزاين.", path: "/payment/result", noindex: true });
+    return { meta: seo.meta, links: seo.links };
+  },
   component: PaymentResultPage,
 });
 

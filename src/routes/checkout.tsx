@@ -10,11 +10,13 @@ import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { useCheckoutStore } from "@/store/checkoutStore";
+import { buildSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({
-    meta: [{ title: "إتمام الطلب | سابا ديزاين" }],
-  }),
+  head: () => {
+    const seo = buildSeo({ title: "إتمام الطلب | سابا ديزاين", description: "أكمل بيانات طلبك واختر وسيلة الدفع المناسبة بأمان.", path: "/checkout", noindex: true });
+    return { meta: seo.meta, links: seo.links };
+  },
   component: CheckoutShell,
 });
 

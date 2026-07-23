@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ContactSection } from "@/components/sections/ContactSection";
-import aboutBg from "@/assets/about-bg.jpg";
+import aboutBg from "@/assets/about-bg.webp";
 import {
   Sparkles, MessageCircle, Phone, Mail, MapPin, Clock,
   Headphones, Zap, ShieldCheck, ChevronDown, ArrowLeft,
@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useSiteSettings, telHref, waHref, mailHref } from "@/hooks/useSiteSettings";
+import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 
 function ContactPage() {
   const { t, dir, lang } = useLang();
@@ -38,7 +39,7 @@ function ContactPage() {
       <main className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <img src={aboutBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
+          <img src={aboutBg} alt="" width={1200} height={800} className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" decoding="async" />
           <div
             className="absolute inset-0"
             style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.88) 0%, rgba(30,91,148,0.80) 50%, rgba(15,40,75,0.94) 100%)" }}
@@ -239,11 +240,25 @@ function FaqItem({ q, a, defaultOpen }: { q: string; a: string; defaultOpen?: bo
 }
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "تواصل معنا | سابا ديزاين" },
-      { name: "description", content: "تواصل مع فريق سابا ديزاين عبر الواتساب، الهاتف، أو البريد الإلكتروني — استشارة مجانية ورد خلال 24 ساعة." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "تواصل معنا | سابا ديزاين — استشارة رقمية مجانية",
+      description: "تواصل مع فريق سابا ديزاين عبر الواتساب أو الهاتف أو البريد الإلكتروني للحصول على استشارة رقمية مجانية ورد سريع.",
+      keywords: "تواصل سابا ديزاين، استشارة تصميم مواقع، وكالة رقمية الرياض، دعم سابا ديزاين",
+      path: "/contact",
+    });
+    const faqPairs = [
+      { q: "كيف أبدأ مشروعاً مع سابا ديزاين؟", a: "أرسل تفاصيل مشروعك عبر نموذج التواصل أو واتساب، وسنقترح عليك الخطة المناسبة." },
+      { q: "هل تقدمون استشارة مجانية؟", a: "نعم، نوفر استشارة أولية مجانية لتحديد احتياجك الرقمي." },
+    ];
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbJsonLd([{ name: "الرئيسية", path: "/" }, { name: "تواصل معنا", path: "/contact" }])) },
+        { type: "application/ld+json", children: JSON.stringify(faqJsonLd(faqPairs)) },
+      ],
+    };
+  },
   component: ContactPage,
 });

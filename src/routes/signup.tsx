@@ -7,7 +7,9 @@ import { useLang } from "@/i18n/LanguageProvider";
 import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError, setToken } from "@/lib/api";
 import { toast } from "sonner";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID = "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
 
 function SignupPage() {
   const [show1, setShow1] = useState(false);
@@ -285,35 +287,37 @@ function SignupPage() {
             </div>
 
             <div className="relative flex w-full justify-center" style={{ zIndex: 100000 }}>
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  const idToken = credentialResponse.credential;
-                  if (!idToken) {
+              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    const idToken = credentialResponse.credential;
+                    if (!idToken) {
+                      toast.error(lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
+                      return;
+                    }
+                    try {
+                      const { token } = await api.auth.oauthGoogle(idToken);
+                      if (!token) throw new ApiError(500, "No token returned");
+                      setToken(token);
+                      await refresh();
+                      toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
+                      navigate({ to: "/account" });
+                    } catch (err) {
+                      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
+                      toast.error(msg);
+                    }
+                  }}
+                  onError={() => {
                     toast.error(lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
-                    return;
-                  }
-                  try {
-                    const { token } = await api.auth.oauthGoogle(idToken);
-                    if (!token) throw new ApiError(500, "No token returned");
-                    setToken(token);
-                    await refresh();
-                    toast.success(lang === "ar" ? "تم إنشاء الحساب" : "Account created");
-                    navigate({ to: "/account" });
-                  } catch (err) {
-                    const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
-                    toast.error(msg);
-                  }
-                }}
-                onError={() => {
-                  toast.error(lang === "ar" ? "فشل التسجيل بجوجل" : "Google sign-up failed");
-                }}
-                useOneTap={false}
-                theme="outline"
-                size="large"
-                shape="rectangular"
-                text="signup_with"
-                width="320"
-              />
+                  }}
+                  useOneTap={false}
+                  theme="outline"
+                  size="large"
+                  shape="rectangular"
+                  text="signup_with"
+                  width="320"
+                />
+              </GoogleOAuthProvider>
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">

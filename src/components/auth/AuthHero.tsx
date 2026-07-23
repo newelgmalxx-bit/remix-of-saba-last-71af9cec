@@ -1,5 +1,5 @@
-import logoWhite from "@/assets/logo-white.png";
-import authIllustration from "@/assets/auth-illustration.jpg";
+import logoWhite from "@/assets/logo-white.webp";
+import authIllustration from "@/assets/auth-illustration.webp";
 import { ShieldCheck, Headphones, BarChart3, CloudCog } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 
@@ -19,7 +19,7 @@ export function AuthHero({ variant = "login" }: { variant?: "login" | "signup" }
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
       <div className="relative flex justify-start">
-        <img src={logoWhite} alt="سابا ديزاين" className="h-14 w-auto opacity-95 sm:h-20" />
+        <img src={logoWhite} alt="سابا ديزاين" width={180} height={88} decoding="async" className="h-14 w-auto opacity-95 sm:h-20" />
       </div>
 
       <div className={`relative mt-6 ${align}`}>
@@ -34,7 +34,7 @@ export function AuthHero({ variant = "login" }: { variant?: "login" | "signup" }
 
       <div className="relative my-6 flex justify-center">
         <div className="w-full max-w-xs overflow-hidden rounded-3xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] ring-1 ring-white/10 sm:max-w-sm lg:max-w-md">
-          <img src={authIllustration} alt="" className="aspect-square w-full object-cover" />
+          <img src={authIllustration} alt="" width={520} height={520} loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
         </div>
       </div>
 

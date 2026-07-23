@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import aboutHero from "@/assets/about-hero.jpg";
-import aboutBg from "@/assets/about-bg.jpg";
+import aboutHero from "@/assets/about-hero.webp";
+import aboutBg from "@/assets/about-bg.webp";
 import {
   Sparkles, Target, Eye, Heart, Award, Users, Rocket, Globe2,
   Lightbulb, ShieldCheck, Handshake, TrendingUp, ArrowLeft, Quote,
@@ -68,7 +68,7 @@ function AboutPage() {
       <main className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <img src={aboutBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
+          <img src={aboutBg} alt="" width={1200} height={800} className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" decoding="async" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(15,40,75,0.85) 0%, rgba(30,91,148,0.78) 50%, rgba(15,40,75,0.92) 100%)" }} />
           <div className="absolute inset-0 bg-grid opacity-20" />
           <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse-glow" />
@@ -142,7 +142,7 @@ function AboutPage() {
 
             <div className="relative order-1 lg:order-2">
               <div className="relative aspect-square overflow-hidden rounded-3xl shadow-lg">
-                <img src={aboutHero} alt={t("aboutPage.story.imageAlt")} className="absolute inset-0 h-full w-full object-cover" />
+                <img src={aboutHero} alt={t("aboutPage.story.imageAlt")} width={640} height={640} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(30,91,148,0) 30%, rgba(15,40,75,0.85) 100%)" }} />
                 <div className="relative flex h-full flex-col justify-end p-8 text-white md:p-10">
                   <Quote className="mb-4 h-10 w-10 opacity-70" />
@@ -349,7 +349,7 @@ export const Route = createFileRoute("/about")({
         "تعرّف على فريق سابا ديزاين، قصتنا، قيمنا، ورؤيتنا في صناعة تجارب رقمية تترك أثراً يدوم. أكثر من 250 مشروع و120 عميل في السعودية والخليج.",
       keywords: "من نحن، سابا ديزاين، فريق سابا، وكالة تصميم، قصة سابا، رؤية سابا",
       path: "/about",
-      image: `${SITE.url}/logo.png`,
+      image: `${SITE.url}/logo.webp`,
     });
     return {
       meta: seo.meta,

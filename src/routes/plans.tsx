@@ -8,16 +8,24 @@ import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/plans")({
-  head: () => ({
-    meta: [
-      { title: "الباقات والأسعار | سابا ديزاين" },
-      { name: "description", content: "اختر الباقة المناسبة لمشروعك من باقات سابا ديزاين المرنة." },
-      { property: "og:title", content: "الباقات والأسعار | سابا ديزاين" },
-      { property: "og:description", content: "باقات مرنة لكل مشاريعك الرقمية." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "باقات تصميم المواقع والتطبيقات | سابا ديزاين",
+      description: "اختر من باقات سابا ديزاين المرنة لتصميم المواقع، التطبيقات، الهوية البصرية والتسويق الرقمي حسب احتياج مشروعك.",
+      keywords: "باقات تصميم مواقع، أسعار تصميم مواقع، باقات تطبيقات، سابا ديزاين، أسعار التسويق الرقمي",
+      path: "/plans",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbJsonLd([{ name: "الرئيسية", path: "/" }, { name: "الباقات", path: "/plans" }])) },
+      ],
+    };
+  },
   component: PlansPage,
 });
 
