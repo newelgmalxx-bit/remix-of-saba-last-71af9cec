@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import type { User } from "@/lib/api/types";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 type LoginResult =
   | { user: User; token: string; requiresOtp?: false }
@@ -43,9 +44,15 @@ function clearToken() {
 
 const getAuthApi = async () => (await import("@/lib/api/auth")).auth;
 
+function isProtectedPath() {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname;
+  return path.startsWith("/admin") || path.startsWith("/account") || path.startsWith("/checkout");
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => isProtectedPath() && !!getToken());
 
   const refresh = useCallback(async () => {
     if (!getToken()) {
@@ -88,11 +95,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refresh();
+    const needsImmediateAuth = isProtectedPath();
+    const cancel = getToken() && !needsImmediateAuth
+      ? runAfterCriticalPaint(() => void refresh(), 7000)
+      : undefined;
+    if (!cancel) refresh();
     const onAuth = () => refresh();
     window.addEventListener("saba:auth", onAuth);
     window.addEventListener("storage", onAuth);
     return () => {
+      cancel?.();
       window.removeEventListener("saba:auth", onAuth);
       window.removeEventListener("storage", onAuth);
     };
