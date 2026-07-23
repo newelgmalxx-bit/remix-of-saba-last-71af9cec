@@ -7,14 +7,14 @@ import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import { StatsBanner } from "@/components/sections/StatsBanner";
 import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CtaBanner } from "@/components/sections/CtaBanner";
-import { buildSeo, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { buildSeo, organizationJsonLd, websiteJsonLd, localBusinessJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => {
     const seo = buildSeo({
-      title: "سابا ديزاين | وكالة تصميم وتطوير مواقع وتطبيقات في السعودية",
+      title: "سابا ديزاين | تصميم وتطوير المواقع والتطبيقات في السعودية",
       description:
-        "سابا ديزاين وكالة رقمية سعودية متخصصة في تصميم وتطوير المواقع، تطبيقات الجوال، المتاجر الإلكترونية، الهوية البصرية، والتسويق الرقمي. نصنع تجارب رقمية تترك أثراً يدوم.",
+        "وكالة رقمية سعودية لتصميم المواقع، تطبيقات الجوال، الهوية البصرية، السيو والتسويق الرقمي — نصنع تجارب رقمية تترك أثراً.",
       keywords:
         "تصميم مواقع، تطوير مواقع، تصميم تطبيقات، متجر إلكتروني، هوية بصرية، تسويق رقمي، سيو، السعودية، الرياض، سابا ديزاين، web design Saudi Arabia",
       path: "/",
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/")({
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(organizationJsonLd()) },
         { type: "application/ld+json", children: JSON.stringify(websiteJsonLd()) },
+        { type: "application/ld+json", children: JSON.stringify(localBusinessJsonLd()) },
       ],
     };
   },

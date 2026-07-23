@@ -11,14 +11,33 @@ import {
 import { useLang } from "@/i18n/LanguageProvider";
 import { publicApi } from "@/lib/api/public";
 
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
+
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
-  head: () => ({
-    meta: [
-      { title: "أعمالنا | سابا ديزاين" },
-      { name: "description", content: "استعرض نماذج من أعمالنا في تصميم المواقع، تطبيقات الموبايل، الهوية البصرية، والتسويق الرقمي." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "أعمالنا | سابا ديزاين",
+      description: "استعرض نماذج من أعمالنا في تصميم المواقع، تطبيقات الموبايل، الهوية البصرية، والتسويق الرقمي.",
+      keywords: "أعمال، portfolio، تصميم مواقع، تطبيقات، هوية بصرية، سابا ديزاين",
+      path: "/portfolio",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "الرئيسية", path: "/" },
+              { name: "أعمالنا", path: "/portfolio" },
+            ])
+          ),
+        },
+      ],
+    };
+  },
 });
 
 type Project = {

@@ -119,6 +119,39 @@ export function websiteJsonLd() {
   };
 }
 
+export function localBusinessJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: SITE.name,
+    alternateName: SITE.nameEn,
+    image: SITE.ogImage,
+    url: SITE.url,
+    telephone: SITE.phone,
+    email: SITE.email,
+    priceRange: "$$",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "SA",
+      addressLocality: "Riyadh",
+      addressRegion: "Riyadh",
+    },
+    areaServed: { "@type": "Country", name: "Saudi Arabia" },
+  };
+}
+
+export function faqJsonLd(items: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    })),
+  };
+}
+
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",
