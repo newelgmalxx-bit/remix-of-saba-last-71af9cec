@@ -1,14 +1,14 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 import { Home, Search, ArrowLeft } from "lucide-react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 
 import "../styles.css";
-import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
-import { useTrackVisit } from "@/hooks/useTrackVisit";
-import { useInjectTracking } from "@/hooks/useInjectTracking";
-import { usePageTracking } from "@/hooks/usePageTracking";
 import { MaintenanceGate } from "@/components/MaintenanceGate";
+
+const LazyToaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
+const LazyTrackingEffects = lazy(() => import("@/components/TrackingEffects").then((m) => ({ default: m.TrackingEffects })));
 
 function NotFoundComponent() {
   return (
@@ -56,17 +56,42 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  useTrackVisit();
-  useInjectTracking();
-  usePageTracking();
   return (
     <LanguageProvider>
       <AuthProvider>
         <MaintenanceGate>
           <Outlet />
         </MaintenanceGate>
-        <Toaster position="top-center" richColors closeButton />
+        <AfterFirstPaint delay={3500}>
+          <Suspense fallback={null}>
+            <LazyTrackingEffects />
+            <LazyToaster position="top-center" richColors closeButton />
+          </Suspense>
+        </AfterFirstPaint>
       </AuthProvider>
     </LanguageProvider>
   );
+}
+
+function AfterFirstPaint({ children, delay }: { children: ReactNode; delay: number }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (ready || typeof window === "undefined") return;
+    let timeoutId: number | undefined;
+    const reveal = () => setReady(true);
+    const start = () => { timeoutId = window.setTimeout(reveal, delay); };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    window.addEventListener("pointerdown", reveal, { once: true, passive: true });
+    window.addEventListener("keydown", reveal, { once: true });
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      window.removeEventListener("load", start);
+      window.removeEventListener("pointerdown", reveal);
+      window.removeEventListener("keydown", reveal);
+    };
+  }, [delay, ready]);
+
+  return ready ? <>{children}</> : null;
 }
