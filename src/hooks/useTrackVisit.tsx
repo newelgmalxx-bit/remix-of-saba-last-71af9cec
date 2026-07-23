@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { BASE, getSid } from "@/lib/api";
+import { BASE, getSid } from "@/lib/api/client";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 function classifySource(referrer: string): string {

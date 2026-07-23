@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { serviceMap, type ServiceContent } from "@/data/services";
 import { Sparkles } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
-import { services as servicesApi } from "@/lib/api";
+import { services as servicesApi } from "@/lib/api/services";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 const KEY = "saba_service_overrides_v1";
@@ -20,8 +20,8 @@ function formatPriceStr(v: any): string {
 
 async function refreshRemoteServices() {
   try {
-    const res = await servicesApi.list();
-    const items = res?.items || [];
+    const res: any = await servicesApi.list();
+    const items = res?.data?.items ?? res?.items ?? [];
     const store = readStore();
     const remoteSlugs: string[] = [];
     for (const s of items) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { publicApi } from "@/lib/api";
+import { publicApi } from "@/lib/api/public";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type SiteSettings = {

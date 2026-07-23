@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { BASE } from "@/lib/api";
+import { BASE } from "@/lib/api/client";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 const SESSION_KEY = "pv_sid";

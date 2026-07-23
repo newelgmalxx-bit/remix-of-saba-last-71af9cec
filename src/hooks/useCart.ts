@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import api from "@/lib/api";
-import type { CartLine } from "@/lib/api";
+import { cart as cartApi } from "@/lib/api/cart";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type CartItem = {
@@ -85,8 +84,8 @@ let didInitialSync = false;
 async function trySyncFromApi(initial = false): Promise<void> {
   if (initial) setCache({ ...cache, loading: true, error: null });
   try {
-    const res = await api.cart.get();
-    const remoteItems = (res.items || []).map(normalizeFromApi);
+    const res: any = await cartApi.get();
+    const remoteItems = (res?.data?.items ?? res?.items ?? []).map(normalizeFromApi);
     setCache({
       items: remoteItems,
       ...computeTotals(remoteItems),
@@ -150,7 +149,7 @@ export function useCart() {
       const isPlanLine = item.serviceSlug.startsWith("plan:");
       const servicePlanId = isPlanLine ? item.serviceSlug.slice(5) : undefined;
         try {
-          await api.cart.addItem({
+          await cartApi.add({
             serviceSlug: item.serviceSlug,
             serviceTitle: item.serviceTitle,
             planName: item.planName,
@@ -168,7 +167,7 @@ export function useCart() {
     const nextItems = cache.items.filter((i) => i.id !== lineId);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     if (!lineId.startsWith("local-")) {
-      try { await api.cart.removeItem(lineId); await trySyncFromApi(); } catch {}
+      try { await cartApi.remove(lineId); await trySyncFromApi(); } catch {}
     }
   }, []);
 
@@ -177,7 +176,7 @@ export function useCart() {
     const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     if (!lineId.startsWith("local-")) {
-      try { await api.cart.updateItem(lineId, qty); await trySyncFromApi(); } catch {}
+      try { await cartApi.updateQty(lineId, qty); await trySyncFromApi(); } catch {}
     }
   }, [remove]);
 
@@ -185,7 +184,7 @@ export function useCart() {
     const ids = cache.items.map((i) => i.id);
     setCache({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, loading: false, error: null });
     for (const id of ids) {
-      api.cart.removeItem(id).catch(() => {});
+      cartApi.remove(id).catch(() => {});
     }
   }, []);
 

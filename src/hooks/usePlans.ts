@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { admin as adminApi, publicApi } from "@/lib/api";
+import { publicApi } from "@/lib/api/public";
 import type { Plan as ApiPlan } from "@/lib/api/types";
 
 export type Plan = {
@@ -149,6 +149,7 @@ export function usePlans(opts?: { source?: "public" | "admin" }) {
         let items: any[] | undefined;
         if (source === "admin") {
           try {
+            const { admin: adminApi } = await import("@/lib/api");
             const res: any = await adminApi.plans.list();
             items = res?.items ?? res?.data?.items;
           } catch {}
@@ -178,6 +179,7 @@ export function usePlans(opts?: { source?: "public" | "admin" }) {
     setPlans(next);
     (async () => {
       try {
+        const { admin: adminApi } = await import("@/lib/api");
         await Promise.all(next.map((p, i) => adminApi.plans.update(p.id, toApi(p, i) as any).catch(async () => {
           await adminApi.plans.create(toApi(p, i) as any);
         })));
