@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/i18n/LanguageProvider";
 import { publicApi } from "@/lib/api/public";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 type Project = {
   id: string;
@@ -71,14 +72,8 @@ export function PortfolioSection() {
         })
         .catch(() => { if (!cancelled) setProjects([]); });
     };
-    const w = window as any;
-    const start = () => {
-      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(load, { timeout: 4000 });
-      else setTimeout(load, 1500);
-    };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
-    return () => { cancelled = true; };
+    const cancel = runAfterCriticalPaint(load, 10000);
+    return () => { cancelled = true; cancel?.(); };
   }, []);
 
   const cats = useMemo(() => {

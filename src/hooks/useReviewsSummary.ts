@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { reviews as reviewsApi } from "@/lib/api/services";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type ReviewSummary = { average: number; count: number };
 
@@ -45,13 +46,7 @@ export function useReviewsSummary(slug: string): ReviewSummary {
     const fn = () => force((n) => n + 1);
     listeners.add(fn);
     if (!cache) {
-      const w = window as any;
-      const start = () => {
-        if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(() => void loadAll(), { timeout: 4000 });
-        else setTimeout(() => void loadAll(), 2000);
-      };
-      if (document.readyState === "complete") start();
-      else window.addEventListener("load", start, { once: true });
+      runAfterCriticalPaint(() => void loadAll(), 10000);
     }
     return () => { listeners.delete(fn); };
   }, []);

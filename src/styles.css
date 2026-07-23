@@ -147,14 +147,14 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: "Tajawal", system-ui, -apple-system, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   html[dir="rtl"] body {
-    font-family: "Tajawal", system-ui, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   :where(input[type="tel"], input[type="number"], input[inputmode="tel"], input[inputmode="numeric"], input[dir="ltr"], textarea[dir="ltr"], [data-ltr-number], [dir="ltr"]) {
@@ -171,8 +171,8 @@
   }
 
   h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: "Tajawal", system-ui, sans-serif;
-    letter-spacing: -0.01em;
+    font-family: inherit;
+    letter-spacing: 0;
   }
 }
 

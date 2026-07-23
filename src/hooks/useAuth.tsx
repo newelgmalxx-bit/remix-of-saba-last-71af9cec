@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import api, { clearToken, getToken, setToken, ApiError } from "@/lib/api";
 import { auth as authApi } from "@/lib/api/auth";
-import type { User } from "@/lib/api";
+import { removeToken as clearToken, getToken, setToken, ApiError } from "@/lib/api/client";
+import type { User } from "@/lib/api/types";
 
 type LoginResult =
   | { user: User; token: string; requiresOtp?: false }
@@ -35,8 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const tryMe = async () => {
-      const { user } = await api.auth.me();
-      setUser(user);
+      const res = await authApi.me();
+      const user = res.data?.user;
+      setUser(user ?? null);
     };
     try {
       await tryMe();
@@ -77,7 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(async (creds: { phone?: string; email?: string; password: string }): Promise<LoginResult> => {
-    const data = await api.auth.login(creds);
+    const res = await authApi.login(creds);
+    const data = res.data;
     if (data?.requiresOtp) {
       return { user: null, token: null, requiresOtp: true, email: data.email, message: data.message };
     }
@@ -90,7 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }): Promise<SignupResult> => {
-    const data = await api.auth.signup(body);
+    const res = await authApi.signup(body);
+    const data = res.data;
     if (data?.requiresOtp) {
       return { user: null, token: null, requiresOtp: true, email: data.email, message: data.message };
     }
@@ -101,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try { await api.auth.logout(); } catch { /* ignore */ }
+    try { await authApi.logout(); } catch { /* ignore */ }
     clearToken();
     setUser(null);
   }, []);

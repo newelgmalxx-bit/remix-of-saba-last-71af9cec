@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { BASE, getSid } from "@/lib/api";
+import { BASE, getSid } from "@/lib/api/client";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 function classifySource(referrer: string): string {
   if (!referrer) return "direct";
@@ -16,23 +17,12 @@ function classifySource(referrer: string): string {
   }
 }
 
-function runIdle(cb: () => void) {
-  if (typeof window === "undefined") return;
-  const w = window as any;
-  const start = () => {
-    if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 4000 });
-    else setTimeout(cb, 2000);
-  };
-  if (document.readyState === "complete") start();
-  else window.addEventListener("load", start, { once: true });
-}
-
 export function useTrackVisit() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (path.startsWith("/admin")) return;
-    runIdle(() => {
+    return runAfterCriticalPaint(() => {
       const referrer = document.referrer || "";
       const body = JSON.stringify({
         path,
@@ -47,6 +37,6 @@ export function useTrackVisit() {
         body,
         keepalive: true,
       }).catch(() => {});
-    });
+    }, 9000);
   }, [path]);
 }

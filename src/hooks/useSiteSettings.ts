@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { publicApi } from "@/lib/api";
+import { publicApi } from "@/lib/api/public";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type SiteSettings = {
   name?: string;
@@ -63,22 +64,11 @@ function normalize(d: any): SiteSettings {
   };
 }
 
-function runIdle(cb: () => void) {
-  if (typeof window === "undefined") return;
-  const w = window as any;
-  const start = () => {
-    if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb, { timeout: 4000 });
-    else setTimeout(cb, 2000);
-  };
-  if (document.readyState === "complete") start();
-  else window.addEventListener("load", start, { once: true });
-}
-
 export function useSiteSettings(): SiteSettings {
   const [settings, setSettings] = useState<SiteSettings>(read);
 
   useEffect(() => {
-    runIdle(() => {
+    return runAfterCriticalPaint(() => {
       (async () => {
         try {
           const res: any = await publicApi.getSiteSettings();
@@ -90,7 +80,7 @@ export function useSiteSettings(): SiteSettings {
           }
         } catch {}
       })();
-    });
+    }, 9000);
   }, []);
 
   return settings;

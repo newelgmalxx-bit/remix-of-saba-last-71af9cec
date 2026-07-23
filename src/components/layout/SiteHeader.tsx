@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Menu, X, LogIn, ShoppingCart, User, Heart, Package, LogOut, LayoutDashboard } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { toast } from "sonner";
-import logo from "@/assets/logo.webp";
 import flagSA from "@/assets/flag-sa.webp";
 import flagUS from "@/assets/flag-us.webp";
 import { useCart } from "@/hooks/useCart";
@@ -64,7 +63,7 @@ export function SiteHeader() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group shrink-0">
           <img
-            src={logo}
+            src="/logo.webp"
             alt="سابا ديزاين"
             width={120}
             height={64}
@@ -306,6 +305,10 @@ export function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en
         src={flagSrc}
         alt=""
         aria-hidden
+        width={24}
+        height={16}
+        loading="lazy"
+        decoding="async"
         className="h-4 w-6 rounded-[2px] object-cover ring-1 ring-border/60 transition-transform duration-300 group-hover:scale-110"
       />
       <span className="tracking-wide">{code}</span>
