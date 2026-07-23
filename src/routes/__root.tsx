@@ -1,5 +1,4 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
-import { Home, Search, ArrowLeft } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 
 import "../styles.css";
@@ -30,23 +29,31 @@ function NotFoundComponent() {
             to="/"
             className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90"
           >
-            <Home className="h-4 w-4" /> العودة للرئيسية
+            <RootIcon path="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.5Z" /> العودة للرئيسية
           </Link>
           <Link
             to="/contact"
             className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
           >
-            <Search className="h-4 w-4" /> تواصل معنا
+            <RootIcon path="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /> تواصل معنا
           </Link>
           <button
             onClick={() => window.history.back()}
             className="inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> الرجوع للخلف
+            <RootIcon path="M19 12H5m0 0 6-6m-6 6 6 6" /> الرجوع للخلف
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function RootIcon({ path }: { path: string }) {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={path} />
+    </svg>
   );
 }
 
