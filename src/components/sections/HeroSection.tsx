@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { HeroMock } from "@/components/sections/HeroMock";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
+
+const HeroMock = lazy(() => import("@/components/sections/HeroMock").then((m) => ({ default: m.HeroMock })));
 
 type HeroIconName = "sparkles" | "arrow" | "shield" | "gauge" | "headphones" | "badge" | "send" | "grid";
 
@@ -25,6 +27,13 @@ function HeroIcon({ name, className = "h-4 w-4" }: { name: HeroIconName; classNa
 
 export function HeroSection() {
   const { t, dir } = useLang();
+  const [showMock, setShowMock] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    if (media.matches) setShowMock(true);
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/40 via-background to-background">
       <div className="pointer-events-none absolute inset-0 hidden bg-grid opacity-40 sm:block" />
@@ -73,9 +82,13 @@ export function HeroSection() {
 
           {/* Visual mock — LEFT side in RTL */}
           <div className="relative order-2 hidden md:block lg:order-2 animate-fade-up">
-            <div className="relative animate-float-slow">
-              <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
-              <HeroMock />
+            <div className="relative animate-float-slow min-h-[360px]">
+              {showMock && (
+                <Suspense fallback={null}>
+                  <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
+                  <HeroMock />
+                </Suspense>
+              )}
             </div>
           </div>
         </div>
