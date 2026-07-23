@@ -1,15 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Instagram, Music2, Ghost, MessageCircle } from "lucide-react";
-import logo from "@/assets/logo-white.webp";
-import payVisa from "@/assets/pay-visa-small.webp";
-import payMastercard from "@/assets/pay-mastercard.webp";
-import payMada from "@/assets/pay-mada.webp";
-import payStcpay from "@/assets/pay-stcpay.webp";
-import payTabby from "@/assets/pay-tabby.webp";
-import payTamara from "@/assets/pay-tamara.webp";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { useSiteSettings, waHref } from "@/hooks/useSiteSettings";
+
+const footerLogo = "/logo-white.webp";
+const paymentMethods = [
+  { src: "/src/assets/pay-visa-small.webp", alt: "Visa", width: 64, height: 21 },
+  { src: "/src/assets/pay-mastercard.webp", alt: "Mastercard", width: 40, height: 24 },
+  { src: "/src/assets/pay-mada.webp", alt: "mada", width: 64, height: 21 },
+  { src: "/src/assets/pay-stcpay.webp", alt: "STC Pay", width: 64, height: 19 },
+  { src: "/src/assets/pay-tabby.webp", alt: "Tabby", width: 64, height: 26 },
+  { src: "/src/assets/pay-tamara.webp", alt: "Tamara", width: 64, height: 21 },
+];
 
 export function SiteFooter() {
   const { t } = useLang();
@@ -25,7 +28,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <img src={logo} alt={t("footer.brand")} width={180} height={88} className="mb-5 h-14 w-auto object-contain sm:h-16" loading="lazy" decoding="async" />
+          <img src={footerLogo} alt={t("footer.brand")} width={180} height={88} className="mb-5 h-14 w-auto object-contain sm:h-16" loading="lazy" decoding="async" />
           <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
             {socials.map(([url, Icon, label], i) => (
@@ -95,16 +98,9 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 text-sm text-white/70 sm:flex-row sm:px-6 lg:px-8">
           <p>© 2021 {t("footer.brand")}. {t("footer.rights")}</p>
           <div className="flex items-center gap-2 sm:gap-3">
-            {[
-              { src: payVisa, alt: "Visa" },
-              { src: payMastercard, alt: "Mastercard" },
-              { src: payMada, alt: "mada" },
-              { src: payStcpay, alt: "STC Pay" },
-              { src: payTabby, alt: "Tabby" },
-              { src: payTamara, alt: "Tamara" },
-            ].map((p) => (
+            {paymentMethods.map((p) => (
               <span key={p.alt} className="flex h-8 items-center justify-center rounded-md bg-white px-2 shadow-sm">
-                <img src={p.src} alt={p.alt} width={64} height={24} className="h-5 w-auto object-contain" loading="lazy" decoding="async" />
+                <img src={p.src} alt={p.alt} width={p.width} height={p.height} className="h-5 w-auto object-contain" loading="lazy" decoding="async" />
               </span>
             ))}
           </div>
