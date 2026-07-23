@@ -5,14 +5,10 @@ import "../styles.css";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 import { useInjectTracking } from "@/hooks/useInjectTracking";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { MaintenanceGate } from "@/components/MaintenanceGate";
-
-const GOOGLE_CLIENT_ID =
-  "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
 
 function NotFoundComponent() {
   return (
@@ -64,15 +60,13 @@ function RootComponent() {
   useInjectTracking();
   usePageTracking();
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <LanguageProvider>
-        <AuthProvider>
-          <MaintenanceGate>
-            <Outlet />
-          </MaintenanceGate>
-          <Toaster position="top-center" richColors closeButton />
-        </AuthProvider>
-      </LanguageProvider>
-    </GoogleOAuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <MaintenanceGate>
+          <Outlet />
+        </MaintenanceGate>
+        <Toaster position="top-center" richColors closeButton />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

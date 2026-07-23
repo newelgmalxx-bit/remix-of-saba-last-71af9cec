@@ -8,7 +8,9 @@ import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError, setToken } from "@/lib/api";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID = "724752139200-ibo205k15vl390ps60of0lm4qah4jauf.apps.googleusercontent.com";
 
 function LoginPage() {
   const [tab, setTab] = useState<"email" | "phone" | "otp">("email");
@@ -325,36 +327,38 @@ function LoginPage() {
             </div>
 
             <div className="relative flex w-full justify-center" style={{ zIndex: 100000 }}>
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  const idToken = credentialResponse.credential;
-                  if (!idToken) {
+              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    const idToken = credentialResponse.credential;
+                    if (!idToken) {
+                      toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
+                      return;
+                    }
+                    try {
+                      const { user, token } = await api.auth.oauthGoogle(idToken);
+                      if (!token || !user) throw new ApiError(500, "Invalid auth response");
+                      setToken(token);
+                      await refresh();
+                      toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
+                      const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
+                      navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
+                    } catch (err) {
+                      const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
+                      toast.error(msg);
+                    }
+                  }}
+                  onError={() => {
                     toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
-                    return;
-                  }
-                  try {
-                    const { user, token } = await api.auth.oauthGoogle(idToken);
-                    if (!token || !user) throw new ApiError(500, "Invalid auth response");
-                    setToken(token);
-                    await refresh();
-                    toast.success(lang === "ar" ? "تم تسجيل الدخول" : "Logged in");
-                    const isAdmin = ["admin", "owner", "manager", "support"].includes(user.role);
-                    navigate({ to: (redirectTo && !isAdmin ? redirectTo : (isAdmin ? "/admin" : "/account")) as any });
-                  } catch (err) {
-                    const msg = err instanceof ApiError ? err.message : (lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
-                    toast.error(msg);
-                  }
-                }}
-                onError={() => {
-                  toast.error(lang === "ar" ? "فشل تسجيل الدخول بجوجل" : "Google sign-in failed");
-                }}
-                useOneTap={false}
-                theme="outline"
-                size="large"
-                shape="rectangular"
-                text="signin_with"
-                width="320"
-              />
+                  }}
+                  useOneTap={false}
+                  theme="outline"
+                  size="large"
+                  shape="rectangular"
+                  text="signin_with"
+                  width="320"
+                />
+              </GoogleOAuthProvider>
             </div>
 
             <p className="mt-7 text-center text-xs text-muted-foreground">
