@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { buildSeo, organizationJsonLd, websiteJsonLd, localBusinessJsonLd } from "@/lib/seo";
+import { buildSeo, organizationJsonLd, websiteJsonLd, localBusinessJsonLd } from "@/lib/seo-lite";
 
 const ServicesGrid = lazy(() => import("@/components/sections/ServicesGrid").then((m) => ({ default: m.ServicesGrid })));
 const PortfolioSection = lazy(() => import("@/components/sections/PortfolioSection").then((m) => ({ default: m.PortfolioSection })));

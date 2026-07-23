@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useSiteSettings, telHref, waHref, mailHref } from "@/hooks/useSiteSettings";
-import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo-lite";
 
 function ContactPage() {
   const { t, dir, lang } = useLang();

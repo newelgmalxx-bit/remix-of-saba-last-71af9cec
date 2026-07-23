@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { FileText, ChevronLeft } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo-lite";
 
 export const Route = createFileRoute("/terms")({
   head: () => {
