@@ -68,6 +68,8 @@ export function SiteHeader() {
             alt="سابا ديزاين"
             width={120}
             height={48}
+            fetchPriority="high"
+            decoding="async"
             className="h-9 sm:h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </Link>
