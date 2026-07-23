@@ -4,16 +4,23 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ShieldCheck, ChevronLeft } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "سياسة الخصوصية | سابا ديزاين" },
-      { name: "description", content: "سياسة الخصوصية الخاصة بسابا ديزاين — كيف نجمع بياناتك ونستخدمها ونحميها." },
-      { property: "og:title", content: "سياسة الخصوصية | سابا ديزاين" },
-      { property: "og:description", content: "كيف نتعامل مع بياناتك في سابا ديزاين." },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "سياسة الخصوصية | سابا ديزاين",
+      description: "اطلع على سياسة الخصوصية في سابا ديزاين وكيف نجمع بياناتك ونستخدمها ونحميها عند استخدام خدماتنا الرقمية.",
+      path: "/privacy",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbJsonLd([{ name: "الرئيسية", path: "/" }, { name: "سياسة الخصوصية", path: "/privacy" }])) },
+      ],
+    };
+  },
   component: PrivacyPage,
 });
 

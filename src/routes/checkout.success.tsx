@@ -11,6 +11,7 @@ import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
+import { buildSeo } from "@/lib/seo";
 
 const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 
@@ -30,7 +31,10 @@ export const Route = createFileRoute("/checkout/success")({
     paid: z.string().optional(),
     cod: z.string().optional(),
   }),
-  head: () => ({ meta: [{ title: "تم استلام طلبك | سابا ديزاين" }] }),
+  head: () => {
+    const seo = buildSeo({ title: "تم استلام طلبك | سابا ديزاين", description: "تم استلام طلبك بنجاح لدى سابا ديزاين.", path: "/checkout/success", noindex: true });
+    return { meta: seo.meta, links: seo.links };
+  },
   component: SuccessPage,
 });
 
