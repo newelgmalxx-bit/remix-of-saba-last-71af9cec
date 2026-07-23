@@ -1,15 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AuthGuard } from "@/components/auth/AuthGuard";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم | سابا ديزاين" }] }),
-  component: AdminShell,
+  component: lazyRouteComponent(() => import("@/pages/routes/admin"), "AdminShell"),
 });
-
-function AdminShell() {
-  return (
-    <AuthGuard requireAdmin>
-      <Outlet />
-    </AuthGuard>
-  );
-}
