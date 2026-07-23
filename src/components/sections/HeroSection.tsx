@@ -84,7 +84,7 @@ export function HeroSection() {
       <div className="relative mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-6 rounded-2xl border border-border bg-white px-8 py-8 shadow-sm lg:flex-row lg:justify-between">
           <div className="text-center lg:max-w-xs lg:text-start">
-            <h3 className="text-lg font-extrabold text-foreground">{t("hero.partner.title")}</h3>
+            <h2 className="text-lg font-extrabold text-foreground">{t("hero.partner.title")}</h2>
             <p className="mt-1 text-xs leading-6 text-muted-foreground">{t("hero.partner.desc")}</p>
           </div>
           <div className="flex flex-1 items-center justify-around gap-6">

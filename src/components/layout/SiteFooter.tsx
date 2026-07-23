@@ -15,10 +15,10 @@ export function SiteFooter() {
   const { t } = useLang();
   const site = useSiteSettings();
   const socials = ([
-    [site.instagram, Instagram],
-    [site.tiktok, Music2],
-    [site.snapchat, Ghost],
-    [waHref(site.whatsapp), MessageCircle],
+    [site.instagram, Instagram, "Instagram"],
+    [site.tiktok, Music2, "TikTok"],
+    [site.snapchat, Ghost, "Snapchat"],
+    [waHref(site.whatsapp), MessageCircle, "WhatsApp"],
   ] as const).filter(([u]) => !!u);
   return (
     <footer className="bg-primary-dark text-white">
@@ -28,15 +28,18 @@ export function SiteFooter() {
           <img src={logo} alt={t("footer.brand")} width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
           <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
-            {socials.map(([url, Icon], i) => (
+            {socials.map(([url, Icon, label], i) => (
               <a
                 key={i}
                 href={url as string}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={label as string}
+                title={label as string}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-primary"
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">{label as string}</span>
               </a>
             ))}
           </div>

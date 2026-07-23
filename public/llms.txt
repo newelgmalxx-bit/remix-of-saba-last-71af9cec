@@ -1,0 +1,19 @@
+# SABA Design
+
+سابا ديزاين — وكالة رقمية سعودية متخصصة في تصميم وتطوير المواقع والتطبيقات والهوية البصرية والتسويق الرقمي.
+
+SABA Design is a Saudi digital agency specializing in web and mobile development, brand identity, UI/UX design, digital marketing, and SEO.
+
+## Primary pages
+
+- [Home](https://saba-design.com/): Overview of SABA Design services and value proposition.
+- [About](https://saba-design.com/about): Company story, team, and mission.
+- [Services](https://saba-design.com/services): Full catalogue of digital services and pricing tiers.
+- [Portfolio](https://saba-design.com/portfolio): Case studies and previous client projects.
+- [Plans](https://saba-design.com/plans): Subscription plans and packages.
+- [Contact](https://saba-design.com/contact): How to reach the team and request a quote.
+
+## Legal
+
+- [Privacy Policy](https://saba-design.com/privacy)
+- [Terms of Service](https://saba-design.com/terms)
