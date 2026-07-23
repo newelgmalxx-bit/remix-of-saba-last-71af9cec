@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Instagram, Music2, Ghost, MessageCircle } from "lucide-react";
-import logo from "@/assets/logo-white.png";
-import payVisa from "@/assets/pay-visa.webp";
-import payMastercard from "@/assets/pay-mastercard.png";
+import logo from "@/assets/logo-white.webp";
+import payVisa from "@/assets/pay-visa-small.webp";
+import payMastercard from "@/assets/pay-mastercard.webp";
 import payMada from "@/assets/pay-mada.webp";
 import payStcpay from "@/assets/pay-stcpay.webp";
 import payTabby from "@/assets/pay-tabby.webp";
@@ -25,7 +25,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <img src={logo} alt={t("footer.brand")} width={180} height={72} className="mb-5 h-14 w-auto object-contain sm:h-16" />
+          <img src={logo} alt={t("footer.brand")} width={180} height={88} className="mb-5 h-14 w-auto object-contain sm:h-16" loading="lazy" decoding="async" />
           <p className="text-base leading-8 text-white/80">{t("footer.tagline")}</p>
           <div className="mt-6 flex items-center gap-3">
             {socials.map(([url, Icon, label], i) => (
@@ -104,7 +104,7 @@ export function SiteFooter() {
               { src: payTamara, alt: "Tamara" },
             ].map((p) => (
               <span key={p.alt} className="flex h-8 items-center justify-center rounded-md bg-white px-2 shadow-sm">
-                <img src={p.src} alt={p.alt} className="h-5 w-auto object-contain" loading="lazy" />
+                <img src={p.src} alt={p.alt} width={64} height={24} className="h-5 w-auto object-contain" loading="lazy" decoding="async" />
               </span>
             ))}
           </div>

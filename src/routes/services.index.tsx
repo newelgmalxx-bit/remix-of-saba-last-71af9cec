@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import servicesHero from "@/assets/services-hero.png";
+import servicesHero from "@/assets/services-hero.webp";
 import { useAllServices } from "@/hooks/useServiceContent";
 import { ServiceCard } from "@/components/sections/ServicesGrid";
 import { useLang } from "@/i18n/LanguageProvider";

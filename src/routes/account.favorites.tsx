@@ -5,7 +5,7 @@ import { AccountLayout } from "@/components/account/AccountLayout";
 import { useAllServices } from "@/hooks/useServiceContent";
 import { useFavorite } from "@/components/sections/ServicesGrid";
 import { useLang } from "@/i18n/LanguageProvider";
-import servicesHero from "@/assets/services-hero.png";
+import servicesHero from "@/assets/services-hero.webp";
 
 function FavoritesPage() {
   const services = useAllServices();
@@ -54,7 +54,7 @@ function FavCard({ slug, title, desc, banner }: { slug: string; title: string; d
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
-        <img src={banner} alt={title} loading="lazy" className="h-full w-full object-cover" />
+        <img src={banner} alt={title} loading="lazy" width={640} height={400} decoding="async" className="h-full w-full object-cover" />
         <button
           onClick={(e) => { e.preventDefault(); toggle(); }}
           className="absolute left-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm"

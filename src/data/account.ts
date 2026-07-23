@@ -3,8 +3,8 @@ import { Banknote, CreditCard, Wallet, Truck, Smartphone } from "lucide-react";
 import tabbyLogo from "@/assets/tabby-logo.webp";
 import tamaraLogo from "@/assets/tamara-logo.webp";
 import applePayLogo from "@/assets/pay-applepay.png";
-import visaLogo from "@/assets/pay-visa.webp";
-import mastercardLogo from "@/assets/pay-mastercard.png";
+import visaLogo from "@/assets/pay-visa-small.webp";
+import mastercardLogo from "@/assets/pay-mastercard.webp";
 
 export type PaymentMethod = "tabby" | "tamara" | "myfatoorah" | "cod";
 

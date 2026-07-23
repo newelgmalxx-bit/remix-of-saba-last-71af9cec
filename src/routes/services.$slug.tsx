@@ -10,14 +10,14 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
-import servicesHero from "@/assets/services-hero.png";
+import servicesHero from "@/assets/services-hero.webp";
 import tabbyLogo from "@/assets/tabby-logo.webp";
-import tabbyHero from "@/assets/tabby-hero.jpg";
+import tabbyHero from "@/assets/tabby-hero.webp";
 import tamaraLogo from "@/assets/tamara-logo.webp";
 import payApplePay from "@/assets/pay-applepay.png";
-import payMastercard from "@/assets/pay-mastercard.png";
-import payMada from "@/assets/pay-mada.png";
-import payVisa from "@/assets/pay-visa.webp";
+import payMastercard from "@/assets/pay-mastercard.webp";
+import payMada from "@/assets/pay-mada.webp";
+import payVisa from "@/assets/pay-visa-small.webp";
 import { serviceMap } from "@/data/services";
 import { useServiceContent } from "@/hooks/useServiceContent";
 import { usePlans } from "@/hooks/usePlans";
@@ -202,7 +202,7 @@ function ServiceDetailPage() {
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:px-8">
             <div className="order-1">
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/60 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)]">
-                <img src={heroImg} alt={title} className="h-full w-full object-cover transition duration-500" />
+                <img src={heroImg} alt={title} width={1200} height={900} fetchPriority="high" decoding="async" className="h-full w-full object-cover transition duration-500" />
                 <span className={`absolute top-4 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white shadow ${dir === "rtl" ? "right-4" : "left-4"}`}>{t("svcDetail.badge.available")}</span>
                 <span className={`absolute top-4 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-primary shadow ${dir === "rtl" ? "left-4" : "right-4"}`}>{breadcrumb}</span>
               </div>
@@ -285,7 +285,7 @@ function ServiceDetailPage() {
                       </div>
                     </div>
                     <span className="inline-flex items-center justify-center overflow-hidden rounded-md">
-                      <img src={tabbyLogo} alt="tabby" className="h-7 w-auto object-contain" />
+                      <img src={tabbyLogo} alt="tabby" width={100} height={40} decoding="async" className="h-7 w-auto object-contain" />
                     </span>
                   </div>
                 </button>
@@ -310,7 +310,7 @@ function ServiceDetailPage() {
                       </div>
                     </div>
                     <span className="inline-flex items-center justify-center overflow-hidden rounded-md">
-                      <img src={tamaraLogo} alt="tamara" className="h-7 w-auto object-contain" />
+                      <img src={tamaraLogo} alt="tamara" width={100} height={32} decoding="async" className="h-7 w-auto object-contain" />
                     </span>
                   </div>
                 </button>
@@ -578,7 +578,7 @@ function ServiceDetailPage() {
           <div className="relative p-6 sm:p-7" style={{ background: "linear-gradient(135deg, #fde4cf 0%, #ffd1d9 40%, #e7d4f5 100%)" }}>
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl">👋</span>
-              <img src={tamaraLogo} alt="tamara" className="h-7 w-auto object-contain" />
+              <img src={tamaraLogo} alt="tamara" width={100} height={32} loading="lazy" decoding="async" className="h-7 w-auto object-contain" />
             </div>
             <h3 className="mt-4 text-center text-base font-extrabold text-foreground">
               {lang === "ar" ? "خطط دفع تناسب احتياجك" : "Payment plans for you"}
@@ -633,11 +633,11 @@ function ServiceDetailPage() {
         <DialogContent dir={dir} className="max-w-sm overflow-hidden border-0 bg-white p-0">
           <div className="px-5 pb-5 pt-5">
             <div className="flex items-center justify-end">
-              <img src={tabbyLogo} alt="tabby" className="h-7 w-auto object-contain" />
+              <img src={tabbyLogo} alt="tabby" width={100} height={40} loading="lazy" decoding="async" className="h-7 w-auto object-contain" />
             </div>
 
             <div className="relative mt-4 overflow-hidden rounded-2xl">
-              <img src={tabbyHero} alt="" className="aspect-[16/10] w-full object-cover" />
+              <img src={tabbyHero} alt="" width={520} height={381} loading="lazy" decoding="async" className="aspect-[16/10] w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-center text-white">
                 <div className="text-xl font-extrabold">{lang === "ar" ? "ادفع على راحتك" : "Pay at your pace"}</div>
@@ -703,10 +703,10 @@ function ServiceDetailPage() {
             </button>
 
             <div className="mt-4 flex items-center justify-center gap-2 opacity-80">
-              <img src={payApplePay} alt="Apple Pay" className="h-5 w-auto object-contain" />
-              <img src={payMastercard} alt="Mastercard" className="h-5 w-auto object-contain" />
-              <img src={payMada} alt="Mada" className="h-5 w-auto object-contain" />
-              <img src={payVisa} alt="Visa" className="h-5 w-auto object-contain" />
+              <img src={payApplePay} alt="Apple Pay" width={24} height={24} loading="lazy" decoding="async" className="h-5 w-auto object-contain" />
+              <img src={payMastercard} alt="Mastercard" width={33} height={20} loading="lazy" decoding="async" className="h-5 w-auto object-contain" />
+              <img src={payMada} alt="Mada" width={60} height={20} loading="lazy" decoding="async" className="h-5 w-auto object-contain" />
+              <img src={payVisa} alt="Visa" width={62} height={20} loading="lazy" decoding="async" className="h-5 w-auto object-contain" />
             </div>
           </div>
         </DialogContent>

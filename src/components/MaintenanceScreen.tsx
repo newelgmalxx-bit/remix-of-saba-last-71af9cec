@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Wrench } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 export function MaintenanceScreen({ lang = "ar" }: { lang?: "ar" | "en" }) {
   const [now, setNow] = useState(new Date());
@@ -14,7 +14,7 @@ export function MaintenanceScreen({ lang = "ar" }: { lang?: "ar" | "en" }) {
       <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="relative z-10 w-full max-w-xl rounded-3xl border border-border bg-card/80 p-8 sm:p-12 text-center shadow-2xl backdrop-blur">
-        <img src={logo} alt="logo" className="mx-auto mb-6 h-12 w-auto object-contain" />
+        <img src={logo} alt="SABA Design" width={180} height={96} className="mx-auto mb-6 h-12 w-auto object-contain" decoding="async" />
         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Wrench className="h-10 w-10 animate-pulse" />
         </div>

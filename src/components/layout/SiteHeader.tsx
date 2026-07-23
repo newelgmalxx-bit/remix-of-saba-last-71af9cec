@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { Menu, X, LogIn, ShoppingCart, User, Heart, Package, LogOut, LayoutDashboard } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
-import flagSA from "@/assets/flag-sa.jpg";
-import flagUS from "@/assets/flag-us.jpg";
+import logo from "@/assets/logo.webp";
+import flagSA from "@/assets/flag-sa.webp";
+import flagUS from "@/assets/flag-us.webp";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
@@ -67,7 +67,7 @@ export function SiteHeader() {
             src={logo}
             alt="سابا ديزاين"
             width={120}
-            height={48}
+            height={64}
             fetchPriority="high"
             decoding="async"
             className="h-9 sm:h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"

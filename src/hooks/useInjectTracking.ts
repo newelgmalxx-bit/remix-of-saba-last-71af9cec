@@ -32,10 +32,11 @@ let injected = false;
 
 function runWhenIdle(callback: () => void) {
   const start = () => {
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(callback, { timeout: 3500 });
+    const w = window as Window & typeof globalThis & { requestIdleCallback?: (cb: IdleRequestCallback, options?: IdleRequestOptions) => number };
+    if (typeof w.requestIdleCallback === "function") {
+      w.requestIdleCallback(callback, { timeout: 3500 });
     } else {
-      window.setTimeout(callback, 1800);
+      globalThis.setTimeout(callback, 1800);
     }
   };
   if (document.readyState === "complete") start();
