@@ -30,6 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
 import { buildSeo, breadcrumbJsonLd, serviceJsonLd, SITE } from "@/lib/seo";
+import { serviceSeoMap } from "@/data/serviceSeo";
 
 const workTabKeys: TKey[] = [
   "svcDetail.works.tab.all",
@@ -852,16 +853,14 @@ function TestimonialsSlider({ testimonials }: { testimonials: { name: string; ro
 
 export const Route = createFileRoute("/services/$slug")({
   head: ({ params }) => {
-    const s = serviceMap[params.slug];
-    const title = s?.seo?.title || (s ? `${s.title} | سابا ديزاين` : "خدمة | سابا ديزاين");
-    const description = s?.seo?.description || s?.subtitle || "حلول رقمية متكاملة لنمو أعمالك.";
-    const keywords = s?.seo?.keywords;
-    const image = s?.seo?.ogImage || s?.bannerImage;
+    const s = serviceSeoMap[params.slug];
+    const title = s?.title || "خدمة | سابا ديزاين";
+    const description = s?.description || "حلول رقمية متكاملة لنمو أعمالك.";
+    const keywords = s?.keywords;
     const seo = buildSeo({
       title,
       description,
       keywords,
-      image,
       path: `/services/${params.slug}`,
       type: "product",
     });
@@ -872,7 +871,7 @@ export const Route = createFileRoute("/services/$slug")({
           breadcrumbJsonLd([
             { name: "الرئيسية", path: "/" },
             { name: "الخدمات", path: "/services" },
-            { name: s?.title || params.slug, path: `/services/${params.slug}` },
+            { name: s?.title.replace(" | سابا ديزاين", "") || params.slug, path: `/services/${params.slug}` },
           ])
         ),
       },
@@ -880,10 +879,9 @@ export const Route = createFileRoute("/services/$slug")({
         type: "application/ld+json",
         children: JSON.stringify(
           serviceJsonLd({
-            name: s?.title || params.slug,
+            name: s?.title.replace(" | سابا ديزاين", "") || params.slug,
             description,
             url: `${SITE.url}/services/${params.slug}`,
-            image,
           })
         ),
       },
