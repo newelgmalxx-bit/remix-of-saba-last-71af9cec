@@ -15,10 +15,10 @@ export function SiteFooter() {
   const { t } = useLang();
   const site = useSiteSettings();
   const socials = ([
-    [site.instagram, Instagram],
-    [site.tiktok, Music2],
-    [site.snapchat, Ghost],
-    [waHref(site.whatsapp), MessageCircle],
+    [site.instagram, Instagram, "Instagram"],
+    [site.tiktok, Music2, "TikTok"],
+    [site.snapchat, Ghost, "Snapchat"],
+    [waHref(site.whatsapp), MessageCircle, "WhatsApp"],
   ] as const).filter(([u]) => !!u);
   return (
     <footer className="bg-primary-dark text-white">
