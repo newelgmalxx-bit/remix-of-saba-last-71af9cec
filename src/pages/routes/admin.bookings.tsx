@@ -1,0 +1,498 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AdminLayout, StatCard, PanelCard, Pill, PrimaryButton, GhostButton } from "@/components/admin/AdminLayout";
+import { CalendarCheck, Clock, Loader2, CheckCircle2, Search, Eye, Download, Pencil, Trash2, BadgeCheck, BadgeDollarSign } from "lucide-react";
+import { useEffect, useState } from "react";
+import { bookingStatusMap, fmtSAR, paymentMethods, type AdminBooking } from "@/data/admin";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { useLang } from "@/i18n/LanguageProvider";
+import { admin as adminApi } from "@/lib/api";
+import { renderInvoiceToPdf, renderInvoiceToPdfBlob } from "@/lib/renderInvoice";
+import { InvoiceDocument, type InvoiceData } from "@/components/invoice/InvoiceDocument";
+
+export const Route = createFileRoute("/admin/bookings")({
+  head: () => ({ meta: [{ title: "الطلبات | لوحة التحكم" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ orderId: typeof s.orderId === "string" ? s.orderId : undefined }),
+  component: BookingsPage,
+});
+
+const statusKeys: AdminBooking["status"][] = ["pending", "confirmed", "in_progress", "review", "completed", "cancelled"];
+
+function BookingsPage() {
+  const { lang, dir } = useLang();
+  const L = (a: string, e: string) => (lang === "en" ? e : a);
+  const statusLabels: Record<AdminBooking["status"], string> = {
+    pending: L("بانتظار التأكيد", "Pending"),
+    confirmed: L("مؤكد", "Confirmed"),
+    in_progress: L("قيد التنفيذ", "In progress"),
+    review: L("قيد المراجعة", "Under review"),
+    completed: L("مكتمل", "Completed"),
+    cancelled: L("ملغي", "Cancelled"),
+  };
+  const normalizePay = (v: string) => {
+    const s = (v || "").toString().toLowerCase().trim();
+    const m = paymentMethods.find(p => p.value === s || p.aliases?.some(a => a.toLowerCase() === s));
+    return m?.value ?? s;
+  };
+  const payLabel = (v: string) => {
+    const key = normalizePay(v);
+    const m = paymentMethods.find(p => p.value === key);
+    return m ? L(m.labelAr, m.labelEn) : v;
+  };
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [tab, setTab] = useState<"all" | AdminBooking["status"]>("all");
+  const [q, setQ] = useState("");
+  const [period, setPeriod] = useState<"7" | "30" | "90" | "all">("all");
+  const [source, setSource] = useState<"all" | "direct" | "partner">("all");
+  const [viewing, setViewing] = useState<AdminBooking | null>(null);
+  const [editing, setEditing] = useState<AdminBooking | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AdminBooking>>({});
+
+  const mapOrderToBooking = (b: any): AdminBooking => ({
+    id: b.id,
+    number: b.number,
+    client: b.contact_name || b.userName || b.client || "",
+    email: b.contact_email || b.userEmail || b.email || "",
+    phone: b.contact_phone || b.phone || undefined,
+    city: b.contact_city || b.city || undefined,
+    address: b.contact_address || b.address || undefined,
+    notes: b.notes || undefined,
+    service: Array.isArray(b.items) && b.items.length
+      ? b.items.map((i: any) => i.service_title || i.serviceTitle || i.title).filter(Boolean).join(" • ")
+      : (b.service || ""),
+    subtotal: Number(b.subtotal) || undefined,
+    vat: Number(b.vat) || undefined,
+    couponDiscount: Number(b.coupon_discount ?? b.couponDiscount) || 0,
+    total: Number(b.total) || 0,
+    payment: normalizePay(b.payment_method || b.payment || "cod"),
+    paymentId: b.payment_id ?? null,
+    status: b.status,
+    date: ((b.created_at || b.createdAt || "") + "").slice(0, 10),
+    source: b.source ?? "direct",
+    paymentStatus: (b.payment_status || b.paymentStatus || (b.status === "completed" ? "paid" : "unpaid")) as AdminBooking["paymentStatus"],
+  } as AdminBooking);
+
+  const reloadBookings = async () => {
+    try {
+      const p: any = await adminApi.orders.list({ limit: 100 });
+      const list = (p.items || []) as any[];
+      setBookings(list.map(mapOrderToBooking));
+      const needsDetail = list.filter((b) => !Array.isArray(b.items) || !b.items.length);
+      if (!needsDetail.length) return;
+      const details = await Promise.all(
+        needsDetail.map((b) => adminApi.orders.get(b.id).catch(() => null))
+      );
+      setBookings((prev) => {
+        const byId = new Map(prev.map((x) => [x.id, x]));
+        details.forEach((d: any) => {
+          if (!d || !d.id) return;
+          const fresh = mapOrderToBooking(d);
+          const ex = byId.get(d.id);
+          if (ex) byId.set(d.id, { ...ex, service: fresh.service || ex.service });
+        });
+        return Array.from(byId.values());
+      });
+    } catch {
+      setBookings([]);
+    }
+  };
+
+  useEffect(() => { reloadBookings(); }, []);
+
+  // Auto-open order details when navigated with ?orderId=
+  const search = Route.useSearch();
+  useEffect(() => {
+    const id = search?.orderId;
+    if (!id) return;
+    const found = bookings.find((b) => b.id === id);
+    if (found) { setViewing(found); return; }
+    // Fetch from API if not in current list
+    (async () => {
+      try {
+        const d: any = await adminApi.orders.get(id);
+        if (d && d.id) setViewing(mapOrderToBooking(d));
+      } catch { /* ignore */ }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search?.orderId, bookings.length]);
+
+  const periodDays = period === "all" ? null : Number(period);
+  const filtered = bookings.filter(b => {
+    if (periodDays != null && b.date) {
+      const d = new Date(b.date).getTime();
+      if (Number.isFinite(d) && (Date.now() - d) / 86400000 > periodDays) return false;
+    }
+    return true;
+  }).filter(b =>
+    (tab === "all" || b.status === tab) &&
+    (source === "all" || b.source === source) &&
+    (b.client.includes(q) || b.number.toLowerCase().includes(q.toLowerCase()))
+  );
+
+  const exportCsv = () => {
+    const header = "Number,Client,Email,Phone,City,Service,Total,Payment,Status,Date";
+    const rows = filtered.map(b => `${b.number},${b.client},${b.email},${b.phone ?? ""},${b.city ?? ""},${b.service},${b.total},${b.payment},${b.status},${b.date}`);
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "bookings.csv"; a.click();
+    URL.revokeObjectURL(url);
+    toast.success(L("تم تصدير الطلبات", "Orders exported"));
+  };
+
+  const openEdit = (b: AdminBooking) => { setEditing(b); setEditForm({ ...b }); };
+  const saveEdit = async () => {
+    if (!editing) return;
+    const id = editing.id;
+    const prev = bookings;
+    // Optimistic update
+    setBookings(bookings.map(b => b.id === id ? { ...b, ...editForm } as AdminBooking : b));
+    try {
+      // 1) Core fields → PUT /admin/orders/{id}
+      const corePayload: any = {};
+      if (editForm.client !== undefined) { corePayload.contact_name = editForm.client; corePayload.contactName = editForm.client; }
+      if (editForm.email !== undefined) { corePayload.contact_email = editForm.email; corePayload.contactEmail = editForm.email; }
+      if (editForm.phone !== undefined) { corePayload.contact_phone = editForm.phone; corePayload.contactPhone = editForm.phone; }
+      if (editForm.city !== undefined) { corePayload.contact_city = editForm.city; corePayload.contactCity = editForm.city; }
+      if (editForm.service !== undefined) { corePayload.service = editForm.service; corePayload.service_title = editForm.service; }
+      if (editForm.total !== undefined) { corePayload.total = Number(editForm.total); }
+      if (Object.keys(corePayload).length) {
+        await adminApi.updateOrder(id, corePayload);
+      }
+      // 2) Status → PUT /admin/orders/{id}/status
+      if (editForm.status && editForm.status !== editing.status) {
+        await adminApi.updateOrderStatus(id, { status: editForm.status });
+      }
+      // 3) Payment method → PUT /admin/orders/{id}/payment
+      if (editForm.payment && editForm.payment !== editing.payment) {
+        await adminApi.updateOrderPaymentMethod(id, editForm.payment);
+      }
+      toast.success(L("تم تحديث الطلب", "Order updated"));
+      setEditing(null);
+      reloadBookings();
+    } catch (e: any) {
+      setBookings(prev);
+      toast.error(e?.message || L("تعذر تحديث الطلب", "Failed to update order"));
+    }
+  };
+  const remove = async (id: string) => {
+    if (!window.confirm(L("هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع.", "Are you sure you want to delete this order? This cannot be undone."))) return;
+    const prev = bookings;
+    setBookings(bookings.filter(b => b.id !== id));
+    try {
+      await adminApi.orders.remove(id);
+      toast.success(L("تم الحذف", "Deleted"));
+    } catch (e: any) {
+      setBookings(prev);
+      toast.error(e?.message || L("تعذر الحذف", "Failed to delete"));
+    }
+  };
+
+  const isCod = (p: string) => {
+    const s = (p || "").toLowerCase();
+    return s === "cod" || s.includes("كاش") || s.includes("استلام") || s.includes("cash");
+  };
+
+  const issueInvoiceForBooking = async (b: AdminBooking) => {
+    const subtotal = +(b.total / 1.15).toFixed(2);
+    const vat = +(b.total - subtotal).toFixed(2);
+    const invoiceData = {
+      number: b.number,
+      date: b.date,
+      orderId: b.id,
+      clientName: b.client,
+      clientEmail: b.email,
+      clientPhone: b.phone,
+      clientCity: b.city,
+      paymentMethod: payLabel(b.payment),
+      paymentStatus: "paid" as const,
+      items: [{ title: b.service || "—", qty: 1, price: subtotal }],
+      subtotal, vat, total: b.total,
+    };
+    try {
+      const pdf = await renderInvoiceToPdfBlob(invoiceData);
+      await adminApi.invoices.create(invoiceData, pdf);
+      toast.success(L("تم حفظ الفاتورة", "Invoice saved"));
+    } catch (e: any) {
+      console.error("Invoice save failed", e);
+      toast.error(L("فشل حفظ الفاتورة", "Failed to save invoice"));
+    }
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    const prev = bookings.find(x => x.id === id);
+    if (!prev || prev.status === status) return;
+    const wasPaid = prev.paymentStatus === "paid" || prev.status === "completed";
+    // Optimistic UI
+    setBookings(bookings.map(x => x.id === id ? {
+      ...x,
+      status: status as any,
+      paymentStatus: status === "completed" ? "paid" : x.paymentStatus,
+    } : x));
+    try {
+      await adminApi.orders.setStatus(id, { status });
+      if (status === "completed") {
+        await adminApi.orders.setPaymentStatus?.(id, "paid");
+      }
+      toast.success(L("تم تحديث الحالة", "Status updated"));
+      if (status === "completed" && !wasPaid) {
+        await issueInvoiceForBooking({ ...prev, paymentStatus: "paid", status: "completed" });
+      }
+      await reloadBookings();
+    } catch (e: any) {
+      // Rollback on failure
+      setBookings(bs => bs.map(x => x.id === id ? prev : x));
+      console.error("[order.setStatus]", e);
+      toast.error(L("تعذّر حفظ الحالة على الخادم", "Failed to save status on server"));
+    }
+  };
+
+  const updatePaymentMethod = async (id: string, payment: string) => {
+    const prev = bookings.find(x => x.id === id);
+    if (!prev || prev.payment === payment) return;
+    setBookings(bookings.map(x => x.id === id ? { ...x, payment } : x));
+    try {
+      await adminApi.orders.setPaymentMethod?.(id, payment);
+      toast.success(L("تم تحديث طريقة الدفع", "Payment method updated"));
+      await reloadBookings();
+    } catch (e: any) {
+      setBookings(bs => bs.map(x => x.id === id ? prev : x));
+      console.error("[order.updatePaymentMethod]", e);
+      toast.error(L("تعذّر حفظ طريقة الدفع", "Failed to save payment method"));
+    }
+  };
+
+  const updatePaymentStatus = async (id: string, paymentStatus: AdminBooking["paymentStatus"]) => {
+    const prev = bookings.find(x => x.id === id);
+    const wasPaid = prev?.paymentStatus === "paid";
+    setBookings(bookings.map(x => x.id === id ? { ...x, paymentStatus } : x));
+    try {
+      await adminApi.orders.setPaymentStatus?.(id, paymentStatus as string);
+      await reloadBookings();
+    } catch (e) {
+      setBookings(bs => bs.map(x => x.id === id ? (prev as any) : x));
+      console.error("[order.setPaymentStatus]", e);
+      toast.error(L("تعذّر حفظ حالة الدفع", "Failed to save payment status"));
+      return;
+    }
+
+    if (paymentStatus !== "paid") {
+      toast.success(L("تم تحديث حالة الدفع", "Payment status updated"));
+      return;
+    }
+    if (wasPaid || !prev) {
+      toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
+      return;
+    }
+    toast.success(L("تم تأكيد الدفع", "Payment confirmed"));
+    await issueInvoiceForBooking({ ...prev, paymentStatus: "paid" });
+  };
+
+  return (
+    <AdminLayout title={L("الطلبات", "Orders")} subtitle={L("تتبع وإدارة دورة حياة الطلبات", "Track and manage the order lifecycle")} action={
+      <div className="hidden sm:flex gap-2">
+        <select value={source} onChange={(e) => setSource(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+          <option value="all">{L("كل المصادر", "All sources")}</option>
+          <option value="direct">{L("مباشر", "Direct")}</option>
+          <option value="partner">{L("من الشريك", "Partner")}</option>
+        </select>
+        <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+          <option value="7">{L("آخر 7 أيام", "Last 7 days")}</option>
+          <option value="30">{L("آخر 30 يوم", "Last 30 days")}</option>
+          <option value="90">{L("آخر 90 يوم", "Last 90 days")}</option>
+          <option value="all">{L("كل الفترة", "All time")}</option>
+        </select>
+        <GhostButton onClick={exportCsv}><Download className="h-4 w-4" /> {L("تصدير", "Export")}</GhostButton>
+      </div>
+    }>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard label={L("إجمالي الطلبات", "Total orders")} value={bookings.length} icon={CalendarCheck} accent="primary" />
+        <StatCard label={L("بانتظار التأكيد", "Pending")} value={bookings.filter(b => b.status === "pending").length} icon={Clock} accent="amber" />
+        <StatCard label={L("قيد التنفيذ", "In progress")} value={bookings.filter(b => b.status === "in_progress").length} icon={Loader2} accent="violet" />
+        <StatCard label={L("مكتملة", "Completed")} value={bookings.filter(b => b.status === "completed").length} icon={CheckCircle2} accent="emerald" />
+      </div>
+
+      <PanelCard>
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L("ابحث برقم الطلب أو اسم العميل...", "Search by order number or client...")} className={`w-full rounded-xl border border-border bg-background py-2.5 text-sm ${dir === "rtl" ? "pr-10 pl-3" : "pl-10 pr-3"}`} />
+          </div>
+          <div className="inline-flex flex-wrap rounded-xl border border-border bg-background p-1">
+            {([["all", L("الكل", "All")], ["pending", L("بانتظار", "Pending")], ["in_progress", L("تنفيذ", "In progress")], ["completed", L("مكتمل", "Completed")], ["cancelled", L("ملغي", "Cancelled")]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setTab(k as any)} className={`px-3 py-1.5 rounded-lg text-xs font-bold ${tab === k ? "bg-primary text-primary-foreground" : "text-foreground/60"}`}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className={`${dir === "rtl" ? "text-right" : "text-left"} text-xs text-muted-foreground border-b border-border`}>
+                <th className="px-3 py-3 font-medium">{L("رقم الطلب", "Order #")}</th>
+                <th className="px-3 py-3 font-medium">{L("العميل", "Client")}</th>
+                <th className="px-3 py-3 font-medium">{L("الجوال", "Phone")}</th>
+                <th className="px-3 py-3 font-medium">{L("المدينة", "City")}</th>
+                <th className="px-3 py-3 font-medium">{L("الخدمة", "Service")}</th>
+                <th className="px-3 py-3 font-medium">{L("الإجمالي", "Total")}</th>
+                <th className="px-3 py-3 font-medium">{L("الدفع", "Payment")}</th>
+                <th className="px-3 py-3 font-medium">{L("حالة الدفع", "Pay status")}</th>
+                <th className="px-3 py-3 font-medium">{L("الحالة", "Status")}</th>
+                <th className="px-3 py-3 font-medium">{L("التاريخ", "Date")}</th>
+                <th className="px-3 py-3 font-medium">{L("الفاتورة", "Invoice")}</th>
+                <th className="px-3 py-3 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((b) => {
+                return (
+                  <tr key={b.id} className="border-b border-border hover:bg-muted/40">
+                    <td className="px-3 py-3 font-bold text-primary" dir="ltr">#{b.number}</td>
+                    <td className="px-3 py-3"><div className="font-medium">{b.client}</div><div className="text-[11px] text-muted-foreground">{b.email}</div></td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground" dir="ltr">{b.phone ?? "—"}</td>
+                    <td className="px-3 py-3 text-xs">{b.city ?? "—"}</td>
+                    <td className="px-3 py-3">{b.service}</td>
+                    <td className="px-3 py-3 font-bold" data-ltr-number>{fmtSAR(b.total)}</td>
+                    <td className="px-3 py-3">
+                      <select value={b.payment} onChange={(e) => updatePaymentMethod(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs">
+                        {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-3 py-3">
+                      {b.status !== "completed" && b.paymentStatus !== "paid" ? (
+                        <button
+                          onClick={() => updatePaymentStatus(b.id, "paid")}
+                          className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100"
+                          title={L("تأكيد استلام الدفع وإصدار الفاتورة", "Mark as paid and issue invoice")}
+                        >
+                          <BadgeDollarSign className="h-3.5 w-3.5" />
+                          {L("تأكيد الدفع", "Mark paid")}
+                        </button>
+                      ) : b.paymentStatus === "paid" || b.status === "completed" ? (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
+                          <BadgeCheck className="h-3.5 w-3.5" />
+                          {L("مدفوع", "Paid")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">
+                          <Clock className="h-3.5 w-3.5" />
+                          {L("غير مدفوع", "Unpaid")}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
+                      <select value={b.status} onChange={(e) => updateStatus(b.id, e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-bold">
+                        {statusKeys.map(k => <option key={k} value={k}>{statusLabels[k]}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground text-xs" data-ltr-number>{b.date}</td>
+                    <td className="px-3 py-3">
+                      <button
+                        onClick={() => setViewing(b)}
+                        title={L("عرض الفاتورة", "View invoice")}
+                        className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        {L("عرض الفاتورة", "View invoice")}
+                      </button>
+                    </td>
+                    <td className="px-3 py-3">
+                      <div className="flex gap-1">
+                        
+                        <button onClick={() => remove(b.id)} title={L("حذف", "Delete")} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </PanelCard>
+
+      {/* Invoice view */}
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent dir={dir} className="max-w-[860px] max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-5 pt-5"><DialogTitle>{L("فاتورة الطلب", "Order invoice")} <span dir="ltr">#{viewing?.number}</span></DialogTitle></DialogHeader>
+          {viewing && (() => {
+            const subtotal = viewing.subtotal && viewing.subtotal > 0 ? viewing.subtotal : +(viewing.total / 1.15).toFixed(2);
+            const vat = viewing.vat && viewing.vat > 0 ? viewing.vat : +(viewing.total - subtotal).toFixed(2);
+            const isPaid = viewing.paymentStatus === "paid" || viewing.status === "completed";
+            const invoiceData: InvoiceData = {
+              number: viewing.number,
+              date: viewing.date,
+              clientName: viewing.client,
+              clientEmail: viewing.email,
+              clientPhone: viewing.phone,
+              clientCity: viewing.city,
+              paymentMethod: payLabel(viewing.payment),
+              paymentStatus: isPaid ? "paid" : "unpaid",
+              items: [{ title: viewing.service || "—", qty: 1, price: subtotal }],
+              subtotal, vat, total: viewing.total,
+              lang: dir === "rtl" ? "ar" : "en",
+            };
+            return (
+              <div className="space-y-4 px-5 pb-5">
+                <div className="overflow-x-auto rounded-xl border border-border bg-white">
+                  <div style={{ transform: "scale(0.92)", transformOrigin: "top center" }}>
+                    <InvoiceDocument data={invoiceData} />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <Pill tone={(bookingStatusMap[viewing.status as keyof typeof bookingStatusMap]?.tone) ?? "primary"}>{statusLabels[viewing.status] ?? viewing.status}</Pill>
+                  <PrimaryButton onClick={() => renderInvoiceToPdf(invoiceData)}>
+                    <Download className="h-4 w-4" /> {L("تحميل PDF", "Download PDF")}
+                  </PrimaryButton>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter className="px-5 pb-5"><GhostButton onClick={() => setViewing(null)}>{L("إغلاق", "Close")}</GhostButton></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit booking */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent dir={dir} className="max-w-lg">
+          <DialogHeader><DialogTitle>{L("تعديل الطلب", "Edit order")} <span dir="ltr">#{editing?.number}</span></DialogTitle></DialogHeader>
+          {editing && (
+            <div className="grid grid-cols-2 gap-3">
+              <Lbl label={L("العميل", "Client")}><input className={ic} value={editForm.client ?? ""} onChange={e => setEditForm({ ...editForm, client: e.target.value })} /></Lbl>
+              <Lbl label={L("البريد", "Email")}><input className={ic} value={editForm.email ?? ""} onChange={e => setEditForm({ ...editForm, email: e.target.value })} /></Lbl>
+              <Lbl label={L("رقم الجوال", "Phone")}><input type="tel" inputMode="tel" className={ic} dir="ltr" value={editForm.phone ?? ""} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} /></Lbl>
+              <Lbl label={L("المدينة", "City")}><input className={ic} value={editForm.city ?? ""} onChange={e => setEditForm({ ...editForm, city: e.target.value })} /></Lbl>
+              <Lbl label={L("الخدمة", "Service")} full><input className={ic} value={editForm.service ?? ""} onChange={e => setEditForm({ ...editForm, service: e.target.value })} /></Lbl>
+              <Lbl label={L("الإجمالي (ر.س)", "Total (SAR)")}><input type="number" className={ic} dir="ltr" value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} /></Lbl>
+              <Lbl label={L("طريقة الدفع", "Payment method")}>
+                <select className={ic} value={editForm.payment ?? paymentMethods[0].value} onChange={e => setEditForm({ ...editForm, payment: e.target.value })}>
+                  {paymentMethods.map(p => <option key={p.value} value={p.value}>{L(p.labelAr, p.labelEn)}</option>)}
+                </select>
+              </Lbl>
+              <Lbl label={L("المصدر", "Source")}>
+                <select className={ic} value={editForm.source ?? "direct"} onChange={e => setEditForm({ ...editForm, source: e.target.value as any })}>
+                  <option value="direct">{L("مباشر", "Direct")}</option><option value="partner">{L("من الشريك", "Partner")}</option>
+                </select>
+              </Lbl>
+              <Lbl label={L("الحالة", "Status")} full>
+                <select className={ic} value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value as any })}>
+                  {statusKeys.map(k => <option key={k} value={k}>{statusLabels[k]}</option>)}
+                </select>
+              </Lbl>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <GhostButton onClick={() => setEditing(null)}>{L("إلغاء", "Cancel")}</GhostButton>
+            <PrimaryButton onClick={saveEdit}>{L("حفظ التغييرات", "Save changes")}</PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
+  );
+}
+
+const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
+function Lbl({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return <label className={`text-xs font-bold space-y-1.5 block ${full ? "col-span-2" : ""}`}>{label}{children}</label>;
+}
+
+export { BookingsPage };
