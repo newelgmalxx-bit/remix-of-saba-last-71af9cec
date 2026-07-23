@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { cart as cartApi } from "@/lib/api/cart";
 import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type CartItem = {
@@ -48,16 +47,6 @@ function computeTotals(
   return { subtotal, discount, vat, total };
 }
 
-function loadLocal(): CartItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch { return []; }
-}
-
 function saveLocal(_items: CartItem[]) {
   // Cart state is the source of truth on the backend. We intentionally do
   // NOT persist items to localStorage — keeping them around caused "ghost"
@@ -81,9 +70,11 @@ function setCache(next: State) {
 }
 
 let didInitialSync = false;
+const getCartApi = async () => (await import("@/lib/api/cart")).cart;
 async function trySyncFromApi(initial = false): Promise<void> {
   if (initial) setCache({ ...cache, loading: true, error: null });
   try {
+    const cartApi = await getCartApi();
     const res: any = await cartApi.get();
     const remoteItems = (res?.data?.items ?? res?.items ?? []).map(normalizeFromApi);
     setCache({
@@ -149,6 +140,7 @@ export function useCart() {
       const isPlanLine = item.serviceSlug.startsWith("plan:");
       const servicePlanId = isPlanLine ? item.serviceSlug.slice(5) : undefined;
         try {
+          const cartApi = await getCartApi();
           await cartApi.add({
             serviceSlug: item.serviceSlug,
             serviceTitle: item.serviceTitle,
@@ -167,7 +159,7 @@ export function useCart() {
     const nextItems = cache.items.filter((i) => i.id !== lineId);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     if (!lineId.startsWith("local-")) {
-      try { await cartApi.remove(lineId); await trySyncFromApi(); } catch {}
+      try { const cartApi = await getCartApi(); await cartApi.remove(lineId); await trySyncFromApi(); } catch {}
     }
   }, []);
 
@@ -176,7 +168,7 @@ export function useCart() {
     const nextItems = cache.items.map((i) => i.id === lineId ? { ...i, qty } : i);
     setCache({ ...cache, items: nextItems, ...computeTotals(nextItems) });
     if (!lineId.startsWith("local-")) {
-      try { await cartApi.updateQty(lineId, qty); await trySyncFromApi(); } catch {}
+      try { const cartApi = await getCartApi(); await cartApi.updateQty(lineId, qty); await trySyncFromApi(); } catch {}
     }
   }, [remove]);
 
@@ -184,7 +176,7 @@ export function useCart() {
     const ids = cache.items.map((i) => i.id);
     setCache({ items: [], subtotal: 0, discount: 0, vat: 0, total: 0, loading: false, error: null });
     for (const id of ids) {
-      cartApi.remove(id).catch(() => {});
+      getCartApi().then((cartApi) => cartApi.remove(id)).catch(() => {});
     }
   }, []);
 

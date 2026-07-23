@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import { auth as authApi } from "@/lib/api/auth";
-import { removeToken as clearToken, getToken, setToken, ApiError } from "@/lib/api/client";
 import type { User } from "@/lib/api/types";
 
 type LoginResult =
@@ -23,6 +21,27 @@ type AuthCtx = {
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
+const TOKEN_KEY = "saba_token";
+
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+  window.dispatchEvent(new Event("saba:auth"));
+}
+
+function clearToken() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem("saba_user");
+  window.dispatchEvent(new Event("saba:auth"));
+}
+
+const getAuthApi = async () => (await import("@/lib/api/auth")).auth;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -35,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const tryMe = async () => {
+      const authApi = await getAuthApi();
       const res = await authApi.me();
       const user = res.data?.user;
       setUser(user ?? null);
@@ -42,14 +62,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await tryMe();
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) {
+      if ((e as { status?: number })?.status === 401) {
         // Try one refresh round-trip before giving up.
         try {
+          const authApi = await getAuthApi();
           const r = await authApi.refresh();
           if (r.data?.token) setToken(r.data.token);
           await tryMe();
         } catch (e2) {
-          if (e2 instanceof ApiError && e2.status === 401) {
+          if ((e2 as { status?: number })?.status === 401) {
             clearToken();
             setUser(null);
           } else {
@@ -78,13 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(async (creds: { phone?: string; email?: string; password: string }): Promise<LoginResult> => {
+    const authApi = await getAuthApi();
     const res = await authApi.login(creds);
     const data = res.data;
     if (data?.requiresOtp) {
       return { user: null, token: null, requiresOtp: true, email: data.email, message: data.message };
     }
     if (!data?.token || !data?.user) {
-      throw new ApiError(500, "Invalid auth response");
+      throw new Error("Invalid auth response");
     }
     setToken(data.token);
     setUser(data.user);
@@ -92,18 +114,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signup = useCallback(async (body: { name: string; email: string; phone: string; password: string; city?: string; language?: string }): Promise<SignupResult> => {
+    const authApi = await getAuthApi();
     const res = await authApi.signup(body);
     const data = res.data;
     if (data?.requiresOtp) {
       return { user: null, token: null, requiresOtp: true, email: data.email, message: data.message };
     }
-    if (!data?.token || !data?.user) throw new ApiError(500, "Invalid auth response");
+    if (!data?.token || !data?.user) throw new Error("Invalid auth response");
     setToken(data.token);
     setUser(data.user);
     return { user: data.user, token: data.token };
   }, []);
 
   const logout = useCallback(async () => {
+    const authApi = await getAuthApi();
     try { await authApi.logout(); } catch { /* ignore */ }
     clearToken();
     setUser(null);
