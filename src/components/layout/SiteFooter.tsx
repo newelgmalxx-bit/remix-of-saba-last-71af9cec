@@ -6,12 +6,12 @@ import { useSiteSettings, waHref } from "@/hooks/useSiteSettings";
 
 const footerLogo = "/logo-white.webp";
 const paymentMethods = [
-  { src: "/src/assets/pay-visa-small.webp", alt: "Visa", width: 64, height: 21 },
-  { src: "/src/assets/pay-mastercard.webp", alt: "Mastercard", width: 40, height: 24 },
-  { src: "/src/assets/pay-mada.webp", alt: "mada", width: 64, height: 21 },
-  { src: "/src/assets/pay-stcpay.webp", alt: "STC Pay", width: 64, height: 19 },
-  { src: "/src/assets/pay-tabby.webp", alt: "Tabby", width: 64, height: 26 },
-  { src: "/src/assets/pay-tamara.webp", alt: "Tamara", width: 64, height: 21 },
+  { src: "/pay-visa-small.webp", alt: "Visa", width: 64, height: 21 },
+  { src: "/pay-mastercard.webp", alt: "Mastercard", width: 40, height: 24 },
+  { src: "/pay-mada.webp", alt: "mada", width: 64, height: 21 },
+  { src: "/pay-stcpay.webp", alt: "STC Pay", width: 64, height: 19 },
+  { src: "/pay-tabby.webp", alt: "Tabby", width: 64, height: 26 },
+  { src: "/pay-tamara.webp", alt: "Tamara", width: 64, height: 21 },
 ];
 
 export function SiteFooter() {
