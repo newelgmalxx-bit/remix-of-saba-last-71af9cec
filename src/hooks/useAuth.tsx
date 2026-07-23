@@ -100,7 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cancel = token && !needsImmediateAuth
       ? runAfterCriticalPaint(() => void refresh(), 7000)
       : undefined;
-    if (needsImmediateAuth || token) refresh();
+    if (needsImmediateAuth) refresh();
+    else if (!token) setLoading(false);
     const onAuth = () => refresh();
     window.addEventListener("saba:auth", onAuth);
     window.addEventListener("storage", onAuth);
