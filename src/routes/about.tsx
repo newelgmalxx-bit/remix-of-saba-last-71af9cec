@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
-import { buildSeo, breadcrumbJsonLd, SITE } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd, SITE } from "@/lib/seo-lite";
 
 const tools = ["Figma", "React", "Next.js", "Webflow", "Shopify", "TypeScript", "Node.js", "Tailwind", "Framer", "Adobe"];
 

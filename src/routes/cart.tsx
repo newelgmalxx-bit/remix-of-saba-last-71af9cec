@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { useCart } from "@/hooks/useCart";
 import { formatCurrency } from "@/data/account";
 import { useLang } from "@/i18n/LanguageProvider";
-import { buildSeo } from "@/lib/seo";
+import { buildSeo } from "@/lib/seo-lite";
 
 export const Route = createFileRoute("/cart")({
   head: () => {

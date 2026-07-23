@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { HeroMock } from "@/components/sections/HeroMock";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLang } from "@/i18n/LanguageProvider";
+
+const HeroMock = lazy(() => import("@/components/sections/HeroMock").then((m) => ({ default: m.HeroMock })));
 
 type HeroIconName = "sparkles" | "arrow" | "shield" | "gauge" | "headphones" | "badge" | "send" | "grid";
 
@@ -25,6 +27,13 @@ function HeroIcon({ name, className = "h-4 w-4" }: { name: HeroIconName; classNa
 
 export function HeroSection() {
   const { t, dir } = useLang();
+  const [showMock, setShowMock] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    if (media.matches) setShowMock(true);
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/40 via-background to-background">
       <div className="pointer-events-none absolute inset-0 hidden bg-grid opacity-40 sm:block" />
@@ -34,7 +43,7 @@ export function HeroSection() {
       <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-12 sm:px-6 lg:px-8 lg:pt-16">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Text — RIGHT side in RTL */}
-          <div className="order-2 text-start lg:order-1 animate-fade-up">
+          <div className="order-1 text-start">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-1.5 text-[11px] font-semibold text-primary shadow-sm">
               <HeroIcon name="sparkles" className="h-3.5 w-3.5" />
               <span>{t("hero.badge")}</span>
@@ -72,10 +81,14 @@ export function HeroSection() {
           </div>
 
           {/* Visual mock — LEFT side in RTL */}
-          <div className="relative order-1 lg:order-2 animate-fade-up" style={{ animationDelay: "0.15s" }}>
-            <div className="relative animate-float-slow">
-              <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
-              <HeroMock />
+          <div className="relative order-2 hidden md:block lg:order-2 animate-fade-up">
+            <div className="relative animate-float-slow min-h-[360px]">
+              {showMock && (
+                <Suspense fallback={null}>
+                  <div className="pointer-events-none absolute inset-0 -z-0 rounded-[2.5rem] bg-primary/20 blur-3xl" />
+                  <HeroMock />
+                </Suspense>
+              )}
             </div>
           </div>
         </div>

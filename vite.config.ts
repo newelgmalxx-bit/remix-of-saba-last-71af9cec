@@ -5,7 +5,17 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import path from "node:path";
 
 export default defineConfig({
-  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+      codeSplittingOptions: {
+        defaultBehavior: [["component"], ["errorComponent"], ["notFoundComponent"]],
+      },
+    }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

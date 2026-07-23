@@ -8,7 +8,7 @@ import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCart } from "@/hooks/useCart";
 import { useLang } from "@/i18n/LanguageProvider";
 import { SarIcon } from "@/components/ui/SarIcon";
-import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo-lite";
 
 export const Route = createFileRoute("/plans")({
   head: () => {

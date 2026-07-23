@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import api, { ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { useCheckoutStore } from "@/store/checkoutStore";
-import { buildSeo } from "@/lib/seo";
+import { buildSeo } from "@/lib/seo-lite";
 
 export const Route = createFileRoute("/checkout")({
   head: () => {

@@ -10,7 +10,7 @@ import { useAllServices } from "@/hooks/useServiceContent";
 import { ServiceCard } from "@/components/sections/ServicesGrid";
 import { useLang } from "@/i18n/LanguageProvider";
 import type { TKey } from "@/i18n/translations";
-import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo-lite";
 
 const tabs: { key: TKey; cat: string }[] = [
   { key: "servicesPage.tab.all", cat: "الكل" },

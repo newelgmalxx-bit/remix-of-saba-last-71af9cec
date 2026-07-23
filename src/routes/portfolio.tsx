@@ -11,7 +11,7 @@ import {
 import { useLang } from "@/i18n/LanguageProvider";
 import { publicApi } from "@/lib/api/public";
 
-import { buildSeo, breadcrumbJsonLd } from "@/lib/seo";
+import { buildSeo, breadcrumbJsonLd } from "@/lib/seo-lite";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,

@@ -1,5 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { translate, type Lang, type TKey } from "./translations";
+import type { Lang, TKey } from "./translations";
+import { runAfterCriticalPaint } from "@/lib/startup";
+import { translateLite } from "./translations-lite";
+
+type TranslateFn = (key: TKey, lang: Lang) => string;
 
 type Ctx = {
   lang: Lang;
@@ -16,12 +20,33 @@ const STORAGE_KEY = "saba_lang";
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Always start with "ar" to match SSR, then sync with localStorage after mount
   const [lang, setLangState] = useState<Lang>("ar");
+  const [fullTranslate, setFullTranslate] = useState<TranslateFn | null>(null);
 
   useEffect(() => {
     try {
       const v = localStorage.getItem(STORAGE_KEY);
       if (v === "ar" || v === "en") setLangState(v);
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadFull = () => {
+      import("./translations").then((m) => {
+        if (!cancelled) setFullTranslate(() => m.translate);
+      }).catch(() => {});
+    };
+    if (window.location.pathname === "/") {
+      const cancel = runAfterCriticalPaint(loadFull, 9000);
+      window.addEventListener("scroll", loadFull, { once: true, passive: true });
+      return () => {
+        cancelled = true;
+        cancel?.();
+        window.removeEventListener("scroll", loadFull);
+      };
+    }
+    loadFull();
+    return () => { cancelled = true; };
   }, []);
 
   const setLang = useCallback((l: Lang) => {
@@ -46,8 +71,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     dir: lang === "ar" ? "rtl" : "ltr",
     setLang,
     toggle,
-    t: (key) => translate(key, lang),
-  }), [lang, setLang, toggle]);
+    t: (key) => (fullTranslate ?? translateLite)(key, lang),
+  }), [fullTranslate, lang, setLang, toggle]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
@@ -61,7 +86,7 @@ export function useLang() {
       dir: "rtl" as const,
       setLang: () => {},
       toggle: () => {},
-      t: (key: TKey) => translate(key, "ar"),
+      t: (key: TKey) => translateLite(key, "ar"),
     };
   }
   return ctx;

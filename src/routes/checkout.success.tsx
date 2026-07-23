@@ -11,7 +11,7 @@ import { downloadInvoice } from "@/lib/invoice";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency, paymentMethods, paymentName, type Order, type PaymentMethod } from "@/data/account";
 import { useCheckoutStore } from "@/store/checkoutStore";
-import { buildSeo } from "@/lib/seo";
+import { buildSeo } from "@/lib/seo-lite";
 
 const GATEWAY_METHODS: PaymentMethod[] = ["myfatoorah", "tabby", "tamara"];
 

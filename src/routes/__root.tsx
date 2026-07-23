@@ -1,10 +1,8 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 
-import "../styles.css";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { AuthProvider } from "@/hooks/useAuth";
-import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 const LazyToaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 const LazyTrackingEffects = lazy(() => import("@/components/TrackingEffects").then((m) => ({ default: m.TrackingEffects })));
@@ -66,10 +64,8 @@ function RootComponent() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <MaintenanceGate>
-          <Outlet />
-        </MaintenanceGate>
-        <AfterFirstPaint delay={3500}>
+        <Outlet />
+        <AfterFirstPaint delay={9000}>
           <Suspense fallback={null}>
             <LazyTrackingEffects />
             <LazyToaster position="top-center" richColors closeButton />
