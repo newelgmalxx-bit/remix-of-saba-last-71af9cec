@@ -3,6 +3,7 @@ import { serviceMap, type ServiceContent } from "@/data/services";
 import { Sparkles } from "lucide-react";
 import { useLang } from "@/i18n/LanguageProvider";
 import { services as servicesApi } from "@/lib/api";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 const KEY = "saba_service_overrides_v1";
 const REMOTE_KEY = "saba_service_remote_v1";
@@ -233,16 +234,11 @@ export function useAllServices(): ServiceContent[] {
     const fn = () => setTick((t) => t + 1);
     window.addEventListener("saba:service-overrides", fn);
     window.addEventListener("storage", fn);
-    const w = window as any;
-    const start = () => {
-      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(() => void refreshRemoteServices(), { timeout: 4000 });
-      else setTimeout(() => void refreshRemoteServices(), 1500);
-    };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
+    const cancel = runAfterCriticalPaint(() => void refreshRemoteServices(), 10000);
     return () => {
       window.removeEventListener("saba:service-overrides", fn);
       window.removeEventListener("storage", fn);
+      cancel?.();
     };
   }, []);
   if (typeof window === "undefined") return [];

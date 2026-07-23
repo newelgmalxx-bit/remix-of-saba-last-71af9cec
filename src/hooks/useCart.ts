@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import api from "@/lib/api";
 import type { CartLine } from "@/lib/api";
+import { runAfterCriticalPaint } from "@/lib/startup";
 
 export type CartItem = {
   id: string;
@@ -111,11 +112,12 @@ export function useCart() {
     setState(cache);
     const fn = (s: State) => mounted.current && setState(s);
     listeners.add(fn);
+    let cancel: (() => void) | undefined;
     if (!didInitialSync) {
       didInitialSync = true;
-      trySyncFromApi(true);
+      cancel = runAfterCriticalPaint(() => void trySyncFromApi(true), 10000);
     }
-    return () => { mounted.current = false; listeners.delete(fn); };
+    return () => { mounted.current = false; listeners.delete(fn); cancel?.(); };
   }, []);
 
   const add = useCallback(

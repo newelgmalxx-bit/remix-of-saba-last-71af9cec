@@ -306,6 +306,10 @@ export function LangSwitch({ lang, onClick, compact, label }: { lang: "ar" | "en
         src={flagSrc}
         alt=""
         aria-hidden
+        width={24}
+        height={16}
+        loading="lazy"
+        decoding="async"
         className="h-4 w-6 rounded-[2px] object-cover ring-1 ring-border/60 transition-transform duration-300 group-hover:scale-110"
       />
       <span className="tracking-wide">{code}</span>
