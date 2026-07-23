@@ -140,8 +140,12 @@ export function PortfolioSection() {
                 <img
                   src={p.img}
                   alt={p.title[lang]}
+                  width={800}
+                  height={600}
                   className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
