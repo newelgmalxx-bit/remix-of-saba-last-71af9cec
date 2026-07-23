@@ -152,6 +152,7 @@ export function ServiceCard({
           <Link
             to="/services/$slug"
             params={{ slug }}
+            aria-label={`${t("services.details")} — ${title}`}
             className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-secondary/40 px-3 text-[11px] font-bold text-foreground/80 transition hover:border-primary/40 hover:text-primary"
           >
             {t("services.details")} <ArrowLeft className="h-3 w-3" />
@@ -159,6 +160,7 @@ export function ServiceCard({
           <Link
             to="/services/$slug"
             params={{ slug }}
+            aria-label={`${t("services.order")} — ${title}`}
             className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-4 text-[11px] font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             {t("services.order")}
