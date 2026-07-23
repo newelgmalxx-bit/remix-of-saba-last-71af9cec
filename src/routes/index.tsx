@@ -65,28 +65,14 @@ function DeferredHomeContent({ children, minHeight = "min-h-[520px]" }: { childr
 
   useEffect(() => {
     if (show) return;
-    const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      const id = window.setTimeout(() => setShow(true), 7000);
-      return () => window.clearTimeout(id);
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setShow(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "600px 0px" },
-    );
-    observer.observe(el);
-    const id = window.setTimeout(() => {
-      setShow(true);
-      observer.disconnect();
-    }, 8000);
+    const reveal = () => setShow(true);
+    window.addEventListener("scroll", reveal, { once: true, passive: true });
+    window.addEventListener("pointerdown", reveal, { once: true, passive: true });
+    window.addEventListener("keydown", reveal, { once: true });
     return () => {
-      window.clearTimeout(id);
-      observer.disconnect();
+      window.removeEventListener("scroll", reveal);
+      window.removeEventListener("pointerdown", reveal);
+      window.removeEventListener("keydown", reveal);
     };
   }, [show]);
 

@@ -8,9 +8,9 @@ export function HeroSection() {
   const ArrowDir = dir === "rtl" ? ArrowLeft : ArrowLeft; // visual is fine; Lucide ArrowLeft works for both with rotation
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/40 via-background to-background">
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-50" />
-      <div className="pointer-events-none absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-primary/15 blur-3xl" />
-      <div className="pointer-events-none absolute top-32 left-0 h-[320px] w-[320px] rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 hidden bg-grid opacity-40 sm:block" />
+      <div className="pointer-events-none absolute -top-32 right-0 hidden h-[420px] w-[420px] rounded-full bg-primary/15 blur-3xl md:block" />
+      <div className="pointer-events-none absolute top-32 left-0 hidden h-[320px] w-[320px] rounded-full bg-primary/10 blur-3xl md:block" />
 
       <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-12 sm:px-6 lg:px-8 lg:pt-16">
         <div className="grid items-center gap-12 lg:grid-cols-2">
